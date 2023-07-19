@@ -1,20 +1,9 @@
 version: "3.8"
 
 services:
-  app:
-    build:
-      context: .
-    ports:
-      - 4000:4000
-      - 9229:9229
-    volumes:
-      - ./:/app
-      - /app/node_modules
-    command: npm run dev
-
   db:
     image: postgres
     ports:
       - 5432:5432
     environment:
-      POSTGRES_PASSWORD: pass1
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
