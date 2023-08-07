@@ -1,0 +1,236 @@
+type Recipe {
+  id: ID!
+  title: String!
+  source: String
+  preparationTime: Int
+  cookingTime: Int
+  servings: Int!
+  directions: String
+  notes: String
+  stars: Int
+  isFavorite: Boolean
+  course: String
+  collection: [String!]
+  category: [String!]
+  ingredients: [String!]
+  photo: [Photo!]
+  nutritionFacts: NutritionFact
+}
+
+type NutritionFact {
+  calories: Float
+  carbohydrates: NutrientGroup
+  fat: NutrientGroup
+  protein: NutrientGroup
+  alchohol: [Nutrient!]!
+  minerals: [Nutrient!]!
+  vitmains: [Nutrient!]!
+  other: [Nutrient!]!
+}
+
+type NutrientGroup {
+  name: String!
+  total: Float!
+  unit: String!
+  unitAbbreviation: String!
+  nutrients: [Nutrient!]!
+}
+
+type Nutrient {
+  name: String!
+  amount: Float
+  unit: String!
+  unitAbbreviation: String!
+  alternateName: String
+  target: Float
+}
+
+type RecipeIngredient {
+  sentence: String!
+  order: Int
+  quantity: Float!
+  minQty: Float
+  maxQuantity: Float
+  unit: String
+  comment: String
+}
+
+input verfiedIngredientInput {
+  recipeIngredient: ID!
+  ingredientId: ID!
+  sentence: String!
+  isIngredient: Boolean!
+  orderIndex: Int!
+  quantity: Float
+  minQty: Float
+  maxQty: Float
+  unit: String
+  name: String
+  comment: String
+  other: String
+}
+
+type Ingredient {
+  id: ID!
+  primaryName: String!
+  alternateNames: [String!]
+  storageInstructions: String
+  perishable: Boolean
+  frideLife: Int
+  freezerLife: Int
+  category: String
+  priceHistory: [PriceHistory!]
+}
+
+type PriceHistory {
+  date: String!
+  price: Float!
+  retailer: String!
+  quantity: Float!
+  quantityUnit: String!
+  pricePerUnit: Float!
+}
+
+type Photo {
+  id: ID!
+  url: String!
+  isPrimary: Boolean!
+  isUploaded: Boolean!
+}
+
+type Import {
+  id: ID!
+  date: String!
+  source: String!
+}
+
+enum Course {
+  BREAKFAST
+  LUNCH
+  DINNER
+  DESSERT
+  SNACK
+  DRINK
+  OTHER
+}
+
+input RecipeInput {
+  recipeKeeperId: ID
+  title: String!
+  source: String
+  preparationTime: Int
+  cookingTime: Int
+  servings: Int!
+  directions: String
+  notes: String
+  stars: Int
+  isFavorite: Boolean!
+  course: Course!
+  collection: [String!]
+  category: [String!]
+  ingredients: [String!]!
+  photo: [String!]
+  isVerified: Boolean!
+}
+
+input RecipeFilterInput {
+  title: String
+  source: String
+  preparationTime: Int
+  cookTime: Int
+  servings: Int
+  stars: Int
+  isFavorite: Boolean
+  course: String
+  collection: [String!]
+  category: [String!]
+  ingredients: [String!]
+}
+
+input NutritionInput {
+  foodName: Float
+  amount: Float
+  energy: Float
+  alchohol: Float
+  caffiene: Float
+  water: Float
+  thiamine: Float
+  riboflavin: Float
+  niacin: Float
+  pantothenicAcid: Float
+  pyridoxine: Float
+  cobalamin: Float
+  folate: Float
+  vitaminA: Float
+  vitmainC: Float
+  vitaminD: Float
+  vitaminE: Float
+  vitaminK: Float
+  calcium: Float
+  copper: Float
+  iron: Float
+  magnesium: Float
+  manganese: Float
+  phosphorus: Float
+  potassium: Float
+  selenium: Float
+  sodium: Float
+  zinc: Float
+  carbs: Float
+  fiber: Float
+  starch: Float
+  sugars: Float
+  netCarbs: Float
+  fat: Float
+  cholesterol: Float
+  monounsaturated: Float
+  polyunsaturated: Float
+  saturated: Float
+  transFat: Float
+  omega3: Float
+  omega6: Float
+  cystine: Float
+  histidine: Float
+  isoleucine: Float
+  leucine: Float
+  lysine: Float
+  methionine: Float
+  phenylalanine: Float
+  protein: Float
+  threonine: Float
+  tryptophan: Float
+  tyrosine: Float
+  valine: Float
+  category: String
+}
+
+type Query {
+  recipe(id: ID!): Recipe
+  recipes(filters: RecipeFilterInput!): [Recipe!]!
+  categories(name: String): [String!]!
+  collections(name: String): [String!]!
+  ingredients(id: ID, name: String): [Ingredient!]!
+  parseIngredient(sentance: [String]!): [RecipeIngredient!]
+}
+
+type Mutation {
+  createRecipe(recipe: RecipeInput!, nutritionFacts: NutritionInput): Recipe!
+  updateRecipe(id: ID!, input: RecipeInput!): Recipe!
+  deleteRecipe(id: ID!): Boolean!
+  updateRecipeIngredients(
+    recipeId: ID!
+    ingredients: [verfiedIngredientInput!]!
+  ): [RecipeIngredient!]!
+  addRecipeIngredient(
+    recipeId: ID!
+    ingredient: verfiedIngredientInput!
+  ): [RecipeIngredient!]!
+  deleteRecipeIngredient(recipeID: ID!, ingredientId: ID!): [RecipeIngredient!]!
+  addNutritionFacts(recipeId: ID, nutrition: NutritionInput!): NutritionFact!
+  updateNutritionFact(recipeId: ID!, nutrientId: ID!, value: Float!): Nutrient!
+  updateNutrientFact(recipeId: ID!, nutrientId: ID!, value: Float!): Nutrient!
+  addRecipePhoto(recipeId: ID!, fileName: String!, isPrimary: Boolean!): Photo!
+  setNutrientTarget(nutrientId: ID!, value: Float!): Nutrient!
+  createCategory(name: String!): String!
+  createCollection(name: String!): String!
+}

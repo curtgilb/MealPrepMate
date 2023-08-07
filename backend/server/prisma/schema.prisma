@@ -1,0 +1,234 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model MealPlan {
+  id                   String     @id @default(cuid())
+  name                 String
+  mealPrepInstructions String
+  servings             Servings[]
+}
+
+model Servings {
+  mealPlan      MealPlan  @relation(fields: [mealPlanId], references: [id])
+  mealPlanId    String
+  recipe        Recipe    @relation(fields: [recipeId], references: [id])
+  recipeId      String
+  numOfServings Int
+  day           DayOfWeek
+
+
+  @@id([mealPlanId, recipeId])
+}
+
+enum DayOfWeek {
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
+model Import {
+  id        String  @id @default(cuid())
+  name      String
+  type      ImportType
+  recipes   Recipe[]
+  createdAt DateTime @default(now())
+}
+
+enum ImportType {
+  MY_FITNESS_PAL
+  RECIPE_KEEPER
+  CRONOMETER
+}
+
+
+
+model RecipeIngredient {
+  id       String   @id @default(cuid())
+  isIngredient Boolean
+  sentence     String
+  order        Int
+  minQuantity  Float?
+  maxQuantity  Float?
+  quantity     Float?
+  unit         String?
+  name         String
+  comment      String?
+  recipe       Recipe     @relation(fields: [recipeId], references: [id])
+  recipeId     String // relation scalar field (used in the `@relation` attribute above)
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId String // relation scalar field (used in the `@relation` attribute above)
+}
+
+
+model Category {
+  id       String   @id @default(cuid())
+  name String  @unique
+  recipes  Recipe[]
+}
+
+model Collection {
+  id         String   @id @default(cuid())
+  name String  @unique
+  recipes    Recipe[]
+}
+
+model Photo {
+  id        String  @id @default(cuid())
+  path      String
+  isPrimary Boolean
+  recipe    Recipe  @relation(fields: [recipeId], references: [id])
+  recipeId  String
+}
+
+model Ingredient {
+  id                  String                    @id @default(cuid())
+  recipeIngredient    RecipeIngredient[]
+  primaryName         String                    @unique
+  alternateNames      IngredientAlternateName[]
+  storageInstructions String?
+  perishable          Boolean?
+  fridgeLife          Int?
+  freezerLife         Int?
+  category            IngredientCategory?
+  priceHistory        IngredientPrice[]
+  defrostTime         Int?
+}
+
+model IngredientAlternateName {
+  id           String     @id @default(cuid())
+  name         String     @unique
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId String
+}
+
+model IngredientPrice {
+  id           String     @id @default(cuid())
+  date         DateTime
+  retailer     String
+  price        Float
+  quantity     Float
+  unit         String
+  pricePerUnit Float
+  ingredientId String
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+}
+
+enum IngredientCategory {
+  DAIRY
+  VEGETABLE
+  FRUIT
+  MEAT
+  BREAD
+  CONDIMENT
+}
+
+enum NutrientType {
+  CARBOHYDRATE
+  FAT 
+  PROTEIN
+  ALCHOHOL 
+  MINERAL
+  VITAMIN
+  OTHER
+}
+
+model Recipe {
+  id              String             @id @default(cuid())
+  recipeKeeperId  String?
+  title           String
+  source          String?
+  servingsText    String?
+  servings        Int
+  preparationTime Int?
+  cookingTime     Int?
+  directions      String?
+  notes           String?
+  stars           Int?
+  photos          Photo[]
+  isFavorite      Boolean? @default(false)
+  childRecipes    Recipe[]           @relation("LinkedRecipes")
+  parentRecipes   Recipe[]           @relation("LinkedRecipes")
+  course          String?
+  category        Category[]
+  collection      Collection[]
+  ingredients     RecipeIngredient[]
+  mealPlans       Servings[]
+  import   Import? @relation(fields: [importId], references: [id])
+  importId String?
+  nutrients RecipeNutrients[]
+}
+
+enum Course {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+  DESSERT
+  DRINK
+  OTHER
+}
+
+model RecipeNutrients {
+  id       String   @id @default(cuid())
+  recipe   Recipe   @relation(fields: [recipeId], references: [id])
+  recipeId String
+  nutrient Nutrient @relation(fields: [nutrientId], references: [id])
+  nutrientId String
+  value    Float
+  perServing Float
+}
+
+model Nutrient {
+  id   String @id @default(cuid())
+  name String
+  abbreviation String
+  unit String
+  alternateNames String[]
+  type NutrientType
+  customTarget Boolean
+  customValue Float?
+  dri DailyReferenceIntake[]
+  parentNutrientId String?
+  parentNutrient Nutrient? @relation("SubNutrients", fields:[parentNutrientId], references: [id])
+  subNutrients Nutrient[] @relation("SubNutrients")
+  recipes RecipeNutrients[]
+  
+}
+
+model DailyReferenceIntake {
+  id String @id @default(cuid())
+  value Float
+  nutrient Nutrient @relation(fields: [nutrientId], references: [id])
+  nutrientId String
+}
+
+enum Gender {
+  MALE 
+  FEMALE
+}
+
+model HealthProfile {
+  id String @id @default(cuid())
+  weight Float
+  gender Gender
+  bodyFatPercentage Float
+  height Float
+  yearBorn Int
+  activityLevel Float
+  targetProtein Float
+  targetCarbs Float
+  targetFat Float
+}
