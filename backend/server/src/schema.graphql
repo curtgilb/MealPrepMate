@@ -115,22 +115,36 @@ enum Course {
 }
 
 input RecipeInput {
-  recipeKeeperId: ID
   title: String!
   source: String
   preparationTime: Int
+  marinateTime: Int
   cookingTime: Int
   servings: Int!
   directions: String
   notes: String
-  stars: Int
   isFavorite: Boolean!
   course: Course!
-  collection: [String!]
-  category: [String!]
-  ingredients: [String!]!
-  photo: [String!]
-  isVerified: Boolean!
+  collection: [ID!]
+  category: [ID!]
+  ingredients: String
+  photos: [String!]
+  leftOverFridgeLife: Int
+  leftOverFreezerLife: Int
+  # RecipeKeeperFields
+  recipeKeeperId: ID
+  servingsText: String
+  stars: Int
+  collectionNames: [String!]
+  categoryNames: [String!]
+  calories: Float
+  totalFat: Float
+  saturatedFat: Float
+  sodium: Float
+  totalCarbs: Float
+  dietaryFiber: Float
+  sugars: Float
+  protein: Float
 }
 
 input RecipeFilterInput {
@@ -206,17 +220,19 @@ input NutritionInput {
 
 type Query {
   recipe(id: ID!): Recipe
+  recipeIngredients(recipeId: ID!, searchForMatch: Boolean): [RecipeIngredient!]
   recipes(filters: RecipeFilterInput!): [Recipe!]!
   categories(name: String): [String!]!
   collections(name: String): [String!]!
   ingredients(id: ID, name: String): [Ingredient!]!
-  parseIngredient(sentance: [String]!): [RecipeIngredient!]
+  parseIngredient(sentance: String!): [RecipeIngredient!]
 }
 
 type Mutation {
-  createRecipe(recipe: RecipeInput!, nutritionFacts: NutritionInput): Recipe!
-  updateRecipe(id: ID!, input: RecipeInput!): Recipe!
+  createRecipe(recipe: RecipeInput!): Recipe!
+  updateRecipe(id: ID!, recipe: RecipeInput!): Recipe!
   deleteRecipe(id: ID!): Boolean!
+  importRecipes(recipes: [RecipeInput!]!): [Recipe!]!
   updateRecipeIngredients(
     recipeId: ID!
     ingredients: [verfiedIngredientInput!]!
@@ -229,8 +245,9 @@ type Mutation {
   addNutritionFacts(recipeId: ID, nutrition: NutritionInput!): NutritionFact!
   updateNutritionFact(recipeId: ID!, nutrientId: ID!, value: Float!): Nutrient!
   updateNutrientFact(recipeId: ID!, nutrientId: ID!, value: Float!): Nutrient!
-  addRecipePhoto(recipeId: ID!, fileName: String!, isPrimary: Boolean!): Photo!
+  addRecipePhoto(recipeId: ID, fileName: String!, isPrimary: Boolean!): Photo!
   setNutrientTarget(nutrientId: ID!, value: Float!): Nutrient!
   createCategory(name: String!): String!
   createCollection(name: String!): String!
+  # groupIngredientsToSubRecipes(ingredients: [ID!], name: String!, )
 }

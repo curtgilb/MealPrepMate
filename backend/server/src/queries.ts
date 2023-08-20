@@ -8,44 +8,58 @@ export const resolvers: Resolvers = {
         where: { id: args.id },
       });
     },
-    // recipes: async (parent, args, context) => {
-    //   return await context.db.recipe.findMany({
-    //     where: {
-    //       AND: [
-    //         { title: { contains: args.filters.title, mode: "insensitive" } },
-    //         { source: { contains: args.filters.source, mode: "insensitive" } },
-    //         { preparationTime: { lte: args.filters.preparationTime } },
-    //         { servingsNumber: { gte: args.filters.servings } },
-    //         { isFavorite: { equals: args.filters.isFavorite } },
-    //         { course: { equals: args.filters.course } },
-    //         {
-    //           collection: {
-    //             some: { collection: { in: args.filters.collection } },
-    //           },
-    //         },
-    //         {
-    //           category: {
-    //             some: { category: { in: args.filters.category } },
-    //           },
-    //         },
-    //         {
-    //           ingredients: {
-    //             some: { name: { in: args.filters.ingredients } },
-    //           },
-    //         },
-    //       ],
-    //     },
-    //   });
-    // },
-    // categories: async (parent, args, context) => {
-    //   return await context.db.category
-    //     .findMany({
-    //       where: {
-    //         category: { contains: args.name, mode: "insensitive" },
-    //       },
-    //     })
-    //     .map((category) => category.category);
-    // },
+    recipes: async (parent, args, context) => {
+      return await context.db.recipe.findMany({
+        where: {
+          AND: [
+            { title: { contains: args.filters.title, mode: "insensitive" } },
+            { source: { contains: args.filters.source, mode: "insensitive" } },
+            { preparationTime: { lte: args.filters.preparationTime } },
+            { servings: { gte: args.filters.servings } },
+            { isFavorite: { equals: args.filters.isFavorite } },
+            { course: { equals: args.filters.course } },
+            {
+              collection: {
+                some: { name: { in: args.filters.collection } },
+              },
+            },
+            {
+              category: {
+                some: { name: { in: args.filters.category } },
+              },
+            },
+            {
+              ingredients: {
+                some: {
+                  OR: [
+                    {
+                      ingredient: {
+                        primaryName: {
+                          in: args.filters.ingredients,
+                          mode: "insensitive",
+                        },
+                      },
+                    },
+                    {
+                      ingredient: {
+                        alternateNames: {
+                          some: {
+                            name: {
+                              in: args.filters.ingredients,
+                              mode: "insensitive",
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      });
+    },
     categories: async (parent, args, context) => {
       const result = await context.db.category.findMany({
         where: {

@@ -24,8 +24,6 @@ model Servings {
   recipeId      String
   numOfServings Int
   day           DayOfWeek
-
-
   @@id([mealPlanId, recipeId])
 }
 
@@ -57,7 +55,7 @@ enum ImportType {
 
 model RecipeIngredient {
   id       String   @id @default(cuid())
-  isIngredient Boolean
+  isIngredient Boolean @default(true)
   sentence     String
   order        Int
   minQuantity  Float?
@@ -70,6 +68,8 @@ model RecipeIngredient {
   recipeId     String // relation scalar field (used in the `@relation` attribute above)
   ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
   ingredientId String // relation scalar field (used in the `@relation` attribute above)
+  display Boolean?
+  servingPercentage Float?
 }
 
 
@@ -96,15 +96,24 @@ model Photo {
 model Ingredient {
   id                  String                    @id @default(cuid())
   recipeIngredient    RecipeIngredient[]
-  primaryName         String                    @unique
+  name         String                    @unique
   alternateNames      IngredientAlternateName[]
   storageInstructions String?
+  priceHistory        IngredientPrice[]
+  expirationRule     ExpirationRule? @relation(fields: [expirationRuleId], references: [id])
+  expirationRuleId   String?
+  
+}
+
+model ExpirationRule {
+  id   String @id @default(cuid())
+  defrostTime         Int?
   perishable          Boolean?
+  tableLife           Int?
   fridgeLife          Int?
   freezerLife         Int?
-  category            IngredientCategory?
-  priceHistory        IngredientPrice[]
-  defrostTime         Int?
+  ingredients        Ingredient[]
+
 }
 
 model IngredientAlternateName {
@@ -131,8 +140,10 @@ enum IngredientCategory {
   VEGETABLE
   FRUIT
   MEAT
-  BREAD
-  CONDIMENT
+  GRAIN
+  SAUCE
+  SPICE
+  BAKING
 }
 
 enum NutrientType {
@@ -154,6 +165,7 @@ model Recipe {
   servings        Int
   preparationTime Int?
   cookingTime     Int?
+  marinadeTime    Int?
   directions      String?
   notes           String?
   stars           Int?
@@ -168,7 +180,10 @@ model Recipe {
   mealPlans       Servings[]
   import   Import? @relation(fields: [importId], references: [id])
   importId String?
-  nutrients RecipeNutrients[]
+  leftoeverFridgeLife Int?
+  leftoverFreezerLife Int?
+  isVerified Boolean @default(false)
+  nutritionLabel NutritionLabel[]
 }
 
 enum Course {
@@ -181,21 +196,38 @@ enum Course {
   OTHER
 }
 
-model RecipeNutrients {
-  id       String   @id @default(cuid())
-  recipe   Recipe   @relation(fields: [recipeId], references: [id])
-  recipeId String
+model NutritionLabel {
+  id String @id @default(cuid())
+  recipe Recipe? @relation(fields: [recipeId], references: [id])
+  recipeId String?
+  nutritionLabelNutrients NutritionLabelNutrient[]
+  name String
+  percentage Float?
+  amount String?
+  source NutritionSource
+
+}
+
+enum NutritionSource {
+  CRONOMETER
+  RECIPE_KEEPER
+  CUSTOM
+}
+
+model NutritionLabelNutrient {
+  @@id([nutritionLabelId, nutrientId])
+  nutritionLabel NutritionLabel @relation(fields: [nutritionLabelId], references: [id])
+  nutritionLabelId String
   nutrient Nutrient @relation(fields: [nutrientId], references: [id])
   nutrientId String
-  value    Float
-  perServing Float
+  value Float
 }
 
 model Nutrient {
   id   String @id @default(cuid())
   name String
-  abbreviation String
   unit String
+  unitAbbreviation String
   alternateNames String[]
   type NutrientType
   customTarget Boolean
@@ -204,13 +236,17 @@ model Nutrient {
   parentNutrientId String?
   parentNutrient Nutrient? @relation("SubNutrients", fields:[parentNutrientId], references: [id])
   subNutrients Nutrient[] @relation("SubNutrients")
-  recipes RecipeNutrients[]
+  NutritionLabelNutrients NutritionLabelNutrient[]
   
 }
 
 model DailyReferenceIntake {
   id String @id @default(cuid())
   value Float
+  gender Gender
+  ageMin Int
+  ageMax Int
+  specialCondition SpecialCondition
   nutrient Nutrient @relation(fields: [nutrientId], references: [id])
   nutrientId String
 }
@@ -218,6 +254,12 @@ model DailyReferenceIntake {
 enum Gender {
   MALE 
   FEMALE
+}
+
+enum SpecialCondition {
+  PREGNANT
+  LACTATING
+  NONE
 }
 
 model HealthProfile {
