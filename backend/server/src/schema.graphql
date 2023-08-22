@@ -223,9 +223,9 @@ type Mutation {
   updateRecipe(id: ID!, recipe: RecipeInput!): Recipe!
   deleteRecipe(id: ID!): Boolean!
   importRecipes(recipes: [RecipeInput!]!): [Recipe!]!
-  deleteRecipeIngredient(recipeID: ID!, ingredientId: ID!): [RecipeIngredient!]!
-  addNutritionFacts(recipeId: ID, nutrition: NutritionInput!): NutritionFact!
-  updateNutritionFact(recipeId: ID!, nutrientId: ID!, value: Float!): Nutrient!
+  updateRecipeIngredient(recipeID: ID!, ingredientId: ID!): [RecipeIngredient!]!
+  addNutritionLabel(recipeId: ID, nutrition: NutritionInput!): NutritionFact!
+  updateNutritionLabel(recipeId: ID!, nutrientId: ID!, value: Float!): Nutrient!
   updateNutrientFact(recipeId: ID!, nutrientId: ID!, value: Float!): Nutrient!
   addRecipePhoto(recipeId: ID, fileName: String!, isPrimary: Boolean!): Photo!
   setNutrientTarget(nutrientId: ID!, value: Float!): Nutrient!

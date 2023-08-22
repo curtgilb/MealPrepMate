@@ -2,35 +2,8 @@ import { Resolvers } from "./generated/graphql";
 import { tagIngredients } from "./ingredientTagger";
 import { toTitleCase } from "./util/utils";
 import { RecipeInput } from "./generated/graphql";
-import { createRecipeIngredients } from "./services/Recipe";
+import { compareIngredients, createRecipeIngredients } from "./services/Recipe";
 import { Prisma } from "@prisma/client";
-// import { Category, Collection, Recipe, PrismaClient } from "@prisma/client";
-
-// async function findOrCreate(
-//   db: PrismaClient,
-//   items: string[],
-//   model: string
-// ): Promise<string[]> {
-//   const ids: string[] = [];
-//   let result: Collection | Category;
-//   for (const item of items) {
-//     const name = item.toLowerCase();
-//     try {
-//       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-//       result = await db[model].findUniqueOrThrow({
-//         where: { name: name },
-//       });
-//     } catch (error) {
-//       console.log(error);
-//       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-//       result = await db[model].create({
-//         data: { name: name },
-//       });
-//     }
-//     ids.push(result.id);
-//   }
-//   return ids;
-// }
 
 export const mutations: Resolvers = {
   Mutation: {
@@ -67,6 +40,59 @@ export const mutations: Resolvers = {
         };
       }
       return context.db.recipe.create({ data: recipe });
+    },
+    updateRecipe: async (parent, args, context) => {
+      const recipe: Prisma.RecipeUpdateInput = {
+        title: toTitleCase(args.recipe.title),
+        servings: args.recipe.servings,
+        source: args.recipe.source,
+        preparationTime: args.recipe.preparationTime,
+        cookingTime: args.recipe.cookingTime,
+        directions: args.recipe.directions,
+        notes: args.recipe.notes,
+        stars: args.recipe.stars,
+        isFavorite: args.recipe.isFavorite,
+        ingredientsTxt: args.recipe.ingredients,
+        course: { connect: { id: args.recipe.course } },
+        category: {
+          set: args.recipe.category.map((id) => ({ id: id })),
+        },
+        cuisine: {
+          update: {
+            id: args.recipe.cuisine,
+          },
+        },
+      };
+      if (args.recipe.ingredients !== undefined) {
+        const ingredientsComparison = await compareIngredients(
+          context.db,
+          args.id,
+          args.recipe.ingredients
+        );
+        recipe.isVerified = !ingredientsComparison.changed;
+
+        if (ingredientsComparison.changed) {
+          recipe.ingredients = {};
+          if (ingredientsComparison.added.length > 0) {
+            recipe.ingredients.create = ingredientsComparison.added;
+          }
+          if (ingredientsComparison.deleted.length > 0) {
+            recipe.ingredients.delete = ingredientsComparison.deleted.map(
+              (id) => ({ id: id })
+            );
+          }
+        }
+      }
+      return context.db.recipe.update({
+        where: { id: args.id },
+        data: recipe,
+      });
+    },
+    deleteRecipe: async (parent, args, context) => {
+      await context.db.recipeIngredient.delete({
+        where: { id: args.id },
+      });
+      return true;
     },
   },
 };

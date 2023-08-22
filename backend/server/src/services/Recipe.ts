@@ -19,7 +19,7 @@ type RecipeNlpResponse = {
 
 type IngredientsComparison = {
   changed: boolean;
-  added?: RecipeNlpResponse[];
+  added?: Prisma.RecipeIngredientCreateWithoutRecipeInput[];
   deleted?: string[];
 };
 
@@ -49,11 +49,19 @@ async function compareIngredients(
       newIngredients.push(sentence);
     }
   });
+  if (newIngredients.length > 0) {
+    ingredientsComparison.added = await createRecipeIngredients(
+      db,
+      newIngredients.join("\n")
+    );
+  }
+
   existingIngredients.forEach((ingredient) => {
     if (!newIngredientsText.includes(ingredient.sentence)) {
-      ingredientsComparison.deleted.push(ingredient.sentence);
+      ingredientsComparison.deleted.push(ingredient.id);
     }
   });
+
   ingredientsComparison.changed =
     newIngredients.length > 0 || ingredientsComparison.deleted.length > 0;
   return ingredientsComparison;
