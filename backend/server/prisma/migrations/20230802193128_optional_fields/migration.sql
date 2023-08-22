@@ -1,4 +1,0 @@
--- AlterTable
-ALTER TABLE "RecipeIngredient" ALTER COLUMN "quantity" DROP NOT NULL,
-ALTER COLUMN "unit" DROP NOT NULL,
-ALTER COLUMN "comment" DROP NOT NULL;

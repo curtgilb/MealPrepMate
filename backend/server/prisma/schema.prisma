@@ -10,6 +10,43 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum DayOfWeek {
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
+enum ImportType {
+  MY_FITNESS_PAL
+  RECIPE_KEEPER
+  CRONOMETER
+}
+
+enum IngredientCategory {
+  DAIRY
+  VEGETABLE
+  FRUIT
+  MEAT
+  GRAIN
+  SAUCE
+  SPICE
+  BAKING
+}
+
+enum NutrientType {
+  CARBOHYDRATE
+  FAT
+  PROTEIN
+  ALCHOHOL
+  MINERAL
+  VITAMIN
+  OTHER
+}
+
 model MealPlan {
   id                   String     @id @default(cuid())
   name                 String
@@ -25,86 +62,55 @@ model Servings {
   numOfServings Int
   day           DayOfWeek
 
-
   @@id([mealPlanId, recipeId])
 }
 
-enum DayOfWeek {
-  SUNDAY
-  MONDAY
-  TUESDAY
-  WEDNESDAY
-  THURSDAY
-  FRIDAY
-  SATURDAY
-}
-
 model Import {
-  id        String  @id @default(cuid())
+  id        String     @id @default(cuid())
   name      String
   type      ImportType
   recipes   Recipe[]
-  createdAt DateTime @default(now())
+  createdAt DateTime   @default(now())
 }
-
-enum ImportType {
-  MY_FITNESS_PAL
-  RECIPE_KEEPER
-  CRONOMETER
-}
-
-
 
 model RecipeIngredient {
-  id       String   @id @default(cuid())
-  isIngredient Boolean
-  sentence     String
-  order        Int
-  minQuantity  Float?
-  maxQuantity  Float?
-  quantity     Float?
-  unit         String?
-  name         String
-  comment      String?
-  recipe       Recipe     @relation(fields: [recipeId], references: [id])
-  recipeId     String // relation scalar field (used in the `@relation` attribute above)
-  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
-  ingredientId String // relation scalar field (used in the `@relation` attribute above)
-}
-
-
-model Category {
-  id       String   @id @default(cuid())
-  name String  @unique
-  recipes  Recipe[]
-}
-
-model Collection {
-  id         String   @id @default(cuid())
-  name String  @unique
-  recipes    Recipe[]
-}
-
-model Photo {
-  id        String  @id @default(cuid())
-  path      String
-  isPrimary Boolean
-  recipe    Recipe  @relation(fields: [recipeId], references: [id])
-  recipeId  String
+  id                String     @id @default(cuid())
+  isIngredient      Boolean    @default(true)
+  sentence          String
+  minQuantity       Float?
+  maxQuantity       Float?
+  quantity          Float?
+  unit              String?
+  name              String
+  comment           String?
+  other             String?
+  recipe            Recipe     @relation(fields: [recipeId], references: [id])
+  recipeId          String // relation scalar field (used in the `@relation` attribute above)
+  ingredient        Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId      String // relation scalar field (used in the `@relation` attribute above)
+  display           Boolean?
+  servingPercentage Float?     @default(1.00)
 }
 
 model Ingredient {
   id                  String                    @id @default(cuid())
   recipeIngredient    RecipeIngredient[]
-  primaryName         String                    @unique
+  name                String                    @unique
   alternateNames      IngredientAlternateName[]
   storageInstructions String?
-  perishable          Boolean?
-  fridgeLife          Int?
-  freezerLife         Int?
-  category            IngredientCategory?
   priceHistory        IngredientPrice[]
-  defrostTime         Int?
+  expirationRule      ExpirationRule?           @relation(fields: [expirationRuleId], references: [id])
+  expirationRuleId    String?
+}
+
+model ExpirationRule {
+  id          String       @id @default(cuid())
+  defrostTime Int?
+  perishable  Boolean?
+  tableLife   Int?
+  fridgeLife  Int?
+  freezerLife Int?
+  ingredients Ingredient[]
 }
 
 model IngredientAlternateName {
@@ -126,109 +132,141 @@ model IngredientPrice {
   ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
 }
 
-enum IngredientCategory {
-  DAIRY
-  VEGETABLE
-  FRUIT
-  MEAT
-  BREAD
-  CONDIMENT
-}
-
-enum NutrientType {
-  CARBOHYDRATE
-  FAT 
-  PROTEIN
-  ALCHOHOL 
-  MINERAL
-  VITAMIN
-  OTHER
-}
-
 model Recipe {
-  id              String             @id @default(cuid())
-  recipeKeeperId  String?
-  title           String
-  source          String?
-  servingsText    String?
-  servings        Int
-  preparationTime Int?
-  cookingTime     Int?
-  directions      String?
-  notes           String?
-  stars           Int?
-  photos          Photo[]
-  isFavorite      Boolean? @default(false)
-  childRecipes    Recipe[]           @relation("LinkedRecipes")
-  parentRecipes   Recipe[]           @relation("LinkedRecipes")
-  course          String?
-  category        Category[]
-  collection      Collection[]
-  ingredients     RecipeIngredient[]
-  mealPlans       Servings[]
-  import   Import? @relation(fields: [importId], references: [id])
-  importId String?
-  nutrients RecipeNutrients[]
+  id                  String             @id @default(cuid())
+  recipeKeeperId      String?
+  title               String
+  source              String?
+  servingsText        String?
+  servings            Int
+  preparationTime     Int?
+  cookingTime         Int?
+  marinadeTime        Int?
+  directions          String?
+  notes               String?
+  stars               Int?
+  photos              Photo[]
+  isFavorite          Boolean?           @default(false)
+  childRecipes        Recipe[]           @relation("LinkedRecipes")
+  parentRecipes       Recipe[]           @relation("LinkedRecipes")
+  course              Course?            @relation(fields: [courseId], references: [id])
+  courseId            String?
+  category            Category[]
+  cuisine             Cuisine?           @relation(fields: [cuisineId], references: [id])
+  cuisineId           String?
+  ingredients         RecipeIngredient[]
+  ingredientsTxt      String?
+  mealPlans           Servings[]
+  import              Import?            @relation(fields: [importId], references: [id])
+  importId            String?
+  leftoeverFridgeLife Int?
+  leftoverFreezerLife Int?
+  isVerified          Boolean            @default(false)
+  nutritionLabel      NutritionLabel[]
 }
 
-enum Course {
-  BREAKFAST
-  LUNCH
-  DINNER
-  SNACK
-  DESSERT
-  DRINK
-  OTHER
+// BREAKFAST, LUNCH, DINNER, SNACK
+model Course {
+  id      String   @id @default(cuid())
+  name    String   @unique
+  recipes Recipe[]
 }
 
-model RecipeNutrients {
-  id       String   @id @default(cuid())
-  recipe   Recipe   @relation(fields: [recipeId], references: [id])
-  recipeId String
-  nutrient Nutrient @relation(fields: [nutrientId], references: [id])
-  nutrientId String
-  value    Float
-  perServing Float
+// Main Dish, Side Dish, Dessert, Appetizer, Salad, Soup, Bread, Beverage, Sauce or Condiment, Seasoning or Spice, Marinade, Fingerfood, Snack, Drink
+model Category {
+  id      String   @id @default(cuid())
+  name    String   @unique
+  recipes Recipe[]
+}
+
+model Cuisine {
+  id     String   @id @default(cuid())
+  name   String   @unique
+  recipe Recipe[]
+}
+
+model Photo {
+  id        String  @id @default(cuid())
+  path      String
+  isPrimary Boolean
+  recipe    Recipe  @relation(fields: [recipeId], references: [id])
+  recipeId  String
+}
+
+model NutritionLabel {
+  id                      String                   @id @default(cuid())
+  recipe                  Recipe?                  @relation(fields: [recipeId], references: [id])
+  recipeId                String?
+  nutritionLabelNutrients NutritionLabelNutrient[]
+  name                    String
+  percentage              Float?
+  amount                  String?
+  source                  NutritionSource
+}
+
+enum NutritionSource {
+  CRONOMETER
+  RECIPE_KEEPER
+  CUSTOM
+}
+
+model NutritionLabelNutrient {
+  nutritionLabel   NutritionLabel @relation(fields: [nutritionLabelId], references: [id])
+  nutritionLabelId String
+  nutrient         Nutrient       @relation(fields: [nutrientId], references: [id])
+  nutrientId       String
+  value            Float
+
+  @@id([nutritionLabelId, nutrientId])
 }
 
 model Nutrient {
-  id   String @id @default(cuid())
-  name String
-  abbreviation String
-  unit String
-  alternateNames String[]
-  type NutrientType
-  customTarget Boolean
-  customValue Float?
-  dri DailyReferenceIntake[]
-  parentNutrientId String?
-  parentNutrient Nutrient? @relation("SubNutrients", fields:[parentNutrientId], references: [id])
-  subNutrients Nutrient[] @relation("SubNutrients")
-  recipes RecipeNutrients[]
-  
+  id                      String                   @id @default(cuid())
+  name                    String
+  unit                    String
+  unitAbbreviation        String
+  alternateNames          String[]
+  type                    NutrientType
+  customTarget            Boolean
+  customValue             Float?
+  dri                     DailyReferenceIntake[]
+  parentNutrientId        String?
+  parentNutrient          Nutrient?                @relation("SubNutrients", fields: [parentNutrientId], references: [id])
+  subNutrients            Nutrient[]               @relation("SubNutrients")
+  NutritionLabelNutrients NutritionLabelNutrient[]
 }
 
 model DailyReferenceIntake {
-  id String @id @default(cuid())
-  value Float
-  nutrient Nutrient @relation(fields: [nutrientId], references: [id])
-  nutrientId String
+  id               String           @id @default(cuid())
+  value            Float
+  gender           Gender
+  ageMin           Int
+  ageMax           Int
+  specialCondition SpecialCondition
+  nutrient         Nutrient         @relation(fields: [nutrientId], references: [id])
+  nutrientId       String
 }
 
 enum Gender {
-  MALE 
+  MALE
   FEMALE
 }
 
+enum SpecialCondition {
+  PREGNANT
+  LACTATING
+  NONE
+}
+
 model HealthProfile {
-  id String @id @default(cuid())
-  weight Float
-  gender Gender
+  id                String @id @default(cuid())
+  weight            Float
+  gender            Gender
   bodyFatPercentage Float
-  height Float
-  yearBorn Int
-  activityLevel Float
-  targetProtein Float
-  targetCarbs Float
-  targetFat Float
+  height            Float
+  yearBorn          Int
+  activityLevel     Float
+  targetProtein     Float
+  targetCarbs       Float
+  targetFat         Float
 }
