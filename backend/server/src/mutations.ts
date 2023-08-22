@@ -2,6 +2,8 @@ import { Resolvers } from "./generated/graphql";
 import { tagIngredients } from "./ingredientTagger";
 import { toTitleCase } from "./util/utils";
 import { RecipeInput } from "./generated/graphql";
+import { createRecipeIngredients } from "./services/Recipe";
+import { Prisma } from "@prisma/client";
 // import { Category, Collection, Recipe, PrismaClient } from "@prisma/client";
 
 // async function findOrCreate(
@@ -35,8 +37,7 @@ export const mutations: Resolvers = {
     createRecipe: async (parent, args, context) => {
       // When a recipe is created, the ingredients are parsed, tentitive matches are made with ingredients.
       // A different mutation will update/verify the matches.
-
-      const recipe = {
+      const recipe: Prisma.RecipeCreateInput = {
         title: toTitleCase(args.recipe.title),
         servings: args.recipe.servings,
         source: args.recipe.source,
@@ -46,48 +47,26 @@ export const mutations: Resolvers = {
         notes: args.recipe.notes,
         stars: args.recipe.stars,
         isFavorite: args.recipe.isFavorite,
-        course: args.recipe.course,
+        ingredientsTxt: args.recipe.ingredients,
+        course: { connect: { id: args.recipe.course } },
         category: {
           connect: args.recipe.category.map((id) => ({ id: id })),
         },
-        collection: {
-          connect: args.recipe.collection.map((id) => ({ id: id })),
+        cuisine: {
+          connect: {
+            id: args.recipe.cuisine,
+          },
         },
       };
-
-      if (
-        "ingredients" in args.recipe &&
-        args.recipe.ingredients !== undefined
-      ) {
-        const taggedIngredients = await tagIngredients(args.recipe.ingredients);
-        for (const ingredient of taggedIngredients) {
-          const match = await context.db.ingredient.findFirst({
-            where: {
-              OR: [
-                {
-                  primaryName: {
-                    contains: ingredient.name,
-                    mode: "insensitive",
-                  },
-                },
-                {
-                  alternateNames: {
-                    some: {
-                      name: { contains: ingredient.name, mode: "insensitive" },
-                    },
-                  },
-                },
-              ],
-            },
-          });
-          if (match !== null) {
-            ingredient.ingredient = { connect: { id: match.id } };
-          }
-          recipe["ingredients"] = { create: taggedIngredients };
-        }
-
-        return await context.db.recipe.create({ data: recipe });
+      if (args.recipe.ingredients !== undefined) {
+        recipe.ingredients = {
+          create: await createRecipeIngredients(
+            context.db,
+            args.recipe.ingredients
+          ),
+        };
       }
+      return context.db.recipe.create({ data: recipe });
     },
   },
 };

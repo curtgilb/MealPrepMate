@@ -1,44 +1,36 @@
-import fs from "fs";
-import {
-  Ingredient,
-  Nutrient,
-  Mappings,
-  DailyRecommendedIntake,
-  DriLookup,
-} from "./ImportTypes.js";
-import { toCamelCase } from "../util/utils";
-import path from "path";
+import { Mappings, DriLookup, RecipeKeeperRecipe } from "./ImportTypes.js";
 import {
   Gender,
   NutrientType,
   Prisma,
   SpecialCondition,
   DayOfWeek,
-  NutritionLabel,
+  PrismaClient,
 } from "@prisma/client";
+import { toNumber, toBoolean } from "../util/Cast";
+import {
+  checkIfPrimaryPhoto,
+  extractServingSize,
+  createRecipeIngredients,
+} from "../services/Recipe";
 
 // The purpose of this class is to take data read in from reading csv, html, etc, files and transform them so that they are ready to be inserted into the database.
 export class Transformer {
-  toNumber(value: string): number | undefined {
-    const parsedFloat = parseFloat(value);
-    const parsedInt = parseInt(value, 10);
-
-    if (!isNaN(parsedFloat)) {
-      return parsedFloat;
-    } else if (!isNaN(parsedInt)) {
-      return parsedInt;
-    } else {
-      throw new Error(`Unable to convert ${value} to a number`);
+  toNutrientTypeEnum(value: string): NutrientType {
+    let nutrientType = this.cast(value) as string;
+    if (nutrientType !== undefined) {
+      nutrientType = nutrientType.toUpperCase();
+      if (["MINERAL", "MINERALS"].includes(nutrientType)) return "MINERAL";
+      else if (["VITAMIN", "VITAMINS"].includes(nutrientType)) return "VITAMIN";
+      else if (["FAT", "FATS", "LIPID"].includes(nutrientType)) return "FAT";
+      else if (["PROTEIN", "PROTEINS"].includes(nutrientType)) return "PROTEIN";
+      else if (
+        ["CARBS", "CARBOHYDRATES", "CARBOHYDRATE"].includes(nutrientType)
+      )
+        return "CARBOHYDRATE";
+      else if (nutrientType === "ALCOHOL") return "ALCHOHOL";
     }
-  }
-  toBoolean(value: string): boolean {
-    if (value.toLowerCase() === "true" || value === "1") {
-      return true;
-    } else if (value.toLowerCase() === "false" || value === "0") {
-      return false;
-    } else {
-      throw new Error(`Unable to convert ${value} to a boolean`);
-    }
+    return "OTHER";
   }
 
   getTime(input: string): number {
@@ -70,9 +62,8 @@ export class Transformer {
       specialCondition = specialCondition.toUpperCase();
       if (["PREGNANT"].includes(specialCondition)) return "PREGNANT";
       else if (["LACTATING"].includes(specialCondition)) return "LACTATING";
-      else return "NONE";
     }
-    throw new Error(`Unable to convert ${value} to a special condition`);
+    return "NONE";
   }
 
   toDayOfWeekEnum(value: string): DayOfWeek {
@@ -129,10 +120,10 @@ export class Transformer {
     }
     // Check if number
     if (!isNaN(parseFloat(str)) && !isNaN(parseInt(str, 10))) {
-      return this.toNumber(str);
+      return toNumber(str);
       // Check if boolean
     } else if (["true", "false", "0", "1"].includes(str.toLowerCase())) {
-      return this.toBoolean(str);
+      return toBoolean(str);
 
       // Else, return string
     } else {
@@ -191,13 +182,13 @@ export class Transformer {
 
     return nutrients.map((record) => {
       const alternateNames = this.cast(record.alternateNames) as string;
-      const nutrientRecord = {
+      const nutrientRecord: Prisma.NutrientCreateInput = {
         name: this.cast(record.nutrient) as string,
         unit: this.cast(record.unit) as string,
         unitAbbreviation: this.cast(record.unitAbbreviation) as string,
         alternateNames:
           alternateNames === undefined ? undefined : alternateNames.split(","),
-        type: (this.cast(record.type) as string).toUpperCase() as NutrientType,
+        type: this.toNutrientTypeEnum(record.type),
         customTarget: false,
       };
 
@@ -238,5 +229,42 @@ export class Transformer {
         }),
       },
     };
+  }
+
+  async toRecipeFromRecipeKeeperHTML(
+    db: PrismaClient,
+    recipes: RecipeKeeperRecipe[]
+  ): Promise<Prisma.RecipeCreateInput[]> {
+    const convertedRecipes: Prisma.RecipeCreateInput[] = [];
+    for (const recipe of recipes) {
+      const ingredients = await createRecipeIngredients(
+        db,
+        recipe.recipeIngredients
+      );
+      convertedRecipes.push({
+        recipeKeeperId: this.cast(recipe.recipeId) as string,
+        title: this.cast(recipe.name) as string,
+        source: this.cast(recipe.recipeSource) as string,
+        servingsText: this.cast(recipe.recipeYield) as string,
+        servings: extractServingSize(recipe.recipeYield),
+        preparationTime: this.cast(recipe.prepTime) as number,
+        cookingTime: this.cast(recipe.cookTime) as number,
+        directions: this.cast(recipe.recipeDirections) as string,
+        ingredientsTxt: this.cast(recipe.recipeIngredients) as string,
+        notes: this.cast(recipe.recipeNotes) as string,
+        stars: this.cast(recipe.recipeRating) as number,
+        photos: {
+          create: recipe.photos.map((photo) => ({
+            path: photo,
+            isPrimary: checkIfPrimaryPhoto(photo),
+          })),
+        },
+        isFavorite: this.cast(recipe.recipeIsFavourite) as boolean,
+        ingredients: {
+          create: ingredients,
+        },
+      });
+    }
+    return convertedRecipes;
   }
 }

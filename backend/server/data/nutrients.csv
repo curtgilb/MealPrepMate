@@ -1,4 +1,4 @@
-﻿Nutrient,Symbol,Unit,Notes,Alternate Names,Type,Parent Nutrient,Cronometer Mapping,Recipe Keeper Mapping,MFP Mapping,DRI Mapping
+﻿Nutrient,Unit Abbreviation,Unit,Notes,Alternate Names,Type,Parent Nutrient,Cronometer Mapping,Recipe Keeper Mapping,MFP Mapping,DRI Mapping
 Added Sugars,g,grams,,,Carbohydrates,Total Carbohydrates,,,,
 Alcohol,g,grams,,,Alcohol,,Alcohol (g),,,
 Biotin,μg,micrograms,,,Vitamin,,,,,biotin

@@ -57,15 +57,16 @@ function readHTML(filePath: string): RecipeKeeperRecipe[] {
   for (const recipe of recipes) {
     // Grab all elements that are properties of each recipe
     const properties = recipe.querySelectorAll("*[itemProp]");
+    const parsedRecipe: RecipeKeeperRecipe = {
+      recipeCourse: [],
+      recipeCategory: [],
+      recipeCollection: [],
+      photos: [],
+    };
 
     properties.forEach((property) => {
       const propName = property.getAttribute("itemprop");
-      const parsedRecipe: RecipeKeeperRecipe = {
-        recipeCourse: [],
-        recipeCategory: [],
-        recipeCollection: [],
-        photos: [],
-      };
+
       if (propName.startsWith("photo")) {
         parsedRecipe.photos.push(property.getAttribute("src"));
         // Add collections and categories
@@ -74,9 +75,12 @@ function readHTML(filePath: string): RecipeKeeperRecipe[] {
         propName.includes("Collection") ||
         propName.includes("Course")
       ) {
-        (parsedRecipe[propName] as string[]).push(
-          property.getAttribute("content")
-        );
+        const value = property.getAttribute("content");
+        if (value !== undefined && value !== null && value !== "") {
+          (parsedRecipe[propName] as string[]).push(
+            property.getAttribute("content")
+          );
+        }
       }
       // Add all others
       else {
@@ -89,6 +93,7 @@ function readHTML(filePath: string): RecipeKeeperRecipe[] {
         parsedRecipe[propName] = propValue !== "" ? propValue : undefined;
       }
     });
+    parsedRecipes.push(parsedRecipe);
   }
   return parsedRecipes;
 }

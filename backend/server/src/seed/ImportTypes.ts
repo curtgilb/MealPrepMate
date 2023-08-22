@@ -76,12 +76,14 @@ type RecipeKeeperRecipe = {
   recipeNotes?: string;
   recipeNutServingSize?: string;
   recipeNutCalories?: string;
-  recipeNutCaloriesTotalFat?: string;
+  recipeNutTotalFat?: string;
   recipeNutSaturatedFat?: string;
   recipeNutSodium?: string;
   recipeNutTotalCarbohydrate?: string;
   recipeNutSugars?: string;
   recipeNutProtein?: string;
+  recipeNutCholesterol?: string;
+  recipeNutDietaryFiber?: string;
   photos: string[];
   recipeCollection: string[];
   recipeCategory: string[];

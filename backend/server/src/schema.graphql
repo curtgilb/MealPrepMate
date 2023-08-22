@@ -10,7 +10,7 @@ type Recipe {
   stars: Int
   isFavorite: Boolean
   course: String
-  collection: [String!]
+  cuisines: [String!]
   category: [String!]
   ingredients: [String!]
   photo: [Photo!]
@@ -104,16 +104,6 @@ type Import {
   source: String!
 }
 
-enum Course {
-  BREAKFAST
-  LUNCH
-  DINNER
-  DESSERT
-  SNACK
-  DRINK
-  OTHER
-}
-
 input RecipeInput {
   title: String!
   source: String
@@ -124,9 +114,9 @@ input RecipeInput {
   directions: String
   notes: String
   isFavorite: Boolean!
-  course: Course!
-  collection: [ID!]
+  course: ID
   category: [ID!]
+  cuisine: ID
   ingredients: String
   photos: [String!]
   leftOverFridgeLife: Int
@@ -233,14 +223,6 @@ type Mutation {
   updateRecipe(id: ID!, recipe: RecipeInput!): Recipe!
   deleteRecipe(id: ID!): Boolean!
   importRecipes(recipes: [RecipeInput!]!): [Recipe!]!
-  updateRecipeIngredients(
-    recipeId: ID!
-    ingredients: [verfiedIngredientInput!]!
-  ): [RecipeIngredient!]!
-  addRecipeIngredient(
-    recipeId: ID!
-    ingredient: verfiedIngredientInput!
-  ): [RecipeIngredient!]!
   deleteRecipeIngredient(recipeID: ID!, ingredientId: ID!): [RecipeIngredient!]!
   addNutritionFacts(recipeId: ID, nutrition: NutritionInput!): NutritionFact!
   updateNutritionFact(recipeId: ID!, nutrientId: ID!, value: Float!): Nutrient!
