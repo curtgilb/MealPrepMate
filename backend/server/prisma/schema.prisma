@@ -66,11 +66,35 @@ model Servings {
 }
 
 model Import {
-  id        String     @id @default(cuid())
-  name      String
-  type      ImportType
-  recipes   Recipe[]
-  createdAt DateTime   @default(now())
+  id            String         @id @default(cuid())
+  name          String
+  type          ImportType
+  status        ImportStatus
+  path          String
+  createdAt     DateTime       @default(now())
+  importRecords ImportRecord[]
+}
+
+model ImportRecord {
+  id             String          @id @default(cuid())
+  import         Import          @relation(fields: [importId], references: [id])
+  importId       String
+  name           String
+  staus          RecordSatus
+  recipe         Recipe?
+  nutritionLabel NutritionLabel?
+}
+
+enum ImportStatus {
+  CREATED
+  UPLOADED
+  PENDING
+  COMPLETED
+}
+
+enum RecordSatus {
+  IMPORTED
+  DUPLICATE
 }
 
 model RecipeIngredient {
@@ -157,12 +181,13 @@ model Recipe {
   ingredients         RecipeIngredient[]
   ingredientsTxt      String?
   mealPlans           Servings[]
-  import              Import?            @relation(fields: [importId], references: [id])
   importId            String?
   leftoeverFridgeLife Int?
   leftoverFreezerLife Int?
   isVerified          Boolean            @default(false)
   nutritionLabel      NutritionLabel[]
+  importRecord        ImportRecord?       @relation(fields: [importRecordId], references: [id])
+  importRecordId      String?             @unique
 }
 
 // BREAKFAST, LUNCH, DINNER, SNACK
@@ -189,6 +214,7 @@ model Photo {
   id        String  @id @default(cuid())
   path      String
   isPrimary Boolean
+  isUploaded  Boolean @default(false)
   recipe    Recipe  @relation(fields: [recipeId], references: [id])
   recipeId  String
 }
@@ -200,8 +226,11 @@ model NutritionLabel {
   nutritionLabelNutrients NutritionLabelNutrient[]
   name                    String
   percentage              Float?
-  amount                  String?
+  servingsTxt                 String?
+  servings                Float?
   source                  NutritionSource
+  importRecord            ImportRecord?             @relation(fields: [importRecordId], references: [id])
+  importRecordId          String?                   @unique
 }
 
 enum NutritionSource {

@@ -2,22 +2,60 @@ type Recipe {
   id: ID!
   title: String!
   source: String
+  servingsText: String
+  servings: Int
   preparationTime: Int
   cookingTime: Int
-  servings: Int!
+  marinadeTime: Int
   directions: String
   notes: String
   stars: Int
+  photos: [Photo!]
   isFavorite: Boolean
-  course: String
-  cuisines: [String!]
-  category: [String!]
-  ingredients: [String!]
-  photo: [Photo!]
-  nutritionFacts: NutritionFact
+  childRecipes: [Recipe]
+  parentRecipes: [Recipe]
+  course: LookupValue
+  category: [LookupValue!]
+  cuisine: LookupValue
+  ingredients: [RecipeIngredient]
+  ingredientsTxt: String
+  leftoeverFridgeLife: Int
+  leftoverFreezerLife: Int
+  isVerified: Boolean
+  # nutritionLabel      NutritionLabel[]
+  # mealPlans           Servings[]
+  # importId            String
 }
 
-type NutritionFact {
+input RecipeInput {
+  title: String!
+  source: String
+  servingsText: String
+  servings: Int
+  preparationTime: Int
+  cookingTime: Int
+  marinadeTime: Int
+  directions: String
+  notes: String
+  stars: Int
+  # photos: [Photo!]
+  isFavorite: Boolean
+  course: String
+  category: [String!]
+  cuisine: String
+  ingredientsTxt: String
+  leftoeverFridgeLife: Int
+  leftoverFreezerLife: Int
+}
+
+type LookupValue {
+  id: ID!
+  name: String!
+}
+
+type NutritionLabel {
+  id: ID!
+  name: String!
   calories: Float
   carbohydrates: NutrientGroup
   fat: NutrientGroup
@@ -102,39 +140,6 @@ type Import {
   id: ID!
   date: String!
   source: String!
-}
-
-input RecipeInput {
-  title: String!
-  source: String
-  preparationTime: Int
-  marinateTime: Int
-  cookingTime: Int
-  servings: Int!
-  directions: String
-  notes: String
-  isFavorite: Boolean!
-  course: ID
-  category: [ID!]
-  cuisine: ID
-  ingredients: String
-  photos: [String!]
-  leftOverFridgeLife: Int
-  leftOverFreezerLife: Int
-  # RecipeKeeperFields
-  recipeKeeperId: ID
-  servingsText: String
-  stars: Int
-  collectionNames: [String!]
-  categoryNames: [String!]
-  calories: Float
-  totalFat: Float
-  saturatedFat: Float
-  sodium: Float
-  totalCarbs: Float
-  dietaryFiber: Float
-  sugars: Float
-  protein: Float
 }
 
 input RecipeFilterInput {
@@ -222,14 +227,14 @@ type Mutation {
   createRecipe(recipe: RecipeInput!): Recipe!
   updateRecipe(id: ID!, recipe: RecipeInput!): Recipe!
   deleteRecipe(id: ID!): Boolean!
-  importRecipes(recipes: [RecipeInput!]!): [Recipe!]!
-  updateRecipeIngredient(recipeID: ID!, ingredientId: ID!): [RecipeIngredient!]!
-  addNutritionLabel(recipeId: ID, nutrition: NutritionInput!): NutritionFact!
+  # importRecipes(recipes: [RecipeInput!]!): [Recipe!]!
+  updateRecipeIngredient(ingredientId: ID!): RecipeIngredient
+  addNutritionLabel(recipeId: ID, nutrition: NutritionInput!): NutritionLabel!
   updateNutritionLabel(recipeId: ID!, nutrientId: ID!, value: Float!): Nutrient!
   updateNutrientFact(recipeId: ID!, nutrientId: ID!, value: Float!): Nutrient!
   addRecipePhoto(recipeId: ID, fileName: String!, isPrimary: Boolean!): Photo!
   setNutrientTarget(nutrientId: ID!, value: Float!): Nutrient!
   createCategory(name: String!): String!
-  createCollection(name: String!): String!
+  createCuisine(name: String!): String!
   # groupIngredientsToSubRecipes(ingredients: [ID!], name: String!, )
 }

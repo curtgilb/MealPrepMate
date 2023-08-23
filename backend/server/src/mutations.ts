@@ -86,6 +86,9 @@ export const mutations: Resolvers = {
       return context.db.recipe.update({
         where: { id: args.id },
         data: recipe,
+        include: {
+          ingredients: true,
+        },
       });
     },
     deleteRecipe: async (parent, args, context) => {

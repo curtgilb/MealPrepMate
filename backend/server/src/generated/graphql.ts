@@ -17,16 +17,6 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
-export enum Course {
-  Breakfast = 'BREAKFAST',
-  Dessert = 'DESSERT',
-  Dinner = 'DINNER',
-  Drink = 'DRINK',
-  Lunch = 'LUNCH',
-  Other = 'OTHER',
-  Snack = 'SNACK'
-}
-
 export type Import = {
   __typename?: 'Import';
   date: Scalars['String']['output'];
@@ -47,24 +37,29 @@ export type Ingredient = {
   storageInstructions?: Maybe<Scalars['String']['output']>;
 };
 
+export type LookupValue = {
+  __typename?: 'LookupValue';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
-  addNutritionFacts: NutritionFact;
+  addNutritionLabel: NutritionLabel;
   addRecipePhoto: Photo;
   createCategory: Scalars['String']['output'];
-  createCollection: Scalars['String']['output'];
+  createCuisine: Scalars['String']['output'];
   createRecipe: Recipe;
   deleteRecipe: Scalars['Boolean']['output'];
-  deleteRecipeIngredient: Array<RecipeIngredient>;
-  importRecipes: Array<Recipe>;
   setNutrientTarget: Nutrient;
   updateNutrientFact: Nutrient;
-  updateNutritionFact: Nutrient;
+  updateNutritionLabel: Nutrient;
   updateRecipe: Recipe;
+  updateRecipeIngredient?: Maybe<RecipeIngredient>;
 };
 
 
-export type MutationAddNutritionFactsArgs = {
+export type MutationAddNutritionLabelArgs = {
   nutrition: NutritionInput;
   recipeId?: InputMaybe<Scalars['ID']['input']>;
 };
@@ -82,7 +77,7 @@ export type MutationCreateCategoryArgs = {
 };
 
 
-export type MutationCreateCollectionArgs = {
+export type MutationCreateCuisineArgs = {
   name: Scalars['String']['input'];
 };
 
@@ -94,17 +89,6 @@ export type MutationCreateRecipeArgs = {
 
 export type MutationDeleteRecipeArgs = {
   id: Scalars['ID']['input'];
-};
-
-
-export type MutationDeleteRecipeIngredientArgs = {
-  ingredientId: Scalars['ID']['input'];
-  recipeID: Scalars['ID']['input'];
-};
-
-
-export type MutationImportRecipesArgs = {
-  recipes: Array<RecipeInput>;
 };
 
 
@@ -121,7 +105,7 @@ export type MutationUpdateNutrientFactArgs = {
 };
 
 
-export type MutationUpdateNutritionFactArgs = {
+export type MutationUpdateNutritionLabelArgs = {
   nutrientId: Scalars['ID']['input'];
   recipeId: Scalars['ID']['input'];
   value: Scalars['Float']['input'];
@@ -131,6 +115,11 @@ export type MutationUpdateNutritionFactArgs = {
 export type MutationUpdateRecipeArgs = {
   id: Scalars['ID']['input'];
   recipe: RecipeInput;
+};
+
+
+export type MutationUpdateRecipeIngredientArgs = {
+  ingredientId: Scalars['ID']['input'];
 };
 
 export type Nutrient = {
@@ -150,18 +139,6 @@ export type NutrientGroup = {
   total: Scalars['Float']['output'];
   unit: Scalars['String']['output'];
   unitAbbreviation: Scalars['String']['output'];
-};
-
-export type NutritionFact = {
-  __typename?: 'NutritionFact';
-  alchohol: Array<Nutrient>;
-  calories?: Maybe<Scalars['Float']['output']>;
-  carbohydrates?: Maybe<NutrientGroup>;
-  fat?: Maybe<NutrientGroup>;
-  minerals: Array<Nutrient>;
-  other: Array<Nutrient>;
-  protein?: Maybe<NutrientGroup>;
-  vitmains: Array<Nutrient>;
 };
 
 export type NutritionInput = {
@@ -219,6 +196,20 @@ export type NutritionInput = {
   vitmainC?: InputMaybe<Scalars['Float']['input']>;
   water?: InputMaybe<Scalars['Float']['input']>;
   zinc?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type NutritionLabel = {
+  __typename?: 'NutritionLabel';
+  alchohol: Array<Nutrient>;
+  calories?: Maybe<Scalars['Float']['output']>;
+  carbohydrates?: Maybe<NutrientGroup>;
+  fat?: Maybe<NutrientGroup>;
+  id: Scalars['ID']['output'];
+  minerals: Array<Nutrient>;
+  name: Scalars['String']['output'];
+  other: Array<Nutrient>;
+  protein?: Maybe<NutrientGroup>;
+  vitmains: Array<Nutrient>;
 };
 
 export type Photo = {
@@ -289,19 +280,26 @@ export type QueryRecipesArgs = {
 
 export type Recipe = {
   __typename?: 'Recipe';
-  category?: Maybe<Array<Scalars['String']['output']>>;
+  category?: Maybe<Array<LookupValue>>;
+  childRecipes?: Maybe<Array<Maybe<Recipe>>>;
   cookingTime?: Maybe<Scalars['Int']['output']>;
-  course?: Maybe<Scalars['String']['output']>;
-  cuisines?: Maybe<Array<Scalars['String']['output']>>;
+  course?: Maybe<LookupValue>;
+  cuisine?: Maybe<LookupValue>;
   directions?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
-  ingredients?: Maybe<Array<Scalars['String']['output']>>;
+  ingredients?: Maybe<Array<Maybe<RecipeIngredient>>>;
+  ingredientsTxt?: Maybe<Scalars['String']['output']>;
   isFavorite?: Maybe<Scalars['Boolean']['output']>;
+  isVerified?: Maybe<Scalars['Boolean']['output']>;
+  leftoeverFridgeLife?: Maybe<Scalars['Int']['output']>;
+  leftoverFreezerLife?: Maybe<Scalars['Int']['output']>;
+  marinadeTime?: Maybe<Scalars['Int']['output']>;
   notes?: Maybe<Scalars['String']['output']>;
-  nutritionFacts?: Maybe<NutritionFact>;
-  photo?: Maybe<Array<Photo>>;
+  parentRecipes?: Maybe<Array<Maybe<Recipe>>>;
+  photos?: Maybe<Array<Photo>>;
   preparationTime?: Maybe<Scalars['Int']['output']>;
-  servings: Scalars['Int']['output'];
+  servings?: Maybe<Scalars['Int']['output']>;
+  servingsText?: Maybe<Scalars['String']['output']>;
   source?: Maybe<Scalars['String']['output']>;
   stars?: Maybe<Scalars['Int']['output']>;
   title: Scalars['String']['output'];
@@ -333,35 +331,23 @@ export type RecipeIngredient = {
 };
 
 export type RecipeInput = {
-  calories?: InputMaybe<Scalars['Float']['input']>;
-  category?: InputMaybe<Array<Scalars['ID']['input']>>;
-  categoryNames?: InputMaybe<Array<Scalars['String']['input']>>;
-  collectionNames?: InputMaybe<Array<Scalars['String']['input']>>;
+  category?: InputMaybe<Array<Scalars['String']['input']>>;
   cookingTime?: InputMaybe<Scalars['Int']['input']>;
-  course: Course;
-  cuisine?: InputMaybe<Scalars['ID']['input']>;
-  dietaryFiber?: InputMaybe<Scalars['Float']['input']>;
+  course?: InputMaybe<Scalars['String']['input']>;
+  cuisine?: InputMaybe<Scalars['String']['input']>;
   directions?: InputMaybe<Scalars['String']['input']>;
-  ingredients?: InputMaybe<Scalars['String']['input']>;
-  isFavorite: Scalars['Boolean']['input'];
-  leftOverFreezerLife?: InputMaybe<Scalars['Int']['input']>;
-  leftOverFridgeLife?: InputMaybe<Scalars['Int']['input']>;
-  marinateTime?: InputMaybe<Scalars['Int']['input']>;
+  ingredientsTxt?: InputMaybe<Scalars['String']['input']>;
+  isFavorite?: InputMaybe<Scalars['Boolean']['input']>;
+  leftoeverFridgeLife?: InputMaybe<Scalars['Int']['input']>;
+  leftoverFreezerLife?: InputMaybe<Scalars['Int']['input']>;
+  marinadeTime?: InputMaybe<Scalars['Int']['input']>;
   notes?: InputMaybe<Scalars['String']['input']>;
-  photos?: InputMaybe<Array<Scalars['String']['input']>>;
   preparationTime?: InputMaybe<Scalars['Int']['input']>;
-  protein?: InputMaybe<Scalars['Float']['input']>;
-  recipeKeeperId?: InputMaybe<Scalars['ID']['input']>;
-  saturatedFat?: InputMaybe<Scalars['Float']['input']>;
-  servings: Scalars['Int']['input'];
+  servings?: InputMaybe<Scalars['Int']['input']>;
   servingsText?: InputMaybe<Scalars['String']['input']>;
-  sodium?: InputMaybe<Scalars['Float']['input']>;
   source?: InputMaybe<Scalars['String']['input']>;
   stars?: InputMaybe<Scalars['Int']['input']>;
-  sugars?: InputMaybe<Scalars['Float']['input']>;
   title: Scalars['String']['input'];
-  totalCarbs?: InputMaybe<Scalars['Float']['input']>;
-  totalFat?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type VerfiedIngredientInput = {
@@ -452,17 +438,17 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
-  Course: Course;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Import: ResolverTypeWrapper<Import>;
   Ingredient: ResolverTypeWrapper<Ingredient>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
+  LookupValue: ResolverTypeWrapper<LookupValue>;
   Mutation: ResolverTypeWrapper<{}>;
   Nutrient: ResolverTypeWrapper<Nutrient>;
   NutrientGroup: ResolverTypeWrapper<NutrientGroup>;
-  NutritionFact: ResolverTypeWrapper<NutritionFact>;
   NutritionInput: NutritionInput;
+  NutritionLabel: ResolverTypeWrapper<NutritionLabel>;
   Photo: ResolverTypeWrapper<Photo>;
   PriceHistory: ResolverTypeWrapper<PriceHistory>;
   Query: ResolverTypeWrapper<{}>;
@@ -482,11 +468,12 @@ export type ResolversParentTypes = ResolversObject<{
   Import: Import;
   Ingredient: Ingredient;
   Int: Scalars['Int']['output'];
+  LookupValue: LookupValue;
   Mutation: {};
   Nutrient: Nutrient;
   NutrientGroup: NutrientGroup;
-  NutritionFact: NutritionFact;
   NutritionInput: NutritionInput;
+  NutritionLabel: NutritionLabel;
   Photo: Photo;
   PriceHistory: PriceHistory;
   Query: {};
@@ -518,19 +505,24 @@ export type IngredientResolvers<ContextType = MyContext, ParentType extends Reso
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type LookupValueResolvers<ContextType = MyContext, ParentType extends ResolversParentTypes['LookupValue'] = ResolversParentTypes['LookupValue']> = ResolversObject<{
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type MutationResolvers<ContextType = MyContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
-  addNutritionFacts?: Resolver<ResolversTypes['NutritionFact'], ParentType, ContextType, RequireFields<MutationAddNutritionFactsArgs, 'nutrition'>>;
+  addNutritionLabel?: Resolver<ResolversTypes['NutritionLabel'], ParentType, ContextType, RequireFields<MutationAddNutritionLabelArgs, 'nutrition'>>;
   addRecipePhoto?: Resolver<ResolversTypes['Photo'], ParentType, ContextType, RequireFields<MutationAddRecipePhotoArgs, 'fileName' | 'isPrimary'>>;
   createCategory?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationCreateCategoryArgs, 'name'>>;
-  createCollection?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationCreateCollectionArgs, 'name'>>;
+  createCuisine?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationCreateCuisineArgs, 'name'>>;
   createRecipe?: Resolver<ResolversTypes['Recipe'], ParentType, ContextType, RequireFields<MutationCreateRecipeArgs, 'recipe'>>;
   deleteRecipe?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteRecipeArgs, 'id'>>;
-  deleteRecipeIngredient?: Resolver<Array<ResolversTypes['RecipeIngredient']>, ParentType, ContextType, RequireFields<MutationDeleteRecipeIngredientArgs, 'ingredientId' | 'recipeID'>>;
-  importRecipes?: Resolver<Array<ResolversTypes['Recipe']>, ParentType, ContextType, RequireFields<MutationImportRecipesArgs, 'recipes'>>;
   setNutrientTarget?: Resolver<ResolversTypes['Nutrient'], ParentType, ContextType, RequireFields<MutationSetNutrientTargetArgs, 'nutrientId' | 'value'>>;
   updateNutrientFact?: Resolver<ResolversTypes['Nutrient'], ParentType, ContextType, RequireFields<MutationUpdateNutrientFactArgs, 'nutrientId' | 'recipeId' | 'value'>>;
-  updateNutritionFact?: Resolver<ResolversTypes['Nutrient'], ParentType, ContextType, RequireFields<MutationUpdateNutritionFactArgs, 'nutrientId' | 'recipeId' | 'value'>>;
+  updateNutritionLabel?: Resolver<ResolversTypes['Nutrient'], ParentType, ContextType, RequireFields<MutationUpdateNutritionLabelArgs, 'nutrientId' | 'recipeId' | 'value'>>;
   updateRecipe?: Resolver<ResolversTypes['Recipe'], ParentType, ContextType, RequireFields<MutationUpdateRecipeArgs, 'id' | 'recipe'>>;
+  updateRecipeIngredient?: Resolver<Maybe<ResolversTypes['RecipeIngredient']>, ParentType, ContextType, RequireFields<MutationUpdateRecipeIngredientArgs, 'ingredientId'>>;
 }>;
 
 export type NutrientResolvers<ContextType = MyContext, ParentType extends ResolversParentTypes['Nutrient'] = ResolversParentTypes['Nutrient']> = ResolversObject<{
@@ -552,12 +544,14 @@ export type NutrientGroupResolvers<ContextType = MyContext, ParentType extends R
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type NutritionFactResolvers<ContextType = MyContext, ParentType extends ResolversParentTypes['NutritionFact'] = ResolversParentTypes['NutritionFact']> = ResolversObject<{
+export type NutritionLabelResolvers<ContextType = MyContext, ParentType extends ResolversParentTypes['NutritionLabel'] = ResolversParentTypes['NutritionLabel']> = ResolversObject<{
   alchohol?: Resolver<Array<ResolversTypes['Nutrient']>, ParentType, ContextType>;
   calories?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   carbohydrates?: Resolver<Maybe<ResolversTypes['NutrientGroup']>, ParentType, ContextType>;
   fat?: Resolver<Maybe<ResolversTypes['NutrientGroup']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   minerals?: Resolver<Array<ResolversTypes['Nutrient']>, ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   other?: Resolver<Array<ResolversTypes['Nutrient']>, ParentType, ContextType>;
   protein?: Resolver<Maybe<ResolversTypes['NutrientGroup']>, ParentType, ContextType>;
   vitmains?: Resolver<Array<ResolversTypes['Nutrient']>, ParentType, ContextType>;
@@ -593,19 +587,26 @@ export type QueryResolvers<ContextType = MyContext, ParentType extends Resolvers
 }>;
 
 export type RecipeResolvers<ContextType = MyContext, ParentType extends ResolversParentTypes['Recipe'] = ResolversParentTypes['Recipe']> = ResolversObject<{
-  category?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
+  category?: Resolver<Maybe<Array<ResolversTypes['LookupValue']>>, ParentType, ContextType>;
+  childRecipes?: Resolver<Maybe<Array<Maybe<ResolversTypes['Recipe']>>>, ParentType, ContextType>;
   cookingTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  course?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  cuisines?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
+  course?: Resolver<Maybe<ResolversTypes['LookupValue']>, ParentType, ContextType>;
+  cuisine?: Resolver<Maybe<ResolversTypes['LookupValue']>, ParentType, ContextType>;
   directions?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  ingredients?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
+  ingredients?: Resolver<Maybe<Array<Maybe<ResolversTypes['RecipeIngredient']>>>, ParentType, ContextType>;
+  ingredientsTxt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   isFavorite?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  isVerified?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  leftoeverFridgeLife?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  leftoverFreezerLife?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  marinadeTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   notes?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  nutritionFacts?: Resolver<Maybe<ResolversTypes['NutritionFact']>, ParentType, ContextType>;
-  photo?: Resolver<Maybe<Array<ResolversTypes['Photo']>>, ParentType, ContextType>;
+  parentRecipes?: Resolver<Maybe<Array<Maybe<ResolversTypes['Recipe']>>>, ParentType, ContextType>;
+  photos?: Resolver<Maybe<Array<ResolversTypes['Photo']>>, ParentType, ContextType>;
   preparationTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  servings?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  servings?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  servingsText?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   source?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   stars?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -626,10 +627,11 @@ export type RecipeIngredientResolvers<ContextType = MyContext, ParentType extend
 export type Resolvers<ContextType = MyContext> = ResolversObject<{
   Import?: ImportResolvers<ContextType>;
   Ingredient?: IngredientResolvers<ContextType>;
+  LookupValue?: LookupValueResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Nutrient?: NutrientResolvers<ContextType>;
   NutrientGroup?: NutrientGroupResolvers<ContextType>;
-  NutritionFact?: NutritionFactResolvers<ContextType>;
+  NutritionLabel?: NutritionLabelResolvers<ContextType>;
   Photo?: PhotoResolvers<ContextType>;
   PriceHistory?: PriceHistoryResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
