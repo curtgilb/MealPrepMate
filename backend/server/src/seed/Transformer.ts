@@ -214,7 +214,8 @@ export class Transformer {
     const { day, time, group, foodName, amount, category, ...rest } = csvData;
     return {
       name: this.cast(foodName) as string,
-      amount: this.cast(amount) as string,
+      servingsTxt: this.cast(amount) as string,
+      servings: extractServingSize(amount),
       source: "CRONOMETER",
       nutritionLabelNutrients: {
         create: Object.entries(rest).map(([nutrient, recomendation]) => {
