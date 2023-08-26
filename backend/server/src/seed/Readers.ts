@@ -28,7 +28,7 @@ async function readCSV(
   return records;
 }
 
-function writeJson(relativePath: string, data) {
+function writeJson(relativePath: string, data: object[]) {
   fs.writeFileSync(
     path.join(__dirname, "./mappings.json"),
     JSON.stringify(data)
@@ -66,31 +66,32 @@ function readHTML(filePath: string): RecipeKeeperRecipe[] {
 
     properties.forEach((property) => {
       const propName = property.getAttribute("itemprop");
-
-      if (propName.startsWith("photo")) {
-        parsedRecipe.photos.push(property.getAttribute("src"));
-        // Add collections and categories
-      } else if (
-        propName.includes("Category") ||
-        propName.includes("Collection") ||
-        propName.includes("Course")
-      ) {
-        const value = property.getAttribute("content");
-        if (value !== undefined && value !== null && value !== "") {
-          (parsedRecipe[propName] as string[]).push(
-            property.getAttribute("content")
-          );
+      if (propName !== undefined) {
+        if (propName.startsWith("photo")) {
+          parsedRecipe.photos.push(property.getAttribute("src") as string);
+          // Add collections and categories
+        } else if (
+          propName.includes("Category") ||
+          propName.includes("Collection") ||
+          propName.includes("Course")
+        ) {
+          const value = property.getAttribute("content");
+          if (value !== undefined && value !== null && value !== "") {
+            (parsedRecipe[propName] as string[]).push(
+              property.getAttribute("content") as string
+            );
+          }
         }
-      }
-      // Add all others
-      else {
-        let propValue: string;
-        if ("content" in property.attributes) {
-          propValue = property.getAttribute("content");
-        } else {
-          propValue = sanitizeInput(property.text);
+        // Add all others
+        else {
+          let propValue: string;
+          if ("content" in property.attributes) {
+            propValue = property.getAttribute("content");
+          } else {
+            propValue = sanitizeInput(property.text);
+          }
+          parsedRecipe[propName] = propValue !== "" ? propValue : undefined;
         }
-        parsedRecipe[propName] = propValue !== "" ? propValue : undefined;
       }
     });
     parsedRecipes.push(parsedRecipe);

@@ -4,12 +4,12 @@ import { Transformer } from "./Transformer";
 const prisma = new PrismaClient();
 
 (async () => {
+  await deleteAllRecords();
   await loadCourses();
   await loadCateogries();
   await loadCuisines();
-  // await deleteAllRecords();
-  // await loadIngredients();
-  // await loadNutrients();
+  await loadIngredients();
+  await loadNutrients();
   loadRecipes();
 })()
   .then(() => {

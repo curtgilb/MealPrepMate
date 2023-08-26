@@ -60,31 +60,86 @@ export type {
   RecipeKeeperRecipe,
 };
 
-type RecipeKeeperRecipe = {
-  recipeId?: string;
-  recipeShareId?: string;
-  recipeIsFavourite?: string;
-  recipeRating?: string;
-  name?: string;
+type Recipe = {
+  recipeId: string;
+  recipeShareId: string;
+  recipeIsFavourite: string;
+  recipeRating: string;
+  name: string;
   recipeCourse: string[];
-  recipeSource?: string;
-  recipeYield?: string;
-  prepTime?: string;
-  cookTime?: string;
-  recipeIngredients?: string;
-  recipeDirections?: string;
-  recipeNotes?: string;
-  recipeNutServingSize?: string;
-  recipeNutCalories?: string;
-  recipeNutTotalFat?: string;
-  recipeNutSaturatedFat?: string;
-  recipeNutSodium?: string;
-  recipeNutTotalCarbohydrate?: string;
-  recipeNutSugars?: string;
-  recipeNutProtein?: string;
-  recipeNutCholesterol?: string;
-  recipeNutDietaryFiber?: string;
+  recipeSource: string;
+  recipeYield: string;
+  prepTime: string;
+  cookTime: string;
+  recipeIngredients: string;
+  recipeDirections: string;
+  recipeNotes: string;
+  recipeNutServingSize: string;
+  recipeNutCalories: string;
+  recipeNutTotalFat: string;
+  recipeNutSaturatedFat: string;
+  recipeNutSodium: string;
+  recipeNutTotalCarbohydrate: string;
+  recipeNutSugars: string;
+  recipeNutProtein: string;
+  recipeNutCholesterol: string;
+  recipeNutDietaryFiber: string;
   photos: string[];
   recipeCollection: string[];
   recipeCategory: string[];
 };
+
+class RecipeKeeperRecipe {
+  props: Recipe = {
+    recipeId: "",
+    recipeShareId: "",
+    recipeIsFavourite: "",
+    recipeRating: "",
+    name: "",
+    recipeSource: "",
+    recipeYield: "",
+    prepTime: "",
+    cookTime: "",
+    recipeIngredients: "",
+    recipeDirections: "",
+    recipeNotes: "",
+    recipeNutServingSize: "",
+    recipeNutTotalFat: "",
+    recipeNutCalories: "",
+    recipeNutSaturatedFat: "",
+    recipeNutSodium: "",
+    recipeNutTotalCarbohydrate: "",
+    recipeNutSugars: "",
+    recipeNutProtein: "",
+    recipeNutCholesterol: "",
+    recipeNutDietaryFiber: "",
+    photos: [],
+    recipeCourse: [],
+    recipeCollection: [],
+    recipeCategory: [],
+  };
+
+  addProperty(prop: HTMLElement) {
+    const key = prop.getAttribute("itemprop");
+    if (key === undefined || key === null) return;
+    const value = key.startsWith("photo")
+      ? prop.getAttribute("src")
+      : prop.getAttribute("content");
+    if (value === undefined || value === null) return;
+    if (key.startsWith("photo")) {
+      this.props.photos.push(value);
+    } else if (
+      key.includes("Category") ||
+      key.includes("Collection") ||
+      key.includes("Course")
+    ) {
+      this.props[key].push(value);
+    } else {
+      if ("content" in prop.attributes) {
+        propValue = prop.getAttribute("content");
+      } else {
+        propValue = sanitizeInput(property.text);
+      }
+    }
+  }
+}
