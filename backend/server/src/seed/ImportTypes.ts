@@ -1,5 +1,5 @@
 import { Gender, SpecialCondition } from "@prisma/client";
-
+import { HTMLElement } from "node-html-parser";
 type Ingredient = {
   name: string;
   storageInstructions: string;
@@ -49,24 +49,12 @@ type DailyRecommendedIntake = {
 
 type Mappings = { [key: string]: { [key: string]: string } };
 
-export type {
-  Ingredient,
-  Nutrient,
-  NutritionFact,
-  Mappings,
-  NutritionLabel,
-  DailyRecommendedIntake,
-  DriLookup,
-  RecipeKeeperRecipe,
-};
-
 type Recipe = {
   recipeId: string;
   recipeShareId: string;
   recipeIsFavourite: string;
   recipeRating: string;
   name: string;
-  recipeCourse: string[];
   recipeSource: string;
   recipeYield: string;
   prepTime: string;
@@ -84,62 +72,71 @@ type Recipe = {
   recipeNutProtein: string;
   recipeNutCholesterol: string;
   recipeNutDietaryFiber: string;
+  recipeCourse: string[];
   photos: string[];
   recipeCollection: string[];
   recipeCategory: string[];
 };
 
-class RecipeKeeperRecipe {
-  props: Recipe = {
-    recipeId: "",
-    recipeShareId: "",
-    recipeIsFavourite: "",
-    recipeRating: "",
-    name: "",
-    recipeSource: "",
-    recipeYield: "",
-    prepTime: "",
-    cookTime: "",
-    recipeIngredients: "",
-    recipeDirections: "",
-    recipeNotes: "",
-    recipeNutServingSize: "",
-    recipeNutTotalFat: "",
-    recipeNutCalories: "",
-    recipeNutSaturatedFat: "",
-    recipeNutSodium: "",
-    recipeNutTotalCarbohydrate: "",
-    recipeNutSugars: "",
-    recipeNutProtein: "",
-    recipeNutCholesterol: "",
-    recipeNutDietaryFiber: "",
-    photos: [],
-    recipeCourse: [],
-    recipeCollection: [],
-    recipeCategory: [],
-  };
+export class RecipeKeeperRecipe {
+  scalarProps: { [key: string]: string } = {};
+  arrayProps: { [key: string]: string[] } = {};
 
-  addProperty(prop: HTMLElement) {
+  addProperty(prop: string, value: string, scalar = true): void {
+    if (scalar) {
+      this.scalarProps[prop] = value;
+    } else {
+      if (!(prop in this.arrayProps)) {
+        this.arrayProps[prop] = [];
+      }
+      this.arrayProps[prop].push(value);
+    }
+  }
+  parseHtmlElement(prop: HTMLElement) {
     const key = prop.getAttribute("itemprop");
     if (key === undefined || key === null) return;
-    const value = key.startsWith("photo")
+    let value = key.startsWith("photo")
       ? prop.getAttribute("src")
       : prop.getAttribute("content");
     if (value === undefined || value === null) return;
     if (key.startsWith("photo")) {
-      this.props.photos.push(value);
+      this.addProperty(key, value);
     } else if (
       key.includes("Category") ||
       key.includes("Collection") ||
       key.includes("Course")
     ) {
-      this.props[key].push(value);
+      this.addProperty(key, value, false);
     } else {
-      if ("content" in prop.attributes) {
-        propValue = prop.getAttribute("content");
-      } else {
-        propValue = sanitizeInput(property.text);
+      if (!("content" in prop.attributes)) {
+        value = this.sanitizeInput(prop.innerText);
       }
+      this.addProperty(key, value);
     }
   }
+
+  sanitizeInput(input: string): string {
+    const workingCopy: string[] = input
+      .split("\r\n")
+      .filter((text) => text !== "")
+      .map((text) => text.replace("•", "").trim());
+    return workingCopy.join("\n");
+  }
+
+  getRecipe(): Recipe {
+    return {
+      ...this.scalarProps,
+      ...this.arrayProps,
+    } as Recipe;
+  }
 }
+export type {
+  Ingredient,
+  Nutrient,
+  NutritionFact,
+  Mappings,
+  NutritionLabel,
+  DailyRecommendedIntake,
+  DriLookup,
+  Recipe,
+};
