@@ -1,5 +1,5 @@
 /* eslint-disable */
-import type { Prisma, MealPlan, Servings, Import, ImportRecord, RecipeIngredient, Ingredient, ExpirationRule, IngredientAlternateName, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, DailyReferenceIntake, HealthProfile } from "@prisma/client";
+import type { Prisma, MealPlan, Servings, Import, ImportRecord, RecipeIngredient, Ingredient, ExpirationRule, IngredientAlternateName, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, DailyReferenceIntake, HealthProfile, Post, Media, PostMedia } from "@prisma/client";
 export default interface PrismaTypes {
     MealPlan: {
         Name: "MealPlan";
@@ -107,7 +107,7 @@ export default interface PrismaTypes {
                 Name: "Recipe";
             };
             ingredient: {
-                Shape: Ingredient;
+                Shape: Ingredient | null;
                 Name: "Ingredient";
             };
         };
@@ -211,7 +211,7 @@ export default interface PrismaTypes {
         Create: {};
         Update: {};
         RelationName: "photos" | "childRecipes" | "parentRecipes" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabel" | "importRecord";
-        ListRelations: "photos" | "childRecipes" | "parentRecipes" | "category" | "ingredients" | "mealPlans" | "nutritionLabel";
+        ListRelations: "photos" | "childRecipes" | "parentRecipes" | "category" | "ingredients" | "mealPlans";
         Relations: {
             photos: {
                 Shape: Photo[];
@@ -246,7 +246,7 @@ export default interface PrismaTypes {
                 Name: "Servings";
             };
             nutritionLabel: {
-                Shape: NutritionLabel[];
+                Shape: NutritionLabel | null;
                 Name: "NutritionLabel";
             };
             importRecord: {
@@ -303,10 +303,10 @@ export default interface PrismaTypes {
         Where: Prisma.CuisineWhereInput;
         Create: {};
         Update: {};
-        RelationName: "recipe";
-        ListRelations: "recipe";
+        RelationName: "recipes";
+        ListRelations: "recipes";
         Relations: {
-            recipe: {
+            recipes: {
                 Shape: Recipe[];
                 Name: "Recipe";
             };
@@ -341,14 +341,14 @@ export default interface PrismaTypes {
         Where: Prisma.NutritionLabelWhereInput;
         Create: {};
         Update: {};
-        RelationName: "recipe" | "nutritionLabelNutrients" | "importRecord";
-        ListRelations: "nutritionLabelNutrients";
+        RelationName: "recipe" | "nutrients" | "importRecord";
+        ListRelations: "nutrients";
         Relations: {
             recipe: {
                 Shape: Recipe | null;
                 Name: "Recipe";
             };
-            nutritionLabelNutrients: {
+            nutrients: {
                 Shape: NutritionLabelNutrient[];
                 Name: "NutritionLabelNutrient";
             };
@@ -444,5 +444,66 @@ export default interface PrismaTypes {
         RelationName: never;
         ListRelations: never;
         Relations: {};
+    };
+    Post: {
+        Name: "Post";
+        Shape: Post;
+        Include: Prisma.PostInclude;
+        Select: Prisma.PostSelect;
+        OrderBy: Prisma.PostOrderByWithRelationInput;
+        WhereUnique: Prisma.PostWhereUniqueInput;
+        Where: Prisma.PostWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "media";
+        ListRelations: "media";
+        Relations: {
+            media: {
+                Shape: PostMedia[];
+                Name: "PostMedia";
+            };
+        };
+    };
+    Media: {
+        Name: "Media";
+        Shape: Media;
+        Include: Prisma.MediaInclude;
+        Select: Prisma.MediaSelect;
+        OrderBy: Prisma.MediaOrderByWithRelationInput;
+        WhereUnique: Prisma.MediaWhereUniqueInput;
+        Where: Prisma.MediaWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "posts";
+        ListRelations: "posts";
+        Relations: {
+            posts: {
+                Shape: PostMedia[];
+                Name: "PostMedia";
+            };
+        };
+    };
+    PostMedia: {
+        Name: "PostMedia";
+        Shape: PostMedia;
+        Include: Prisma.PostMediaInclude;
+        Select: Prisma.PostMediaSelect;
+        OrderBy: Prisma.PostMediaOrderByWithRelationInput;
+        WhereUnique: Prisma.PostMediaWhereUniqueInput;
+        Where: Prisma.PostMediaWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "post" | "media";
+        ListRelations: never;
+        Relations: {
+            post: {
+                Shape: Post | null;
+                Name: "Post";
+            };
+            media: {
+                Shape: Media;
+                Name: "Media";
+            };
+        };
     };
 }

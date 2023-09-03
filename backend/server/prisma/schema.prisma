@@ -6,9 +6,9 @@ generator client {
 }
 
 generator pothos {
-  provider = "prisma-pothos-types"
-    clientOutput = "@prisma/client"
-  output = "../src/pothos-types.ts"
+  provider     = "prisma-pothos-types"
+  clientOutput = "@prisma/client"
+  output       = "../src/types.ts"
 }
 
 datasource db {
@@ -111,13 +111,13 @@ model RecipeIngredient {
   maxQuantity       Float?
   quantity          Float?
   unit              String?
-  name              String
+  name              String?
   comment           String?
   other             String?
   recipe            Recipe     @relation(fields: [recipeId], references: [id])
   recipeId          String // relation scalar field (used in the `@relation` attribute above)
-  ingredient        Ingredient @relation(fields: [ingredientId], references: [id])
-  ingredientId      String // relation scalar field (used in the `@relation` attribute above)
+  ingredient        Ingredient? @relation(fields: [ingredientId], references: [id])
+  ingredientId      String? // relation scalar field (used in the `@relation` attribute above)
   display           Boolean?
   servingPercentage Float?     @default(1.00)
 }
@@ -167,8 +167,6 @@ model Recipe {
   recipeKeeperId      String?
   title               String
   source              String?
-  servingsText        String?
-  servings            Int
   preparationTime     Int?
   cookingTime         Int?
   marinadeTime        Int?
@@ -176,7 +174,7 @@ model Recipe {
   notes               String?
   stars               Int?
   photos              Photo[]
-  isFavorite          Boolean           @default(false)
+  isFavorite          Boolean            @default(false)
   childRecipes        Recipe[]           @relation("LinkedRecipes")
   parentRecipes       Recipe[]           @relation("LinkedRecipes")
   course              Course?            @relation(fields: [courseId], references: [id])
@@ -188,12 +186,12 @@ model Recipe {
   ingredientsTxt      String?
   mealPlans           Servings[]
   importId            String?
-  leftoverFridgeLife Int?
+  leftoverFridgeLife  Int?
   leftoverFreezerLife Int?
   isVerified          Boolean            @default(false)
-  nutritionLabel      NutritionLabel[]
-  importRecord        ImportRecord?       @relation(fields: [importRecordId], references: [id])
-  importRecordId      String?             @unique
+  nutritionLabel      NutritionLabel?
+  importRecord        ImportRecord?      @relation(fields: [importRecordId], references: [id])
+  importRecordId      String?            @unique
 }
 
 // BREAKFAST, LUNCH, DINNER, SNACK
@@ -211,32 +209,32 @@ model Category {
 }
 
 model Cuisine {
-  id     String   @id @default(cuid())
-  name   String   @unique
-  recipe Recipe[]
+  id      String   @id @default(cuid())
+  name    String   @unique
+  recipes Recipe[]
 }
 
 model Photo {
-  id        String  @id @default(cuid())
-  path      String
-  isPrimary Boolean
-  isUploaded  Boolean @default(false)
-  recipe    Recipe  @relation(fields: [recipeId], references: [id])
-  recipeId  String
+  id         String  @id @default(cuid())
+  path       String
+  isPrimary  Boolean
+  isUploaded Boolean @default(false)
+  recipe     Recipe  @relation(fields: [recipeId], references: [id])
+  recipeId   String
 }
 
 model NutritionLabel {
-  id                      String                   @id @default(cuid())
-  recipe                  Recipe?                  @relation(fields: [recipeId], references: [id])
-  recipeId                String?
-  nutritionLabelNutrients NutritionLabelNutrient[]
-  name                    String
-  percentage              Float?
-  servingsTxt                 String?
-  servings                Float?
-  source                  NutritionSource
-  importRecord            ImportRecord?             @relation(fields: [importRecordId], references: [id])
-  importRecordId          String?                   @unique
+  id             String                   @id @default(cuid())
+  recipe         Recipe?                  @relation(fields: [recipeId], references: [id])
+  recipeId       String?                  @unique
+  nutrients      NutritionLabelNutrient[]
+  name           String
+  percentage     Float?
+  servings       Float?
+  servingSize    Float?
+  source         NutritionSource
+  importRecord   ImportRecord?            @relation(fields: [importRecordId], references: [id])
+  importRecordId String?                  @unique
 }
 
 enum NutritionSource {
@@ -251,13 +249,12 @@ model NutritionLabelNutrient {
   nutrient         Nutrient       @relation(fields: [nutrientId], references: [id])
   nutrientId       String
   value            Float
-
   @@id([nutritionLabelId, nutrientId])
 }
 
 model Nutrient {
   id                      String                   @id @default(cuid())
-  name                    String
+  name                    String                  @unique
   unit                    String
   unitAbbreviation        String
   alternateNames          String[]
@@ -304,4 +301,28 @@ model HealthProfile {
   targetProtein     Float
   targetCarbs       Float
   targetFat         Float
+}
+
+
+model Post {
+  id        Int         @id @default(autoincrement())
+  title     String
+  content   String
+  media     PostMedia[]
+}
+
+model Media {
+  id           Int         @id @default(autoincrement())
+  url          String
+  posts        PostMedia[]
+  uploadedById Int
+}
+
+model PostMedia {
+  id      Int   @id @default(autoincrement())
+  post    Post?  @relation(fields: [postId], references: [id])
+  media   Media @relation(fields: [mediaId], references: [id])
+  postId  Int?
+  mediaId Int
+  testField String?
 }

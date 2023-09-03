@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-import { readCSV, readHTML } from "./Readers";
-import { Transformer } from "./Transformer";
+import { readCSV, readHTML } from "../importHelpers/Readers.js";
+import { Transformer } from "../importHelpers/Transformer.js";
+import { toRecipeCreateInputFromRecipeKeeper } from "../services/RecipeService.js";
 const prisma = new PrismaClient();
 
 (async () => {
@@ -10,7 +11,7 @@ const prisma = new PrismaClient();
   await loadCuisines();
   await loadIngredients();
   await loadNutrients();
-  loadRecipes();
+  await loadRecipes();
 })()
   .then(() => {
     console.log("Seeding complete");
@@ -22,6 +23,8 @@ const prisma = new PrismaClient();
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+async function loadHealthProfile() {}
 
 async function loadCateogries() {
   await prisma.category.createMany({
@@ -118,7 +121,7 @@ async function loadIngredients() {
   // }
 }
 
-async function deleteAllRecords() {
+export async function deleteAllRecords() {
   const tablenames = await prisma.$queryRaw<
     Array<{ tablename: string }>
   >`SELECT tablename FROM pg_tables WHERE schemaname='public'`;
@@ -136,7 +139,18 @@ async function deleteAllRecords() {
   }
 }
 
-function loadRecipes() {
+async function loadRecipes() {
   const recipes = readHTML("../../data/RecipeKeeper/recipes.html");
-  console.log(recipes);
+  const createStmts = await toRecipeCreateInputFromRecipeKeeper(
+    prisma,
+    recipes
+  );
+
+  for (const createStmt of createStmts) {
+    console.log(JSON.stringify(createStmt));
+
+    await prisma.recipe.create({
+      data: createStmt,
+    });
+  }
 }

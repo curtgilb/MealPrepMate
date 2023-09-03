@@ -13,3 +13,18 @@ function toCamelCase(input: string): string {
 }
 
 export { toTitleCase, toCamelCase };
+
+// function vulgarFractionToDecimal(text: string): string {
+//   const vulgarFractionMap = {
+//     "¼": "1/4",
+//     "½": "1/2",
+//     "¾": "3/4",
+//     // Add more mappings as needed
+//   };
+
+//   const regex = new RegExp(Object.keys(vulgarFractionMap).join("|"), "g");
+
+//   const replacedText = text.replace(regex, (match) => vulgarFractionMap[match]);
+
+//   return replacedText;
+// }

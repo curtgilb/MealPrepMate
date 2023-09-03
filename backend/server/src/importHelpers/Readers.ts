@@ -1,9 +1,15 @@
 import fs from "fs";
 import { parse } from "csv-parse";
 import { parse as parseHTML } from "node-html-parser";
-import { toCamelCase } from "../util/utils";
+import { toCamelCase } from "../util/utils.js";
 import path from "path";
-import { RecipeKeeperRecipe, Recipe } from "./ImportTypes";
+import {
+  RecipeKeeperTransformer,
+  RecipeKeeperRecipe,
+} from "../importHelpers/RecipeTransformer.js";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function readCSV(
   filePath: string,
@@ -35,27 +41,28 @@ function writeJson(relativePath: string, data: object[]) {
   );
 }
 
-function readJSON(relativePath: string): object[] {
+function readJSON(relativePath: string): object {
   return JSON.parse(
     fs.readFileSync(path.join(__dirname, relativePath), "utf8")
-  ) as object[];
+  ) as object;
 }
 
-function readHTML(filePath: string) {
+function readHTML(filePath: string): RecipeKeeperRecipe[] {
   const data = fs.readFileSync(path.join(__dirname, filePath), "utf-8");
   const html = parseHTML(data);
   const recipes = html.querySelectorAll(".recipe-details");
-  const parsedRecipes: Recipe[] = [];
+  const parsedRecipes: RecipeKeeperRecipe[] = [];
   for (const recipe of recipes) {
     // Grab all elements that are properties of each recipe
     const properties = recipe.querySelectorAll("*[itemProp]");
-    const parsedRecipe: RecipeKeeperRecipe = new RecipeKeeperRecipe();
+    const parsedRecipe = new RecipeKeeperTransformer();
 
     properties.forEach((property) => {
       parsedRecipe.parseHtmlElement(property);
     });
-    parsedRecipes.push(parsedRecipe.getRecipe());
+    parsedRecipes.push(parsedRecipe.toObject());
   }
+  return parsedRecipes;
 }
 
 export { writeJson, readJSON, readCSV, readHTML };

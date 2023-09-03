@@ -7,8 +7,8 @@ const minioClient = new Client({
   endPoint: "localhost",
   port: 9000,
   useSSL: false,
-  accessKey: "hlYr0DKojQRcguCsDYqX",
-  secretKey: "oFnaNy89mJwkyFTJGqS2u2uvaXsZQn7K8epGmRzh",
+  accessKey: "admin",
+  secretKey: "password1",
 });
 
 try {
@@ -21,3 +21,6 @@ try {
 } catch (error) {
   console.log(error);
 }
+
+// accessKey: "hlYr0DKojQRcguCsDYqX",
+// secretKey: "oFnaNy89mJwkyFTJGqS2u2uvaXsZQn7K8epGmRzh",

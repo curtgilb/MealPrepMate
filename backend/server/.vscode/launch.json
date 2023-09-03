@@ -38,6 +38,14 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "skipFiles": ["<node_internals>/**/*.js"]
+    },
+    {
+      "name": "Test",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": ["--loader", "ts-node/esm"],
+      "args": ["${file}"],
+      "cwd": "${workspaceFolder}"
     }
   ]
 }

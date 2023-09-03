@@ -1,4 +1,4 @@
-import { Mappings, DriLookup, RecipeKeeperRecipe } from "./ImportTypes.js";
+import { Mappings, DriLookup } from "./ImportTypes.js";
 import {
   Gender,
   NutrientType,
@@ -7,18 +7,19 @@ import {
   DayOfWeek,
   PrismaClient,
 } from "@prisma/client";
-import { toNumber, toBoolean } from "../util/Cast";
+import { toNumber, toBoolean } from "../util/Cast.js";
 import {
   checkIfPrimaryPhoto,
   extractServingSize,
   createRecipeIngredients,
-} from "../services/Recipe";
+} from "../services/RecipeService.js";
+import { cast } from "../util/Cast.js";
 
 // The purpose of this class is to take data read in from reading csv, html, etc, files and transform them so that they are ready to be inserted into the database.
 export class Transformer {
   toNutrientTypeEnum(value: string): NutrientType {
-    let nutrientType = this.cast(value) as string;
-    if (nutrientType !== undefined) {
+    let nutrientType = cast(value) as string;
+    if (nutrientType) {
       nutrientType = nutrientType.toUpperCase();
       if (["MINERAL", "MINERALS"].includes(nutrientType)) return "MINERAL";
       else if (["VITAMIN", "VITAMINS"].includes(nutrientType)) return "VITAMIN";
@@ -33,22 +34,9 @@ export class Transformer {
     return "OTHER";
   }
 
-  getTime(input: string): number {
-    const match = Array.from(input.matchAll(/(?<time>\d+)(?<unit>.)/gm))[0];
-    const time: number = parseInt(match.groups.time);
-    const unit: string = match.groups.unit;
-    if (unit === "S") {
-      return time / 60;
-    } else if (unit === "H") {
-      return time * 60;
-    } else {
-      return time;
-    }
-  }
-
   toGenderEnum(value: string): Gender {
-    let gender = this.cast(value) as string;
-    if (gender !== undefined) {
+    let gender = cast(value) as string;
+    if (gender) {
       gender = gender.toUpperCase();
       if (["M", "MALE"].includes(gender)) return "MALE";
       else if (["F", "FEMALE"].includes(gender)) return "FEMALE";
@@ -57,8 +45,8 @@ export class Transformer {
   }
 
   toSpecialConditionEnum(value: string): SpecialCondition {
-    let specialCondition = this.cast(value) as string;
-    if (specialCondition !== undefined) {
+    let specialCondition = cast(value) as string;
+    if (specialCondition) {
       specialCondition = specialCondition.toUpperCase();
       if (["PREGNANT"].includes(specialCondition)) return "PREGNANT";
       else if (["LACTATING"].includes(specialCondition)) return "LACTATING";
@@ -67,8 +55,8 @@ export class Transformer {
   }
 
   toDayOfWeekEnum(value: string): DayOfWeek {
-    let dayOfWeek = this.cast(value) as string;
-    if (dayOfWeek !== undefined) {
+    let dayOfWeek = cast(value) as string;
+    if (dayOfWeek) {
       dayOfWeek = dayOfWeek.toUpperCase();
       if (["MONDAY", "MON"].includes(dayOfWeek)) return "MONDAY";
       else if (["TUESDAY", "TUES"].includes(dayOfWeek)) return "TUESDAY";
@@ -114,34 +102,18 @@ export class Transformer {
     return mappings;
   }
 
-  cast(str: string): string | number | boolean | undefined {
-    if (str === "" || str === undefined || str === null) {
-      return undefined;
-    }
-    // Check if number
-    if (!isNaN(parseFloat(str)) && !isNaN(parseInt(str, 10))) {
-      return toNumber(str);
-      // Check if boolean
-    } else if (["true", "false", "0", "1"].includes(str.toLowerCase())) {
-      return toBoolean(str);
-
-      // Else, return string
-    } else {
-      return str;
-    }
-  }
   // In order to create with alternate names, records must be create one at a time (i.e., no createMany)
   toIngredient(record: {
     [key: string]: string;
   }): Prisma.IngredientCreateInput {
     const ingredient: Prisma.IngredientCreateInput = {
-      name: this.cast(record.name) as string,
-      storageInstructions: this.cast(record.storageInstructions) as string,
+      name: cast(record.name) as string,
+      storageInstructions: cast(record.storageInstructions) as string,
     };
-    if ((this.cast(record.alternateNames) as string) !== undefined) {
+    if (cast(record.alternateNames) as string) {
       ingredient.alternateNames = {
         createMany: {
-          data: (this.cast(record.alternateNames) as string)
+          data: (cast(record.alternateNames) as string)
             .split(",")
             .map((name) => ({ name })),
         },
@@ -164,10 +136,10 @@ export class Transformer {
         }
         driLookup[nutrient].push({
           gender: this.toGenderEnum(gender),
-          ageMin: this.cast(minAge) as number,
-          ageMax: this.cast(maxAge) as number,
+          ageMin: cast(minAge) as number,
+          ageMax: cast(maxAge) as number,
           specialCondition: this.toSpecialConditionEnum(specialCondition),
-          value: this.cast(recomendation) as number,
+          value: cast(recomendation) as number,
         });
       }
     });
@@ -181,19 +153,21 @@ export class Transformer {
     const driLookup = this.createDriLookup(dailyRecommendedIntake);
 
     return nutrients.map((record) => {
-      const alternateNames = this.cast(record.alternateNames) as string;
       const nutrientRecord: Prisma.NutrientCreateInput = {
-        name: this.cast(record.nutrient) as string,
-        unit: this.cast(record.unit) as string,
-        unitAbbreviation: this.cast(record.unitAbbreviation) as string,
-        alternateNames:
-          alternateNames === undefined ? undefined : alternateNames.split(","),
+        name: cast(record.nutrient) as string,
+        unit: cast(record.unit) as string,
+        unitAbbreviation: cast(record.unitAbbreviation) as string,
         type: this.toNutrientTypeEnum(record.type),
         customTarget: false,
       };
 
-      const driLookupValue = this.cast(record.driMapping) as string;
-      if (driLookupValue !== undefined) {
+      const alternateNames = cast(record.alternateNames) as string;
+      if (alternateNames) {
+        nutrientRecord.alternateNames = alternateNames.split(",");
+      }
+
+      const driLookupValue = cast(record.driMapping) as string;
+      if (driLookupValue) {
         nutrientRecord["dri"] = {
           createMany: {
             data: driLookup[driLookupValue],
@@ -213,14 +187,13 @@ export class Transformer {
   ): Prisma.NutritionLabelCreateInput {
     const { day, time, group, foodName, amount, category, ...rest } = csvData;
     return {
-      name: this.cast(foodName) as string,
-      servingsTxt: this.cast(amount) as string,
+      name: cast(foodName) as string,
       servings: extractServingSize(amount),
       source: "CRONOMETER",
-      nutritionLabelNutrients: {
+      nutrients: {
         create: Object.entries(rest).map(([nutrient, recomendation]) => {
           return {
-            value: this.cast(recomendation) as number,
+            value: cast(recomendation) as number,
             nutrient: {
               connect: {
                 id: nutrientIdMap[nutrientNameMap.cronometer[nutrient]],
@@ -232,40 +205,41 @@ export class Transformer {
     };
   }
 
-  async toRecipeFromRecipeKeeperHTML(
-    db: PrismaClient,
-    recipes: RecipeKeeperRecipe[]
-  ): Promise<Prisma.RecipeCreateInput[]> {
-    const convertedRecipes: Prisma.RecipeCreateInput[] = [];
-    for (const recipe of recipes) {
-      const ingredients = await createRecipeIngredients(
-        db,
-        recipe.recipeIngredients
-      );
-      convertedRecipes.push({
-        recipeKeeperId: this.cast(recipe.recipeId) as string,
-        title: this.cast(recipe.name) as string,
-        source: this.cast(recipe.recipeSource) as string,
-        servingsText: this.cast(recipe.recipeYield) as string,
-        servings: extractServingSize(recipe.recipeYield),
-        preparationTime: this.cast(recipe.prepTime) as number,
-        cookingTime: this.cast(recipe.cookTime) as number,
-        directions: this.cast(recipe.recipeDirections) as string,
-        ingredientsTxt: this.cast(recipe.recipeIngredients) as string,
-        notes: this.cast(recipe.recipeNotes) as string,
-        stars: this.cast(recipe.recipeRating) as number,
-        photos: {
-          create: recipe.photos.map((photo) => ({
-            path: photo,
-            isPrimary: checkIfPrimaryPhoto(photo),
-          })),
-        },
-        isFavorite: this.cast(recipe.recipeIsFavourite) as boolean,
-        ingredients: {
-          create: ingredients,
-        },
-      });
-    }
-    return convertedRecipes;
-  }
+  //   async toRecipeFromRecipeKeeperHTML(
+  //     db: PrismaClient,
+  //     recipes: RecipeKeeperRecipe[]
+  //   ): Promise<Prisma.RecipeCreateInput[]> {
+  //     const convertedRecipes: Prisma.RecipeCreateInput[] = [];
+  //     for (const recipe of recipes) {
+  //       const ingredients = await createRecipeIngredients(
+  //         db,
+  //         recipe.recipeIngredients
+  //       );
+  //       convertedRecipes.push({
+  //         recipeKeeperId: cast(recipe.recipeId) as string,
+  //         title: cast(recipe.name) as string,
+  //         source: cast(recipe.recipeSource) as string,
+  //         servingsText: cast(recipe.recipeYield) as string,
+  //         servings: extractServingSize(recipe.recipeYield),
+  //         preparationTime: cast(recipe.prepTime) as number,
+  //         cookingTime: cast(recipe.cookTime) as number,
+  //         directions: cast(recipe.recipeDirections) as string,
+  //         ingredientsTxt: cast(recipe.recipeIngredients) as string,
+  //         notes: cast(recipe.recipeNotes) as string,
+  //         stars: cast(recipe.recipeRating) as number,
+  //         photos: {
+  //           create: recipe.photos.map((photo) => ({
+  //             path: photo,
+  //             isPrimary: checkIfPrimaryPhoto(photo),
+  //           })),
+  //         },
+  //         isFavorite: cast(recipe.recipeIsFavourite) as boolean,
+  //         ingredients: {
+  //           create: ingredients,
+  //         },
+  //       });
+  //     }
+  //     return convertedRecipes;
+  //   }
+  // }
 }
