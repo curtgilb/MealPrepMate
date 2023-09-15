@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from ingredient_parser import parse_ingredient
 from pydantic import BaseModel
+from recipe_scrapers import scrape_me
+
+
 
 app = FastAPI()
 
@@ -28,3 +31,6 @@ async def parse_batch(requestBody: MultipleIngredients):
         result["quantity"] = convertToFloat(result["quantity"])
         parsed_ingredients.append(result)
     return parsed_ingredients
+
+@app.post("/scraperecipe")
+    def parse_recipe(requestBody):

@@ -24,7 +24,21 @@ const prisma = new PrismaClient();
     await prisma.$disconnect();
   });
 
-async function loadHealthProfile() {}
+async function loadHealthProfile() {
+  await prisma.healthProfile.create({
+    data: {
+      weight: 180,
+      gender: "MALE",
+      bodyFatPercentage: 0.25,
+      height: 72,
+      yearBorn: 1994,
+      activityLevel: 1.2,
+      targetProtein: 0.25,
+      targetCarbs: 0.5,
+      targetFat: 0.5,
+    },
+  });
+}
 
 async function loadCateogries() {
   await prisma.category.createMany({
