@@ -47,15 +47,15 @@ function readJSON(relativePath: string): object {
   ) as object;
 }
 
-function readHTML(filePath: string): RecipeKeeperRecipe[] {
-  const data = fs.readFileSync(path.join(__dirname, filePath), "utf-8");
+function readHTML(data: string): RecipeKeeperRecipe[] {
+  // const data = fs.readFileSync(path.join(__dirname, filePath), "utf-8");
   const html = parseHTML(data);
   const recipes = html.querySelectorAll(".recipe-details");
   const parsedRecipes: RecipeKeeperRecipe[] = [];
   for (const recipe of recipes) {
     // Grab all elements that are properties of each recipe
     const properties = recipe.querySelectorAll("*[itemProp]");
-    const parsedRecipe = new RecipeKeeperTransformer();
+    const parsedRecipe = new RecipeKeeperTransformer(recipe.toString());
 
     properties.forEach((property) => {
       parsedRecipe.parseHtmlElement(property);

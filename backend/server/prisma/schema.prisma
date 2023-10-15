@@ -73,10 +73,11 @@ model Servings {
 
 model Import {
   id            String         @id @default(cuid())
-  name          String
+  fileName          String
   type          ImportType
   status        ImportStatus
   path          String
+  imageMapping  String?
   createdAt     DateTime       @default(now())
   importRecords ImportRecord[]
 }
@@ -85,22 +86,24 @@ model ImportRecord {
   id             String          @id @default(cuid())
   import         Import          @relation(fields: [importId], references: [id])
   importId       String
+  rawInput       String
   name           String
-  staus          RecordSatus
-  recipe         Recipe?
+  status          RecordStatus
+  recipe         Recipe? @relation(fields: [recipeId], references: [id])
+  recipeId       String
   nutritionLabel NutritionLabel?
+  createdAt     DateTime       @default(now())
 }
 
 enum ImportStatus {
-  CREATED
-  UPLOADED
   PENDING
   COMPLETED
 }
 
-enum RecordSatus {
+enum RecordStatus {
   IMPORTED
   DUPLICATE
+  PENDING
 }
 
 model RecipeIngredient {
@@ -119,7 +122,15 @@ model RecipeIngredient {
   ingredient        Ingredient? @relation(fields: [ingredientId], references: [id])
   ingredientId      String? // relation scalar field (used in the `@relation` attribute above)
   display           Boolean?
-  servingPercentage Float?     @default(1.00)
+  group             RecipeIngredientGroup? @relation(fields: [groupId], references: [id])
+  groupId           String
+}
+
+model RecipeIngredientGroup {
+  id String @id @default(cuid())
+  name String
+  ingredients RecipeIngredient[]
+  nutritionLabel NutritionLabel?
 }
 
 model Ingredient {
@@ -173,7 +184,7 @@ model Recipe {
   directions          String?
   notes               String?
   stars               Int?
-  photos              Photo[]
+  photos              RecipePhotos[]
   isFavorite          Boolean            @default(false)
   childRecipes        Recipe[]           @relation("LinkedRecipes")
   parentRecipes       Recipe[]           @relation("LinkedRecipes")
@@ -189,9 +200,8 @@ model Recipe {
   leftoverFridgeLife  Int?
   leftoverFreezerLife Int?
   isVerified          Boolean            @default(false)
-  nutritionLabel      NutritionLabel?
-  importRecord        ImportRecord?      @relation(fields: [importRecordId], references: [id])
-  importRecordId      String?            @unique
+  nutritionLabel      NutritionLabel[]
+  importRecords       ImportRecord[] 
 }
 
 // BREAKFAST, LUNCH, DINNER, SNACK
@@ -217,16 +227,26 @@ model Cuisine {
 model Photo {
   id         String  @id @default(cuid())
   path       String
-  isPrimary  Boolean
-  isUploaded Boolean @default(false)
-  recipe     Recipe  @relation(fields: [recipeId], references: [id])
-  recipeId   String
+  hash       String @unique
+  recipes    RecipePhotos[]
+}
+
+model RecipePhotos {
+  photo Photo @relation(fields: [photoId], references: [id])
+  photoId String
+  recipe Recipe @relation(fields: [recipeId], references: [id])
+  recipeId String
+  isPrimary Boolean @default(false)
+  @@id([photoId, recipeId])
+
 }
 
 model NutritionLabel {
   id             String                   @id @default(cuid())
   recipe         Recipe?                  @relation(fields: [recipeId], references: [id])
-  recipeId       String?                  @unique
+  recipeId       String?                  
+  ingredientGroup RecipeIngredientGroup? @relation(fields: [ingredientGroupId], references: [id])
+  ingredientGroupId String @unique
   nutrients      NutritionLabelNutrient[]
   name           String
   percentage     Float?
@@ -301,28 +321,4 @@ model HealthProfile {
   targetProtein     Float
   targetCarbs       Float
   targetFat         Float
-}
-
-
-model Post {
-  id        Int         @id @default(autoincrement())
-  title     String
-  content   String
-  media     PostMedia[]
-}
-
-model Media {
-  id           Int         @id @default(autoincrement())
-  url          String
-  posts        PostMedia[]
-  uploadedById Int
-}
-
-model PostMedia {
-  id      Int   @id @default(autoincrement())
-  post    Post?  @relation(fields: [postId], references: [id])
-  media   Media @relation(fields: [mediaId], references: [id])
-  postId  Int?
-  mediaId Int
-  testField String?
 }

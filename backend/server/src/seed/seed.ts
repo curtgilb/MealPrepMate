@@ -2,16 +2,23 @@ import { PrismaClient } from "@prisma/client";
 import { readCSV, readHTML } from "../importHelpers/Readers.js";
 import { Transformer } from "../importHelpers/Transformer.js";
 import { toRecipeCreateInputFromRecipeKeeper } from "../services/RecipeService.js";
+import { storage } from "../storage.js";
 const prisma = new PrismaClient();
+const bucketPolicy =
+  '{"Version":"2012-10-17","Statement":[{"Sid":"PublicReadGetObject","Effect":"Allow","Principal":"*","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::$$$/*"]}]}';
 
 (async () => {
   await deleteAllRecords();
-  await loadCourses();
-  await loadCateogries();
-  await loadCuisines();
-  await loadIngredients();
-  await loadNutrients();
+  // await loadCourses();
+  // await loadCateogries();
+  // await loadCuisines();
+  // await loadIngredients();
+  // await loadNutrients();
   await loadRecipes();
+  // await loadHealthProfile();
+  // await createBuckets();
+  // await deleteBuckets();
+  // await createBuckets();
 })()
   .then(() => {
     console.log("Seeding complete");
@@ -23,6 +30,33 @@ const prisma = new PrismaClient();
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+async function deleteBuckets() {
+  const buckets = await storage.listBuckets();
+  for (const bucket of buckets) {
+    const objectsToDelete: string[] = [];
+    const stream = storage.listObjectsV2(bucket.name, "", true);
+    stream.on("data", (object) => {
+      objectsToDelete.push(object.name);
+    });
+    stream.on("end", () => {
+      storage.removeObjects(bucket.name, objectsToDelete, (error) => {
+        if (error) console.log(error);
+        storage.removeBucket(bucket.name, (error) => {
+          if (error) console.log(error);
+        });
+      });
+    });
+  }
+}
+
+async function createBuckets() {
+  const buckets = ["imports", "photos"];
+  for (const bucket of buckets) {
+    await storage.makeBucket(bucket);
+    await storage.setBucketPolicy(bucket, bucketPolicy.replace("$$$", bucket));
+  }
+}
 
 async function loadHealthProfile() {
   await prisma.healthProfile.create({

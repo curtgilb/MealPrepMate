@@ -1,3 +1,5 @@
+import { getFieldDef } from "graphql/execution/execute.js";
+
 function toTitleCase(str: string): string {
   return str.replace(
     /\w\S*/g,
@@ -61,4 +63,9 @@ function compareTwoStrings(first: string, second: string): number {
   return (2.0 * intersectionSize) / (first.length + second.length - 2);
 }
 
-export { toTitleCase, toCamelCase, compareTwoStrings };
+function getFileExtension(fileName: string): string {
+  const lastDotIndex = fileName.lastIndexOf(".");
+  return fileName.substring(lastDotIndex + 1);
+}
+
+export { toTitleCase, toCamelCase, compareTwoStrings, getFileExtension };

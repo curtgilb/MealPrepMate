@@ -1,4 +1,6 @@
+import { ScalarLeafsRule } from "graphql";
 import { HTMLElement } from "node-html-parser";
+import { Photo, RecordStatus } from "@prisma/client";
 
 export type RecipeKeeperRecipe = {
   recipeId: string;
@@ -27,6 +29,9 @@ export type RecipeKeeperRecipe = {
   photos: string[];
   recipeCollection: string[];
   recipeCategory: string[];
+  rawInput: string;
+  matchId: string;
+  status: RecordStatus;
 };
 
 export class RecipeKeeperTransformer {
@@ -53,6 +58,9 @@ export class RecipeKeeperTransformer {
     recipeNutProtein: "",
     recipeNutCholesterol: "",
     recipeNutDietaryFiber: "",
+    rawInput: "",
+    matchId: "",
+    status: "PENDING",
   };
   arrayProps: { [key: string]: string[] } = {
     recipeCourse: [],
@@ -60,6 +68,10 @@ export class RecipeKeeperTransformer {
     recipeCollection: [],
     recipeCategory: [],
   };
+
+  constructor(rawInput: string) {
+    this.scalarProps.rawInput = rawInput;
+  }
 
   addProperty(prop: string, value: string): void {
     if (prop in this.scalarProps) {

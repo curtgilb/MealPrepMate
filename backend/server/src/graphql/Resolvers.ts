@@ -1,5 +1,5 @@
 import { builder } from "../builder.js";
-import { Prisma } from "@prisma/client";
+
 import { db } from "../db.js";
 import { RecipeInput } from "../gql.js";
 import { toRecipeCreateInput } from "../services/RecipeService.js";
@@ -42,7 +42,7 @@ builder.mutationType({
         return recipe;
       },
     }),
-    readTextFile: t.string({
+    import: t.string({
       args: {
         file: t.arg({
           type: "File",
@@ -50,9 +50,9 @@ builder.mutationType({
         }),
       },
       resolve: async (_, { file }) => {
-        const textContent = await file.text();
+        //
 
-        return textContent;
+        return "reciped";
       },
     }),
   }),

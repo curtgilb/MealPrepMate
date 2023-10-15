@@ -49,11 +49,11 @@ async function toRecipeCreateInput(
     };
   }
 
-  if (recipe.photos) {
-    data.photos = {
-      connect: recipe.photos.map((id) => ({ id: id })),
-    };
-  }
+  // if (recipe.photos) {
+  //   data.photos = {
+  //     connect: recipe.photos.map((id) => ({ id: id })),
+  //   };
+  // }
 
   if (recipe.course) {
     data.course = {
@@ -123,14 +123,14 @@ async function toRecipeCreateInputFromRecipeKeeper(
         },
       },
     };
-    if (recipe.photos.length > 0) {
-      data.photos = {
-        create: recipe.photos.map((photo) => ({
-          path: photo,
-          isPrimary: checkIfPrimaryPhoto(photo),
-        })),
-      };
-    }
+    // if (recipe.photos.length > 0) {
+    //   data.photos = {
+    //     create: recipe.photos.map((photo) => ({
+    //       path: photo,
+    //       isPrimary: checkIfPrimaryPhoto(photo),
+    //     })),
+    //   };
+    // }
 
     if (cast(recipe.recipeIngredients) !== undefined) {
       const ingredients = await createRecipeIngredients(
@@ -276,12 +276,6 @@ async function matchIngredients(
     matchedIngredients.push(ingredient);
   }
   return matchedIngredients;
-}
-
-//Check the filename to see if the path is primary photo in Recipe Keeper
-function checkIfPrimaryPhoto(filePath: string): boolean {
-  const removedExtension = filePath.replace(/\.[^/.]+$/, "");
-  return removedExtension.endsWith("_0");
 }
 
 // Extracts the serving size from the servings text
