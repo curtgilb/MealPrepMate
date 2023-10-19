@@ -1,15 +1,17 @@
 // Class to extend the functionality of recipe CRUD operations
 import { Prisma, PrismaClient, Recipe, Course } from "@prisma/client";
 import { Mappings } from "../importHelpers/ImportTypes.js";
-import { RecipeKeeperRecipe } from "../importHelpers/RecipeTransformer.js";
+import { RecipeKeeperRecipe } from "../importHelpers/RecipeKeeperParser.js";
 import { cast, toNumber } from "../util/Cast.js";
 import { db } from "../db.js";
 import { readJSON } from "../importHelpers/Readers.js";
+import { toTitleCase } from "../util/utils.js";
+import { RecipeModel } from "./Recipe.js";
 
-class RecipeKeeperModel {
-  constructor(private readonly prismaRecipe: PrismaClient["recipe"]) {}
-
-  // async createRecipeFromGraphql(data): Promise<Recipe> {}
+export class RecipeKeeperModel extends RecipeModel {
+  constructor(protected readonly db: PrismaClient) {
+    super(db);
+  }
 
   async createRecipeKeeperRecipe(
     recipe: RecipeKeeperRecipe,
@@ -22,19 +24,41 @@ class RecipeKeeperModel {
       preparationTime: this.getTime(recipe.prepTime),
       cookingTime: this.getTime(recipe.cookTime),
       directions: cast(recipe.recipeDirections) as string,
-      ingredientsTxt: cast(recipe.recipeIngredients) as string,
       notes: cast(recipe.recipeNotes) as string,
       stars: cast(recipe.recipeRating) as number,
       isFavorite: cast(recipe.recipeIsFavourite) as boolean,
-      nutritionLabel: this.buildRKNutritionStmt(recipe),
+      nutritionLabel: this.buildNutritionStmt(recipe),
       photos: this.buildPhotosStmt(recipe, imageMapping),
       isVerified: false,
+      course: this.createCourseStmt(
+        recipe.recipeCourse
+      ) as Prisma.CourseCreateNestedManyWithoutRecipesInput,
+      category: this.createCourseStmt(
+        recipe.recipeCategory
+      ) as Prisma.CategoryCreateNestedManyWithoutRecipesInput,
+      ingredients: await this.createRecipeIngredientsStmt(
+        recipe.recipeIngredients
+      ),
     };
 
-    return await this.prismaRecipe.create({ data: dbStmt });
+    return await this.db.recipe.create({ data: dbStmt });
   }
 
-  private coerceCourse(): {};
+  private createCourseStmt(courses: string[]): unknown {
+    const newCourses = courses
+      .filter((course) => cast(course) as string)
+      .map((course) => {
+        const name = toTitleCase(cast(course) as string);
+        const stmt = {
+          where: { name },
+          create: { name },
+        };
+        return stmt;
+      });
+
+    if (newCourses.length < 1) return undefined;
+    return { connectOrCreate: newCourses };
+  }
 
   private buildPhotosStmt(
     recipe: RecipeKeeperRecipe,
@@ -70,7 +94,7 @@ class RecipeKeeperModel {
     return filteredList;
   }
 
-  private buildRKNutritionStmt(
+  private buildNutritionStmt(
     recipe: RecipeKeeperRecipe
   ): Prisma.NutritionLabelCreateNestedManyWithoutRecipeInput {
     const nutrientMappings = readJSON("../mappings.json") as Mappings;

@@ -4,29 +4,35 @@ import { parse as parseHTML } from "node-html-parser";
 import { toCamelCase } from "../util/utils.js";
 import path from "path";
 import {
-  RecipeKeeperTransformer,
+  RecipeKeeperParser,
   RecipeKeeperRecipe,
-} from "../importHelpers/RecipeTransformer.js";
+} from "./RecipeKeeperParser.js";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function readCSV(
-  filePath: string,
+  source: string | File,
   camelCaseHeaders = true
 ): Promise<{ [key: string]: string }[]> {
-  const fullPath = path.join(__dirname, filePath);
-  const records: { [key: string]: string }[] = [];
-  const parser = fs.createReadStream(fullPath).pipe(
-    parse({
-      delimiter: ",",
-      columns: camelCaseHeaders
-        ? (headers: string[]) => headers.map((header) => toCamelCase(header))
-        : true,
-      bom: true,
-    })
-  );
+  let parser;
+  const parserOptions = {
+    delimiter: ",",
+    columns: camelCaseHeaders
+      ? (headers: string[]) => headers.map((header) => toCamelCase(header))
+      : true,
+    bom: true,
+    raw: true,
+  };
+  if (typeof source === "object" && Object.hasOwn(source, "name")) {
+    // Treat as a file object
+    parser = parse((source as File).toString(), parserOptions);
+  } else {
+    const fullPath = path.join(__dirname, source as string);
+    parser = fs.createReadStream(fullPath).pipe(parse(parserOptions));
+  }
 
+  const records: { [key: string]: string }[] = [];
   for await (const record of parser) {
     const typedRecord = record as { [key: string]: string };
     records.push(typedRecord);
@@ -55,7 +61,7 @@ function readHTML(data: string): RecipeKeeperRecipe[] {
   for (const recipe of recipes) {
     // Grab all elements that are properties of each recipe
     const properties = recipe.querySelectorAll("*[itemProp]");
-    const parsedRecipe = new RecipeKeeperTransformer(recipe.toString());
+    const parsedRecipe = new RecipeKeeperParser(recipe.toString());
 
     properties.forEach((property) => {
       parsedRecipe.parseHtmlElement(property);

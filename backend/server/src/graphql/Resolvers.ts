@@ -1,8 +1,8 @@
 import { builder } from "../builder.js";
-
 import { db } from "../db.js";
 import { RecipeInput } from "../gql.js";
-import { toRecipeCreateInput } from "../services/RecipeService.js";
+import { processRecipeKeeperImport } from "../services/ImportService/RecipeKeeper.js";
+import { RecipeModel } from "../ModelExtensions/Recipe.js";
 
 const recipeInput = builder.inputType("RecipeInput", {
   fields: (t) => ({
@@ -17,7 +17,7 @@ const recipeInput = builder.inputType("RecipeInput", {
     stars: t.int(),
     photos: t.idList(),
     isFavorite: t.boolean(),
-    course: t.id(),
+    courses: t.idList(),
     category: t.idList(),
     cuisine: t.id(),
     ingredients: t.string(),
@@ -34,25 +34,20 @@ builder.mutationType({
         recipe: t.arg({ type: recipeInput, required: true }),
       },
       resolve: async (query, root, args, ctx, info) => {
-        const data = await toRecipeCreateInput(args.recipe as RecipeInput, db);
-        const recipe = await db.recipe.create({
-          data,
-          ...query,
-        });
-        return recipe;
+        const recipe = new RecipeModel(db);
+        return recipe.createRecipe(args.recipe as RecipeInput, query);
       },
     }),
-    import: t.string({
+    import: t.prismaField({
+      type: "Import",
       args: {
         file: t.arg({
           type: "File",
           required: true,
         }),
       },
-      resolve: async (_, { file }) => {
-        //
-
-        return "reciped";
+      resolve: async (query, root, args, ctx, info) => {
+        return await processRecipeKeeperImport(args.file);
       },
     }),
   }),

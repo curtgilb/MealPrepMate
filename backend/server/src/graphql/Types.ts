@@ -10,6 +10,34 @@ builder.scalarType("File", {
     throw new Error("Uploads can only be used as input types");
   },
 });
+
+builder.scalarType("Date", {
+  serialize: () => {
+    throw new Error("Uploads can only be used as input types");
+  },
+});
+// ==========================================Imports===========================================
+builder.prismaObject("Import", {
+  fields: (t) => ({
+    id: t.exposeID("id"),
+    fileName: t.exposeString("fileName"),
+    type: t.exposeString("type"),
+    status: t.exposeString("status"),
+    url: t.exposeString("path"),
+    records: t.relation("importRecords"),
+    recordsCount: t.relationCount("importRecords"),
+  }),
+});
+
+builder.prismaObject("ImportRecord", {
+  fields: (t) => ({
+    name: t.exposeString("name"),
+    status: t.exposeString("status"),
+    recipe: t.relation("recipe"),
+    nutritionLabel: t.relation("nutritionLabel"),
+  }),
+});
+
 // ==========================================Recipes==========================================
 builder.prismaObject("Recipe", {
   fields: (t) => ({
@@ -21,14 +49,12 @@ builder.prismaObject("Recipe", {
     notes: t.exposeString("notes", { nullable: true }),
     stars: t.exposeInt("stars", { nullable: true }),
     isFavorite: t.exposeBoolean("isFavorite"),
-    ingredientsTxt: t.exposeString("ingredientsTxt", { nullable: true }),
     leftoverFridgeLife: t.exposeInt("leftoverFridgeLife", { nullable: true }),
     directions: t.exposeString("directions", { nullable: true }),
     isVerified: t.exposeBoolean("isVerified", { nullable: true }),
     cuisine: t.relation("cuisine"),
     category: t.relation("category"),
     course: t.relation("course"),
-    photos: t.relation("photos"),
     ingredients: t.relation("ingredients"),
   }),
 });
@@ -60,14 +86,19 @@ builder.prismaObject("Course", {
   }),
 });
 
+builder.prismaObject("RecipePhotos", {
+  name: "RecipePhotos",
+  fields: (t) => ({
+    isPrimary: t.exposeBoolean("isPrimary"),
+    photos: t.relation("photo"),
+  }),
+});
+
 builder.prismaObject("Photo", {
   name: "Photo",
   fields: (t) => ({
     id: t.exposeID("id"),
     url: t.exposeString("path"),
-    isPrimary: t.exposeBoolean("isPrimary"),
-    isUploaded: t.exposeBoolean("isUploaded"),
-    recipe: t.relation("recipe"),
   }),
 });
 
@@ -75,6 +106,7 @@ builder.prismaObject("RecipeIngredient", {
   name: "RecipeIngredients",
   fields: (t) => ({
     isIngredient: t.exposeBoolean("isIngredient"),
+    order: t.exposeInt("order"),
     sentence: t.exposeString("sentence"),
     minQuantity: t.exposeFloat("minQuantity", { nullable: true }),
     maxQuantity: t.exposeFloat("maxQuantity", { nullable: true }),
@@ -85,6 +117,16 @@ builder.prismaObject("RecipeIngredient", {
     other: t.exposeString("other", { nullable: true }),
     recipes: t.relation("recipe"),
     baseIngredient: t.relation("ingredient", { nullable: true }),
+  }),
+});
+
+builder.prismaObject("RecipeIngredientGroup", {
+  name: "RecipeIngredientGroup",
+  fields: (t) => ({
+    name: t.exposeString("name"),
+    servings: t.exposeInt("servings", { nullable: true }),
+    servingsInRecipe: t.exposeInt("servingsInRecipe", { nullable: true }),
+    nutritionLabel: t.relation("nutritionLabel", { nullable: true }),
   }),
 });
 
@@ -136,10 +178,12 @@ builder.prismaObject("NutritionLabel", {
   name: "NutritionLabel",
   fields: (t) => ({
     id: t.exposeID("id"),
-    recipe: t.relation("recipe"),
+    recipe: t.relation("recipe", { nullable: true }),
     name: t.exposeString("name"),
     percentage: t.exposeInt("percentage", { nullable: true }),
     servings: t.exposeInt("servings", { nullable: true }),
+    ingredientGroup: t.relation("ingredientGroup"),
+    nutrients: t.relation("nutrients"),
   }),
 });
 

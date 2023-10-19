@@ -3,7 +3,7 @@ import { PrismaClient, Prisma, Recipe } from "@prisma/client";
 import fetch from "node-fetch";
 import { toNumber } from "../util/Cast.js";
 import { RecipeInput } from "../gql.js";
-import { RecipeKeeperRecipe } from "../importHelpers/RecipeTransformer.js";
+import { RecipeKeeperRecipe } from "../importHelpers/RecipeKeeperParser.js";
 import { cast, CastType } from "../util/Cast.js";
 import { readJSON } from "../importHelpers/Readers.js";
 import { Mappings } from "../importHelpers/ImportTypes.js";
@@ -348,7 +348,6 @@ function cleanIngredientResponse(
 export {
   tagIngredients,
   extractServingSize,
-  checkIfPrimaryPhoto,
   compareIngredients,
   matchIngredients,
   createRecipeIngredients,

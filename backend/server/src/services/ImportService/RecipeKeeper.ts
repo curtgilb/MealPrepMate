@@ -1,47 +1,53 @@
 import { Open, CentralDirectory, File as ZipFile } from "unzipper";
 import fs from "fs/promises";
-import { getFileExtension } from "../../util/utils.js";
-import { Prisma } from "@prisma/client";
-import crypto from "crypto";
+import { hash } from "./ImportService.js";
 import { db } from "../../db.js";
 import { v4 as uuidv4 } from "uuid";
 import { storage } from "../../storage.js";
 import { readHTML } from "../../importHelpers/Readers.js";
-import { RecipeKeeperRecipe } from "../../importHelpers/RecipeTransformer.js";
+import { RecipeKeeperRecipe } from "../../importHelpers/RecipeKeeperParser.js";
 import { compareTwoStrings } from "../../util/utils.js";
+import { getFileMetaData, FileMetaData } from "./ImportService.js";
 
 // TODO
 // Hash file to see if HTML is the same
 // Enum on the status
 
-type FileMetaData = {
-  path: string;
-  name: string;
-  ext: string;
-};
-
 type RecipeKeeperExtractedData = {
+  htmlHash: string;
+  fileMeta: FileMetaData;
   recipes: RecipeKeeperRecipe[];
   images: { [key: string]: string };
 };
 
-export async function processReciperKeeperImport(source: string | File) {
+export async function processRecipeKeeperImport(source: string | File) {
   const fileBuffer = await unzipFile(source);
-  const data = await extractRecipes(fileBuffer);
-  await findRecipeMatches(data.recipes);
+  const lastImport = await db.import.findFirst({
+    orderBy: { createdAt: "desc" },
+  });
+  const { htmlHash, fileMeta, recipes, images } = await extractRecipes(
+    fileBuffer
+  );
+  if (lastImport?.fileHash === htmlHash)
+    throw Error("No changes made since the last import");
+  await findRecipeMatches(recipes);
+  return await saveRecipeData(fileMeta.name, htmlHash, images, recipes);
 }
 
 async function saveRecipeData(
   fileName: string,
+  fileHash: string,
   imageMapping: { [key: string]: string },
   recipes: RecipeKeeperRecipe[]
 ) {
-  await db.import.create({
+  return await db.import.create({
     data: {
-      fileName: fileName,
+      fileName,
+      fileHash,
       type: "RECIPE_KEEPER",
       status: "PENDING",
       imageMapping: JSON.stringify(imageMapping),
+      path: "",
       importRecords: {
         createMany: {
           data: recipes.map((recipe) => {
@@ -63,7 +69,6 @@ async function findRecipeMatches(recipes: RecipeKeeperRecipe[]) {
     select: {
       id: true,
       title: true,
-      ingredientsTxt: true,
     },
   });
 
@@ -108,15 +113,13 @@ function findApproximateRecipe(
   existingRecipes: {
     id: string;
     title: string;
-    ingredientsTxt: string | null;
   }[]
 ): boolean {
-  const newComparisonKey = recipe.name.concat(recipe.recipeIngredients);
+  const newComparisonKey = recipe.name;
   let highestPercentMatch = 0;
+
   const secondMatch = existingRecipes.filter((existingRecipe) => {
-    const oldComparisonKey = existingRecipe.title.concat(
-      existingRecipe.ingredientsTxt as string
-    );
+    const oldComparisonKey = existingRecipe.title;
     const percentMatch = compareTwoStrings(oldComparisonKey, newComparisonKey);
 
     if (percentMatch > 0.8 && percentMatch > highestPercentMatch) {
@@ -139,20 +142,28 @@ async function extractRecipes(
 ): Promise<RecipeKeeperExtractedData> {
   let recipeKeeperRecipes: RecipeKeeperRecipe[] = [];
   const imageToHash: { [key: string]: string } = {};
+  let htmlHash;
+  let htmlFileMeta;
   for (const file of zipFile.files) {
     if (file.type === "File") {
       const fileMeta = getFileMetaData(file.path);
       if (fileMeta.ext === "html") {
         const htmlData = (await file.buffer()).toString();
+        htmlHash = hash(htmlData);
+        htmlFileMeta = JSON.parse(JSON.stringify(fileMeta)) as FileMetaData;
         recipeKeeperRecipes = readHTML(htmlData);
       } else if (["jpg", "png", "tiff"].includes(fileMeta.ext)) {
         await processImage(file, imageToHash, fileMeta);
       }
     }
   }
+  if (!htmlHash) throw Error("No Html file was found in zip file");
+  if (!htmlFileMeta) throw Error("No HTML file was found in zip file");
   return {
+    htmlHash: htmlHash,
     recipes: recipeKeeperRecipes,
     images: imageToHash,
+    fileMeta: htmlFileMeta,
   };
 }
 
@@ -161,31 +172,27 @@ async function processImage(
   hashLookup: { [key: string]: string },
   fileMeta: FileMetaData
 ) {
-  // Hash the file
-  const hash = crypto.createHash("sha256");
-  hash.update(await image.buffer());
-  const hashHex = hash.digest("hex");
+  const hashOutput = hash(await image.buffer());
   const foundImage = await db.photo.findUnique({
-    where: { hash: hashHex },
+    where: { hash: hashOutput },
   });
   if (!foundImage) {
     const fileName = `${uuidv4()}.${fileMeta.ext}`;
-
     await storage.putObject("images", fileName, await image.buffer());
-
     await db.photo.create({
       data: {
         path: `images/${fileName}`,
-        hash: hashHex,
+        hash: hashOutput,
       },
     });
   }
-  hashLookup[fileMeta.name] = hashHex;
+  hashLookup[fileMeta.name] = hashOutput;
 }
 
 async function unzipFile(source: string | File): Promise<CentralDirectory> {
   if (typeof source === "string") {
     try {
+      // const fullPath = path.join(__dirname, filePath);
       await fs.access(source);
       return await Open.file(source);
     } catch {
@@ -196,19 +203,4 @@ async function unzipFile(source: string | File): Promise<CentralDirectory> {
     return await Open.buffer(fileBuffer);
   }
   throw Error();
-}
-
-function getFileMetaData(path: string): FileMetaData {
-  if (path) {
-    const pathSplit = path.split("/");
-    const name = pathSplit.pop() as string; // .pop() only return undefined if the array is empty. Array should not be empty if the string is not empty.
-    const ext = getFileExtension(name);
-
-    return {
-      path,
-      name, //: fileName.replace(fileExt, ""),
-      ext,
-    };
-  }
-  throw Error(`Path "${path}" is invalid.`);
 }

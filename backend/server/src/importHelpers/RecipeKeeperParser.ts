@@ -34,7 +34,7 @@ export type RecipeKeeperRecipe = {
   status: RecordStatus;
 };
 
-export class RecipeKeeperTransformer {
+export class RecipeKeeperParser {
   scalarProps: { [key: string]: string } = {
     recipeId: "",
     recipeShareId: "",

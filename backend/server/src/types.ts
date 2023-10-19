@@ -238,7 +238,7 @@ export default interface PrismaTypes {
         Create: {};
         Update: {};
         RelationName: "photos" | "childRecipes" | "parentRecipes" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabel" | "importRecords";
-        ListRelations: "photos" | "childRecipes" | "parentRecipes" | "category" | "ingredients" | "mealPlans" | "nutritionLabel" | "importRecords";
+        ListRelations: "photos" | "childRecipes" | "parentRecipes" | "course" | "category" | "ingredients" | "mealPlans" | "nutritionLabel" | "importRecords";
         Relations: {
             photos: {
                 Shape: RecipePhotos[];
@@ -253,7 +253,7 @@ export default interface PrismaTypes {
                 Name: "Recipe";
             };
             course: {
-                Shape: Course | null;
+                Shape: Course[];
                 Name: "Course";
             };
             category: {

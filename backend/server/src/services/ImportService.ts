@@ -1,3 +1,0 @@
-function importRecipeKeeper() {}
-
-function importCronometer() {}
