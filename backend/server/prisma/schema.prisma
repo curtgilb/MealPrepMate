@@ -8,7 +8,7 @@ generator client {
 generator pothos {
   provider     = "prisma-pothos-types"
   clientOutput = "@prisma/client"
-  output       = "../src/types.ts"
+  output       = "../src/types/PothosTypes.ts"
 }
 
 datasource db {
@@ -109,7 +109,6 @@ enum RecordStatus {
 
 model RecipeIngredient {
   id                String     @id @default(cuid())
-  isIngredient      Boolean    @default(true)
   sentence          String
   minQuantity       Float?
   maxQuantity       Float?
@@ -123,9 +122,8 @@ model RecipeIngredient {
   recipeId          String // relation scalar field (used in the `@relation` attribute above)
   ingredient        Ingredient? @relation(fields: [ingredientId], references: [id])
   ingredientId      String? // relation scalar field (used in the `@relation` attribute above)
-  display           Boolean?
   group             RecipeIngredientGroup? @relation(fields: [groupId], references: [id])
-  groupId           String
+  groupId           String?
 }
 
 model RecipeIngredientGroup {
@@ -142,9 +140,10 @@ model Ingredient {
   recipeIngredient    RecipeIngredient[]
   name                String                    @unique
   alternateNames      IngredientAlternateName[]
+  variant             String?
   storageInstructions String?
   priceHistory        IngredientPrice[]
-  expirationRule      ExpirationRule?           @relation(fields: [expirationRuleId], references: [id])
+  expirationRule      ExpirationRule?           @relation(fields: [expirationRuleId], references: [id], onDelete: SetNull)
   expirationRuleId    String?
 }
 
@@ -161,7 +160,7 @@ model ExpirationRule {
 model IngredientAlternateName {
   id           String     @id @default(cuid())
   name         String     @unique
-  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
   ingredientId String
 }
 
@@ -188,10 +187,8 @@ model Recipe {
   directions          String?
   notes               String?
   stars               Int?
-  photos              RecipePhotos[]
+  photos              Photo[]
   isFavorite          Boolean            @default(false)
-  childRecipes        Recipe[]           @relation("LinkedRecipes")
-  parentRecipes       Recipe[]           @relation("LinkedRecipes")
   course              Course[]
   category            Category[]
   cuisine             Cuisine?           @relation(fields: [cuisineId], references: [id])
@@ -229,18 +226,10 @@ model Cuisine {
 model Photo {
   id         String  @id @default(cuid())
   path       String
-  hash       String @unique
-  recipes    RecipePhotos[]
-}
-
-model RecipePhotos {
-  photo Photo @relation(fields: [photoId], references: [id])
-  photoId String
-  recipe Recipe @relation(fields: [recipeId], references: [id])
-  recipeId String
   isPrimary Boolean @default(false)
-  @@id([photoId, recipeId])
-
+  hash       String @unique
+  recipe      Recipe? @relation(fields: [recipeId], references: [id])
+  recipeId    String?
 }
 
 model NutritionLabel {

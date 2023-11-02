@@ -14,8 +14,9 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  Date: { input: any; output: any; }
-  File: { input: any; output: any; }
+  /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
+  DateTime: { input: Date; output: Date; }
+  File: { input: File; output: File; }
 };
 
 export type Category = {
@@ -32,6 +33,31 @@ export type Course = {
   recipes: Array<Recipe>;
 };
 
+export type CreateExpirationRule = {
+  defrostTime?: InputMaybe<Scalars['Float']['input']>;
+  freezerLife?: InputMaybe<Scalars['Int']['input']>;
+  fridgeLife?: InputMaybe<Scalars['Int']['input']>;
+  ingredientId?: InputMaybe<Scalars['ID']['input']>;
+  perishable?: InputMaybe<Scalars['Boolean']['input']>;
+  tableLife?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type CreateIngredientInput = {
+  alternateNames?: InputMaybe<Array<Scalars['String']['input']>>;
+  name: Scalars['String']['input'];
+  storageInstructions?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CreatePriceHistoryInput = {
+  date: Scalars['DateTime']['input'];
+  ingredientId: Scalars['String']['input'];
+  price: Scalars['Float']['input'];
+  pricePerUnit: Scalars['Float']['input'];
+  quantity: Scalars['Float']['input'];
+  retailer: Scalars['String']['input'];
+  unit: Scalars['String']['input'];
+};
+
 export type Cuisine = {
   __typename?: 'Cuisine';
   id: Scalars['ID']['output'];
@@ -42,6 +68,15 @@ export type Cuisine = {
 export type DailyReferenceIntake = {
   __typename?: 'DailyReferenceIntake';
   value: Scalars['Float']['output'];
+};
+
+export type EditPriceHistoryInput = {
+  date?: InputMaybe<Scalars['DateTime']['input']>;
+  price?: InputMaybe<Scalars['Float']['input']>;
+  pricePerUnit?: InputMaybe<Scalars['Float']['input']>;
+  quantity?: InputMaybe<Scalars['Float']['input']>;
+  retailer?: InputMaybe<Scalars['String']['input']>;
+  unit?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ExpirationRule = {
@@ -100,8 +135,61 @@ export type IngredientPrice = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  addPriceHistory: IngredientPrice;
+  connectExpirationRule: Ingredient;
+  createCategory: Array<Category>;
+  createCourse: Array<Course>;
+  createCuisine: Array<Cuisine>;
+  createExpirationRule: ExpirationRule;
+  createIngredient: Ingredient;
   createRecipe: Recipe;
-  import: Import;
+  deleteCategory: Array<Category>;
+  deleteCourse: Array<Course>;
+  deleteCuisine: Array<Cuisine>;
+  deleteExpirationRule: Array<ExpirationRule>;
+  deleteIngredient: Array<Ingredient>;
+  deletePriceHistory: Array<IngredientPrice>;
+  editExpirationRule: ExpirationRule;
+  editIngredient: Ingredient;
+  editPriceHistory: IngredientPrice;
+  mergeIngredients: Ingredient;
+};
+
+
+export type MutationAddPriceHistoryArgs = {
+  price: CreatePriceHistoryInput;
+};
+
+
+export type MutationConnectExpirationRuleArgs = {
+  expirationRuleId: Scalars['String']['input'];
+  ingredientId: Scalars['String']['input'];
+};
+
+
+export type MutationCreateCategoryArgs = {
+  name: Scalars['String']['input'];
+};
+
+
+export type MutationCreateCourseArgs = {
+  name: Scalars['String']['input'];
+};
+
+
+export type MutationCreateCuisineArgs = {
+  name: Scalars['String']['input'];
+};
+
+
+export type MutationCreateExpirationRuleArgs = {
+  ingredientId?: InputMaybe<Scalars['String']['input']>;
+  rule: CreateExpirationRule;
+};
+
+
+export type MutationCreateIngredientArgs = {
+  ingredient: CreateIngredientInput;
 };
 
 
@@ -110,8 +198,64 @@ export type MutationCreateRecipeArgs = {
 };
 
 
-export type MutationImportArgs = {
-  file: Scalars['File']['input'];
+export type MutationDeleteCategoryArgs = {
+  categoryId: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteCourseArgs = {
+  courseId: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteCuisineArgs = {
+  cuisineId: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteExpirationRuleArgs = {
+  expirationRuleId: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteIngredientArgs = {
+  ingredientToDeleteId: Scalars['String']['input'];
+};
+
+
+export type MutationDeletePriceHistoryArgs = {
+  ingredientId: Scalars['String']['input'];
+  ingredientPriceId: Array<Scalars['String']['input']>;
+};
+
+
+export type MutationEditExpirationRuleArgs = {
+  expirationRule: CreateExpirationRule;
+  expirationRuleId: Scalars['String']['input'];
+};
+
+
+export type MutationEditIngredientArgs = {
+  ingredient: CreateIngredientInput;
+  ingredientId: Scalars['String']['input'];
+};
+
+
+export type MutationEditPriceHistoryArgs = {
+  price: EditPriceHistoryInput;
+  priceId: Scalars['String']['input'];
+};
+
+
+export type MutationMergeIngredientsArgs = {
+  ingredientIdToDelete: Scalars['String']['input'];
+  ingredientIdToKeep: Scalars['String']['input'];
+};
+
+export type NumericalComparison = {
+  eq?: InputMaybe<Scalars['Int']['input']>;
+  gte?: InputMaybe<Scalars['Int']['input']>;
+  lte?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type Nutrient = {
@@ -129,8 +273,9 @@ export type NutritionLabel = {
   id: Scalars['ID']['output'];
   ingredientGroup: RecipeIngredientGroup;
   name: Scalars['String']['output'];
+  nutrients: Array<NutritionLabelNutrient>;
   percentage?: Maybe<Scalars['Int']['output']>;
-  recipe: Recipe;
+  recipe?: Maybe<Recipe>;
   servings?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -138,6 +283,11 @@ export type NutritionLabelNutrient = {
   __typename?: 'NutritionLabelNutrient';
   label: Nutrient;
   value: Scalars['Float']['output'];
+};
+
+export type Pagination = {
+  limit: Scalars['Int']['input'];
+  start: Scalars['Int']['input'];
 };
 
 export type Photo = {
@@ -148,8 +298,64 @@ export type Photo = {
 
 export type Query = {
   __typename?: 'Query';
+  categories: Array<Category>;
+  courses: Array<Course>;
   cuisines: Array<Cuisine>;
-  recipes: Array<Recipe>;
+  expirationRule: ExpirationRule;
+  expirationRules: Array<ExpirationRule>;
+  ingredient: Ingredient;
+  ingredientPrice: IngredientPrice;
+  ingredients: Array<Ingredient>;
+  priceHistory: Array<IngredientPrice>;
+};
+
+
+export type QueryCategoriesArgs = {
+  searchString?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryCoursesArgs = {
+  searchString?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryCuisinesArgs = {
+  searchString?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryExpirationRuleArgs = {
+  expirationRuleId: Scalars['String']['input'];
+};
+
+
+export type QueryExpirationRulesArgs = {
+  pagination?: InputMaybe<Pagination>;
+  searchString?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryIngredientArgs = {
+  ingredientId: Scalars['String']['input'];
+};
+
+
+export type QueryIngredientPriceArgs = {
+  ingredientPriceId: Scalars['String']['input'];
+};
+
+
+export type QueryIngredientsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  searchString?: InputMaybe<Scalars['String']['input']>;
+  start?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryPriceHistoryArgs = {
+  ingredientId: Scalars['String']['input'];
+  retailer?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Recipe = {
@@ -183,7 +389,6 @@ export type RecipeIngredients = {
   __typename?: 'RecipeIngredients';
   baseIngredient?: Maybe<Ingredient>;
   comment?: Maybe<Scalars['String']['output']>;
-  isIngredient: Scalars['Boolean']['output'];
   maxQuantity?: Maybe<Scalars['Float']['output']>;
   minQuantity?: Maybe<Scalars['Float']['output']>;
   name?: Maybe<Scalars['String']['output']>;
@@ -196,10 +401,10 @@ export type RecipeIngredients = {
 };
 
 export type RecipeInput = {
-  category?: InputMaybe<Array<Scalars['ID']['input']>>;
+  categoryIds?: InputMaybe<Array<Scalars['String']['input']>>;
   cookTime?: InputMaybe<Scalars['Int']['input']>;
-  courses?: InputMaybe<Array<Scalars['ID']['input']>>;
-  cuisine?: InputMaybe<Scalars['ID']['input']>;
+  courseIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  cuisineId?: InputMaybe<Scalars['String']['input']>;
   directions?: InputMaybe<Scalars['String']['input']>;
   ingredients?: InputMaybe<Scalars['String']['input']>;
   isFavorite?: InputMaybe<Scalars['Boolean']['input']>;
@@ -207,7 +412,7 @@ export type RecipeInput = {
   leftoverFridgeLife?: InputMaybe<Scalars['Int']['input']>;
   marinadeTime?: InputMaybe<Scalars['Int']['input']>;
   notes?: InputMaybe<Scalars['String']['input']>;
-  photos?: InputMaybe<Array<Scalars['ID']['input']>>;
+  photoIds?: InputMaybe<Array<Scalars['String']['input']>>;
   prepTime?: InputMaybe<Scalars['Int']['input']>;
   servings: Scalars['Int']['input'];
   source?: InputMaybe<Scalars['String']['input']>;
@@ -295,9 +500,13 @@ export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   Category: ResolverTypeWrapper<Category>;
   Course: ResolverTypeWrapper<Course>;
+  CreateExpirationRule: CreateExpirationRule;
+  CreateIngredientInput: CreateIngredientInput;
+  CreatePriceHistoryInput: CreatePriceHistoryInput;
   Cuisine: ResolverTypeWrapper<Cuisine>;
   DailyReferenceIntake: ResolverTypeWrapper<DailyReferenceIntake>;
-  Date: ResolverTypeWrapper<Scalars['Date']['output']>;
+  DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
+  EditPriceHistoryInput: EditPriceHistoryInput;
   ExpirationRule: ResolverTypeWrapper<ExpirationRule>;
   File: ResolverTypeWrapper<Scalars['File']['output']>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
@@ -309,9 +518,11 @@ export type ResolversTypes = {
   IngredientPrice: ResolverTypeWrapper<IngredientPrice>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
+  NumericalComparison: NumericalComparison;
   Nutrient: ResolverTypeWrapper<Nutrient>;
   NutritionLabel: ResolverTypeWrapper<NutritionLabel>;
   NutritionLabelNutrient: ResolverTypeWrapper<NutritionLabelNutrient>;
+  Pagination: Pagination;
   Photo: ResolverTypeWrapper<Photo>;
   Query: ResolverTypeWrapper<{}>;
   Recipe: ResolverTypeWrapper<Recipe>;
@@ -327,9 +538,13 @@ export type ResolversParentTypes = {
   Boolean: Scalars['Boolean']['output'];
   Category: Category;
   Course: Course;
+  CreateExpirationRule: CreateExpirationRule;
+  CreateIngredientInput: CreateIngredientInput;
+  CreatePriceHistoryInput: CreatePriceHistoryInput;
   Cuisine: Cuisine;
   DailyReferenceIntake: DailyReferenceIntake;
-  Date: Scalars['Date']['output'];
+  DateTime: Scalars['DateTime']['output'];
+  EditPriceHistoryInput: EditPriceHistoryInput;
   ExpirationRule: ExpirationRule;
   File: Scalars['File']['output'];
   Float: Scalars['Float']['output'];
@@ -341,9 +556,11 @@ export type ResolversParentTypes = {
   IngredientPrice: IngredientPrice;
   Int: Scalars['Int']['output'];
   Mutation: {};
+  NumericalComparison: NumericalComparison;
   Nutrient: Nutrient;
   NutritionLabel: NutritionLabel;
   NutritionLabelNutrient: NutritionLabelNutrient;
+  Pagination: Pagination;
   Photo: Photo;
   Query: {};
   Recipe: Recipe;
@@ -380,8 +597,8 @@ export type DailyReferenceIntakeResolvers<ContextType = any, ParentType extends 
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
-  name: 'Date';
+export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTime'], any> {
+  name: 'DateTime';
 }
 
 export type ExpirationRuleResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExpirationRule'] = ResolversParentTypes['ExpirationRule']> = {
@@ -443,8 +660,24 @@ export type IngredientPriceResolvers<ContextType = any, ParentType extends Resol
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  addPriceHistory?: Resolver<ResolversTypes['IngredientPrice'], ParentType, ContextType, RequireFields<MutationAddPriceHistoryArgs, 'price'>>;
+  connectExpirationRule?: Resolver<ResolversTypes['Ingredient'], ParentType, ContextType, RequireFields<MutationConnectExpirationRuleArgs, 'expirationRuleId' | 'ingredientId'>>;
+  createCategory?: Resolver<Array<ResolversTypes['Category']>, ParentType, ContextType, RequireFields<MutationCreateCategoryArgs, 'name'>>;
+  createCourse?: Resolver<Array<ResolversTypes['Course']>, ParentType, ContextType, RequireFields<MutationCreateCourseArgs, 'name'>>;
+  createCuisine?: Resolver<Array<ResolversTypes['Cuisine']>, ParentType, ContextType, RequireFields<MutationCreateCuisineArgs, 'name'>>;
+  createExpirationRule?: Resolver<ResolversTypes['ExpirationRule'], ParentType, ContextType, RequireFields<MutationCreateExpirationRuleArgs, 'rule'>>;
+  createIngredient?: Resolver<ResolversTypes['Ingredient'], ParentType, ContextType, RequireFields<MutationCreateIngredientArgs, 'ingredient'>>;
   createRecipe?: Resolver<ResolversTypes['Recipe'], ParentType, ContextType, RequireFields<MutationCreateRecipeArgs, 'recipe'>>;
-  import?: Resolver<ResolversTypes['Import'], ParentType, ContextType, RequireFields<MutationImportArgs, 'file'>>;
+  deleteCategory?: Resolver<Array<ResolversTypes['Category']>, ParentType, ContextType, RequireFields<MutationDeleteCategoryArgs, 'categoryId'>>;
+  deleteCourse?: Resolver<Array<ResolversTypes['Course']>, ParentType, ContextType, RequireFields<MutationDeleteCourseArgs, 'courseId'>>;
+  deleteCuisine?: Resolver<Array<ResolversTypes['Cuisine']>, ParentType, ContextType, RequireFields<MutationDeleteCuisineArgs, 'cuisineId'>>;
+  deleteExpirationRule?: Resolver<Array<ResolversTypes['ExpirationRule']>, ParentType, ContextType, RequireFields<MutationDeleteExpirationRuleArgs, 'expirationRuleId'>>;
+  deleteIngredient?: Resolver<Array<ResolversTypes['Ingredient']>, ParentType, ContextType, RequireFields<MutationDeleteIngredientArgs, 'ingredientToDeleteId'>>;
+  deletePriceHistory?: Resolver<Array<ResolversTypes['IngredientPrice']>, ParentType, ContextType, RequireFields<MutationDeletePriceHistoryArgs, 'ingredientId' | 'ingredientPriceId'>>;
+  editExpirationRule?: Resolver<ResolversTypes['ExpirationRule'], ParentType, ContextType, RequireFields<MutationEditExpirationRuleArgs, 'expirationRule' | 'expirationRuleId'>>;
+  editIngredient?: Resolver<ResolversTypes['Ingredient'], ParentType, ContextType, RequireFields<MutationEditIngredientArgs, 'ingredient' | 'ingredientId'>>;
+  editPriceHistory?: Resolver<ResolversTypes['IngredientPrice'], ParentType, ContextType, RequireFields<MutationEditPriceHistoryArgs, 'price' | 'priceId'>>;
+  mergeIngredients?: Resolver<ResolversTypes['Ingredient'], ParentType, ContextType, RequireFields<MutationMergeIngredientsArgs, 'ingredientIdToDelete' | 'ingredientIdToKeep'>>;
 };
 
 export type NutrientResolvers<ContextType = any, ParentType extends ResolversParentTypes['Nutrient'] = ResolversParentTypes['Nutrient']> = {
@@ -461,8 +694,9 @@ export type NutritionLabelResolvers<ContextType = any, ParentType extends Resolv
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   ingredientGroup?: Resolver<ResolversTypes['RecipeIngredientGroup'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  nutrients?: Resolver<Array<ResolversTypes['NutritionLabelNutrient']>, ParentType, ContextType>;
   percentage?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  recipe?: Resolver<ResolversTypes['Recipe'], ParentType, ContextType>;
+  recipe?: Resolver<Maybe<ResolversTypes['Recipe']>, ParentType, ContextType>;
   servings?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -480,8 +714,15 @@ export type PhotoResolvers<ContextType = any, ParentType extends ResolversParent
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  cuisines?: Resolver<Array<ResolversTypes['Cuisine']>, ParentType, ContextType>;
-  recipes?: Resolver<Array<ResolversTypes['Recipe']>, ParentType, ContextType>;
+  categories?: Resolver<Array<ResolversTypes['Category']>, ParentType, ContextType, Partial<QueryCategoriesArgs>>;
+  courses?: Resolver<Array<ResolversTypes['Course']>, ParentType, ContextType, Partial<QueryCoursesArgs>>;
+  cuisines?: Resolver<Array<ResolversTypes['Cuisine']>, ParentType, ContextType, Partial<QueryCuisinesArgs>>;
+  expirationRule?: Resolver<ResolversTypes['ExpirationRule'], ParentType, ContextType, RequireFields<QueryExpirationRuleArgs, 'expirationRuleId'>>;
+  expirationRules?: Resolver<Array<ResolversTypes['ExpirationRule']>, ParentType, ContextType, Partial<QueryExpirationRulesArgs>>;
+  ingredient?: Resolver<ResolversTypes['Ingredient'], ParentType, ContextType, RequireFields<QueryIngredientArgs, 'ingredientId'>>;
+  ingredientPrice?: Resolver<ResolversTypes['IngredientPrice'], ParentType, ContextType, RequireFields<QueryIngredientPriceArgs, 'ingredientPriceId'>>;
+  ingredients?: Resolver<Array<ResolversTypes['Ingredient']>, ParentType, ContextType, Partial<QueryIngredientsArgs>>;
+  priceHistory?: Resolver<Array<ResolversTypes['IngredientPrice']>, ParentType, ContextType, RequireFields<QueryPriceHistoryArgs, 'ingredientId'>>;
 };
 
 export type RecipeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Recipe'] = ResolversParentTypes['Recipe']> = {
@@ -514,7 +755,6 @@ export type RecipeIngredientGroupResolvers<ContextType = any, ParentType extends
 export type RecipeIngredientsResolvers<ContextType = any, ParentType extends ResolversParentTypes['RecipeIngredients'] = ResolversParentTypes['RecipeIngredients']> = {
   baseIngredient?: Resolver<Maybe<ResolversTypes['Ingredient']>, ParentType, ContextType>;
   comment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  isIngredient?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   maxQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   minQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -538,7 +778,7 @@ export type Resolvers<ContextType = any> = {
   Course?: CourseResolvers<ContextType>;
   Cuisine?: CuisineResolvers<ContextType>;
   DailyReferenceIntake?: DailyReferenceIntakeResolvers<ContextType>;
-  Date?: GraphQLScalarType;
+  DateTime?: GraphQLScalarType;
   ExpirationRule?: ExpirationRuleResolvers<ContextType>;
   File?: GraphQLScalarType;
   Import?: ImportResolvers<ContextType>;

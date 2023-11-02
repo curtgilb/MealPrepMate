@@ -1,5 +1,5 @@
 /* eslint-disable */
-import type { Prisma, MealPlan, Servings, Import, ImportRecord, RecipeIngredient, RecipeIngredientGroup, Ingredient, ExpirationRule, IngredientAlternateName, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, RecipePhotos, NutritionLabel, NutritionLabelNutrient, Nutrient, DailyReferenceIntake, HealthProfile } from "@prisma/client";
+import type { Prisma, MealPlan, Servings, Import, ImportRecord, RecipeIngredient, RecipeIngredientGroup, Ingredient, ExpirationRule, IngredientAlternateName, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, DailyReferenceIntake, HealthProfile } from "@prisma/client";
 export default interface PrismaTypes {
     MealPlan: {
         Name: "MealPlan";
@@ -237,20 +237,12 @@ export default interface PrismaTypes {
         Where: Prisma.RecipeWhereInput;
         Create: {};
         Update: {};
-        RelationName: "photos" | "childRecipes" | "parentRecipes" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabel" | "importRecords";
-        ListRelations: "photos" | "childRecipes" | "parentRecipes" | "course" | "category" | "ingredients" | "mealPlans" | "nutritionLabel" | "importRecords";
+        RelationName: "photos" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabel" | "importRecords";
+        ListRelations: "photos" | "course" | "category" | "ingredients" | "mealPlans" | "nutritionLabel" | "importRecords";
         Relations: {
             photos: {
-                Shape: RecipePhotos[];
-                Name: "RecipePhotos";
-            };
-            childRecipes: {
-                Shape: Recipe[];
-                Name: "Recipe";
-            };
-            parentRecipes: {
-                Shape: Recipe[];
-                Name: "Recipe";
+                Shape: Photo[];
+                Name: "Photo";
             };
             course: {
                 Shape: Course[];
@@ -349,34 +341,11 @@ export default interface PrismaTypes {
         Where: Prisma.PhotoWhereInput;
         Create: {};
         Update: {};
-        RelationName: "recipes";
-        ListRelations: "recipes";
-        Relations: {
-            recipes: {
-                Shape: RecipePhotos[];
-                Name: "RecipePhotos";
-            };
-        };
-    };
-    RecipePhotos: {
-        Name: "RecipePhotos";
-        Shape: RecipePhotos;
-        Include: Prisma.RecipePhotosInclude;
-        Select: Prisma.RecipePhotosSelect;
-        OrderBy: Prisma.RecipePhotosOrderByWithRelationInput;
-        WhereUnique: Prisma.RecipePhotosWhereUniqueInput;
-        Where: Prisma.RecipePhotosWhereInput;
-        Create: {};
-        Update: {};
-        RelationName: "photo" | "recipe";
+        RelationName: "recipe";
         ListRelations: never;
         Relations: {
-            photo: {
-                Shape: Photo;
-                Name: "Photo";
-            };
             recipe: {
-                Shape: Recipe;
+                Shape: Recipe | null;
                 Name: "Recipe";
             };
         };

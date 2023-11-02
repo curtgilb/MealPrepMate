@@ -1,7 +1,7 @@
 import fs from "fs";
 import { parse } from "csv-parse";
 import { parse as parseHTML } from "node-html-parser";
-import { toCamelCase } from "../util/utils.js";
+import { toCamelCase } from "../../util/utils.js";
 import path from "path";
 import {
   RecipeKeeperParser,

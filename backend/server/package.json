@@ -7,7 +7,7 @@
   "scripts": {
     "compile": "tsc",
     "dev": "nodemon src/index.ts",
-    "codegen": "graphql-codegen --config codegen1.ts",
+    "codegen": "graphql-codegen --config codegen.ts",
     "test": "vitest"
   },
   "repository": {
@@ -29,6 +29,7 @@
     "@types/uuid": "^9.0.5",
     "csv": "^6.3.1",
     "graphql": "^16.8.0",
+    "graphql-scalars": "^1.22.4",
     "graphql-yoga": "^4.0.4",
     "minio": "^7.1.1",
     "node-fetch": "^3.3.2",
@@ -38,6 +39,7 @@
   },
   "devDependencies": {
     "@graphql-codegen/cli": "5.0.0",
+    "@graphql-codegen/schema-ast": "^4.0.0",
     "@graphql-codegen/typescript": "4.0.1",
     "@graphql-codegen/typescript-resolvers": "4.0.1",
     "@tsconfig/node-lts": "^18.12.5",

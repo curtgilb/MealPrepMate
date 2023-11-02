@@ -1,4 +1,4 @@
-import { readCSV } from "../../importHelpers/Readers.js";
+import { readCSV } from "../importHelpers/Readers.js";
 import { getFileMetaData } from "./ImportService.js";
 import { hash } from "./ImportService.js";
 

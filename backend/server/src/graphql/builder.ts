@@ -1,14 +1,15 @@
 // Setup for your schema builder. Does not contain any definitions for types in your schema
 import SchemaBuilder from "@pothos/core";
 import PrismaPlugin from "@pothos/plugin-prisma";
-import { db } from "./db.js";
-import type PrismaTypes from "./types.js";
+import { DateTimeResolver } from "graphql-scalars";
+import { db } from "../db.js";
+import type PrismaTypes from "../types/PothosTypes.js";
 
-export const builder = new SchemaBuilder<{
+const builder = new SchemaBuilder<{
   PrismaTypes: PrismaTypes;
   Scalars: {
-    File: { Input: File; Output: never };
-    Date: { Input: Date; Output: Date };
+    File: { Input: File; Output: File };
+    DateTime: { Input: Date; Output: Date };
   };
 }>({
   plugins: [PrismaPlugin],
@@ -24,3 +25,14 @@ export const builder = new SchemaBuilder<{
     onUnusedQuery: process.env.NODE_ENV === "production" ? null : "warn",
   },
 });
+
+builder.queryType({});
+builder.mutationType({});
+builder.addScalarType("DateTime", DateTimeResolver, {});
+builder.scalarType("File", {
+  serialize: () => {
+    throw new Error("Uploads can only be used as input types");
+  },
+});
+
+export { builder };

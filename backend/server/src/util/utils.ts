@@ -1,4 +1,5 @@
-import { getFieldDef } from "graphql/execution/execute.js";
+import crypto from "crypto";
+import { FileMetaData } from "../types/CustomTypes.js";
 
 function toTitleCase(str: string): string {
   return str
@@ -70,4 +71,32 @@ function getFileExtension(fileName: string): string {
   return fileName.substring(lastDotIndex + 1);
 }
 
-export { toTitleCase, toCamelCase, compareTwoStrings, getFileExtension };
+function getFileMetaData(path: string): FileMetaData {
+  if (path) {
+    const pathSplit = path.split("/");
+    const name = pathSplit.pop() as string; // .pop() only return undefined if the array is empty. Array should not be empty if the string is not empty.
+    const ext = getFileExtension(name);
+
+    return {
+      path,
+      name, //: fileName.replace(fileExt, ""),
+      ext,
+    };
+  }
+  throw Error(`Path "${path}" is invalid.`);
+}
+
+function hash(input: Buffer | string): string {
+  const hash = crypto.createHash("sha256");
+  hash.update(input);
+  return hash.digest("hex");
+}
+
+export {
+  toTitleCase,
+  toCamelCase,
+  compareTwoStrings,
+  getFileExtension,
+  getFileMetaData,
+  hash,
+};

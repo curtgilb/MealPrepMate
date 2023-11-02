@@ -1,0 +1,247 @@
+type Category {
+  id: ID!
+  name: String!
+  recipes: [Recipe!]!
+}
+
+type Course {
+  id: ID!
+  name: String!
+  recipes: [Recipe!]!
+}
+
+input CreateExpirationRule {
+  defrostTime: Float
+  freezerLife: Int
+  fridgeLife: Int
+  ingredientId: ID
+  perishable: Boolean
+  tableLife: Int
+}
+
+input CreateIngredientInput {
+  alternateNames: [String!]
+  name: String!
+  storageInstructions: String
+}
+
+input CreatePriceHistoryInput {
+  date: DateTime!
+  ingredientId: String!
+  price: Float!
+  pricePerUnit: Float!
+  quantity: Float!
+  retailer: String!
+  unit: String!
+}
+
+type Cuisine {
+  id: ID!
+  name: String!
+  recipes: [Recipe!]!
+}
+
+type DailyReferenceIntake {
+  value: Float!
+}
+
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar DateTime
+
+input EditPriceHistoryInput {
+  date: DateTime
+  price: Float
+  pricePerUnit: Float
+  quantity: Float
+  retailer: String
+  unit: String
+}
+
+type ExpirationRule {
+  defrostTime: Int
+  freezerLife: Int
+  fridgeLife: Int
+  id: ID!
+  perishable: Boolean
+  tableLife: Int
+}
+
+scalar File
+
+type Import {
+  fileName: String!
+  id: ID!
+  records: [ImportRecord!]!
+  recordsCount: Int!
+  status: String!
+  type: String!
+  url: String!
+}
+
+type ImportRecord {
+  name: String!
+  nutritionLabel: NutritionLabel!
+  recipe: Recipe!
+  status: String!
+}
+
+type Ingredient {
+  alternateNames: [IngredientAlternateName!]!
+  expiration: ExpirationRule!
+  id: ID!
+  name: String!
+  priceHistory: [IngredientPrice!]!
+  storageInstructions: String
+}
+
+type IngredientAlternateName {
+  id: ID!
+  name: String!
+}
+
+type IngredientPrice {
+  price: Float!
+  pricePerUnit: Float!
+  quantity: Float!
+  retailer: String!
+  unit: String!
+}
+
+type Mutation {
+  addPriceHistory(price: CreatePriceHistoryInput!): IngredientPrice!
+  connectExpirationRule(expirationRuleId: String!, ingredientId: String!): Ingredient!
+  createCategory(name: String!): [Category!]!
+  createCourse(name: String!): [Course!]!
+  createCuisine(name: String!): [Cuisine!]!
+  createExpirationRule(ingredientId: String, rule: CreateExpirationRule!): ExpirationRule!
+  createIngredient(ingredient: CreateIngredientInput!): Ingredient!
+  createRecipe(recipe: RecipeInput!): Recipe!
+  deleteCategory(categoryId: String!): [Category!]!
+  deleteCourse(courseId: String!): [Course!]!
+  deleteCuisine(cuisineId: String!): [Cuisine!]!
+  deleteExpirationRule(expirationRuleId: String!): [ExpirationRule!]!
+  deleteIngredient(ingredientToDeleteId: String!): [Ingredient!]!
+  deletePriceHistory(ingredientId: String!, ingredientPriceId: [String!]!): [IngredientPrice!]!
+  editExpirationRule(expirationRule: CreateExpirationRule!, expirationRuleId: String!): ExpirationRule!
+  editIngredient(ingredient: CreateIngredientInput!, ingredientId: String!): Ingredient!
+  editPriceHistory(price: EditPriceHistoryInput!, priceId: String!): IngredientPrice!
+  mergeIngredients(ingredientIdToDelete: String!, ingredientIdToKeep: String!): Ingredient!
+}
+
+input NumericalComparison {
+  eq: Int
+  gte: Int
+  lte: Int
+}
+
+type Nutrient {
+  alternateNames: [String!]!
+  dailyReferenceIntakeValue: Float!
+  name: String!
+  type: String!
+  unit: String!
+  unitAbbreviation: String!
+}
+
+type NutritionLabel {
+  id: ID!
+  ingredientGroup: RecipeIngredientGroup!
+  name: String!
+  nutrients: [NutritionLabelNutrient!]!
+  percentage: Int
+  recipe: Recipe
+  servings: Int
+}
+
+type NutritionLabelNutrient {
+  label: Nutrient!
+  value: Float!
+}
+
+input Pagination {
+  limit: Int!
+  start: Int!
+}
+
+type Photo {
+  id: ID!
+  url: String!
+}
+
+type Query {
+  categories(searchString: String): [Category!]!
+  courses(searchString: String): [Course!]!
+  cuisines(searchString: String): [Cuisine!]!
+  expirationRule(expirationRuleId: String!): ExpirationRule!
+  expirationRules(pagination: Pagination, searchString: String): [ExpirationRule!]!
+  ingredient(ingredientId: String!): Ingredient!
+  ingredientPrice(ingredientPriceId: String!): IngredientPrice!
+  ingredients(limit: Int, searchString: String, start: Int): [Ingredient!]!
+  priceHistory(ingredientId: String!, retailer: String): [IngredientPrice!]!
+}
+
+type Recipe {
+  category: [Category!]!
+  cookTime: Int
+  course: [Course!]!
+  cuisine: Cuisine!
+  directions: String
+  id: ID!
+  ingredients: [RecipeIngredients!]!
+  isFavorite: Boolean!
+  isVerified: Boolean
+  leftoverFridgeLife: Int
+  marinadeTime: Int
+  name: String!
+  notes: String
+  prepTime: Int
+  stars: Int
+}
+
+type RecipeIngredientGroup {
+  name: String!
+  nutritionLabel: NutritionLabel
+  servings: Int
+  servingsInRecipe: Int
+}
+
+type RecipeIngredients {
+  baseIngredient: Ingredient
+  comment: String
+  maxQuantity: Float
+  minQuantity: Float
+  name: String
+  order: Int!
+  other: String
+  quantity: Float
+  recipes: Recipe!
+  sentence: String!
+  unit: String
+}
+
+input RecipeInput {
+  categoryIds: [String!]
+  cookTime: Int
+  courseIds: [String!]
+  cuisineId: String
+  directions: String
+  ingredients: String
+  isFavorite: Boolean
+  leftoverFreezerLife: Int
+  leftoverFridgeLife: Int
+  marinadeTime: Int
+  notes: String
+  photoIds: [String!]
+  prepTime: Int
+  servings: Int!
+  source: String
+  stars: Int
+  title: String!
+}
+
+type RecipePhotos {
+  isPrimary: Boolean!
+  photos: Photo!
+}

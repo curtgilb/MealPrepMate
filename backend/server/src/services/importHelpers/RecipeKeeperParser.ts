@@ -1,38 +1,6 @@
-import { ScalarLeafsRule } from "graphql";
+import { RecipeKeeperRecipe } from "../../types/CustomTypes.js";
 import { HTMLElement } from "node-html-parser";
 import { Photo, RecordStatus } from "@prisma/client";
-
-export type RecipeKeeperRecipe = {
-  recipeId: string;
-  recipeShareId: string;
-  recipeIsFavourite: string;
-  recipeRating: string;
-  name: string;
-  recipeSource: string;
-  recipeYield: string;
-  prepTime: string;
-  cookTime: string;
-  recipeIngredients: string;
-  recipeDirections: string;
-  recipeNotes: string;
-  recipeNutServingSize: string;
-  recipeNutCalories: string;
-  recipeNutTotalFat: string;
-  recipeNutSaturatedFat: string;
-  recipeNutSodium: string;
-  recipeNutTotalCarbohydrate: string;
-  recipeNutSugars: string;
-  recipeNutProtein: string;
-  recipeNutCholesterol: string;
-  recipeNutDietaryFiber: string;
-  recipeCourse: string[];
-  photos: string[];
-  recipeCollection: string[];
-  recipeCategory: string[];
-  rawInput: string;
-  matchId: string;
-  status: RecordStatus;
-};
 
 export class RecipeKeeperParser {
   scalarProps: { [key: string]: string } = {
