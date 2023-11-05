@@ -4,7 +4,6 @@ from pydantic import BaseModel
 from recipe_scrapers import scrape_me
 
 
-
 app = FastAPI()
 
 class MultipleIngredients(BaseModel):
@@ -32,5 +31,5 @@ async def parse_batch(requestBody: MultipleIngredients):
         parsed_ingredients.append(result)
     return parsed_ingredients
 
-@app.post("/scraperecipe")
-    def parse_recipe(requestBody):
+# @app.post("/scraperecipe")
+#     def parse_recipe(requestBody):

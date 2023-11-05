@@ -4,8 +4,8 @@ import { hash } from "../../util/utils.js";
 import { db } from "../../db.js";
 import { v4 as uuidv4 } from "uuid";
 import { storage } from "../../storage.js";
-import { readHTML } from "../importHelpers/Readers.js";
-import { RecipeKeeperRecipe } from "../importHelpers/RecipeKeeperParser.js";
+import { readHTML } from "../io/Readers.js";
+import { RecipeKeeperRecipe } from "../parsers/RecipeKeeperParser.js";
 import { compareTwoStrings } from "../../util/utils.js";
 import { getFileMetaData, FileMetaData } from "./ImportService.js";
 
@@ -25,9 +25,8 @@ export async function processRecipeKeeperImport(source: string | File) {
   const lastImport = await db.import.findFirst({
     orderBy: { createdAt: "desc" },
   });
-  const { htmlHash, fileMeta, recipes, images } = await extractRecipes(
-    fileBuffer
-  );
+  const { htmlHash, fileMeta, recipes, images } =
+    await extractRecipes(fileBuffer);
   if (lastImport?.fileHash === htmlHash)
     throw Error("No changes made since the last import");
   await findRecipeMatches(recipes);

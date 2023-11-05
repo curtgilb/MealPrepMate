@@ -7,7 +7,7 @@ import {
   RecipeKeeperRecipe,
   Mappings,
 } from "../types/CustomTypes.js";
-import { readJSON } from "../services/importHelpers/Readers.js";
+import { readJSON } from "../services/io/Readers.js";
 import { db } from "../db.js";
 import { toTitleCase } from "../util/utils.js";
 
@@ -51,6 +51,8 @@ async function createRecipe(
   });
 }
 
+// ===========================================Helper functions=============================
+
 async function createRecipeIngredientsStmt(
   ingredients: string | undefined | null
 ): Promise<
@@ -71,7 +73,7 @@ async function createRecipeIngredientsStmt(
       quantity: cast(ingredient.quantity) as number,
       comment: cast(ingredient.comment) as string,
       other: cast(ingredient.other) as string,
-      unit: cast(ingredient.unit) as string,
+      // unit: cast(ingredient.unit) as string,
     };
     if (ingredient.matchedIngredient !== undefined) {
       data.ingredient = {

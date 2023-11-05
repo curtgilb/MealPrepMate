@@ -8,13 +8,6 @@ import { db } from "../../db.js";
 // freezerLife: t.arg({ type: numericalComparison }),
 
 // ============================================ Types ===================================
-const numericalComparison = builder.inputType("NumericalComparison", {
-  fields: (t) => ({
-    lte: t.int(),
-    eq: t.int(),
-    gte: t.int(),
-  }),
-});
 
 builder.prismaObject("Ingredient", {
   fields: (t) => ({
@@ -41,7 +34,7 @@ builder.prismaObject("IngredientPrice", {
     retailer: t.exposeString("retailer"),
     price: t.exposeFloat("price"),
     quantity: t.exposeFloat("quantity"),
-    unit: t.exposeString("unit"),
+    unit: t.relation("unit"),
     pricePerUnit: t.exposeFloat("pricePerUnit"),
   }),
 });
@@ -73,7 +66,7 @@ const createPriceHistory = builder.inputType("CreatePriceHistoryInput", {
     retailer: t.string({ required: true }),
     price: t.float({ required: true }),
     quantity: t.float({ required: true }),
-    unit: t.string({ required: true }),
+    unitId: t.string({ required: true }),
     pricePerUnit: t.float({ required: true }),
   }),
 });
@@ -84,7 +77,7 @@ const editPriceHistory = builder.inputType("EditPriceHistoryInput", {
     retailer: t.string(),
     price: t.float(),
     quantity: t.float(),
-    unit: t.string(),
+    unitId: t.string(),
     pricePerUnit: t.float(),
   }),
 });
@@ -213,7 +206,11 @@ builder.mutationFields((t) => ({
           retailer: args.price.retailer,
           price: args.price.price,
           quantity: args.price.quantity,
-          unit: args.price.unit,
+          unit: {
+            connect: {
+              id: args.price.unitId,
+            },
+          },
           pricePerUnit: args.price.pricePerUnit,
           ingredient: {
             connect: {
@@ -241,7 +238,7 @@ builder.mutationFields((t) => ({
           retailer: args.price.retailer ? args.price.retailer : undefined,
           price: args.price.price ? args.price.price : undefined,
           quantity: args.price.quantity ? args.price.quantity : undefined,
-          unit: args.price.unit ? args.price.unit : undefined,
+          unitId: args.price.unitId ? args.price.unitId : undefined,
           pricePerUnit: args.price.pricePerUnit
             ? args.price.pricePerUnit
             : undefined,

@@ -1,8 +1,33 @@
 import { RecipeKeeperRecipe } from "../../types/CustomTypes.js";
 import { HTMLElement } from "node-html-parser";
-import { Photo, RecordStatus } from "@prisma/client";
+import { parse as parseHTML } from "node-html-parser";
 
 export class RecipeKeeperParser {
+  data: string;
+  parsedRecipes: RecipeKeeperRecipe[] = [];
+
+  constructor(data: string) {
+    this.data = data;
+  }
+
+  parse(): RecipeKeeperRecipe[] {
+    const html = parseHTML(this.data);
+    const recipes = html.querySelectorAll(".recipe-details");
+    for (const recipe of recipes) {
+      // Grab all elements that are properties of each recipe
+      const properties = recipe.querySelectorAll("*[itemProp]");
+      const parsedRecipe = new Recipe(recipe.toString());
+
+      properties.forEach((property) => {
+        parsedRecipe.parseProperty(property);
+      });
+      this.parsedRecipes.push(parsedRecipe.toObject());
+    }
+    return this.parsedRecipes;
+  }
+}
+
+class Recipe {
   scalarProps: { [key: string]: string } = {
     recipeId: "",
     recipeShareId: "",
@@ -41,7 +66,7 @@ export class RecipeKeeperParser {
     this.scalarProps.rawInput = rawInput;
   }
 
-  addProperty(prop: string, value: string): void {
+  private addProperty(prop: string, value: string): void {
     if (prop in this.scalarProps) {
       this.scalarProps[prop] = value;
     } else if (prop in this.arrayProps) {
@@ -50,7 +75,7 @@ export class RecipeKeeperParser {
     }
   }
 
-  getValue(key: string, prop: HTMLElement): string {
+  private getValue(key: string, prop: HTMLElement): string {
     let value = key.startsWith("photo")
       ? prop.getAttribute("src")
       : prop.getAttribute("content");
@@ -62,7 +87,7 @@ export class RecipeKeeperParser {
     return "";
   }
 
-  parseHtmlElement(prop: HTMLElement) {
+  parseProperty(prop: HTMLElement) {
     const key = prop.getAttribute("itemprop");
     if (key === undefined || key === null) return;
     const value = this.getValue(key, prop);
@@ -74,7 +99,7 @@ export class RecipeKeeperParser {
     }
   }
 
-  sanitizeInput(input: string): string {
+  private sanitizeInput(input: string): string {
     const workingCopy: string[] = input
       .split("\r\n")
       .filter((text) => text !== "")

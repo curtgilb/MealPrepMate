@@ -6,10 +6,10 @@ import {
 } from "./extensions/RecipeExtension.js";
 export const db = new PrismaClient().$extends({
   model: {
-    recipe: {
-      createRecipe,
-      createRecipeKeeperRecipe,
-    },
+    // recipe: {
+    //   createRecipe,
+    //   createRecipeKeeperRecipe,
+    // },
     photo: {
       uploadPhoto,
     },

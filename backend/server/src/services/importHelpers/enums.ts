@@ -1,1 +1,0 @@
-function toGender(str: string);

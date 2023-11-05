@@ -25,6 +25,21 @@ input CreateIngredientInput {
   storageInstructions: String
 }
 
+input CreateNutrientInput {
+  nutrientId: String!
+  value: Float!
+}
+
+input CreateNutritionLabelInput {
+  connectingId: String
+  name: String
+  nutrients: [CreateNutrientInput!]
+  servingSize: Float
+  servingSizeUnitId: String
+  servings: Float
+  servingsUsed: Float
+}
+
 input CreatePriceHistoryInput {
   date: DateTime!
   ingredientId: String!
@@ -32,7 +47,7 @@ input CreatePriceHistoryInput {
   pricePerUnit: Float!
   quantity: Float!
   retailer: String!
-  unit: String!
+  unitId: String!
 }
 
 type Cuisine {
@@ -42,6 +57,12 @@ type Cuisine {
 }
 
 type DailyReferenceIntake {
+  ageMax: Int!
+  ageMin: Int!
+  gender: Gender!
+  id: String!
+  nutrient: Nutrient!
+  specialCondition: SpecialCondition!
   value: Float!
 }
 
@@ -50,13 +71,41 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTime
 
+enum DayOfWeek {
+  FRIDAY
+  MONDAY
+  SATURDAY
+  SUNDAY
+  THURSDAY
+  TUESDAY
+  WEDNESDAY
+}
+
+input EditNutrientInput {
+  nutrientId: String!
+  nutritionLabelId: String!
+  value: Float!
+}
+
+input EditNutritionLabelInput {
+  id: String!
+  name: String
+  nutrientsToAdd: [CreateNutrientInput!]
+  nutrientsToDeleteIds: [String!]
+  nutrientsToEdit: [EditNutrientInput!]
+  servingSize: Float
+  servingSizeUnitId: String
+  servings: Float
+  servingsUsed: Float
+}
+
 input EditPriceHistoryInput {
   date: DateTime
   price: Float
   pricePerUnit: Float
   quantity: Float
   retailer: String
-  unit: String
+  unitId: String
 }
 
 type ExpirationRule {
@@ -69,6 +118,11 @@ type ExpirationRule {
 }
 
 scalar File
+
+enum Gender {
+  FEMALE
+  MALE
+}
 
 type Import {
   fileName: String!
@@ -87,6 +141,17 @@ type ImportRecord {
   status: String!
 }
 
+enum ImportStatus {
+  COMPLETED
+  PENDING
+}
+
+enum ImportType {
+  CRONOMETER
+  MY_FITNESS_PAL
+  RECIPE_KEEPER
+}
+
 type Ingredient {
   alternateNames: [IngredientAlternateName!]!
   expiration: ExpirationRule!
@@ -101,63 +166,112 @@ type IngredientAlternateName {
   name: String!
 }
 
+input IngredientFilter {
+  amount: NumericalComparison
+  ingredientID: String!
+  unitId: String
+}
+
 type IngredientPrice {
   price: Float!
   pricePerUnit: Float!
   quantity: Float!
   retailer: String!
-  unit: String!
+  unit: Unit!
 }
 
 type Mutation {
+  addCategoryToRecipe(category: String!, recipeId: String!): Recipe!
   addPriceHistory(price: CreatePriceHistoryInput!): IngredientPrice!
+  addRecipeCourse(course: String!, recipeId: String!): Recipe!
+  addRecipePhotos(photoId: [String!]!, recipeId: String!): Recipe!
+  changeRecipeCuisine(cuisineId: String!, recipeId: String!): Recipe!
   connectExpirationRule(expirationRuleId: String!, ingredientId: String!): Ingredient!
+  connectNutritionLabelToIngredientGroup(groupId: String!, labelId: String!, recipeId: String!): RecipeIngredientGroup!
+  connectNutritionLabeltoRecipe(labelId: String!, recipeId: String!): Recipe!
   createCategory(name: String!): [Category!]!
   createCourse(name: String!): [Course!]!
   createCuisine(name: String!): [Cuisine!]!
   createExpirationRule(ingredientId: String, rule: CreateExpirationRule!): ExpirationRule!
   createIngredient(ingredient: CreateIngredientInput!): Ingredient!
-  createRecipe(recipe: RecipeInput!): Recipe!
+  createNutritionLabels(nutritionLabels: NutritionLabelsInput!): [NutritionLabel!]!
   deleteCategory(categoryId: String!): [Category!]!
   deleteCourse(courseId: String!): [Course!]!
   deleteCuisine(cuisineId: String!): [Cuisine!]!
   deleteExpirationRule(expirationRuleId: String!): [ExpirationRule!]!
   deleteIngredient(ingredientToDeleteId: String!): [Ingredient!]!
+  deleteNutritionLabel(id: String!): [NutritionLabel!]!
   deletePriceHistory(ingredientId: String!, ingredientPriceId: [String!]!): [IngredientPrice!]!
+  disconnectNutritionLabelFromIngredientGroup(deleteLabel: Boolean!, groupId: String!, labelId: String!, recipeId: String!): RecipeIngredientGroup!
+  disconnectNutritionLabelFromRecipe(labelId: String!, recipeId: String!): Recipe!
   editExpirationRule(expirationRule: CreateExpirationRule!, expirationRuleId: String!): ExpirationRule!
   editIngredient(ingredient: CreateIngredientInput!, ingredientId: String!): Ingredient!
+  editNutritionLabel(label: EditNutritionLabelInput!): NutritionLabel!
   editPriceHistory(price: EditPriceHistoryInput!, priceId: String!): IngredientPrice!
+  markPrimaryRecipePhoto(primaryPhotoId: String!, recipeId: String!): Recipe!
   mergeIngredients(ingredientIdToDelete: String!, ingredientIdToKeep: String!): Ingredient!
+  removeCategoryFromRecipe(categoryId: String!, recipeId: String!): Recipe!
+  removeCourseFromRecipe(courseId: String!, recipeId: String!): Recipe!
+  removeRecipeCuisine(cuisineId: String!, recipeId: String!): Recipe!
+  removeRecipePhotos(photoIds: [String!]!, recipeId: String!): Recipe!
+  uploadPhoto(photo: File!): Photo!
 }
 
 input NumericalComparison {
-  eq: Int
-  gte: Int
-  lte: Int
+  eq: Float
+  gte: Float
+  lte: Float
+  value: Int
 }
 
 type Nutrient {
-  alternateNames: [String!]!
-  dailyReferenceIntakeValue: Float!
+  customTarget: Float
+  dailyReferenceIntakeValue(age: Int!, gender: Gender!, specialCondition: SpecialCondition!): Float!
+  id: String!
   name: String!
+  otherNames: [String!]!
   type: String!
-  unit: String!
-  unitAbbreviation: String!
+  unit: Unit!
+}
+
+enum NutrientType {
+  ALCHOHOL
+  CARBOHYDRATE
+  FAT
+  MINERAL
+  OTHER
+  PROTEIN
+  VITAMIN
+}
+
+input NutritionFilter {
+  nutrientID: String!
+  perServing: Boolean
+  target: NumericalComparison
 }
 
 type NutritionLabel {
   id: ID!
+  importRecord: ImportRecord
   ingredientGroup: RecipeIngredientGroup!
-  name: String!
+  name: String
   nutrients: [NutritionLabelNutrient!]!
-  percentage: Int
   recipe: Recipe
-  servings: Int
+  servingSize: Float
+  servings: Float
+  servingsUsed: Float
 }
 
 type NutritionLabelNutrient {
-  label: Nutrient!
+  nutrient: Nutrient!
+  totalValue: Float
   value: Float!
+  valuePerServing: Float
+}
+
+input NutritionLabelsInput {
+  baseLabel: CreateNutritionLabelInput!
+  ingredientGroupLabels: [CreateNutritionLabelInput!]
 }
 
 input Pagination {
@@ -167,6 +281,7 @@ input Pagination {
 
 type Photo {
   id: ID!
+  isPrimary: Boolean!
   url: String!
 }
 
@@ -196,8 +311,16 @@ type Recipe {
   marinadeTime: Int
   name: String!
   notes: String
+  photos: [Photo!]!
   prepTime: Int
   stars: Int
+}
+
+input RecipeFilter {
+  ingredientFilter: [IngredientFilter!]
+  numOfServings: NumericalComparison
+  nutrientFilters: [NutritionFilter!]
+  searchString: String
 }
 
 type RecipeIngredientGroup {
@@ -218,7 +341,7 @@ type RecipeIngredients {
   quantity: Float
   recipes: Recipe!
   sentence: String!
-  unit: String
+  unit: Unit!
 }
 
 input RecipeInput {
@@ -241,7 +364,21 @@ input RecipeInput {
   title: String!
 }
 
-type RecipePhotos {
-  isPrimary: Boolean!
-  photos: Photo!
+enum RecordStatus {
+  DUPLICATE
+  IMPORTED
+  PENDING
+}
+
+enum SpecialCondition {
+  LACTATING
+  NONE
+  PREGNANT
+}
+
+type Unit {
+  abbreviations: [String!]!
+  id: String!
+  name: String!
+  symbol: String!
 }

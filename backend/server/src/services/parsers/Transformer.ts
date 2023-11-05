@@ -1,74 +1,10 @@
 import { Mappings, DriLookup } from "./ImportTypes.js";
-import {
-  Gender,
-  NutrientType,
-  Prisma,
-  SpecialCondition,
-  DayOfWeek,
-  PrismaClient,
-} from "@prisma/client";
-import { toNumber, toBoolean } from "../../util/Cast.js";
-import {
-  checkIfPrimaryPhoto,
-  extractServingSize,
-  createRecipeIngredients,
-} from "../services/RecipeService.js";
+import { Prisma } from "@prisma/client";
+import { extractServingSize } from "../services/RecipeService.js";
 import { cast } from "../../util/Cast.js";
 
 // The purpose of this class is to take data read in from reading csv, html, etc, files and transform them so that they are ready to be inserted into the database.
 export class Transformer {
-  toNutrientTypeEnum(value: string): NutrientType {
-    let nutrientType = cast(value) as string;
-    if (nutrientType) {
-      nutrientType = nutrientType.toUpperCase();
-      if (["MINERAL", "MINERALS"].includes(nutrientType)) return "MINERAL";
-      else if (["VITAMIN", "VITAMINS"].includes(nutrientType)) return "VITAMIN";
-      else if (["FAT", "FATS", "LIPID"].includes(nutrientType)) return "FAT";
-      else if (["PROTEIN", "PROTEINS"].includes(nutrientType)) return "PROTEIN";
-      else if (
-        ["CARBS", "CARBOHYDRATES", "CARBOHYDRATE"].includes(nutrientType)
-      )
-        return "CARBOHYDRATE";
-      else if (nutrientType === "ALCOHOL") return "ALCHOHOL";
-    }
-    return "OTHER";
-  }
-
-  toGenderEnum(value: string): Gender {
-    let gender = cast(value) as string;
-    if (gender) {
-      gender = gender.toUpperCase();
-      if (["M", "MALE"].includes(gender)) return "MALE";
-      else if (["F", "FEMALE"].includes(gender)) return "FEMALE";
-    }
-    throw new Error(`Unable to convert ${value} to a gender`);
-  }
-
-  toSpecialConditionEnum(value: string): SpecialCondition {
-    let specialCondition = cast(value) as string;
-    if (specialCondition) {
-      specialCondition = specialCondition.toUpperCase();
-      if (["PREGNANT"].includes(specialCondition)) return "PREGNANT";
-      else if (["LACTATING"].includes(specialCondition)) return "LACTATING";
-    }
-    return "NONE";
-  }
-
-  toDayOfWeekEnum(value: string): DayOfWeek {
-    let dayOfWeek = cast(value) as string;
-    if (dayOfWeek) {
-      dayOfWeek = dayOfWeek.toUpperCase();
-      if (["MONDAY", "MON"].includes(dayOfWeek)) return "MONDAY";
-      else if (["TUESDAY", "TUES"].includes(dayOfWeek)) return "TUESDAY";
-      else if (["WEDNESDAY", "WED"].includes(dayOfWeek)) return "WEDNESDAY";
-      else if (["THURSDAY", "THURS"].includes(dayOfWeek)) return "THURSDAY";
-      else if (["FRIDAY", "FRI"].includes(dayOfWeek)) return "FRIDAY";
-      else if (["SATURDAY", "SAT"].includes(dayOfWeek)) return "SATURDAY";
-      else if (["SUNDAY", "SUN"].includes(dayOfWeek)) return "SUNDAY";
-    }
-    throw new Error(`Unable to convert ${value} to a day of week`);
-  }
-
   createMappings(nutrients: { [key: string]: string }[]): Mappings {
     // Create mappings from import names to nutrient names
     const mappings: Mappings = {

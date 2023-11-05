@@ -1,5 +1,5 @@
 /* eslint-disable */
-import type { Prisma, MealPlan, Servings, Import, ImportRecord, RecipeIngredient, RecipeIngredientGroup, Ingredient, ExpirationRule, IngredientAlternateName, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, DailyReferenceIntake, HealthProfile } from "@prisma/client";
+import type { Prisma, MealPlan, Servings, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, ExpirationRule, IngredientAlternateName, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, DailyReferenceIntake, HealthProfile } from "@prisma/client";
 export default interface PrismaTypes {
     MealPlan: {
         Name: "MealPlan";
@@ -99,9 +99,13 @@ export default interface PrismaTypes {
         Where: Prisma.RecipeIngredientWhereInput;
         Create: {};
         Update: {};
-        RelationName: "recipe" | "ingredient" | "group";
+        RelationName: "unit" | "recipe" | "ingredient" | "group";
         ListRelations: never;
         Relations: {
+            unit: {
+                Shape: MeasurementUnit;
+                Name: "MeasurementUnit";
+            };
             recipe: {
                 Shape: Recipe;
                 Name: "Recipe";
@@ -113,6 +117,37 @@ export default interface PrismaTypes {
             group: {
                 Shape: RecipeIngredientGroup | null;
                 Name: "RecipeIngredientGroup";
+            };
+        };
+    };
+    MeasurementUnit: {
+        Name: "MeasurementUnit";
+        Shape: MeasurementUnit;
+        Include: Prisma.MeasurementUnitInclude;
+        Select: Prisma.MeasurementUnitSelect;
+        OrderBy: Prisma.MeasurementUnitOrderByWithRelationInput;
+        WhereUnique: Prisma.MeasurementUnitWhereUniqueInput;
+        Where: Prisma.MeasurementUnitWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "ingredients" | "nutrients" | "ingredientPrice" | "servingSizes";
+        ListRelations: "ingredients" | "nutrients" | "ingredientPrice" | "servingSizes";
+        Relations: {
+            ingredients: {
+                Shape: RecipeIngredient[];
+                Name: "RecipeIngredient";
+            };
+            nutrients: {
+                Shape: Nutrient[];
+                Name: "Nutrient";
+            };
+            ingredientPrice: {
+                Shape: IngredientPrice[];
+                Name: "IngredientPrice";
+            };
+            servingSizes: {
+                Shape: NutritionLabel[];
+                Name: "NutritionLabel";
             };
         };
     };
@@ -218,12 +253,16 @@ export default interface PrismaTypes {
         Where: Prisma.IngredientPriceWhereInput;
         Create: {};
         Update: {};
-        RelationName: "ingredient";
+        RelationName: "ingredient" | "unit";
         ListRelations: never;
         Relations: {
             ingredient: {
                 Shape: Ingredient;
                 Name: "Ingredient";
+            };
+            unit: {
+                Shape: MeasurementUnit;
+                Name: "MeasurementUnit";
             };
         };
     };
@@ -360,7 +399,7 @@ export default interface PrismaTypes {
         Where: Prisma.NutritionLabelWhereInput;
         Create: {};
         Update: {};
-        RelationName: "recipe" | "ingredientGroup" | "nutrients" | "importRecord";
+        RelationName: "recipe" | "ingredientGroup" | "nutrients" | "servingSizeUnit" | "importRecord";
         ListRelations: "nutrients";
         Relations: {
             recipe: {
@@ -374,6 +413,10 @@ export default interface PrismaTypes {
             nutrients: {
                 Shape: NutritionLabelNutrient[];
                 Name: "NutritionLabelNutrient";
+            };
+            servingSizeUnit: {
+                Shape: MeasurementUnit | null;
+                Name: "MeasurementUnit";
             };
             importRecord: {
                 Shape: ImportRecord | null;
@@ -414,7 +457,7 @@ export default interface PrismaTypes {
         Where: Prisma.NutrientWhereInput;
         Create: {};
         Update: {};
-        RelationName: "dri" | "parentNutrient" | "subNutrients" | "NutritionLabelNutrients";
+        RelationName: "dri" | "parentNutrient" | "subNutrients" | "NutritionLabelNutrients" | "unit";
         ListRelations: "dri" | "subNutrients" | "NutritionLabelNutrients";
         Relations: {
             dri: {
@@ -432,6 +475,10 @@ export default interface PrismaTypes {
             NutritionLabelNutrients: {
                 Shape: NutritionLabelNutrient[];
                 Name: "NutritionLabelNutrient";
+            };
+            unit: {
+                Shape: MeasurementUnit;
+                Name: "MeasurementUnit";
             };
         };
     };

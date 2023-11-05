@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { readCSV, readHTML } from "../services/importHelpers/Readers.js";
-import { Transformer } from "../services/importHelpers/Transformer.js";
+import { readCSV, readHTML } from "../services/io/Readers.js";
+import { Transformer } from "../services/parsers/Transformer.js";
 import { toRecipeCreateInputFromRecipeKeeper } from "../services/RecipeService.js";
 import { storage } from "../storage.js";
 const prisma = new PrismaClient();
@@ -195,8 +195,6 @@ async function loadRecipes() {
   );
 
   for (const createStmt of createStmts) {
-    console.log(JSON.stringify(createStmt));
-
     await prisma.recipe.create({
       data: createStmt,
     });

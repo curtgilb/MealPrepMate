@@ -1,59 +1,59 @@
 ﻿Nutrient,Unit Abbreviation,Unit,Notes,Alternate Names,Type,Parent Nutrient,Cronometer Mapping,Recipe Keeper Mapping,MFP Mapping,DRI Mapping
-Added Sugars,g,grams,,,Carbohydrates,Total Carbohydrates,,,,
-Alcohol,g,grams,,,Alcohol,,Alcohol (g),,,
-Biotin,μg,micrograms,,,Vitamin,,,,,biotin
-Caffeine,mg,miligrams,,,General,,Caffeine (mg),,,
-Calcium,mg,miligrams,,,Mineral,,Calcium (mg),,Calcium,calcium
-Calories,kcal,calories,,,General,,Energy (kcal),recipeNutCalories,Calories,
+Added Sugars,g,gram,,,Carbohydrates,Total Carbohydrates,,,,
+Alcohol,g,gram,,,Alcohol,,Alcohol (g),,,
+Biotin,μg,microgram,,,Vitamin,,,,,biotin
+Caffeine,mg,miligram,,,General,,Caffeine (mg),,,
+Calcium,mg,miligram,,,Mineral,,Calcium (mg),,Calcium,calcium
+Calories,kcal,calorie,,,General,,Energy (kcal),recipeNutCalories,Calories,
 Chloride,g,grams,,,Mineral,,,,,chloride
-Cholesterol,mg,miligrams,,,Fats,,Cholesterol (mg),recipeNutCholesterol,Cholesterol,
-Choline,mg,miligrams,,,Vitamin,,,,,choline
-Chromium,μg,micrograms,,,Mineral,,,,,chromium
-Cobalamin,μg,micrograms,,Vitamin B12,Vitamin,,B12 (Cobalamin) (Âµg),,,vitaminB12
-Copper,μg,micrograms,,,Mineral,,Copper (mg),,,copper
-Cystine,g,grams,,,Protein,Protein,Cystine (g),,,
-Dietary Fiber,g,grams,,,Carbohydrates,Total Carbohydrates,Fiber (g),recipeNutDietaryFiber,Fiber,
-Fluoride,mg,miligrams,,,Mineral,,,,,fluoride
-Folate,μg,micrograms,,Vitamin B9,Vitamin,,Folate (Âµg),,,folate
-Histidine,g,grams,,,Protein,Protein,Histidine (g),,,
-Iodine,μg,micrograms,,,Mineral,,,,,iodine
-Iron,mg,miligrams,,,Mineral,,Iron (mg),,Iron,iron
-Isoleucine,g,grams,,,Protein,Protein,Isoleucine (g),,,
-Leucine,g,grams,,,Protein,Protein,Leucine (g),,,
-Lysine,g,grams,,,Protein,Protein,Lysine (g),,,
-Magnesium,mg,miligrams,,,Mineral,,Magnesium (mg),,,magnesium
-Manganese,mg,miligrams,,,Mineral,,Manganese (mg),,,manganese
-Methionine,g,grams,,,Protein,,Methionine (g),,,
-Molybdenum,μg,micrograms,,,Mineral,,,,,molybdenum
-Monounsaturated Fat,g,grams,,,Fats,Polyunsaturated Fat,Monounsaturated (g),,Monounsaturated Fat,
-Niacin,mg,miligrams,,Vitamin B3,Vitamin,,B3 (Niacin) (mg),,,niacin
-Omega-3,g,grams,,α-Linolenic Acid,Fats,Total Fat,Omega-3 (g),,,
-Omega-6,g,grams,,Linoleic Acid,Fats,Polyunsaturated Fat,Omega-6 (g),,,
-Pantothenic Acid,mg,miligrams,,Vitamin B5,Vitamin,,B5 (Pantothenic Acid) (mg),,pantothenicAcid,
-Phenylalanine,g,grams,,,Protein,Protein,Phenylalanine (g),,,
-Phosphorus,mg,miligrams,,,Mineral,,Phosphorus (mg),,,phosphorus
+Cholesterol,mg,miligram,,,Fats,,Cholesterol (mg),recipeNutCholesterol,Cholesterol,
+Choline,mg,miligram,,,Vitamin,,,,,choline
+Chromium,μg,microgram,,,Mineral,,,,,chromium
+Cobalamin,μg,microgram,,Vitamin B12,Vitamin,,B12 (Cobalamin) (Âµg),,,vitaminB12
+Copper,μg,microgram,,,Mineral,,Copper (mg),,,copper
+Cystine,g,gram,,,Protein,Protein,Cystine (g),,,
+Dietary Fiber,g,gram,,,Carbohydrates,Total Carbohydrates,Fiber (g),recipeNutDietaryFiber,Fiber,
+Fluoride,mg,miligram,,,Mineral,,,,,fluoride
+Folate,μg,microgram,,Vitamin B9,Vitamin,,Folate (Âµg),,,folate
+Histidine,g,gram,,,Protein,Protein,Histidine (g),,,
+Iodine,μg,microgram,,,Mineral,,,,,iodine
+Iron,mg,miligram,,,Mineral,,Iron (mg),,Iron,iron
+Isoleucine,g,gram,,,Protein,Protein,Isoleucine (g),,,
+Leucine,g,gram,,,Protein,Protein,Leucine (g),,,
+Lysine,g,gram,,,Protein,Protein,Lysine (g),,,
+Magnesium,mg,miligram,,,Mineral,,Magnesium (mg),,,magnesium
+Manganese,mg,miligram,,,Mineral,,Manganese (mg),,,manganese
+Methionine,g,gram,,,Protein,,Methionine (g),,,
+Molybdenum,μg,microgram,,,Mineral,,,,,molybdenum
+Monounsaturated Fat,g,gram,,,Fats,Polyunsaturated Fat,Monounsaturated (g),,Monounsaturated Fat,
+Niacin,mg,miligram,,Vitamin B3,Vitamin,,B3 (Niacin) (mg),,,niacin
+Omega-3,g,gram,,α-Linolenic Acid,Fats,Total Fat,Omega-3 (g),,,
+Omega-6,g,gram,,Linoleic Acid,Fats,Polyunsaturated Fat,Omega-6 (g),,,
+Pantothenic Acid,mg,miligram,,Vitamin B5,Vitamin,,B5 (Pantothenic Acid) (mg),,pantothenicAcid,
+Phenylalanine,g,gram,,,Protein,Protein,Phenylalanine (g),,,
+Phosphorus,mg,miligram,,,Mineral,,Phosphorus (mg),,,phosphorus
 Polyunsaturated Fat,g,grams,,,Fats,Total Fat,Polyunsaturated (g),,Polyunsaturated Fat,
-Potassium,mg,miligrams,,,Mineral,,Potassium (mg),,Potassium,potassium
-Protein,g,grams,"Based on g protein per kg of body weight for the reference body weight, e.g., for adults 0.8 g/kg body weight for the reference body weight.",,Protein,,Protein (g),recipeNutProtein,Protein (g),
-Pyridoxine,mg,miligrams,,Vitamin B6,Vitamin,,B6 (Pyridoxine) (mg),,,vitaminB6
-Riboflavin,mg,miligrams,,Vitamin B2,Vitamin,,B2 (Riboflavin) (mg),,,riboflavin
-Saturated Fat,g,grams,,,Fats,Total Fat,Saturated (g),recipeNutSaturatedFat,Saturated Fat,
-Selenium,μg,micrograms,,,Mineral,,Selenium (Âµg),,,selenium
-Sodium,mg,miligrams,,,Mineral,,Sodium (mg),recipeNutSodium,Sodium (mg),sodium
-Starch,g,grams,,,Carbohydrates,Total Carbohydrates,Starch (g),,,
-Sugars,g,grams,,,Carbohydrates,Total Carbohydrates,Sugars (g),recipeNutSugars,Sugar,
-Thiamin,mg,miligrams,,Vitamin B1,Vitamin,,B1 (Thiamine) (mg),,,thiamin
-Threonine,g,grams,,,Protein,Protien,Threonine (g),,,
-Total Carbohydrates,g,grams,,,Carbohydrates,,Carbs (g),recipeNutTotalCarbohydrate,Carbohydrates (g),
-Total Fat,g,grams,,,Fats,,Fat (g),recipeNutTotalFat,Fat (g),
-Trans Fat,g,grams,,,Fats,Total Fat,Trans-Fats (g),,Trans Fat,
-Tryptophan,g,grams,,,Protein,,Tryptophan (g),,,
-Tyrosine,g,grams,,,Protein,Protein,Tyrosine (g),,,
-Valine,g,grams,,,Protein,Protein,Valine (g),,,
-Vitamin A,μg,micrograms,,,Vitamin,,Vitamin A (Âµg),,Vitamin A,vitaminA
-Vitamin C,mg,miligrams,,,Vitamin,,Vitamin C (mg),,Vitamin C,vitaminC
-Vitamin D,μg,micrograms,,,Vitamin,,Vitamin D (IU),,,vitaminD
-Vitamin E,mg,miligrams,,,Vitamin,,Vitamin E (mg),,,vitaminE
-Vitamin K,μg,micrograms,,,Vitamin,,Vitamin K (Âµg),,,vitaminK
-Water,L,liters,,,General,,Water (g),,,
-Zinc,mg,miligrams,,,Mineral,,Zinc (mg),,,zinc
+Potassium,mg,miligram,,,Mineral,,Potassium (mg),,Potassium,potassium
+Protein,g,gram,"Based on g protein per kg of body weight for the reference body weight, e.g., for adults 0.8 g/kg body weight for the reference body weight.",,Protein,,Protein (g),recipeNutProtein,Protein (g),
+Pyridoxine,mg,miligram,,Vitamin B6,Vitamin,,B6 (Pyridoxine) (mg),,,vitaminB6
+Riboflavin,mg,miligram,,Vitamin B2,Vitamin,,B2 (Riboflavin) (mg),,,riboflavin
+Saturated Fat,g,gram,,,Fats,Total Fat,Saturated (g),recipeNutSaturatedFat,Saturated Fat,
+Selenium,μg,microgram,,,Mineral,,Selenium (Âµg),,,selenium
+Sodium,mg,miligram,,,Mineral,,Sodium (mg),recipeNutSodium,Sodium (mg),sodium
+Starch,g,gram,,,Carbohydrates,Total Carbohydrates,Starch (g),,,
+Sugars,g,gram,,,Carbohydrates,Total Carbohydrates,Sugars (g),recipeNutSugars,Sugar,
+Thiamin,mg,miligram,,Vitamin B1,Vitamin,,B1 (Thiamine) (mg),,,thiamin
+Threonine,g,gram,,,Protein,Protien,Threonine (g),,,
+Total Carbohydrates,g,gram,,,Carbohydrates,,Carbs (g),recipeNutTotalCarbohydrate,Carbohydrates (g),
+Total Fat,g,gram,,,Fats,,Fat (g),recipeNutTotalFat,Fat (g),
+Trans Fat,g,gram,,,Fats,Total Fat,Trans-Fats (g),,Trans Fat,
+Tryptophan,g,gram,,,Protein,,Tryptophan (g),,,
+Tyrosine,g,gram,,,Protein,Protein,Tyrosine (g),,,
+Valine,g,gram,,,Protein,Protein,Valine (g),,,
+Vitamin A,μg,microgram,,,Vitamin,,Vitamin A (Âµg),,Vitamin A,vitaminA
+Vitamin C,mg,miligram,,,Vitamin,,Vitamin C (mg),,Vitamin C,vitaminC
+Vitamin D,μg,microgram,,,Vitamin,,Vitamin D (IU),,,vitaminD
+Vitamin E,mg,miligram,,,Vitamin,,Vitamin E (mg),,,vitaminE
+Vitamin K,μg,microgram,,,Vitamin,,Vitamin K (Âµg),,,vitaminK
+Water,L,liter,,,General,,Water (g),,,
+Zinc,mg,miligram,,,Mineral,,Zinc (mg),,,zinc
