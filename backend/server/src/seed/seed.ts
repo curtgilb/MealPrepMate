@@ -1,24 +1,32 @@
 import { PrismaClient } from "@prisma/client";
-import { readCSV, readHTML } from "../services/io/Readers.js";
-import { Transformer } from "../services/parsers/Transformer.js";
-import { toRecipeCreateInputFromRecipeKeeper } from "../services/RecipeService.js";
+import { readCSV } from "../services/io/Readers.js";
+
 import { storage } from "../storage.js";
+import { cast, toMeasurementUnitTypeEnum } from "../util/Cast.js";
 const prisma = new PrismaClient();
+import { db } from "../db.js";
+import { NutrientParser } from "../services/parsers/NutrientParser.js";
 const bucketPolicy =
   '{"Version":"2012-10-17","Statement":[{"Sid":"PublicReadGetObject","Effect":"Allow","Principal":"*","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::$$$/*"]}]}';
 
+// Units first
+// Nutrients
+// Ingredients
+// Recipes
+
 (async () => {
   await deleteAllRecords();
-  // await loadCourses();
-  // await loadCateogries();
-  // await loadCuisines();
-  // await loadIngredients();
-  // await loadNutrients();
-  await loadRecipes();
-  // await loadHealthProfile();
   // await createBuckets();
   // await deleteBuckets();
-  // await createBuckets();
+  await loadUnits();
+  await loadCourses();
+  await loadCateogries();
+  await loadCuisines();
+  await loadNutrients();
+  // await loadIngredients();
+
+  // await loadRecipes();
+  // await loadHealthProfile();
 })()
   .then(() => {
     console.log("Seeding complete");
@@ -37,7 +45,7 @@ async function deleteBuckets() {
     const objectsToDelete: string[] = [];
     const stream = storage.listObjectsV2(bucket.name, "", true);
     stream.on("data", (object) => {
-      objectsToDelete.push(object.name);
+      objectsToDelete.push(object.name as string);
     });
     stream.on("end", () => {
       storage.removeObjects(bucket.name, objectsToDelete, (error) => {
@@ -50,29 +58,42 @@ async function deleteBuckets() {
   }
 }
 
-async function createBuckets() {
-  const buckets = ["imports", "photos"];
-  for (const bucket of buckets) {
-    await storage.makeBucket(bucket);
-    await storage.setBucketPolicy(bucket, bucketPolicy.replace("$$$", bucket));
-  }
-}
-
-async function loadHealthProfile() {
-  await prisma.healthProfile.create({
-    data: {
-      weight: 180,
-      gender: "MALE",
-      bodyFatPercentage: 0.25,
-      height: 72,
-      yearBorn: 1994,
-      activityLevel: 1.2,
-      targetProtein: 0.25,
-      targetCarbs: 0.5,
-      targetFat: 0.5,
-    },
+async function loadUnits() {
+  const data = await readCSV("../../../data/seed_data/units.csv");
+  await db.measurementUnit.createMany({
+    data: data.map(({ record }) => ({
+      name: cast(record.name) as string,
+      abbreviations: record.lookupNames?.split(", "),
+      symbol: cast(record.symbol) as string,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      type: toMeasurementUnitTypeEnum(record.type),
+    })),
   });
 }
+
+// async function createBuckets() {
+//   const buckets = ["imports", "photos"];
+//   for (const bucket of buckets) {
+//     await storage.makeBucket(bucket);
+//     await storage.setBucketPolicy(bucket, bucketPolicy.replace("$$$", bucket));
+//   }
+// }
+
+// async function loadHealthProfile() {
+//   await prisma.healthProfile.create({
+//     data: {
+//       weight: 180,
+//       gender: "MALE",
+//       bodyFatPercentage: 0.25,
+//       height: 72,
+//       yearBorn: 1994,
+//       activityLevel: 1.2,
+//       targetProtein: 0.25,
+//       targetCarbs: 0.5,
+//       targetFat: 0.5,
+//     },
+//   });
+// }
 
 async function loadCateogries() {
   await prisma.category.createMany({
@@ -124,50 +145,30 @@ async function loadCuisines() {
 }
 
 async function loadNutrients() {
-  // Load in Nutrients
-  const transformer = new Transformer();
-  const nutrients = await readCSV("../../data/nutrients.csv");
-  const mineralDRI = await readCSV("../../data/FDA/minerals.csv");
-  const vitaminDRI = await readCSV("../../data/FDA/vitamins.csv");
-  const dris = [...mineralDRI, ...vitaminDRI];
-  const idLookup: { [key: string]: string } = {};
-  for (const nutrient of transformer.toNutrientAndDRI(nutrients, dris)) {
-    const record = await prisma.nutrient.create({
-      data: nutrient,
-    });
-    idLookup[record.name] = record.id;
+  const nutrients = new NutrientParser();
+  const stmts = await nutrients.parse();
+  await db.nutrient.createMany({ data: stmts.createNutrientsStmt });
+
+  for (const driCreateStmt of stmts.dri) {
+    await db.dailyReferenceIntake.create({ data: driCreateStmt });
   }
 
-  // Create self references for nutrients
-  for (const nutrient of nutrients) {
-    if (nutrient.parentNutrient in idLookup) {
-      await prisma.nutrient.update({
-        where: {
-          id: idLookup[nutrient.nutrient],
-        },
-        data: {
-          parentNutrient: {
-            connect: {
-              id: idLookup[nutrient.parentNutrient],
-            },
-          },
-        },
-      });
-    }
+  for (const updateStmt of stmts.updateNutrientsStmt) {
+    await db.nutrient.update(updateStmt);
   }
 }
 
-async function loadIngredients() {
-  // Load in Ingredients
-  const transformer = new Transformer();
-  const ingredients = await readCSV("../../data/Ingredients.csv");
-  // for (const ingredient of ingredients) {
-  await prisma.ingredient.createMany({
-    data: ingredients.map((ingredient) => transformer.toIngredient(ingredient)),
-    skipDuplicates: true,
-  });
-  // }
-}
+// async function loadIngredients() {
+//   // Load in Ingredients
+//   const transformer = new Transformer();
+//   const ingredients = await readCSV("../../data/Ingredients.csv");
+//   // for (const ingredient of ingredients) {
+//   await prisma.ingredient.createMany({
+//     data: ingredients.map((ingredient) => transformer.toIngredient(ingredient)),
+//     skipDuplicates: true,
+//   });
+//   // }
+// }
 
 export async function deleteAllRecords() {
   const tablenames = await prisma.$queryRaw<
@@ -187,16 +188,16 @@ export async function deleteAllRecords() {
   }
 }
 
-async function loadRecipes() {
-  const recipes = readHTML("../../data/RecipeKeeper/recipes.html");
-  const createStmts = await toRecipeCreateInputFromRecipeKeeper(
-    prisma,
-    recipes
-  );
+// async function loadRecipes() {
+//   const recipes = readHTML("../../data/RecipeKeeper/recipes.html");
+//   const createStmts = await toRecipeCreateInputFromRecipeKeeper(
+//     prisma,
+//     recipes
+//   );
 
-  for (const createStmt of createStmts) {
-    await prisma.recipe.create({
-      data: createStmt,
-    });
-  }
-}
+//   for (const createStmt of createStmts) {
+//     await prisma.recipe.create({
+//       data: createStmt,
+//     });
+//   }
+// }

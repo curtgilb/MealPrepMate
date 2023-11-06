@@ -1,6 +1,6 @@
-﻿Name,lookupNames, symbol,measurementType
-tablespoon,"tablespoon, tablespoons, tbsp., tbsp,",Tbsp,volume
-teaspoon,"teaspoon, teaspoons, tsp, tsp.,",tsp,volume
+﻿Name,Lookup Names,Symbol,Type
+tablespoon,"tablespoons, tbsp.",Tbsp,volume
+teaspoon,"teaspoon, teaspoons, tsp, tsp.",tsp,volume
 cup,"cup, cups, c, c.",c,volume
 quart,"quart, quarts, qts, qt, qt.",qt,volume
 fluid ounce,,fl oz,volume

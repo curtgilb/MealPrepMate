@@ -5,12 +5,15 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+type CsvOutput = {
+  record: { [key: string]: string };
+  raw: string;
+};
 
 async function readCSV(
-  source: string | File,
+  source: string,
   camelCaseHeaders = true
-): Promise<{ [key: string]: string }[]> {
-  let parser;
+): Promise<CsvOutput[]> {
   const parserOptions = {
     delimiter: ",",
     columns: camelCaseHeaders
@@ -19,23 +22,21 @@ async function readCSV(
     bom: true,
     raw: true,
   };
-  if (typeof source === "object" && Object.hasOwn(source, "name")) {
-    // Treat as a file object
-    parser = parse(await source.text(), parserOptions);
-  } else {
-    const fullPath = path.join(__dirname, source as string);
-    parser = fs.createReadStream(fullPath).pipe(parse(parserOptions));
-  }
+  const fullPath = path.join(__dirname, source);
+  const parser = fs.createReadStream(fullPath).pipe(parse(parserOptions));
 
-  const records: { [key: string]: string }[] = [];
+  const records: CsvOutput[] = [];
   for await (const record of parser) {
-    const typedRecord = record as { [key: string]: string };
+    const typedRecord = record as CsvOutput;
     records.push(typedRecord);
   }
   return records;
 }
 
-function writeJson(relativePath: string, data: object[]) {
+function writeJson(relativePath: string, data: unknown) {
+  if (typeof data !== "object") {
+    throw Error("Data must be an object type");
+  }
   fs.writeFileSync(path.join(__dirname, relativePath), JSON.stringify(data));
 }
 

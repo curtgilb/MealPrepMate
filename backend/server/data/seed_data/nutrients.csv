@@ -1,0 +1,59 @@
+﻿Nutrient,Unit Abbreviation,Unit,Advanced View,Notes,Alternate Names,Type,Parent Nutrient,Cronometer,Recipe Keeper,My Fitness Pal,DRI
+Added Sugars,g,gram,FALSE,,,Carbohydrates,Total Carbohydrates,,,,
+Alcohol,g,gram,FALSE,,,Alcohol,,Alcohol (g),,,
+Biotin,μg,microgram,TRUE,,,Vitamin,,,,,biotin
+Caffeine,mg,miligram,FALSE,,,General,,Caffeine (mg),,,
+Calcium,mg,miligram,FALSE,,,Mineral,,Calcium (mg),,Calcium,calcium
+Calories,kcal,calorie,FALSE,,,General,,Energy (kcal),recipeNutCalories,Calories,
+Chloride,g,gram,TRUE,,,Mineral,,,,,chloride
+Cholesterol,mg,miligram,FALSE,,,Fats,,Cholesterol (mg),recipeNutCholesterol,Cholesterol,
+Choline,mg,miligram,TRUE,,,Vitamin,,,,,choline
+Chromium,μg,microgram,TRUE,,,Mineral,,,,,chromium
+Cobalamin,μg,microgram,TRUE,,Vitamin B12,Vitamin,,B12 (Cobalamin) (Âµg),,,vitaminB12
+Copper,μg,microgram,FALSE,,,Mineral,,Copper (mg),,,copper
+Cystine,g,gram,TRUE,,,Protein,Protein,Cystine (g),,,
+Dietary Fiber,g,gram,FALSE,,,Carbohydrates,Total Carbohydrates,Fiber (g),recipeNutDietaryFiber,Fiber,
+Fluoride,mg,miligram,TRUE,,,Mineral,,,,,fluoride
+Folate,μg,microgram,FALSE,,Vitamin B9,Vitamin,,Folate (Âµg),,,folate
+Histidine,g,gram,TRUE,,,Protein,Protein,Histidine (g),,,
+Iodine,μg,microgram,TRUE,,,Mineral,,,,,iodine
+Iron,mg,miligram,FALSE,,,Mineral,,Iron (mg),,Iron,iron
+Isoleucine,g,gram,TRUE,,,Protein,Protein,Isoleucine (g),,,
+Leucine,g,gram,TRUE,,,Protein,Protein,Leucine (g),,,
+Lysine,g,gram,TRUE,,,Protein,Protein,Lysine (g),,,
+Magnesium,mg,miligram,FALSE,,,Mineral,,Magnesium (mg),,,magnesium
+Manganese,mg,miligram,FALSE,,,Mineral,,Manganese (mg),,,manganese
+Methionine,g,gram,TRUE,,,Protein,,Methionine (g),,,
+Molybdenum,μg,microgram,TRUE,,,Mineral,,,,,molybdenum
+Monounsaturated Fat,g,gram,TRUE,,,Fats,Polyunsaturated Fat,Monounsaturated (g),,Monounsaturated Fat,
+Niacin,mg,miligram,FALSE,,Vitamin B3,Vitamin,,B3 (Niacin) (mg),,,niacin
+Omega-3,g,gram,FALSE,,α-Linolenic Acid,Fats,Total Fat,Omega-3 (g),,,
+Omega-6,g,gram,FALSE,,Linoleic Acid,Fats,Polyunsaturated Fat,Omega-6 (g),,,
+Pantothenic Acid,mg,miligram,TRUE,,Vitamin B5,Vitamin,,B5 (Pantothenic Acid) (mg),,pantothenicAcid,
+Phenylalanine,g,gram,TRUE,,,Protein,Protein,Phenylalanine (g),,,
+Phosphorus,mg,miligram,TRUE,,,Mineral,,Phosphorus (mg),,,phosphorus
+Polyunsaturated Fat,g,gram,FALSE,,,Fats,Total Fat,Polyunsaturated (g),,Polyunsaturated Fat,
+Potassium,mg,miligram,FALSE,,,Mineral,,Potassium (mg),,Potassium,potassium
+Protein,g,gram,FALSE,"Based on g protein per kg of body weight for the reference body weight, e.g., for adults 0.8 g/kg body weight for the reference body weight.",,Protein,,Protein (g),recipeNutProtein,Protein (g),
+Pyridoxine,mg,miligram,TRUE,,Vitamin B6,Vitamin,,B6 (Pyridoxine) (mg),,,vitaminB6
+Riboflavin,mg,miligram,FALSE,,Vitamin B2,Vitamin,,B2 (Riboflavin) (mg),,,riboflavin
+Saturated Fat,g,gram,FALSE,,,Fats,Total Fat,Saturated (g),recipeNutSaturatedFat,Saturated Fat,
+Selenium,μg,microgram,TRUE,,,Mineral,,Selenium (Âµg),,,selenium
+Sodium,mg,miligram,FALSE,,,Mineral,,Sodium (mg),recipeNutSodium,Sodium (mg),sodium
+Starch,g,gram,FALSE,,,Carbohydrates,Total Carbohydrates,Starch (g),,,
+Sugars,g,gram,FALSE,,,Carbohydrates,Total Carbohydrates,Sugars (g),recipeNutSugars,Sugar,
+Thiamin,mg,miligram,TRUE,,Vitamin B1,Vitamin,,B1 (Thiamine) (mg),,,thiamin
+Threonine,g,gram,TRUE,,,Protein,Protien,Threonine (g),,,
+Total Carbohydrates,g,gram,FALSE,,,Carbohydrates,,Carbs (g),recipeNutTotalCarbohydrate,Carbohydrates (g),
+Total Fat,g,gram,FALSE,,,Fats,,Fat (g),recipeNutTotalFat,Fat (g),
+Trans Fat,g,gram,FALSE,,,Fats,Total Fat,Trans-Fats (g),,Trans Fat,
+Tryptophan,g,gram,TRUE,,,Protein,,Tryptophan (g),,,
+Tyrosine,g,gram,TRUE,,,Protein,Protein,Tyrosine (g),,,
+Valine,g,gram,TRUE,,,Protein,Protein,Valine (g),,,
+Vitamin A,μg,microgram,FALSE,,,Vitamin,,Vitamin A (Âµg),,Vitamin A,vitaminA
+Vitamin C,mg,miligram,FALSE,,,Vitamin,,Vitamin C (mg),,Vitamin C,vitaminC
+Vitamin D,μg,microgram,FALSE,,,Vitamin,,Vitamin D (IU),,,vitaminD
+Vitamin E,mg,miligram,FALSE,,,Vitamin,,Vitamin E (mg),,,vitaminE
+Vitamin K,μg,microgram,FALSE,,,Vitamin,,Vitamin K (Âµg),,,vitaminK
+Water,L,liter,FALSE,,,General,,Water (g),,,
+Zinc,mg,miligram,FALSE,,,Mineral,,Zinc (mg),,,zinc

@@ -1,12 +1,7 @@
 import { builder } from "../builder.js";
 import { db } from "../../db.js";
 
-import {
-  Prisma,
-  Gender,
-  SpecialCondition,
-  NutritionLabel,
-} from "@prisma/client";
+import { Gender, SpecialCondition } from "@prisma/client";
 
 // ============================================ Types ===================================
 builder.prismaObject("NutritionLabel", {
@@ -28,7 +23,6 @@ builder.prismaObject("NutritionLabelNutrient", {
   name: "NutritionLabelNutrient",
   fields: (t) => ({
     value: t.exposeFloat("value"),
-    totalValue: t.exposeFloat("totalValue", { nullable: true }),
     valuePerServing: t.exposeFloat("valuePerServing", { nullable: true }),
     nutrient: t.relation("nutrient"),
   }),
@@ -74,7 +68,7 @@ builder.prismaObject("MeasurementUnit", {
     id: t.exposeString("id"),
     name: t.exposeString("name"),
     abbreviations: t.exposeStringList("abbreviations"),
-    symbol: t.exposeString("symbol"),
+    symbol: t.exposeString("symbol", { nullable: true }),
   }),
 });
 
@@ -155,20 +149,20 @@ const editNutritionLabelInput = builder.inputType("EditNutritionLabelInput", {
 
 // ============================================ Mutations ===============================
 builder.mutationFields((t) => ({
-  createNutritionLabels: t.prismaField({
-    type: ["NutritionLabel"],
-    args: {
-      nutritionLabels: t.arg({ type: createNutritionLabels, required: true }),
-    },
-    resolve: async (query, root, args) => {},
-  }),
-  editNutritionLabel: t.prismaField({
-    type: "NutritionLabel",
-    args: {
-      label: t.arg({ type: editNutritionLabelInput, required: true }),
-    },
-    resolve: async (query, root, args) => {},
-  }),
+  // createNutritionLabels: t.prismaField({
+  //   type: ["NutritionLabel"],
+  //   args: {
+  //     nutritionLabels: t.arg({ type: createNutritionLabels, required: true }),
+  //   },
+  //   resolve: async (query, root, args) => {},
+  // }),
+  // editNutritionLabel: t.prismaField({
+  //   type: "NutritionLabel",
+  //   args: {
+  //     label: t.arg({ type: editNutritionLabelInput, required: true }),
+  //   },
+  //   resolve: async (query, root, args) => {},
+  // }),
   deleteNutritionLabel: t.prismaField({
     type: ["NutritionLabel"],
     args: {

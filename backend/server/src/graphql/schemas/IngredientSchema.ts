@@ -13,19 +13,12 @@ builder.prismaObject("Ingredient", {
   fields: (t) => ({
     id: t.exposeID("id"),
     name: t.exposeString("name"),
-    alternateNames: t.relation("alternateNames"),
+    alternateNames: t.exposeStringList("alternateNames"),
     storageInstructions: t.exposeString("storageInstructions", {
       nullable: true,
     }),
     priceHistory: t.relation("priceHistory"),
     expiration: t.relation("expirationRule"),
-  }),
-});
-
-builder.prismaObject("IngredientAlternateName", {
-  fields: (t) => ({
-    id: t.exposeID("id"),
-    name: t.exposeString("name"),
   }),
 });
 
@@ -178,17 +171,17 @@ builder.queryFields((t) => ({
       });
     },
   }),
-  expirationRules: t.prismaField({
-    type: ["ExpirationRule"],
-    args: {
-      searchString: t.arg.string(),
-      pagination: t.arg({ type: paginationInput }),
-    },
-    resolve: async (query, root, args) => {
-      const search: Prisma.ExpirationRuleFindManyArgs = { ...query };
-      return await db.expirationRule.findMany(search);
-    },
-  }),
+  // expirationRules: t.prismaField({
+  //   type: ["ExpirationRule"],
+  //   args: {
+  //     searchString: t.arg.string(),
+  //     pagination: t.arg({ type: paginationInput }),
+  //   },
+  //   resolve: async (query, root, args) => {
+  //     const search: Prisma.ExpirationRuleFindManyArgs = { ...query };
+  //     return await db.expirationRule.findMany(search);
+  //   },
+  // }),
 }));
 
 // ============================================ Mutations ===================================
@@ -356,22 +349,14 @@ builder.mutationFields((t) => ({
       ingredient: t.arg({ type: createIngredientInput, required: true }),
     },
     resolve: async (query, root, args) => {
+      const ingredientInput: Prisma.IngredientCreateInput = {
+        name: args.ingredient.name,
+        storageInstructions: args.ingredient.storageInstructions,
+      };
+      if (args.ingredient.alternateNames)
+        ingredientInput.alternateNames = args.ingredient.alternateNames;
       return await db.ingredient.create({
-        data: {
-          name: args.ingredient.name,
-          alternateNames: args.ingredient.alternateNames
-            ? {
-                createMany: {
-                  data: args.ingredient.alternateNames?.map(
-                    (alternateName) => ({
-                      name: alternateName,
-                    })
-                  ),
-                },
-              }
-            : undefined,
-          storageInstructions: args.ingredient.storageInstructions,
-        },
+        data: ingredientInput,
         ...query,
       });
     },
@@ -405,40 +390,17 @@ builder.mutationFields((t) => ({
           where: { id: args.ingredientIdToDelete },
           select: {
             name: true,
-            alternateNames: {
-              select: {
-                name: true,
-              },
-            },
+            alternateNames: true,
           },
         });
         // Upsert new names on the merged record
-        const names = [
-          old?.name,
-          old?.alternateNames.map((altName) => {
-            altName.name;
-          }),
-        ].flat();
-        for (const name of names) {
-          try {
-            if (name) {
-              await tx.ingredientAlternateName.create({
-                data: { ingredientId: args.ingredientIdToKeep, name: name },
-              });
-            }
-          } catch (error) {
-            if (
-              error &&
-              typeof error === "object" &&
-              "code" in error &&
-              error.code === "P2002"
-            ) {
-              console.log("Duplicate name not added");
-            } else {
-              throw error;
-            }
-          }
-        }
+        const names = [old?.name, old?.alternateNames].filter(
+          (name) => name
+        ) as string[];
+        await tx.ingredient.update({
+          where: { id: args.ingredientIdToKeep },
+          data: { alternateNames: names },
+        });
         // Delete the old record
         await tx.ingredient.delete({
           where: { id: args.ingredientIdToDelete },

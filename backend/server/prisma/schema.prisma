@@ -53,6 +53,13 @@ enum NutrientType {
   OTHER
 }
 
+enum UnitType {
+  VOLUME
+  WEIGHT
+  COUNT
+  ENERGY
+}
+
 model MealPlan {
   id                   String     @id @default(cuid())
   name                 String
@@ -129,9 +136,10 @@ model RecipeIngredient {
 
 model MeasurementUnit {
   id              String             @id @default(cuid())
-  name            String
+  name            String             @unique
   abbreviations   String[]
-  symbol          String
+  symbol          String?
+  type            UnitType?
   ingredients     RecipeIngredient[]
   nutrients       Nutrient[]
   ingredientPrice IngredientPrice[]
@@ -148,14 +156,14 @@ model RecipeIngredientGroup {
 }
 
 model Ingredient {
-  id                  String                    @id @default(cuid())
+  id                  String             @id @default(cuid())
   recipeIngredient    RecipeIngredient[]
-  name                String                    @unique
+  name                String             @unique
   alternateNames      String[]
   variant             String?
   storageInstructions String?
   priceHistory        IngredientPrice[]
-  expirationRule      ExpirationRule?           @relation(fields: [expirationRuleId], references: [id], onDelete: SetNull)
+  expirationRule      ExpirationRule?    @relation(fields: [expirationRuleId], references: [id], onDelete: SetNull)
   expirationRuleId    String?
 }
 
@@ -243,19 +251,17 @@ model NutritionLabel {
   recipe            Recipe?                  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId          String?
   ingredientGroup   RecipeIngredientGroup?   @relation(fields: [ingredientGroupId], references: [id], onDelete: Cascade)
-  ingredientGroupId String?                   @unique
+  ingredientGroupId String?                  @unique
   nutrients         NutritionLabelNutrient[]
   name              String?
   servings          Float?
   servingSize       Float?
-  servingSizeUnit   MeasurementUnit?        @relation(fields: [unitId], references: [id])
+  servingSizeUnit   MeasurementUnit?         @relation(fields: [unitId], references: [id])
   unitId            String?
   servingsUsed      Float?
   importRecord      ImportRecord?            @relation(fields: [importRecordId], references: [id])
   importRecordId    String?                  @unique
 }
-
-
 
 model NutritionLabelNutrient {
   nutritionLabel   NutritionLabel @relation(fields: [nutritionLabelId], references: [id], onDelete: Cascade)
@@ -263,7 +269,8 @@ model NutritionLabelNutrient {
   nutrient         Nutrient       @relation(fields: [nutrientId], references: [id], onDelete: Restrict)
   nutrientId       String
   value            Float
-  valuePerServing   Float?
+  valuePerServing  Float?
+
   @@id([nutritionLabelId, nutrientId])
 }
 
@@ -272,9 +279,8 @@ model Nutrient {
   name                    String                   @unique
   alternateNames          String[]
   type                    NutrientType
-  advancedView              Boolean
-  expandedView            Boolean?
-  customTarget             Float?
+  advancedView            Boolean
+  customTarget            Float?
   dri                     DailyReferenceIntake[]
   parentNutrientId        String?
   parentNutrient          Nutrient?                @relation("SubNutrients", fields: [parentNutrientId], references: [id])

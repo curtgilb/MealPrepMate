@@ -5,38 +5,38 @@ import { cast } from "../../util/Cast.js";
 
 // The purpose of this class is to take data read in from reading csv, html, etc, files and transform them so that they are ready to be inserted into the database.
 export class Transformer {
-  createMappings(nutrients: { [key: string]: string }[]): Mappings {
-    // Create mappings from import names to nutrient names
-    const mappings: Mappings = {
-      myFitnessPal: {},
-      recipeKeeper: {},
-      cronometer: {},
-      dri: {},
-    };
-    nutrients.reduce(
-      (
-        accumulation: Mappings,
-        current: { [key: string]: string }
-      ): Mappings => {
-        if (current.recipeKeeper !== undefined) {
-          accumulation.recipeKeeper[current.recipeKeeper] = current.nutrient;
-        }
-        if (current.cronometer !== undefined) {
-          accumulation.cronometer[current.cronometer] = current.nutrient;
-        }
-        if (current.dri !== undefined) {
-          accumulation.dri[current.dri] = current.nutrient;
-        }
-        if (current.myFitnessPal !== undefined) {
-          accumulation.myFitnessPal[current.myFitnessPal] = current.nutrient;
-        }
-        return accumulation;
-      },
-      mappings
-    );
+  // createMappings(nutrients: { [key: string]: string }[]): Mappings {
+  //   // Create mappings from import names to nutrient names
+  //   const mappings: Mappings = {
+  //     myFitnessPal: {},
+  //     recipeKeeper: {},
+  //     cronometer: {},
+  //     dri: {},
+  //   };
+  //   nutrients.reduce(
+  //     (
+  //       accumulation: Mappings,
+  //       current: { [key: string]: string }
+  //     ): Mappings => {
+  //       if (current.recipeKeeper !== undefined) {
+  //         accumulation.recipeKeeper[current.recipeKeeper] = current.nutrient;
+  //       }
+  //       if (current.cronometer !== undefined) {
+  //         accumulation.cronometer[current.cronometer] = current.nutrient;
+  //       }
+  //       if (current.dri !== undefined) {
+  //         accumulation.dri[current.dri] = current.nutrient;
+  //       }
+  //       if (current.myFitnessPal !== undefined) {
+  //         accumulation.myFitnessPal[current.myFitnessPal] = current.nutrient;
+  //       }
+  //       return accumulation;
+  //     },
+  //     mappings
+  //   );
 
-    return mappings;
-  }
+  //   return mappings;
+  // }
 
   // In order to create with alternate names, records must be create one at a time (i.e., no createMany)
   toIngredient(record: {

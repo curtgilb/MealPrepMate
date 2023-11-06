@@ -1,6 +1,7 @@
 import {
   Gender,
   SpecialCondition,
+  UnitType,
   DayOfWeek,
   NutrientType,
 } from "@prisma/client";
@@ -136,6 +137,21 @@ function toDayOfWeekEnum(value: string): DayOfWeek {
   throw new Error(`Unable to convert ${value} to a day of week`);
 }
 
+function toMeasurementUnitTypeEnum(value: string): UnitType {
+  switch (value.toUpperCase()) {
+    case "COUNT":
+      return "COUNT";
+    case "VOLUME":
+      return "VOLUME";
+    case "WEIGHT":
+      return "WEIGHT";
+    case "ENERGY":
+      return "ENERGY";
+    default:
+      return "COUNT";
+  }
+}
+
 export {
   cast,
   toNumber,
@@ -144,4 +160,5 @@ export {
   toGenderEnum,
   toSpecialConditionEnum,
   toDayOfWeekEnum,
+  toMeasurementUnitTypeEnum,
 };

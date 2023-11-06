@@ -1,5 +1,5 @@
 /* eslint-disable */
-import type { Prisma, MealPlan, Servings, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, ExpirationRule, IngredientAlternateName, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, DailyReferenceIntake, HealthProfile } from "@prisma/client";
+import type { Prisma, MealPlan, Servings, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, ExpirationRule, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, DailyReferenceIntake, HealthProfile } from "@prisma/client";
 export default interface PrismaTypes {
     MealPlan: {
         Name: "MealPlan";
@@ -184,16 +184,12 @@ export default interface PrismaTypes {
         Where: Prisma.IngredientWhereInput;
         Create: {};
         Update: {};
-        RelationName: "recipeIngredient" | "alternateNames" | "priceHistory" | "expirationRule";
-        ListRelations: "recipeIngredient" | "alternateNames" | "priceHistory";
+        RelationName: "recipeIngredient" | "priceHistory" | "expirationRule";
+        ListRelations: "recipeIngredient" | "priceHistory";
         Relations: {
             recipeIngredient: {
                 Shape: RecipeIngredient[];
                 Name: "RecipeIngredient";
-            };
-            alternateNames: {
-                Shape: IngredientAlternateName[];
-                Name: "IngredientAlternateName";
             };
             priceHistory: {
                 Shape: IngredientPrice[];
@@ -220,25 +216,6 @@ export default interface PrismaTypes {
         Relations: {
             ingredients: {
                 Shape: Ingredient[];
-                Name: "Ingredient";
-            };
-        };
-    };
-    IngredientAlternateName: {
-        Name: "IngredientAlternateName";
-        Shape: IngredientAlternateName;
-        Include: Prisma.IngredientAlternateNameInclude;
-        Select: Prisma.IngredientAlternateNameSelect;
-        OrderBy: Prisma.IngredientAlternateNameOrderByWithRelationInput;
-        WhereUnique: Prisma.IngredientAlternateNameWhereUniqueInput;
-        Where: Prisma.IngredientAlternateNameWhereInput;
-        Create: {};
-        Update: {};
-        RelationName: "ingredient";
-        ListRelations: never;
-        Relations: {
-            ingredient: {
-                Shape: Ingredient;
                 Name: "Ingredient";
             };
         };
