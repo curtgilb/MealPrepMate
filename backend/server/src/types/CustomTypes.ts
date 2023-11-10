@@ -1,4 +1,3 @@
-import { RecordStatus } from "@prisma/client";
 import { Gender, SpecialCondition } from "@prisma/client";
 
 type RecipeNlpResponse = {
@@ -41,8 +40,8 @@ type RecipeKeeperRecipe = {
   recipeCollection: string[];
   recipeCategory: string[];
   rawInput: string;
-  matchId: string;
-  status: RecordStatus;
+  // matchId: string;
+  // status: RecordStatus;
 };
 
 type Ingredient = {

@@ -1,4 +1,4 @@
-import { Prisma, Recipe as PrismaRecipe } from "@prisma/client";
+import { MeasurementUnit, Prisma } from "@prisma/client";
 import { RecipeInput } from "../types/gql.js";
 import { parse } from "recipe-ingredient-parser-v3";
 import { cast, toNumber } from "../util/Cast.js";
@@ -8,21 +8,15 @@ import {
   Mappings,
 } from "../types/CustomTypes.js";
 import { readJSON } from "../services/io/Readers.js";
-import { db } from "../db.js";
 import { toTitleCase } from "../util/utils.js";
-
-type RecipeQuery = {
-  include?: Prisma.RecipeInclude | undefined;
-  select?: Prisma.RecipeSelect | undefined;
-};
+import { db } from "../db.js";
 
 async function createRecipe(
-  recipe: RecipeInput,
-  query?: RecipeQuery
-): Promise<PrismaRecipe> {
-  return await db.recipe.create({
+  recipe: RecipeInput
+): Promise<Prisma.RecipeCreateArgs> {
+  return {
     data: {
-      title: recipe.title,
+      title: toTitleCase(recipe.title),
       source: recipe.source,
       preparationTime: recipe.prepTime,
       cookingTime: recipe.cookTime,
@@ -47,11 +41,59 @@ async function createRecipe(
       leftoverFreezerLife: recipe.leftoverFreezerLife,
       leftoverFridgeLife: recipe.leftoverFridgeLife,
     },
-    ...query,
-  });
+  };
+}
+
+// Recipe Keeper methods
+async function createRecipeKeeperRecipe(
+  recipe: RecipeKeeperRecipe,
+  imageMapping: { [key: string]: string }
+): Promise<Prisma.RecipeCreateInput> {
+  const dbStmt: Prisma.RecipeCreateInput = {
+    recipeKeeperId: cast(toTitleCase(recipe.recipeId)) as string,
+    title: cast(toTitleCase(recipe.name)) as string,
+    source: cast(recipe.recipeSource) as string,
+    preparationTime: getTime(recipe.prepTime),
+    cookingTime: getTime(recipe.cookTime),
+    directions: cast(recipe.recipeDirections) as string,
+    notes: cast(recipe.recipeNotes) as string,
+    stars: cast(recipe.recipeRating) as number,
+    isFavorite: cast(recipe.recipeIsFavourite) as boolean,
+    nutritionLabel: buildNutritionStmt(recipe),
+    photos: buildPhotosStmt(recipe, imageMapping),
+    isVerified: false,
+    course: createCourseStmt(
+      recipe.recipeCourse
+    ) as Prisma.CourseCreateNestedManyWithoutRecipesInput,
+    category: createCourseStmt(
+      recipe.recipeCategory
+    ) as Prisma.CategoryCreateNestedManyWithoutRecipesInput,
+    ingredients: await createRecipeIngredientsStmt(recipe.recipeIngredients),
+  };
+
+  return dbStmt;
 }
 
 // ===========================================Helper functions=============================
+
+function matchUnit(
+  units: MeasurementUnit[],
+  search: string
+): MeasurementUnit | undefined {
+  const matches = units.filter((unit) => {
+    return (
+      unit.name.toLowerCase().includes(search.toLowerCase()) ||
+      unit.abbreviations.some((abbrev) =>
+        abbrev.toLowerCase().includes(search.toLowerCase())
+      )
+    );
+  });
+
+  if (matches.length > 0) {
+    return matches[0];
+  }
+  return undefined;
+}
 
 async function createRecipeIngredientsStmt(
   ingredients: string | undefined | null
@@ -63,7 +105,10 @@ async function createRecipeIngredientsStmt(
   }
   const taggedIngredients = await tagIngredients(ingredients);
   const matchedIngredients = await matchIngredients(taggedIngredients);
+  const units = await db.measurementUnit.findMany({});
+
   const ingredientsToCreate = matchedIngredients.map((ingredient, index) => {
+    const matchedUnit = matchUnit(units, ingredient.unit);
     const data: Prisma.RecipeIngredientCreateWithoutRecipeInput = {
       order: index,
       sentence: cast(ingredient.sentence) as string,
@@ -73,13 +118,17 @@ async function createRecipeIngredientsStmt(
       quantity: cast(ingredient.quantity) as number,
       comment: cast(ingredient.comment) as string,
       other: cast(ingredient.other) as string,
-      // unit: cast(ingredient.unit) as string,
     };
     if (ingredient.matchedIngredient !== undefined) {
       data.ingredient = {
         connect: {
           id: cast(ingredient.matchedIngredient) as string,
         },
+      };
+    }
+    if (matchedUnit) {
+      data.unit = {
+        connect: { id: matchedUnit.id },
       };
     }
     return data;
@@ -104,9 +153,7 @@ async function matchIngredients(
           },
           {
             alternateNames: {
-              some: {
-                name: { contains: ingredient.name, mode: "insensitive" },
-              },
+              has: toTitleCase(ingredient.name),
             },
           },
         ],
@@ -156,55 +203,6 @@ async function tagIngredients(
   });
 }
 
-// function cleanIngredientResponse(
-//   ingredientInput: RecipeNlpResponse
-// ): RecipeNlpResponse {
-//   const { sentence, quantity, unit, name, comment, other } = ingredientInput;
-//   const data: RecipeNlpResponse = {
-//     sentence: cast(sentence) as string,
-//     quantity: cast(quantity) as number,
-//     unit: cast(unit) as string,
-//     name: cast(name) as string,
-//     comment: cast(comment) as string,
-//     other: cast(other) as string,
-//   };
-//   if (ingredientInput.matchedIngredient) {
-//     data.matchedIngredient = cast(ingredientInput.matchedIngredient) as string;
-//   }
-//   return data;
-// }
-
-// Recipe Keeper methods
-async function createRecipeKeeperRecipe(
-  recipe: RecipeKeeperRecipe,
-  imageMapping: { [key: string]: string },
-  query?: RecipeQuery
-): Promise<PrismaRecipe> {
-  const dbStmt: Prisma.RecipeCreateInput = {
-    recipeKeeperId: cast(recipe.recipeId) as string,
-    title: cast(recipe.name) as string,
-    source: cast(recipe.recipeSource) as string,
-    preparationTime: getTime(recipe.prepTime),
-    cookingTime: getTime(recipe.cookTime),
-    directions: cast(recipe.recipeDirections) as string,
-    notes: cast(recipe.recipeNotes) as string,
-    stars: cast(recipe.recipeRating) as number,
-    isFavorite: cast(recipe.recipeIsFavourite) as boolean,
-    nutritionLabel: buildNutritionStmt(recipe),
-    photos: buildPhotosStmt(recipe, imageMapping),
-    isVerified: false,
-    course: createCourseStmt(
-      recipe.recipeCourse
-    ) as Prisma.CourseCreateNestedManyWithoutRecipesInput,
-    category: createCourseStmt(
-      recipe.recipeCategory
-    ) as Prisma.CategoryCreateNestedManyWithoutRecipesInput,
-    ingredients: await createRecipeIngredientsStmt(recipe.recipeIngredients),
-  };
-
-  return await db.recipe.create({ data: dbStmt, ...query });
-}
-
 function createCourseStmt(courses: string[]): unknown {
   const newCourses = courses
     .filter((course) => cast(course) as string)
@@ -224,27 +222,20 @@ function createCourseStmt(courses: string[]): unknown {
 function buildPhotosStmt(
   recipe: RecipeKeeperRecipe,
   imageMapping: { [key: string]: string }
-): Prisma.RecipePhotosCreateNestedManyWithoutRecipeInput | undefined {
+): Prisma.PhotoCreateNestedManyWithoutRecipeInput | undefined {
   if (recipe.photos.length > 0) {
     return {
-      create: recipe.photos.map((photo) => ({
-        isPrimary: checkIfPrimaryPhoto(photo),
-        photo: {
-          connect: {
-            hash: imageMapping[photo],
-          },
-        },
-      })),
+      connect: recipe.photos.map((photo) => ({ hash: imageMapping[photo] })),
     };
   }
   return undefined;
 }
 
 //Check the filename to see if the path is primary photo in Recipe Keeper
-function checkIfPrimaryPhoto(filePath: string): boolean {
-  const removedExtension = filePath.replace(/\.[^/.]+$/, "");
-  return removedExtension.endsWith("_0");
-}
+// function checkIfPrimaryPhoto(filePath: string): boolean {
+//   const removedExtension = filePath.replace(/\.[^/.]+$/, "");
+//   return removedExtension.endsWith("_0");
+// }
 
 function filterNutrients(recipe: RecipeKeeperRecipe, mapping: Mappings) {
   const nutrients = Object.keys(mapping.recipeKeeper);
@@ -258,12 +249,10 @@ function filterNutrients(recipe: RecipeKeeperRecipe, mapping: Mappings) {
 function buildNutritionStmt(
   recipe: RecipeKeeperRecipe
 ): Prisma.NutritionLabelCreateNestedManyWithoutRecipeInput {
-  const nutrientMappings = readJSON("../mappings.json") as Mappings;
+  const nutrientMappings = readJSON("../../mappings.json") as Mappings;
   return {
     create: {
       name: cast(recipe.name) as string,
-      source: "RECIPE_KEEPER",
-      percentage: 100,
       servings: extractServingSize(recipe.recipeYield),
       nutrients: {
         create: filterNutrients(recipe, nutrientMappings).map((nutrient) => {

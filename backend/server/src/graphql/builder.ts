@@ -8,7 +8,7 @@ import type PrismaTypes from "../types/PothosTypes.js";
 const builder = new SchemaBuilder<{
   PrismaTypes: PrismaTypes;
   Scalars: {
-    File: { Input: File; Output: File };
+    File: { Input: File; Output: never };
     DateTime: { Input: Date; Output: Date };
   };
 }>({

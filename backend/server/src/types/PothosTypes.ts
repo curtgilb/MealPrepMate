@@ -1,5 +1,5 @@
 /* eslint-disable */
-import type { Prisma, MealPlan, Servings, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, ExpirationRule, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, DailyReferenceIntake, HealthProfile } from "@prisma/client";
+import type { Prisma, MealPlan, Servings, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, IngredientCategory, ExpirationRule, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, DailyReferenceIntake, HealthProfile } from "@prisma/client";
 export default interface PrismaTypes {
     MealPlan: {
         Name: "MealPlan";
@@ -103,7 +103,7 @@ export default interface PrismaTypes {
         ListRelations: never;
         Relations: {
             unit: {
-                Shape: MeasurementUnit;
+                Shape: MeasurementUnit | null;
                 Name: "MeasurementUnit";
             };
             recipe: {
@@ -184,12 +184,16 @@ export default interface PrismaTypes {
         Where: Prisma.IngredientWhereInput;
         Create: {};
         Update: {};
-        RelationName: "recipeIngredient" | "priceHistory" | "expirationRule";
+        RelationName: "recipeIngredient" | "category" | "priceHistory" | "expirationRule";
         ListRelations: "recipeIngredient" | "priceHistory";
         Relations: {
             recipeIngredient: {
                 Shape: RecipeIngredient[];
                 Name: "RecipeIngredient";
+            };
+            category: {
+                Shape: IngredientCategory | null;
+                Name: "IngredientCategory";
             };
             priceHistory: {
                 Shape: IngredientPrice[];
@@ -198,6 +202,25 @@ export default interface PrismaTypes {
             expirationRule: {
                 Shape: ExpirationRule | null;
                 Name: "ExpirationRule";
+            };
+        };
+    };
+    IngredientCategory: {
+        Name: "IngredientCategory";
+        Shape: IngredientCategory;
+        Include: Prisma.IngredientCategoryInclude;
+        Select: Prisma.IngredientCategorySelect;
+        OrderBy: Prisma.IngredientCategoryOrderByWithRelationInput;
+        WhereUnique: Prisma.IngredientCategoryWhereUniqueInput;
+        Where: Prisma.IngredientCategoryWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "ingredients";
+        ListRelations: "ingredients";
+        Relations: {
+            ingredients: {
+                Shape: Ingredient[];
+                Name: "Ingredient";
             };
         };
     };

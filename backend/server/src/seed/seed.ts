@@ -6,6 +6,7 @@ import { cast, toMeasurementUnitTypeEnum } from "../util/Cast.js";
 const prisma = new PrismaClient();
 import { db } from "../db.js";
 import { NutrientParser } from "../services/parsers/NutrientParser.js";
+import { IngredientParser } from "../services/parsers/IngredientParser.js";
 const bucketPolicy =
   '{"Version":"2012-10-17","Statement":[{"Sid":"PublicReadGetObject","Effect":"Allow","Principal":"*","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::$$$/*"]}]}';
 
@@ -16,17 +17,17 @@ const bucketPolicy =
 
 (async () => {
   await deleteAllRecords();
-  // await createBuckets();
-  // await deleteBuckets();
+  await deleteBuckets();
+  await createBuckets();
   await loadUnits();
   await loadCourses();
   await loadCateogries();
   await loadCuisines();
   await loadNutrients();
-  // await loadIngredients();
+  await loadIngredients();
 
   // await loadRecipes();
-  // await loadHealthProfile();
+  await loadHealthProfile();
 })()
   .then(() => {
     console.log("Seeding complete");
@@ -71,29 +72,29 @@ async function loadUnits() {
   });
 }
 
-// async function createBuckets() {
-//   const buckets = ["imports", "photos"];
-//   for (const bucket of buckets) {
-//     await storage.makeBucket(bucket);
-//     await storage.setBucketPolicy(bucket, bucketPolicy.replace("$$$", bucket));
-//   }
-// }
+async function createBuckets() {
+  const buckets = ["imports", "images"];
+  for (const bucket of buckets) {
+    await storage.makeBucket(bucket);
+    await storage.setBucketPolicy(bucket, bucketPolicy.replace("$$$", bucket));
+  }
+}
 
-// async function loadHealthProfile() {
-//   await prisma.healthProfile.create({
-//     data: {
-//       weight: 180,
-//       gender: "MALE",
-//       bodyFatPercentage: 0.25,
-//       height: 72,
-//       yearBorn: 1994,
-//       activityLevel: 1.2,
-//       targetProtein: 0.25,
-//       targetCarbs: 0.5,
-//       targetFat: 0.5,
-//     },
-//   });
-// }
+async function loadHealthProfile() {
+  await prisma.healthProfile.create({
+    data: {
+      weight: 180,
+      gender: "MALE",
+      bodyFatPercentage: 0.25,
+      height: 72,
+      yearBorn: 1994,
+      activityLevel: 1.2,
+      // targ: 0.25,
+      // targetCarbs: 0.5,
+      // targetFat: 0.5,
+    },
+  });
+}
 
 async function loadCateogries() {
   await prisma.category.createMany({
@@ -158,17 +159,19 @@ async function loadNutrients() {
   }
 }
 
-// async function loadIngredients() {
-//   // Load in Ingredients
-//   const transformer = new Transformer();
-//   const ingredients = await readCSV("../../data/Ingredients.csv");
-//   // for (const ingredient of ingredients) {
-//   await prisma.ingredient.createMany({
-//     data: ingredients.map((ingredient) => transformer.toIngredient(ingredient)),
-//     skipDuplicates: true,
-//   });
-//   // }
-// }
+async function loadIngredients() {
+  // Load in Ingredients
+  const parser = new IngredientParser();
+  const expRulesStmt = await parser.parseExpirationRules();
+  const categoriesStmt = await parser.parseIngredientCategories();
+  await db.expirationRule.createMany({ data: expRulesStmt });
+  await db.category.createMany({ data: categoriesStmt, skipDuplicates: true });
+  const ingredientStmt = await parser.parseIngredients(
+    await db.expirationRule.findMany({}),
+    await db.category.findMany({})
+  );
+  await db.ingredient.createMany({ data: ingredientStmt });
+}
 
 export async function deleteAllRecords() {
   const tablenames = await prisma.$queryRaw<

@@ -1,4 +1,7 @@
 import { builder } from "../builder.js";
+import { processRecipeKeeperImport } from "../../services/import/RecipeKeeperImport.js";
+import { processCronometerImport } from "../../services/import/CronometerImport.js";
+
 // ============================================ Types ===================================
 builder.prismaObject("Import", {
   fields: (t) => ({
@@ -26,17 +29,29 @@ builder.prismaObject("ImportRecord", {
 
 // ============================================ Mutations ===============================
 
-// builder.mutationFields((t) => ({
-//   import: t.prismaField({
-//     type: "Import",
-//     args: {
-//       file: t.arg({
-//         type: "File",
-//         required: true,
-//       }),
-//     },
-//     resolve: async (query, root, args, ctx, info) => {
-//       return await processRecipeKeeperImport(args.file);
-//     },
-//   }),
-// }));
+builder.mutationFields((t) => ({
+  importRecipeKeeper: t.prismaField({
+    type: "Import",
+    args: {
+      file: t.arg({
+        type: "File",
+        required: true,
+      }),
+    },
+    resolve: async (query, root, args) => {
+      return await processRecipeKeeperImport(args.file, query);
+    },
+  }),
+  importCronometer: t.prismaField({
+    type: "Import",
+    args: {
+      file: t.arg({
+        type: "File",
+        required: true,
+      }),
+    },
+    resolve: async (query, root, { file }) => {
+      return await processCronometerImport(file);
+    },
+  }),
+}));

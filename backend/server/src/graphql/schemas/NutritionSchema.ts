@@ -33,6 +33,7 @@ builder.prismaObject("Nutrient", {
     id: t.exposeString("id"),
     name: t.exposeString("name"),
     otherNames: t.exposeStringList("alternateNames"),
+    childNutrients: t.relation("subNutrients"),
     unit: t.relation("unit"),
     type: t.exposeString("type"),
     dailyReferenceIntakeValue: t.float({

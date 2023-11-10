@@ -39,6 +39,35 @@ async function createNutritionLabel(
   return [baseLabel, ...subLabels];
 }
 
+async createCronometerNutritionLabel()
+
+// toNutritionLabel(
+//   csvData: {
+//     [key: string]: string;
+//   },
+//   nutrientNameMap: Mappings,
+//   nutrientIdMap: { [key: string]: string }
+// ): Prisma.NutritionLabelCreateInput {
+//   const { day, time, group, foodName, amount, category, ...rest } = csvData;
+//   return {
+//     name: cast(foodName) as string,
+//     servings: extractServingSize(amount),
+//     source: "CRONOMETER",
+//     nutrients: {
+//       create: Object.entries(rest).map(([nutrient, recomendation]) => {
+//         return {
+//           value: cast(recomendation) as number,
+//           nutrient: {
+//             connect: {
+//               id: nutrientIdMap[nutrientNameMap.cronometer[nutrient]],
+//             },
+//           },
+//         };
+//       }),
+//     },
+//   };
+// }
+
 function getCorrectServings(
   args: EditNutritionLabelInput,
   original: LabelWithNutrients

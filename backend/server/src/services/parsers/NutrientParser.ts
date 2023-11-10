@@ -9,7 +9,6 @@ import {
 } from "../../util/Cast.js";
 import { cast } from "../../util/Cast.js";
 import { writeJson } from "../io/Readers.js";
-import { al } from "vitest/dist/reporters-5f784f42.js";
 
 type NutrientParseInput = {
   nutrientPath: string;
@@ -51,7 +50,7 @@ export class NutrientParser {
       : "../../../data/seed_data/minerals_dri.csv";
     this.mappingSavePath = input?.mappingSavePath
       ? input.mappingSavePath
-      : "../../../mappings.json";
+      : "../../mappings.json";
   }
 
   async parse(): Promise<NutrientParseOutput> {
@@ -116,16 +115,18 @@ export class NutrientParser {
       createNutrientsStmt.push(createStmt);
 
       // Connect parent and child nutrients
-      updateNutrientsStmt.push({
-        where: { name: record.nutrient },
-        data: {
-          parentNutrient: {
-            connect: {
-              name: record.parentNutrient,
+      if (record.parentNutrient) {
+        updateNutrientsStmt.push({
+          where: { name: record.nutrient },
+          data: {
+            parentNutrient: {
+              connect: {
+                name: record.parentNutrient,
+              },
             },
           },
-        },
-      });
+        });
+      }
     }
     return {
       createNutrientsStmt,
@@ -142,14 +143,16 @@ export class NutrientParser {
       const { gender, specialCondition, minAge, maxAge, ...rest } = record;
 
       for (const [nutrient, value] of Object.entries(rest)) {
-        createDriStmts.push({
-          nutrient: { connect: { name: this.mappings.dri[nutrient] } },
-          value: cast(value) as number,
-          gender: toGenderEnum(gender),
-          ageMin: cast(minAge) as number,
-          ageMax: cast(maxAge) as number,
-          specialCondition: toSpecialConditionEnum(specialCondition),
-        });
+        if (this.mappings.dri[nutrient]) {
+          createDriStmts.push({
+            nutrient: { connect: { name: this.mappings.dri[nutrient] } },
+            value: cast(value) as number,
+            gender: toGenderEnum(gender),
+            ageMin: cast(minAge) as number,
+            ageMax: cast(maxAge) as number,
+            specialCondition: toSpecialConditionEnum(specialCondition),
+          });
+        }
       }
     }
     return createDriStmts;

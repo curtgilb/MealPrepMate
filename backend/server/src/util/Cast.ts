@@ -16,7 +16,7 @@ enum CastType {
 function cast(
   value: unknown,
   targetType = CastType.AUTO,
-  defaultValue: unknown = null
+  defaultValue: unknown = undefined
 ): unknown {
   if (value === undefined || value === null) {
     return defaultValue;

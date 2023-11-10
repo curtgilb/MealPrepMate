@@ -32,17 +32,6 @@ enum ImportType {
   CRONOMETER
 }
 
-enum IngredientCategory {
-  DAIRY
-  VEGETABLE
-  FRUIT
-  MEAT
-  GRAIN
-  SAUCE
-  SPICE
-  BAKING
-}
-
 enum NutrientType {
   CARBOHYDRATE
   FAT
@@ -85,7 +74,7 @@ model Import {
   type          ImportType
   status        ImportStatus
   path          String
-  imageMapping  String?
+  imageMapping  Json?
   createdAt     DateTime       @default(now())
   importRecords ImportRecord[]
 }
@@ -96,9 +85,11 @@ model ImportRecord {
   importId       String
   rawInput       String
   name           String
+  parsedFormat   Json
+  doNotImport     Boolean        @default(false)
   status         RecordStatus
   recipe         Recipe?         @relation(fields: [recipeId], references: [id])
-  recipeId       String
+  recipeId       String?
   nutritionLabel NutritionLabel?
   createdAt      DateTime        @default(now())
 }
@@ -124,8 +115,8 @@ model RecipeIngredient {
   comment           String?
   other             String?
   order             Int
-  unit              MeasurementUnit        @relation(fields: measurementUnitId, references: [id])
-  measurementUnitId String
+  unit              MeasurementUnit?        @relation(fields: [measurementUnitId], references: [id])
+  measurementUnitId String?
   recipe            Recipe                 @relation(fields: [recipeId], references: [id])
   recipeId          String // relation scalar field (used in the `@relation` attribute above)
   ingredient        Ingredient?            @relation(fields: [ingredientId], references: [id])
@@ -161,14 +152,24 @@ model Ingredient {
   name                String             @unique
   alternateNames      String[]
   variant             String?
+  category            IngredientCategory? @relation(fields: [categoryId], references:[id], onDelete:SetNull)
+  categoryId          String?
   storageInstructions String?
   priceHistory        IngredientPrice[]
   expirationRule      ExpirationRule?    @relation(fields: [expirationRuleId], references: [id], onDelete: SetNull)
   expirationRuleId    String?
 }
 
+model IngredientCategory {
+  id    String  @id @default(cuid())
+  name  String @unique
+  ingredients Ingredient[]
+}
+
 model ExpirationRule {
   id          String       @id @default(cuid())
+  name        String
+  variant     String?
   defrostTime Int?
   perishable  Boolean?
   tableLife   Int?
@@ -320,7 +321,11 @@ model HealthProfile {
   height            Float
   yearBorn          Int
   activityLevel     Float
-  targetProtein     Float
-  targetCarbs       Float
-  targetFat         Float
+  targetProteinPercentage     Float?
+  targetProteinGrams          Float?
+  targetCarbsPercentage       Float?
+  targetCarbsGrams            Float?
+  targetFatPercentage         Float?
+  targetFatGrams              Float?
 }
+

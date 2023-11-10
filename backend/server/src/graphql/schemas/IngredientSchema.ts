@@ -35,6 +35,8 @@ builder.prismaObject("IngredientPrice", {
 builder.prismaObject("ExpirationRule", {
   fields: (t) => ({
     id: t.exposeID("id"),
+    name: t.exposeString("name"),
+    variation: t.exposeString("variant", { nullable: true }),
     defrostTime: t.exposeInt("defrostTime", { nullable: true }),
     perishable: t.exposeBoolean("perishable", { nullable: true }),
     tableLife: t.exposeInt("tableLife", { nullable: true }),
@@ -77,6 +79,8 @@ const editPriceHistory = builder.inputType("EditPriceHistoryInput", {
 
 const createExpirationRule = builder.inputType("CreateExpirationRule", {
   fields: (t) => ({
+    name: t.string({ required: true }),
+    variation: t.string(),
     defrostTime: t.float(),
     perishable: t.boolean(),
     tableLife: t.int(),
@@ -269,6 +273,8 @@ builder.mutationFields((t) => ({
     resolve: async (query, root, args) => {
       return await db.expirationRule.create({
         data: {
+          name: args.rule.name,
+          variant: args.rule.variation,
           defrostTime: args.rule.defrostTime,
           perishable: args.rule.perishable,
           tableLife: args.rule.tableLife,

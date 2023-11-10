@@ -5,13 +5,14 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-type CsvOutput = {
+export type CsvOutput = {
   record: { [key: string]: string };
   raw: string;
 };
 
 async function readCSV(
   source: string,
+  isPath: boolean = true,
   camelCaseHeaders = true
 ): Promise<CsvOutput[]> {
   const parserOptions = {
@@ -22,8 +23,13 @@ async function readCSV(
     bom: true,
     raw: true,
   };
-  const fullPath = path.join(__dirname, source);
-  const parser = fs.createReadStream(fullPath).pipe(parse(parserOptions));
+  let parser;
+  if (isPath) {
+    const fullPath = path.join(__dirname, source);
+    parser = fs.createReadStream(fullPath).pipe(parse(parserOptions));
+  } else {
+    parser = parse(source, parserOptions);
+  }
 
   const records: CsvOutput[] = [];
   for await (const record of parser) {
