@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Nutrient, PrismaClient } from "@prisma/client";
 import { readCSV } from "../services/io/Readers.js";
 
 import { storage } from "../storage.js";
@@ -9,11 +9,6 @@ import { NutrientParser } from "../services/parsers/NutrientParser.js";
 import { IngredientParser } from "../services/parsers/IngredientParser.js";
 const bucketPolicy =
   '{"Version":"2012-10-17","Statement":[{"Sid":"PublicReadGetObject","Effect":"Allow","Principal":"*","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::$$$/*"]}]}';
-
-// Units first
-// Nutrients
-// Ingredients
-// Recipes
 
 (async () => {
   await deleteAllRecords();
@@ -51,9 +46,6 @@ async function deleteBuckets() {
     stream.on("end", () => {
       storage.removeObjects(bucket.name, objectsToDelete, (error) => {
         if (error) console.log(error);
-        storage.removeBucket(bucket.name, (error) => {
-          if (error) console.log(error);
-        });
       });
     });
   }
@@ -147,15 +139,18 @@ async function loadCuisines() {
 
 async function loadNutrients() {
   const nutrients = new NutrientParser();
-  const stmts = await nutrients.parse();
+  const stmts = await nutrients.parseNutrients();
+  // Create Nutrients
   await db.nutrient.createMany({ data: stmts.createNutrientsStmt });
 
-  for (const driCreateStmt of stmts.dri) {
-    await db.dailyReferenceIntake.create({ data: driCreateStmt });
-  }
-
+  // Update Stmt for linking child nutrients
+  const createdNutrients: Nutrient[] = [];
   for (const updateStmt of stmts.updateNutrientsStmt) {
-    await db.nutrient.update(updateStmt);
+    createdNutrients.push(await db.nutrient.update(updateStmt));
+  }
+  const driStmt = await nutrients.parseDRIs(createdNutrients);
+  for (const driCreateStmt of driStmt) {
+    await db.dailyReferenceIntake.create({ data: driCreateStmt });
   }
 }
 
@@ -190,17 +185,3 @@ export async function deleteAllRecords() {
     console.log(error);
   }
 }
-
-// async function loadRecipes() {
-//   const recipes = readHTML("../../data/RecipeKeeper/recipes.html");
-//   const createStmts = await toRecipeCreateInputFromRecipeKeeper(
-//     prisma,
-//     recipes
-//   );
-
-//   for (const createStmt of createStmts) {
-//     await prisma.recipe.create({
-//       data: createStmt,
-//     });
-//   }
-// }

@@ -1,5 +1,4 @@
-import { MeasurementUnit, Prisma } from "@prisma/client";
-import { Mappings } from "../../types/CustomTypes.js";
+import { MeasurementUnit, Nutrient, Prisma } from "@prisma/client";
 import { readCSV } from "../io/Readers.js";
 import { db } from "../../db.js";
 import {
@@ -8,7 +7,6 @@ import {
   toSpecialConditionEnum,
 } from "../../util/Cast.js";
 import { cast } from "../../util/Cast.js";
-import { writeJson } from "../io/Readers.js";
 
 type NutrientParseInput = {
   nutrientPath: string;
@@ -17,26 +15,10 @@ type NutrientParseInput = {
   mappingSavePath: string;
 };
 
-type NutrientParseOutput = {
-  createNutrientsStmt: Prisma.NutrientCreateManyInput[];
-  updateNutrientsStmt: Prisma.NutrientUpdateArgs[];
-  dri: Prisma.DailyReferenceIntakeCreateInput[];
-  mappings: Mappings;
-};
-
 export class NutrientParser {
-  // Dictionary of import types (recipekeeper, my fitness pal,etc.).
-  // Each of those are a dictionary mapping name in csv to DB name
-  mappings: Mappings = {
-    cronometer: {},
-    recipeKeeper: {},
-    myFitnessPal: {},
-    dri: {},
-  };
   nutrientPath: string;
   mineralDriPath: string;
   vitaminDriPath: string;
-  mappingSavePath: string;
 
   constructor(input?: NutrientParseInput) {
     this.nutrientPath = input?.nutrientPath
@@ -48,21 +30,6 @@ export class NutrientParser {
     this.mineralDriPath = input?.mineralDriPath
       ? input.mineralDriPath
       : "../../../data/seed_data/minerals_dri.csv";
-    this.mappingSavePath = input?.mappingSavePath
-      ? input.mappingSavePath
-      : "../../mappings.json";
-  }
-
-  async parse(): Promise<NutrientParseOutput> {
-    const nutrients = await this.parseNutrients();
-    const dris = await this.parseDRIs();
-    writeJson(this.mappingSavePath, this.mappings);
-    return {
-      createNutrientsStmt: nutrients.createNutrientsStmt,
-      updateNutrientsStmt: nutrients.updateNutrientsStmt,
-      dri: dris,
-      mappings: this.mappings,
-    };
   }
 
   private findUnitMatch(
@@ -78,7 +45,7 @@ export class NutrientParser {
     return result[0].id;
   }
 
-  private async parseNutrients(): Promise<{
+  async parseNutrients(): Promise<{
     createNutrientsStmt: Prisma.NutrientCreateManyInput[];
     updateNutrientsStmt: Prisma.NutrientUpdateArgs[];
   }> {
@@ -89,13 +56,6 @@ export class NutrientParser {
     const createNutrientsStmt: Prisma.NutrientCreateManyInput[] = [];
     const updateNutrientsStmt: Prisma.NutrientUpdateArgs[] = [];
     for (const { record } of data) {
-      // Create the mapping
-      for (const type of Object.keys(this.mappings)) {
-        if (record[type]) {
-          this.mappings[type][record[type]] = record.nutrient;
-        }
-      }
-
       // Grab the available units
       const units = await db.measurementUnit.findMany({});
       if (units.length === 0)
@@ -107,6 +67,10 @@ export class NutrientParser {
         type: toNutrientTypeEnum(record.type),
         advancedView: cast(record.advancedView) as boolean,
         unitId: this.findUnitMatch(units, record.unit),
+        recipeKeeperMapping: cast(record.recipeKeeper) as string,
+        cronometerMapping: cast(record.cronometer) as string,
+        myFitnessPalMapping: cast(record.myFitnessPal) as string,
+        driMapping: cast(record.dri) as string,
       };
       const altNames = record.alternateNames.split(", ").filter((name) => name);
       if (altNames.length > 0) {
@@ -134,18 +98,26 @@ export class NutrientParser {
     };
   }
 
-  private async parseDRIs(): Promise<Prisma.DailyReferenceIntakeCreateInput[]> {
+  async parseDRIs(
+    nutrients: Nutrient[]
+  ): Promise<Prisma.DailyReferenceIntakeCreateInput[]> {
     const mineralDRI = await readCSV(this.mineralDriPath);
     const vitaminDRI = await readCSV(this.vitaminDriPath);
     const dris = [...mineralDRI, ...vitaminDRI];
     const createDriStmts: Prisma.DailyReferenceIntakeCreateInput[] = [];
+    const mapping = nutrients.reduce((aggregate, nutrient) => {
+      if (nutrient.driMapping) {
+        aggregate.set(nutrient.driMapping, nutrient.id);
+      }
+      return aggregate;
+    }, new Map<string, string>());
     for (const { record } of dris) {
       const { gender, specialCondition, minAge, maxAge, ...rest } = record;
 
       for (const [nutrient, value] of Object.entries(rest)) {
-        if (this.mappings.dri[nutrient]) {
+        if (mapping.has(nutrient)) {
           createDriStmts.push({
-            nutrient: { connect: { name: this.mappings.dri[nutrient] } },
+            nutrient: { connect: { id: mapping.get(nutrient) } },
             value: cast(value) as number,
             gender: toGenderEnum(gender),
             ageMin: cast(minAge) as number,

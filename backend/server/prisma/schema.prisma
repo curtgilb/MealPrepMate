@@ -73,7 +73,6 @@ model Import {
   fileHash      String
   type          ImportType
   status        ImportStatus
-  path          String
   imageMapping  Json?
   createdAt     DateTime       @default(now())
   importRecords ImportRecord[]
@@ -86,7 +85,7 @@ model ImportRecord {
   rawInput       String
   name           String
   parsedFormat   Json
-  doNotImport     Boolean        @default(false)
+  doNotImport    Boolean         @default(false)
   status         RecordStatus
   recipe         Recipe?         @relation(fields: [recipeId], references: [id])
   recipeId       String?
@@ -115,7 +114,7 @@ model RecipeIngredient {
   comment           String?
   other             String?
   order             Int
-  unit              MeasurementUnit?        @relation(fields: [measurementUnitId], references: [id])
+  unit              MeasurementUnit?       @relation(fields: [measurementUnitId], references: [id])
   measurementUnitId String?
   recipe            Recipe                 @relation(fields: [recipeId], references: [id])
   recipeId          String // relation scalar field (used in the `@relation` attribute above)
@@ -147,22 +146,22 @@ model RecipeIngredientGroup {
 }
 
 model Ingredient {
-  id                  String             @id @default(cuid())
+  id                  String              @id @default(cuid())
   recipeIngredient    RecipeIngredient[]
-  name                String             @unique
+  name                String              @unique
   alternateNames      String[]
   variant             String?
-  category            IngredientCategory? @relation(fields: [categoryId], references:[id], onDelete:SetNull)
+  category            IngredientCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   categoryId          String?
   storageInstructions String?
   priceHistory        IngredientPrice[]
-  expirationRule      ExpirationRule?    @relation(fields: [expirationRuleId], references: [id], onDelete: SetNull)
+  expirationRule      ExpirationRule?     @relation(fields: [expirationRuleId], references: [id], onDelete: SetNull)
   expirationRuleId    String?
 }
 
 model IngredientCategory {
-  id    String  @id @default(cuid())
-  name  String @unique
+  id          String       @id @default(cuid())
+  name        String       @unique
   ingredients Ingredient[]
 }
 
@@ -255,6 +254,7 @@ model NutritionLabel {
   ingredientGroupId String?                  @unique
   nutrients         NutritionLabelNutrient[]
   name              String?
+  verfied           Boolean               @default(true)
   servings          Float?
   servingSize       Float?
   servingSizeUnit   MeasurementUnit?         @relation(fields: [unitId], references: [id])
@@ -289,6 +289,10 @@ model Nutrient {
   NutritionLabelNutrients NutritionLabelNutrient[]
   unit                    MeasurementUnit          @relation(fields: [unitId], references: [id])
   unitId                  String
+  recipeKeeperMapping     String?
+  cronometerMapping       String?
+  myFitnessPalMapping     String?
+  driMapping              String?
 }
 
 model DailyReferenceIntake {
@@ -314,18 +318,17 @@ enum SpecialCondition {
 }
 
 model HealthProfile {
-  id                String @id @default(cuid())
-  weight            Float
-  gender            Gender
-  bodyFatPercentage Float
-  height            Float
-  yearBorn          Int
-  activityLevel     Float
-  targetProteinPercentage     Float?
-  targetProteinGrams          Float?
-  targetCarbsPercentage       Float?
-  targetCarbsGrams            Float?
-  targetFatPercentage         Float?
-  targetFatGrams              Float?
+  id                      String @id @default(cuid())
+  weight                  Float
+  gender                  Gender
+  bodyFatPercentage       Float
+  height                  Float
+  yearBorn                Int
+  activityLevel           Float
+  targetProteinPercentage Float?
+  targetProteinGrams      Float?
+  targetCarbsPercentage   Float?
+  targetCarbsGrams        Float?
+  targetFatPercentage     Float?
+  targetFatGrams          Float?
 }
-

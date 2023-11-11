@@ -10,6 +10,7 @@ import { getFileMetaData, FileMetaData } from "./ImportService.js";
 import { Prisma, ImportRecord, RecordStatus, Recipe } from "@prisma/client";
 import { db } from "../../db.js";
 import { createRecipeKeeperRecipe } from "../../extensions/RecipeExtension.js";
+import { ImportQuery } from "../../types/CustomTypes.js";
 
 const APPROX_MATCH_THRESHOLD = 0.8;
 
@@ -18,11 +19,6 @@ type RecipeKeeperExtractedData = {
   fileMeta: FileMetaData;
   recipes: RecipeKeeperRecipe[];
   images: { [key: string]: string };
-};
-
-type ImportQuery = {
-  include?: Prisma.ImportInclude | undefined;
-  select?: Prisma.ImportSelect | undefined;
 };
 
 export async function processRecipeKeeperImport(
@@ -97,7 +93,8 @@ async function saveRecipeData(
 }
 
 export type Match = {
-  matchingId: string | undefined;
+  matchingRecipeId: string | undefined;
+  matchingLabelId: string | undefined;
   importStatus: RecordStatus;
 };
 

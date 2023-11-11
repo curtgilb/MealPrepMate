@@ -1,18 +1,25 @@
-import { Import, ImportRecord } from "@prisma/client";
+import { Import, ImportRecord, Prisma } from "@prisma/client";
 import { CsvOutput, readCSV } from "../io/Readers.js";
 import { getFileMetaData } from "./ImportService.js";
 import { hash } from "./ImportService.js";
 import { db } from "../../db.js";
 import { Match } from "./RecipeKeeperImport.js";
+import { CronometerParser } from "../parsers/CronometerParser.js";
+import { CronometerNutrition } from "../../types/CustomTypes.js";
+import { ImportQuery } from "../../types/CustomTypes.js";
+import { createCronometerNutritionLabel } from "../../extensions/NutritionExtension.js";
 // Does hashing the buffer or string result in a different hash
 
-export async function processCronometerImport(source: File): Promise<Import> {
+export async function processCronometerImport(
+  source: File,
+  query: ImportQuery
+): Promise<Import> {
   const fileMeta = getFileMetaData(source.name);
   const fileHash = hash(await source.text());
   // const bufferHash = hash(Buffer.from(await source.arrayBuffer()));
 
   // Take hash of file to compare to existing imports
-  // If hash alreaddy exists, do not import
+  // If hash already exists, do not import
   const lastImport = await db.import.findFirst({
     where: { type: "CRONOMETER" },
     orderBy: { createdAt: "desc" },
@@ -22,21 +29,46 @@ export async function processCronometerImport(source: File): Promise<Import> {
     throw Error("No changes made since the last import");
   }
 
-  const records = await readCSV(await source.text(), false);
-  const matches = await findCronometerLabelMatches(records);
-  for (const [index, record] of records.entries()) {
+  // const records = await readCSV(await source.text(), false);
+  const parsedRecords = await new CronometerParser().parse(await source.text());
+  const matches = await findCronometerLabelMatches(parsedRecords);
+
+  for (const [index, record] of parsedRecords.entries()) {
     if (matches[index].importStatus === "IMPORTED") {
+      const label = await createCronometerNutritionLabel(
+        record,
+        matches[index].matchingRecipeId
+      );
+      matches[index].matchingLabelId = label.id;
     }
   }
 
-  // If it doesn't match, compare each record raw input
-  // Check for approxiamate matches with exact name matches
-  // Create nutritional labels for ones that didn't match
-  // Create import records
-  return db.import.findUniqueOrThrow({ where: { id: "asdf" } });
+  return await db.import.create({
+    data: {
+      fileName: fileMeta.name,
+      fileHash: fileHash,
+      type: "CRONOMETER",
+      status: "PENDING",
+      importRecords: {
+        createMany: {
+          data: parsedRecords.map((record, index) => ({
+            rawInput: record.rawInput,
+            name: record.foodName,
+            parsedFormat: record as unknown as Prisma.JsonObject,
+            status: matches[index].importStatus,
+            recipeId: matches[index].matchingRecipeId,
+            nutritionLabelId: matches[index].matchingLabelId,
+          })),
+        },
+      },
+    },
+    ...query,
+  });
 }
 
-async function findCronometerLabelMatches(data: CsvOutput[]): Promise<Match[]> {
+async function findCronometerLabelMatches(
+  data: CronometerNutrition[]
+): Promise<Match[]> {
   const matches: Match[] = [];
   const importRecords = await db.importRecord.findMany({
     where: { import: { type: "CRONOMETER" } },
@@ -47,7 +79,9 @@ async function findCronometerLabelMatches(data: CsvOutput[]): Promise<Match[]> {
       nutritionLabel: { select: { id: true, name: true } },
     },
   });
-  const lookup = importRecords.reduce(
+  // Lookup map rawInput -> nutritionLabelId
+  // and name --> nutritionLabelId
+  const labelLookup = importRecords.reduce(
     (aggregation: Map<string, string>, record) => {
       if (!aggregation.has(record.rawInput) && record.nutritionLabel?.id) {
         aggregation.set(record.rawInput, record.nutritionLabel.id);
@@ -63,26 +97,36 @@ async function findCronometerLabelMatches(data: CsvOutput[]): Promise<Match[]> {
     new Map()
   );
 
-  for (const { record, raw } of data) {
+  for (const row of data) {
+    // Search for a recipe match
+    const recipe = await db.recipe.findFirst({
+      where: { title: { contains: row.foodName, mode: "insensitive" } },
+    });
     // Check for exact match
-    if (lookup.has(raw)) {
+    if (labelLookup.has(row.rawInput)) {
       matches.push({
-        matchingId: lookup.get(raw) as string,
+        matchingLabelId: labelLookup.get(row.rawInput) as string,
+        matchingRecipeId: recipe?.id,
         importStatus: "DUPLICATE",
       });
       continue;
     }
 
     // Check for approximate match
-    if (lookup.has(record.name)) {
+    if (labelLookup.has(row.foodName)) {
       matches.push({
-        matchingId: lookup.get(record.name) as string,
+        matchingLabelId: labelLookup.get(row.foodName) as string,
+        matchingRecipeId: recipe?.id,
         importStatus: "PENDING",
       });
       continue;
     }
 
-    matches.push({ matchingId: undefined, importStatus: "IMPORTED" });
+    matches.push({
+      matchingLabelId: undefined,
+      matchingRecipeId: recipe?.id,
+      importStatus: "IMPORTED",
+    });
   }
   return matches;
 }

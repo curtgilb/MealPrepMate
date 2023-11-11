@@ -16,3 +16,4 @@ builder.enumType(RecordStatus, { name: "RecordStatus" });
 builder.enumType(DayOfWeek, { name: "DayOfWeek" });
 builder.enumType(ImportType, { name: "ImportType" });
 builder.enumType(NutrientType, { name: "NutrientType" });
+builder.enumType(ImportType, { name: "ImportType" });

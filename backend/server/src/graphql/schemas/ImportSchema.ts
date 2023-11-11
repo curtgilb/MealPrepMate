@@ -9,7 +9,7 @@ builder.prismaObject("Import", {
     fileName: t.exposeString("fileName"),
     type: t.exposeString("type"),
     status: t.exposeString("status"),
-    url: t.exposeString("path"),
+    createdAt: t.expose("createdAt", { type: "DateTime" }),
     records: t.relation("importRecords"),
     recordsCount: t.relationCount("importRecords"),
   }),
@@ -24,6 +24,13 @@ builder.prismaObject("ImportRecord", {
   }),
 });
 // ============================================ Inputs ==================================
+// const createImportInput = builder.inputType("CreateImportInput", {
+//   fields: (t) => ({
+//     file: t.,
+//     alternateNames: t.stringList(),
+//     storageInstructions: t.string(),
+//   }),
+// });
 
 // ============================================ Queries =================================
 
@@ -35,6 +42,10 @@ builder.mutationFields((t) => ({
     args: {
       file: t.arg({
         type: "File",
+        required: true,
+      }),
+      type: t.arg({
+        type: "ImportType",
         required: true,
       }),
     },

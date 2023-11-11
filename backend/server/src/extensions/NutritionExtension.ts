@@ -5,6 +5,7 @@ import {
 } from "../types/gql.js";
 import { Prisma, NutritionLabel } from "@prisma/client";
 import { db } from "../db.js";
+import { CronometerNutrition } from "../types/CustomTypes.js";
 
 type NutritionLabelQuery = {
   include?: Prisma.NutritionLabelInclude | undefined;
@@ -39,34 +40,29 @@ async function createNutritionLabel(
   return [baseLabel, ...subLabels];
 }
 
-async createCronometerNutritionLabel()
-
-// toNutritionLabel(
-//   csvData: {
-//     [key: string]: string;
-//   },
-//   nutrientNameMap: Mappings,
-//   nutrientIdMap: { [key: string]: string }
-// ): Prisma.NutritionLabelCreateInput {
-//   const { day, time, group, foodName, amount, category, ...rest } = csvData;
-//   return {
-//     name: cast(foodName) as string,
-//     servings: extractServingSize(amount),
-//     source: "CRONOMETER",
-//     nutrients: {
-//       create: Object.entries(rest).map(([nutrient, recomendation]) => {
-//         return {
-//           value: cast(recomendation) as number,
-//           nutrient: {
-//             connect: {
-//               id: nutrientIdMap[nutrientNameMap.cronometer[nutrient]],
-//             },
-//           },
-//         };
-//       }),
-//     },
-//   };
-// }
+async function createCronometerNutritionLabel(
+  input: CronometerNutrition,
+  matchingRecipeId: string | undefined,
+  query?: NutritionLabelQuery
+) {
+  const servingsDenominator = input.amount ? input.amount : 1;
+  return await db.nutritionLabel.create({
+    data: {
+      name: input.foodName,
+      servings: input.amount,
+      nutrients: {
+        createMany: {
+          data: input.nutrients.map((nutrient) => ({
+            value: nutrient.amount,
+            valuePerServing: nutrient.amount / servingsDenominator,
+            nutrientId: nutrient.id,
+          })),
+        },
+      },
+    },
+    ...query,
+  });
+}
 
 function getCorrectServings(
   args: EditNutritionLabelInput,
@@ -215,4 +211,8 @@ function createEditLabelStatment(
   return stmt;
 }
 
-export { createNutritionLabel, editNutritionLabels };
+export {
+  createNutritionLabel,
+  createCronometerNutritionLabel,
+  editNutritionLabels,
+};
