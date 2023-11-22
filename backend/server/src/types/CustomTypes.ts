@@ -1,4 +1,3 @@
-import { Gender, SpecialCondition } from "@prisma/client";
 import { Prisma } from "@prisma/client";
 
 type RecipeNlpResponse = {
@@ -7,7 +6,9 @@ type RecipeNlpResponse = {
   unit: string;
   name: string;
   comment: string;
+  preparation: string;
   other: string;
+
   minQty?: number;
   maxQty?: number;
   matchedIngredient?: string;
@@ -26,16 +27,18 @@ type RecipeKeeperRecipe = {
   recipeIngredients: string;
   recipeDirections: string;
   recipeNotes: string;
-  recipeNutServingSize: string;
-  recipeNutCalories: string;
-  recipeNutTotalFat: string;
-  recipeNutSaturatedFat: string;
-  recipeNutSodium: string;
-  recipeNutTotalCarbohydrate: string;
-  recipeNutSugars: string;
-  recipeNutProtein: string;
-  recipeNutCholesterol: string;
-  recipeNutDietaryFiber: string;
+  nutritionServingSize: string;
+  // recipeNutServingSize: string;
+  // recipeNutCalories: string;
+  // recipeNutTotalFat: string;
+  // recipeNutSaturatedFat: string;
+  // recipeNutSodium: string;
+  // recipeNutTotalCarbohydrate: string;
+  // recipeNutSugars: string;
+  // recipeNutProtein: string;
+  // recipeNutCholesterol: string;
+  // recipeNutDietaryFiber: string;
+  nutrients: Nutrient[];
   recipeCourse: string[];
   photos: string[];
   recipeCollection: string[];

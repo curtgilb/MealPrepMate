@@ -99,9 +99,12 @@ enum ImportStatus {
 }
 
 enum RecordStatus {
-  IMPORTED
-  DUPLICATE
-  PENDING
+  IMPORTED //Item was imported into DB
+  DUPLICATE //Already exists in the DB
+  UPDATED //Item was updated in the DB to match the import
+  IGNORED // item was ignored as requested by user
+  PENDING // item is pending user action, may already exist in DB
+  VERIFIED // User has marked this item as verified
 }
 
 model RecipeIngredient {
@@ -254,7 +257,7 @@ model NutritionLabel {
   ingredientGroupId String?                  @unique
   nutrients         NutritionLabelNutrient[]
   name              String?
-  verfied           Boolean               @default(true)
+  verfied           Boolean               @default(false)
   servings          Float?
   servingSize       Float?
   servingSizeUnit   MeasurementUnit?         @relation(fields: [unitId], references: [id])

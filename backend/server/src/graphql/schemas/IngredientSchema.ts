@@ -90,12 +90,12 @@ const createExpirationRule = builder.inputType("CreateExpirationRule", {
   }),
 });
 
-const paginationInput = builder.inputType("Pagination", {
-  fields: (t) => ({
-    start: t.int({ required: true }),
-    limit: t.int({ required: true }),
-  }),
-});
+// const paginationInput = builder.inputType("Pagination", {
+//   fields: (t) => ({
+//     start: t.int({ required: true }),
+//     limit: t.int({ required: true }),
+//   }),
+// });
 // const ingredientsFilter = builder.inputType("IngredientFilter", {});
 
 // ============================================ Queries ===================================

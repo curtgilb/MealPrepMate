@@ -9,7 +9,6 @@ import { compareTwoStrings } from "../../util/utils.js";
 import { getFileMetaData, FileMetaData } from "./ImportService.js";
 import { Prisma, ImportRecord, RecordStatus, Recipe } from "@prisma/client";
 import { db } from "../../db.js";
-import { createRecipeKeeperRecipe } from "../../extensions/RecipeExtension.js";
 import { ImportQuery } from "../../types/CustomTypes.js";
 
 const APPROX_MATCH_THRESHOLD = 0.8;
@@ -58,13 +57,16 @@ async function saveRecipeData(
 ) {
   return await db.$transaction(async (tx) => {
     for (const [index, recipe] of recipes.entries()) {
-      if (!matches[index].matchingId) {
-        const createStmt = await createRecipeKeeperRecipe(recipe, imageMapping);
+      if (!matches[index].matchingRecipeId) {
+        const createStmt = await tx.recipe.createRecipeKeeperRecipe(
+          recipe,
+          imageMapping
+        );
         const result = await tx.recipe.create({
           data: createStmt,
           select: { id: true },
         });
-        matches[index].matchingId = result.id;
+        matches[index].matchingRecipeId = result.id;
       }
     }
     return await tx.import.create({
@@ -74,7 +76,6 @@ async function saveRecipeData(
         type: "RECIPE_KEEPER",
         status: "PENDING",
         imageMapping: imageMapping as Prisma.JsonObject,
-        path: "",
         importRecords: {
           createMany: {
             data: recipes.map((recipe, index) => ({
@@ -82,7 +83,7 @@ async function saveRecipeData(
               status: matches[index].importStatus,
               parsedFormat: recipe as Prisma.JsonObject,
               rawInput: recipe.rawInput,
-              recipeId: matches[index].matchingId,
+              recipeId: matches[index].matchingRecipeId,
             })),
           },
         },
@@ -93,8 +94,8 @@ async function saveRecipeData(
 }
 
 export type Match = {
-  matchingRecipeId: string | undefined;
-  matchingLabelId: string | undefined;
+  matchingRecipeId?: string | undefined;
+  matchingLabelId?: string | undefined;
   importStatus: RecordStatus;
 };
 
@@ -108,7 +109,10 @@ async function findRecipeMatches(
     const previousMatch = await findExactRecipe(recipe);
 
     if (previousMatch) {
-      matches.push({ matchingId: previousMatch.id, importStatus: "DUPLICATE" });
+      matches.push({
+        matchingRecipeId: previousMatch.id,
+        importStatus: "DUPLICATE",
+      });
       continue;
     } else {
       // Check for updateable match by comparing keys (title + ingredients) for a similar match
@@ -123,13 +127,13 @@ async function findRecipeMatches(
         const approximateMatch = findApproximateRecipe(recipe, existingRecipes);
         if (approximateMatch) {
           matches.push({
-            matchingId: approximateMatch.id,
+            matchingRecipeId: approximateMatch.id,
             importStatus: "PENDING",
           });
           continue;
         }
       }
-      matches.push({ matchingId: undefined, importStatus: "IMPORTED" });
+      matches.push({ matchingRecipeId: undefined, importStatus: "IMPORTED" });
     }
   }
   return matches;
@@ -191,8 +195,8 @@ async function extractRecipes(
         const htmlData = (await file.buffer()).toString();
         htmlHash = hash(htmlData);
         htmlFileMeta = JSON.parse(JSON.stringify(fileMeta)) as FileMetaData;
-        const parser = new RecipeKeeperParser(htmlData);
-        recipeKeeperRecipes = parser.parse();
+        const parser = new RecipeKeeperParser();
+        recipeKeeperRecipes = await parser.parse(htmlData);
       } else if (["jpg", "png", "tiff"].includes(fileMeta.ext)) {
         await processImage(file, imageToHash, fileMeta);
       }

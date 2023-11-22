@@ -16,20 +16,20 @@ def convertToFloat(string):
     except ValueError:
         return string
 
-@app.get("/parse")
-def parse(ingredient:str, results:bool = False):
-    parsed_ingredient = parse_ingredient(ingredient, confidence=results)
-    parsed_ingredient["quantity"] = convertToFloat(parsed_ingredient["quantity"])
-    return parsed_ingredient
 
 @app.post("/parse")
 async def parse_batch(requestBody: MultipleIngredients):
     parsed_ingredients = []
     for ingredient in requestBody.ingredients:
-        result = parse_ingredient(ingredient, confidence=requestBody.confidence)
-        result["quantity"] = convertToFloat(result["quantity"])
-        parsed_ingredients.append(result)
+        print(ingredient)
+        result = parse_ingredient(ingredient)
+        transformedOutput = {}
+        transformedOutput["sentence"] = ingredient
+        transformedOutput["name"] = None if not hasattr(result.name, "text") else result.name.text
+        transformedOutput["comment"] = None if not hasattr(result.comment, "text") else result.comment.text
+        transformedOutput["other"] = result.other
+        transformedOutput["preparation"] = result.preparation
+        transformedOutput["quantity"] = convertToFloat(result.amount[0].quantity)
+        transformedOutput["unit"] = result.amount[0].unit
+        parsed_ingredients.append(transformedOutput)
     return parsed_ingredients
-
-# @app.post("/scraperecipe")
-#     def parse_recipe(requestBody):

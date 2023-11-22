@@ -1,5 +1,4 @@
 import { Import, ImportRecord, Prisma } from "@prisma/client";
-import { CsvOutput, readCSV } from "../io/Readers.js";
 import { getFileMetaData } from "./ImportService.js";
 import { hash } from "./ImportService.js";
 import { db } from "../../db.js";
@@ -7,7 +6,6 @@ import { Match } from "./RecipeKeeperImport.js";
 import { CronometerParser } from "../parsers/CronometerParser.js";
 import { CronometerNutrition } from "../../types/CustomTypes.js";
 import { ImportQuery } from "../../types/CustomTypes.js";
-import { createCronometerNutritionLabel } from "../../extensions/NutritionExtension.js";
 // Does hashing the buffer or string result in a different hash
 
 export async function processCronometerImport(
@@ -35,10 +33,8 @@ export async function processCronometerImport(
 
   for (const [index, record] of parsedRecords.entries()) {
     if (matches[index].importStatus === "IMPORTED") {
-      const label = await createCronometerNutritionLabel(
-        record,
-        matches[index].matchingRecipeId
-      );
+      const label =
+        await db.nutritionLabel.createCronometerNutritionLabel(record);
       matches[index].matchingLabelId = label.id;
     }
   }
@@ -102,6 +98,7 @@ async function findCronometerLabelMatches(
     const recipe = await db.recipe.findFirst({
       where: { title: { contains: row.foodName, mode: "insensitive" } },
     });
+
     // Check for exact match
     if (labelLookup.has(row.rawInput)) {
       matches.push({

@@ -1,7 +1,5 @@
-import { builder } from "../builder.js";
-import { Prisma } from "@prisma/client";
 import { db } from "../../db.js";
-import { createRecipe } from "../../extensions/RecipeExtension.js";
+import { builder } from "../builder.js";
 import { numericalComparison } from "./UtilitySchema.js";
 
 // ============================================ Types ===================================
@@ -180,14 +178,14 @@ const recipeFilter = builder.inputType("RecipeFilter", {
 
 // ============================================ Mutations ===============================
 
-// builder.mutationFields((t) => ({
-//   createRecipe: t.prismaField({
-//     type: "Recipe",
-//     args: {
-//       recipe: t.arg({ type: recipeInput, required: true }),
-//     },
-//     resolve: async (query, root, args) => {
-//       return createRecipe(args.recipe, query);
-//     },
-//   }),
-// }));
+builder.mutationFields((t) => ({
+  createRecipe: t.prismaField({
+    type: "Recipe",
+    args: {
+      recipe: t.arg({ type: recipeInput, required: true }),
+    },
+    resolve: async (query, root, args) => {
+      return await db.recipe.createRecipe(args.recipe, query);
+    },
+  }),
+}));

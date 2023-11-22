@@ -1,4 +1,4 @@
-import { Prisma, Photo, PrismaClient } from "@prisma/client";
+import { Prisma, Photo } from "@prisma/client";
 import { storage } from "../storage.js";
 import { hash, getFileExtension } from "../util/utils.js";
 import { v4 as uuidv4 } from "uuid";

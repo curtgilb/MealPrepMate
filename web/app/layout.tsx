@@ -12,6 +12,8 @@ import {
   createClient,
 } from "@urql/next";
 import { Inter as FontSans } from "next/font/google";
+import { SideDrawer } from "@/components/SideDrawer";
+import { NavBar } from "@/components/NavBar";
 
 export const fontSans = FontSans({
   subsets: ["latin"],
@@ -43,6 +45,8 @@ export default function RootLayout({
             fontSans.variable
           )}
         >
+          <NavBar />
+          <SideDrawer />
           {children}
         </body>
       </html>
