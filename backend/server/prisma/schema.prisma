@@ -16,16 +16,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum DayOfWeek {
-  SUNDAY
-  MONDAY
-  TUESDAY
-  WEDNESDAY
-  THURSDAY
-  FRIDAY
-  SATURDAY
-}
-
 enum ImportType {
   MY_FITNESS_PAL
   RECIPE_KEEPER
@@ -36,7 +26,7 @@ enum NutrientType {
   CARBOHYDRATE
   FAT
   PROTEIN
-  ALCHOHOL
+  ALCOHOL
   MINERAL
   VITAMIN
   OTHER
@@ -49,22 +39,64 @@ enum UnitType {
   ENERGY
 }
 
-model MealPlan {
-  id                   String     @id @default(cuid())
-  name                 String
-  mealPrepInstructions String
-  servings             Servings[]
+enum DayOfWeek {
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
 }
 
-model Servings {
-  mealPlan      MealPlan  @relation(fields: [mealPlanId], references: [id])
-  mealPlanId    String
-  recipe        Recipe    @relation(fields: [recipeId], references: [id])
-  recipeId      String
-  numOfServings Int
-  day           DayOfWeek
+enum Meal {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+}
 
-  @@id([mealPlanId, recipeId])
+model MealPlanChain {
+  id         String    @id @default(cuid())
+  name       String
+  prevWeek   MealPlan? @relation("PrevWeek", fields: [prevWeekId], references: [id])
+  prevWeekId String?
+  nextWeek   MealPlan? @relation("NextWeek", fields: [nextWeekId], references: [id])
+  nextWeekId String?
+}
+
+model MealPlan {
+  id                   String            @id @default(cuid())
+  name                 String
+  mealPrepInstructions String
+  planRecipes          MealPlanRecipe[]
+  MealPlanServings     MealPlanServing[]
+  prevWeeks            MealPlanChain[]   @relation("PrevWeek")
+  nextWeeks            MealPlanChain[]   @relation("NextWeek")
+}
+
+model MealPlanServing {
+  id               String         @id @default(cuid())
+  mealPlan         MealPlan       @relation(fields: [mealPlanId], references: [id])
+  mealPlanId       String
+  day              DayOfWeek
+  meal             Meal
+  recipe           MealPlanRecipe @relation(fields: [mealPlanRecipeId], references: [id])
+  mealPlanRecipeId String
+  numberOfServings Int
+
+  @@unique([mealPlanId, day, meal, mealPlanRecipeId])
+}
+
+model MealPlanRecipe {
+  id            String            @id @default(cuid())
+  mealPlan      MealPlan          @relation(fields: [mealPlanId], references: [id])
+  mealPlanId    String
+  recipe        Recipe            @relation(fields: [recipeId], references: [id])
+  recipeId      String
+  factor        Int
+  totalServings Int
+  servings      MealPlanServing[]
 }
 
 model Import {
@@ -93,11 +125,13 @@ model ImportRecord {
   createdAt      DateTime        @default(now())
 }
 
+// Status for entire import
 enum ImportStatus {
   PENDING
   COMPLETED
 }
 
+// Status for individual record
 enum RecordStatus {
   IMPORTED //Item was imported into DB
   DUPLICATE //Already exists in the DB
@@ -128,8 +162,8 @@ model RecipeIngredient {
 }
 
 model MeasurementUnit {
-  id              String             @id @default(cuid())
-  name            String             @unique
+  id              String                  @id @default(cuid())
+  name            String                  @unique
   abbreviations   String[]
   symbol          String?
   type            UnitType?
@@ -137,6 +171,8 @@ model MeasurementUnit {
   nutrients       Nutrient[]
   ingredientPrice IngredientPrice[]
   servingSizes    NutritionLabel[]
+  fromUnit        MeasurementConversion[] @relation("FromUnit")
+  toUnit          MeasurementConversion[] @relation("ToUnit")
 }
 
 model RecipeIngredientGroup {
@@ -149,17 +185,29 @@ model RecipeIngredientGroup {
 }
 
 model Ingredient {
-  id                  String              @id @default(cuid())
+  id                  String                  @id @default(cuid())
   recipeIngredient    RecipeIngredient[]
-  name                String              @unique
+  name                String                  @unique
   alternateNames      String[]
   variant             String?
-  category            IngredientCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  category            IngredientCategory?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   categoryId          String?
   storageInstructions String?
   priceHistory        IngredientPrice[]
-  expirationRule      ExpirationRule?     @relation(fields: [expirationRuleId], references: [id], onDelete: SetNull)
+  expirationRule      ExpirationRule?         @relation(fields: [expirationRuleId], references: [id], onDelete: SetNull)
   expirationRuleId    String?
+  conversionRatio     MeasurementConversion[]
+}
+
+model MeasurementConversion {
+  id              String          @id @default(cuid())
+  fromUnit        MeasurementUnit @relation("FromUnit", fields: [fromUnitId], references: [id])
+  fromUnitId      String
+  toUnit          MeasurementUnit @relation("ToUnit", fields: [toUnitId], references: [id])
+  toUnitId        String
+  conversionRatio Float
+  ingredient      Ingredient?     @relation(fields: [ingredientId], references: [id])
+  ingredientId    String?
 }
 
 model IngredientCategory {
@@ -211,7 +259,7 @@ model Recipe {
   cuisine             Cuisine?           @relation(fields: [cuisineId], references: [id], onDelete: SetNull)
   cuisineId           String?
   ingredients         RecipeIngredient[]
-  mealPlans           Servings[]
+  mealPlans           MealPlanRecipe[]
   importId            String?
   leftoverFridgeLife  Int?
   leftoverFreezerLife Int?
@@ -257,7 +305,7 @@ model NutritionLabel {
   ingredientGroupId String?                  @unique
   nutrients         NutritionLabelNutrient[]
   name              String?
-  verfied           Boolean               @default(false)
+  verfied           Boolean                  @default(false)
   servings          Float?
   servingSize       Float?
   servingSizeUnit   MeasurementUnit?         @relation(fields: [unitId], references: [id])
@@ -274,7 +322,6 @@ model NutritionLabelNutrient {
   nutrientId       String
   value            Float
   valuePerServing  Float?
-
   @@id([nutritionLabelId, nutrientId])
 }
 
