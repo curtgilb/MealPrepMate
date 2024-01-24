@@ -2,6 +2,7 @@ import { builder } from "../builder.js";
 import { Prisma } from "@prisma/client";
 import { db } from "../../db.js";
 import { toTitleCase } from "../../util/utils.js";
+import { z } from "zod";
 
 // ============================================ Types ===================================
 
@@ -127,7 +128,10 @@ builder.mutationFields((t) => ({
   createCategory: t.prismaField({
     type: ["Category"],
     args: {
-      name: t.arg.string({ required: true }),
+      name: t.arg.string({
+        required: true,
+        validate: { schema: z.string().min(1).max(100).transform(toTitleCase) },
+      }),
     },
     resolve: async (query, root, args) => {
       await db.category.create({ data: { name: args.name } });

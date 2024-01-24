@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { nutritionExtension } from "./extensions/NutritionExtension.js";
-import { recipeExtensions } from "./extensions/RecipeExtension.js";
+import { nutritionExtension } from "./models/NutritionExtension.js";
+import { recipeExtensions } from "./models/RecipeExtension.js";
 
 export const db = new PrismaClient()
   .$extends(recipeExtensions)

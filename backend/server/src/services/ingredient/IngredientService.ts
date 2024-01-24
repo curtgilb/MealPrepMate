@@ -19,7 +19,7 @@ async function tagIngredients(
     body: JSON.stringify(body),
     headers: { "Content-Type": "application/json" },
   });
-
+  // console.log(await response.text());
   const taggedIngredients = (await response.json()) as RecipeNlpResponse[];
   return taggedIngredients.map((ingredient) => {
     let minQty = undefined;

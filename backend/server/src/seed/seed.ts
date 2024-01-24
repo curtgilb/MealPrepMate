@@ -7,8 +7,25 @@ const prisma = new PrismaClient();
 import { db } from "../db.js";
 import { NutrientParser } from "../services/parsers/NutrientParser.js";
 import { IngredientParser } from "../services/parsers/IngredientParser.js";
-const bucketPolicy =
-  '{"Version":"2012-10-17","Statement":[{"Sid":"PublicReadGetObject","Effect":"Allow","Principal":"*","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::$$$/*"]}]}';
+const bucketPolicy = `{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": [
+                    "*"
+                ]
+            },
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::$$$/*"
+            ]
+        }
+    ]
+}`;
 
 (async () => {
   await deleteAllRecords();
@@ -37,17 +54,29 @@ const bucketPolicy =
 
 async function deleteBuckets() {
   const buckets = await storage.listBuckets();
+  const promises: Promise<string[]>[] = [];
+
   for (const bucket of buckets) {
-    const objectsToDelete: string[] = [];
-    const stream = storage.listObjectsV2(bucket.name, "", true);
-    stream.on("data", (object) => {
-      objectsToDelete.push(object.name as string);
-    });
-    stream.on("end", () => {
-      storage.removeObjects(bucket.name, objectsToDelete, (error) => {
-        if (error) console.log(error);
-      });
-    });
+    promises.push(
+      new Promise((resolve, reject) => {
+        const bucketObjects: string[] = [];
+        const stream = storage.listObjectsV2(bucket.name, "", true);
+        stream.on("data", function (obj) {
+          if (obj.name) bucketObjects.push(obj.name);
+          console.log(obj);
+        });
+        stream.on("end", () => {
+          resolve(bucketObjects);
+        });
+
+        stream.on("error", (err) => reject(err));
+      })
+    );
+  }
+  const files = await Promise.all(promises);
+  for (const [i, file] of files.entries()) {
+    await storage.removeObjects(buckets[i].name, file);
+    await storage.removeBucket(buckets[i].name);
   }
 }
 
@@ -158,14 +187,11 @@ async function loadIngredients() {
   // Load in Ingredients
   const parser = new IngredientParser();
   const expRulesStmt = await parser.parseExpirationRules();
-  const categoriesStmt = await parser.parseIngredientCategories();
   await db.expirationRule.createMany({ data: expRulesStmt });
-  await db.category.createMany({ data: categoriesStmt, skipDuplicates: true });
-  const ingredientStmt = await parser.parseIngredients(
-    await db.expirationRule.findMany({}),
-    await db.category.findMany({})
-  );
-  await db.ingredient.createMany({ data: ingredientStmt });
+  const ingredientStmt = await parser.parseIngredients();
+  for (const stmt of ingredientStmt) {
+    await db.ingredient.create({ data: stmt });
+  }
 }
 
 export async function deleteAllRecords() {

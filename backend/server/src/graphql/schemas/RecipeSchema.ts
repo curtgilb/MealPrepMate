@@ -1,6 +1,7 @@
 import { db } from "../../db.js";
 import { builder } from "../builder.js";
 import { numericalComparison } from "./UtilitySchema.js";
+import { recipeInputValidation } from "../validations/validations.js";
 
 // ============================================ Types ===================================
 builder.prismaObject("Recipe", {
@@ -54,14 +55,12 @@ builder.prismaObject("RecipeIngredientGroup", {
 const recipeInput = builder.inputType("RecipeInput", {
   fields: (t) => ({
     title: t.string({ required: true }),
-    servings: t.int({ required: true }),
     source: t.string(),
     prepTime: t.int(),
     cookTime: t.int(),
     marinadeTime: t.int({}),
     directions: t.string(),
     notes: t.string(),
-    stars: t.int(),
     photoIds: t.stringList(),
     isFavorite: t.boolean(),
     courseIds: t.stringList(),
@@ -88,93 +87,40 @@ const ingredientFilter = builder.inputType("IngredientFilter", {
     unitId: t.string(),
   }),
 });
-
+// Filter by nutrient (calroies or any nutrient per serving or per recipe)
+// Filter by ingredient
 const recipeFilter = builder.inputType("RecipeFilter", {
   fields: (t) => ({
-    // Searches recipe titles, ingredients
-    searchString: t.string(),
+    searchString: t.string(), // Searches recipe titles
     numOfServings: t.field({ type: numericalComparison }),
+    courseIds: t.stringList(),
+    cuisineId: t.stringList(),
+    categoryIds: t.stringList(),
+    prepTime: t.field({ type: numericalComparison }),
+    cookTime: t.field({ type: numericalComparison }),
+    marinadeTime: t.field({ type: numericalComparison }),
+    // totalPrepTime: t.field({ type: numericalComparison }),
+    isFavorite: t.boolean(),
     nutrientFilters: t.field({ type: [nutritionFilter] }),
     ingredientFilter: t.field({ type: [ingredientFilter] }),
   }),
 });
 
 // ============================================ Queries =================================
-// builder.queryFields((t) => ({
-//   recipes: t.prismaField({
-//     type: ["Recipe"],
-//     args: {
-//       filter: t.arg({ type: recipeFilter, required: true }),
-//     },
-//     resolve: async (query, root, args) => {
-//       const filters: Prisma.RecipeWhereInput[] = [];
-//       const search: Prisma.RecipeFindManyArgs = {
-//         where: {},
-//         ...query,
-//       };
-//       if (args.filter.searchString) {
-//         const name: Prisma.RecipeWhereInput = {
-//           OR: [
-//             {
-//               title: {
-//                 contains: args.filter.searchString,
-//                 mode: "insensitive",
-//               },
-//             },
-//             {
-//               ingredients: {
-//                 some: {
-//                   name: {
-//                     contains: args.filter.searchString,
-//                     mode: "insensitive",
-//                   },
-//                 },
-//               },
-//             },
-//           ],
-//         };
-//         filters.push(name);
-//       }
-
-//       if (args.filter.nutrientFilters) {
-//         const nutritionFilter: Prisma.NutritionLabelWhereInput[] = [];
-
-//         for (const nutrient of args.filter.nutrientFilters) {
-//           const filter =
-//           if (nutrient.target?.gte || nutrient.target?.lte) {
-//           } else if (nutrient.target?.eq) {
-//             nutritionFilter.push({});
-//           }
-
-//           const nutrientFilter: Prisma.RecipeWhereInput = {
-//             nutritionLabel: { every },
-//           };
-//         }
-
-//         await db.nutritionLabelNutrient.findMany({
-//           where: {
-//             OR: [
-//               {
-//                 AND: [
-//                   {
-//                     nutrientId: "dfg",
-//                   },
-//                   {
-//                     value: {
-//                       lte: 7,
-//                     },
-//                   },
-//                 ],
-//               },
-//             ],
-//           },
-//         });
-//       }
-
-//       return await db.recipe.findMany(search);
-//     },
-//   }),
-// }));
+builder.queryFields((t) => ({
+  recipe: t.prismaField({
+    type: "Recipe",
+    args: {
+      recipeId: t.arg.string({ required: true }),
+    },
+    resolve: async (query, root, args) => {
+      return await db.recipe.findUniqueOrThrow({
+        where: { id: args.recipeId },
+        ...query,
+      });
+    },
+  }),
+}));
 
 // ============================================ Mutations ===============================
 
@@ -182,10 +128,22 @@ builder.mutationFields((t) => ({
   createRecipe: t.prismaField({
     type: "Recipe",
     args: {
-      recipe: t.arg({ type: recipeInput, required: true }),
+      recipe: t.arg({
+        type: recipeInput,
+        required: true,
+        validate: {
+          schema: recipeInputValidation,
+        },
+      }),
     },
     resolve: async (query, root, args) => {
+      console.log(args.recipe);
       return await db.recipe.createRecipe(args.recipe, query);
     },
   }),
 }));
+
+// type: "Recipe",
+// args: {
+//   filter: t.arg({ type: recipeFilter, required: true }),
+// },

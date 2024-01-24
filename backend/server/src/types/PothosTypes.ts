@@ -1,6 +1,29 @@
 /* eslint-disable */
-import type { Prisma, MealPlan, Servings, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, IngredientCategory, ExpirationRule, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, DailyReferenceIntake, HealthProfile } from "@prisma/client";
+import type { Prisma, MealPlanChain, MealPlan, MealPlanServing, MealPlanRecipe, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, DailyReferenceIntake, HealthProfile } from "@prisma/client";
 export default interface PrismaTypes {
+    MealPlanChain: {
+        Name: "MealPlanChain";
+        Shape: MealPlanChain;
+        Include: Prisma.MealPlanChainInclude;
+        Select: Prisma.MealPlanChainSelect;
+        OrderBy: Prisma.MealPlanChainOrderByWithRelationInput;
+        WhereUnique: Prisma.MealPlanChainWhereUniqueInput;
+        Where: Prisma.MealPlanChainWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "prevWeek" | "nextWeek";
+        ListRelations: never;
+        Relations: {
+            prevWeek: {
+                Shape: MealPlan | null;
+                Name: "MealPlan";
+            };
+            nextWeek: {
+                Shape: MealPlan | null;
+                Name: "MealPlan";
+            };
+        };
+    };
     MealPlan: {
         Name: "MealPlan";
         Shape: MealPlan;
@@ -11,23 +34,35 @@ export default interface PrismaTypes {
         Where: Prisma.MealPlanWhereInput;
         Create: {};
         Update: {};
-        RelationName: "servings";
-        ListRelations: "servings";
+        RelationName: "planRecipes" | "MealPlanServings" | "prevWeeks" | "nextWeeks";
+        ListRelations: "planRecipes" | "MealPlanServings" | "prevWeeks" | "nextWeeks";
         Relations: {
-            servings: {
-                Shape: Servings[];
-                Name: "Servings";
+            planRecipes: {
+                Shape: MealPlanRecipe[];
+                Name: "MealPlanRecipe";
+            };
+            MealPlanServings: {
+                Shape: MealPlanServing[];
+                Name: "MealPlanServing";
+            };
+            prevWeeks: {
+                Shape: MealPlanChain[];
+                Name: "MealPlanChain";
+            };
+            nextWeeks: {
+                Shape: MealPlanChain[];
+                Name: "MealPlanChain";
             };
         };
     };
-    Servings: {
-        Name: "Servings";
-        Shape: Servings;
-        Include: Prisma.ServingsInclude;
-        Select: Prisma.ServingsSelect;
-        OrderBy: Prisma.ServingsOrderByWithRelationInput;
-        WhereUnique: Prisma.ServingsWhereUniqueInput;
-        Where: Prisma.ServingsWhereInput;
+    MealPlanServing: {
+        Name: "MealPlanServing";
+        Shape: MealPlanServing;
+        Include: Prisma.MealPlanServingInclude;
+        Select: Prisma.MealPlanServingSelect;
+        OrderBy: Prisma.MealPlanServingOrderByWithRelationInput;
+        WhereUnique: Prisma.MealPlanServingWhereUniqueInput;
+        Where: Prisma.MealPlanServingWhereInput;
         Create: {};
         Update: {};
         RelationName: "mealPlan" | "recipe";
@@ -38,8 +73,35 @@ export default interface PrismaTypes {
                 Name: "MealPlan";
             };
             recipe: {
+                Shape: MealPlanRecipe;
+                Name: "MealPlanRecipe";
+            };
+        };
+    };
+    MealPlanRecipe: {
+        Name: "MealPlanRecipe";
+        Shape: MealPlanRecipe;
+        Include: Prisma.MealPlanRecipeInclude;
+        Select: Prisma.MealPlanRecipeSelect;
+        OrderBy: Prisma.MealPlanRecipeOrderByWithRelationInput;
+        WhereUnique: Prisma.MealPlanRecipeWhereUniqueInput;
+        Where: Prisma.MealPlanRecipeWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "mealPlan" | "recipe" | "servings";
+        ListRelations: "servings";
+        Relations: {
+            mealPlan: {
+                Shape: MealPlan;
+                Name: "MealPlan";
+            };
+            recipe: {
                 Shape: Recipe;
                 Name: "Recipe";
+            };
+            servings: {
+                Shape: MealPlanServing[];
+                Name: "MealPlanServing";
             };
         };
     };
@@ -130,8 +192,8 @@ export default interface PrismaTypes {
         Where: Prisma.MeasurementUnitWhereInput;
         Create: {};
         Update: {};
-        RelationName: "ingredients" | "nutrients" | "ingredientPrice" | "servingSizes";
-        ListRelations: "ingredients" | "nutrients" | "ingredientPrice" | "servingSizes";
+        RelationName: "ingredients" | "nutrients" | "ingredientPrice" | "servingSizes" | "fromUnit" | "toUnit";
+        ListRelations: "ingredients" | "nutrients" | "ingredientPrice" | "servingSizes" | "fromUnit" | "toUnit";
         Relations: {
             ingredients: {
                 Shape: RecipeIngredient[];
@@ -148,6 +210,14 @@ export default interface PrismaTypes {
             servingSizes: {
                 Shape: NutritionLabel[];
                 Name: "NutritionLabel";
+            };
+            fromUnit: {
+                Shape: MeasurementConversion[];
+                Name: "MeasurementConversion";
+            };
+            toUnit: {
+                Shape: MeasurementConversion[];
+                Name: "MeasurementConversion";
             };
         };
     };
@@ -184,8 +254,8 @@ export default interface PrismaTypes {
         Where: Prisma.IngredientWhereInput;
         Create: {};
         Update: {};
-        RelationName: "recipeIngredient" | "category" | "priceHistory" | "expirationRule";
-        ListRelations: "recipeIngredient" | "priceHistory";
+        RelationName: "recipeIngredient" | "category" | "priceHistory" | "expirationRule" | "conversionRatio";
+        ListRelations: "recipeIngredient" | "priceHistory" | "conversionRatio";
         Relations: {
             recipeIngredient: {
                 Shape: RecipeIngredient[];
@@ -202,6 +272,37 @@ export default interface PrismaTypes {
             expirationRule: {
                 Shape: ExpirationRule | null;
                 Name: "ExpirationRule";
+            };
+            conversionRatio: {
+                Shape: MeasurementConversion[];
+                Name: "MeasurementConversion";
+            };
+        };
+    };
+    MeasurementConversion: {
+        Name: "MeasurementConversion";
+        Shape: MeasurementConversion;
+        Include: Prisma.MeasurementConversionInclude;
+        Select: Prisma.MeasurementConversionSelect;
+        OrderBy: Prisma.MeasurementConversionOrderByWithRelationInput;
+        WhereUnique: Prisma.MeasurementConversionWhereUniqueInput;
+        Where: Prisma.MeasurementConversionWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "fromUnit" | "toUnit" | "ingredient";
+        ListRelations: never;
+        Relations: {
+            fromUnit: {
+                Shape: MeasurementUnit;
+                Name: "MeasurementUnit";
+            };
+            toUnit: {
+                Shape: MeasurementUnit;
+                Name: "MeasurementUnit";
+            };
+            ingredient: {
+                Shape: Ingredient | null;
+                Name: "Ingredient";
             };
         };
     };
@@ -300,8 +401,8 @@ export default interface PrismaTypes {
                 Name: "RecipeIngredient";
             };
             mealPlans: {
-                Shape: Servings[];
-                Name: "Servings";
+                Shape: MealPlanRecipe[];
+                Name: "MealPlanRecipe";
             };
             nutritionLabel: {
                 Shape: NutritionLabel[];

@@ -1,10 +1,11 @@
 import { MeasurementUnit, Prisma, Recipe } from "@prisma/client";
-import { RecipeInput } from "../types/gql.js";
+import { RecipeInput, RecipeIngredient } from "../types/gql.js";
 import { tagIngredients } from "../services/ingredient/IngredientService.js";
 import { cast, toNumber } from "../util/Cast.js";
 import { RecipeNlpResponse, RecipeKeeperRecipe } from "../types/CustomTypes.js";
 import { toTitleCase } from "../util/utils.js";
 import { db } from "../db.js";
+import { CastType } from "../util/Cast.js";
 
 type RecipeQuery = {
   include?: Prisma.RecipeInclude | undefined;
@@ -17,18 +18,19 @@ export const recipeExtensions = Prisma.defineExtension((client) => {
     units: MeasurementUnit[],
     search: string
   ): MeasurementUnit | undefined {
-    const matches = units.filter((unit) => {
-      return (
-        unit.name.toLowerCase().includes(search.toLowerCase()) ||
-        unit.abbreviations.some((abbrev) =>
-          abbrev.toLowerCase().includes(search.toLowerCase())
-        )
-      );
-    });
-
-    if (matches.length > 0) {
-      return matches[0];
+    if (search) {
+      for (const unit of units) {
+        if (
+          unit.name.toLowerCase().includes(search.toLowerCase()) ||
+          unit.abbreviations.some((abbrev) =>
+            abbrev.toLowerCase().includes(search.toLowerCase())
+          )
+        ) {
+          return unit;
+        }
+      }
     }
+
     return undefined;
   }
 
@@ -49,11 +51,11 @@ export const recipeExtensions = Prisma.defineExtension((client) => {
         order: index,
         sentence: cast(ingredient.sentence) as string,
         name: cast(ingredient.name) as string,
-        minQuantity: cast(ingredient.minQty) as number,
-        maxQuantity: cast(ingredient.maxQty) as number,
-        quantity: cast(ingredient.quantity) as number,
-        comment: cast(ingredient.comment) as string,
-        other: cast(ingredient.other) as string,
+        minQuantity: cast(ingredient.minQty, CastType.NUMBER) as number,
+        maxQuantity: cast(ingredient.maxQty, CastType.NUMBER) as number,
+        quantity: cast(ingredient.quantity, CastType.NUMBER) as number,
+        comment: cast(ingredient.comment, CastType.STRING) as string,
+        other: cast(ingredient.other, CastType.STRING) as string,
       };
       if (ingredient.matchedIngredient !== undefined) {
         data.ingredient = {
@@ -79,26 +81,29 @@ export const recipeExtensions = Prisma.defineExtension((client) => {
   ): Promise<RecipeNlpResponse[]> {
     const matchedIngredients = [];
     for (const ingredient of taggedIngredients) {
-      const matchingIngredient = await db.ingredient.findFirst({
-        where: {
-          OR: [
-            {
-              name: {
-                contains: ingredient.name,
-                mode: "insensitive",
+      if (ingredient.name) {
+        const matchingIngredient = await db.ingredient.findFirst({
+          where: {
+            OR: [
+              {
+                name: {
+                  contains: ingredient.name,
+                  mode: "insensitive",
+                },
               },
-            },
-            {
-              alternateNames: {
-                has: toTitleCase(ingredient.name),
+              {
+                alternateNames: {
+                  has: toTitleCase(ingredient.name),
+                },
               },
-            },
-          ],
-        },
-      });
-      if (matchingIngredient !== null) {
-        ingredient.matchedIngredient = matchingIngredient.id;
+            ],
+          },
+        });
+        if (matchingIngredient !== null) {
+          ingredient.matchedIngredient = matchingIngredient.id;
+        }
       }
+
       matchedIngredients.push(ingredient);
     }
     return matchedIngredients;
@@ -108,7 +113,7 @@ export const recipeExtensions = Prisma.defineExtension((client) => {
     const newCourses = courses
       .filter((course) => cast(course) as string)
       .map((course) => {
-        const name = toTitleCase(cast(course) as string);
+        const name = toTitleCase(cast(course, CastType.STRING) as string);
         const stmt = {
           where: { name },
           create: { name },
@@ -125,6 +130,7 @@ export const recipeExtensions = Prisma.defineExtension((client) => {
     imageMapping: { [key: string]: string }
   ): Prisma.PhotoCreateNestedManyWithoutRecipeInput | undefined {
     if (recipe.photos.length > 0) {
+      console.log(recipe.photos);
       return {
         connect: recipe.photos.map((photo) => ({ hash: imageMapping[photo] })),
       };
@@ -169,7 +175,7 @@ export const recipeExtensions = Prisma.defineExtension((client) => {
         ): Promise<Recipe> {
           return await client.recipe.create({
             data: {
-              title: toTitleCase(recipe.title),
+              title: toTitleCase(recipe.title) as string, // TODO: Fix typing
               source: recipe.source,
               preparationTime: recipe.prepTime,
               cookingTime: recipe.cookTime,
@@ -207,10 +213,10 @@ export const recipeExtensions = Prisma.defineExtension((client) => {
           recipe: RecipeKeeperRecipe,
           imageMapping: { [key: string]: string },
           query?: RecipeQuery
-        ): Promise<Prisma.RecipeCreateInput> {
+        ): Promise<Recipe> {
           return await client.recipe.create({
             data: {
-              recipeKeeperId: cast(toTitleCase(recipe.recipeId)) as string,
+              recipeKeeperId: cast(recipe) as string,
               title: cast(toTitleCase(recipe.name)) as string,
               source: cast(recipe.recipeSource) as string,
               preparationTime: cast(recipe.prepTime) as number,
@@ -231,6 +237,45 @@ export const recipeExtensions = Prisma.defineExtension((client) => {
               ingredients: await createRecipeIngredientsStmt(
                 recipe.recipeIngredients
               ),
+            },
+            ...query,
+          });
+        },
+        async updateRecipe(
+          recipeId: string,
+          recipe: RecipeInput,
+          query?: RecipeQuery
+        ): Promise<Recipe> {
+          return await client.recipe.update({
+            where: {
+              id: recipeId,
+            },
+            data: {
+              title: recipe.title ? toTitleCase(recipe.title) : undefined,
+              source: recipe.source,
+              preparationTime: recipe.prepTime,
+              cookingTime: recipe.cookTime,
+              marinadeTime: recipe.marinadeTime,
+              directions: recipe.directions,
+              notes: recipe.notes,
+              stars: recipe.stars,
+              photos: {
+                set: recipe.photoIds?.map((photoId) => ({ id: photoId })),
+              },
+              isFavorite: recipe.isFavorite || false,
+              course: {
+                set: recipe.courseIds?.map((id) => ({ id })),
+              },
+              category: {
+                set: recipe.categoryIds?.map((id) => ({ id })),
+              },
+              cuisine: {
+                connect: recipe.cuisineId
+                  ? { id: recipe.cuisineId }
+                  : undefined,
+              },
+              leftoverFreezerLife: recipe.leftoverFreezerLife,
+              leftoverFridgeLife: recipe.leftoverFridgeLife,
             },
             ...query,
           });

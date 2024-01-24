@@ -40,12 +40,13 @@
       "skipFiles": ["<node_internals>/**/*.js"]
     },
     {
-      "name": "Test",
+      "name": "ts-node",
       "type": "node",
       "request": "launch",
-      "runtimeArgs": ["--loader", "ts-node/esm"],
-      "args": ["${file}"],
-      "cwd": "${workspaceFolder}"
+      "args": ["${relativeFile}"],
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "cwd": "${workspaceRoot}",
+      "internalConsoleOptions": "openOnSessionStart"
     }
   ]
 }

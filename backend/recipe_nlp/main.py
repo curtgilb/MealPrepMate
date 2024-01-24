@@ -21,7 +21,6 @@ def convertToFloat(string):
 async def parse_batch(requestBody: MultipleIngredients):
     parsed_ingredients = []
     for ingredient in requestBody.ingredients:
-        print(ingredient)
         result = parse_ingredient(ingredient)
         transformedOutput = {}
         transformedOutput["sentence"] = ingredient
@@ -29,7 +28,7 @@ async def parse_batch(requestBody: MultipleIngredients):
         transformedOutput["comment"] = None if not hasattr(result.comment, "text") else result.comment.text
         transformedOutput["other"] = result.other
         transformedOutput["preparation"] = result.preparation
-        transformedOutput["quantity"] = convertToFloat(result.amount[0].quantity)
-        transformedOutput["unit"] = result.amount[0].unit
+        transformedOutput["quantity"] = None if len(result.amount) == 0 else convertToFloat(result.amount[0].quantity)
+        transformedOutput["unit"] = None if len(result.amount) == 0 else result.amount[0].unit
         parsed_ingredients.append(transformedOutput)
     return parsed_ingredients

@@ -313,6 +313,8 @@ model NutritionLabel {
   servingsUsed      Float?
   importRecord      ImportRecord?            @relation(fields: [importRecordId], references: [id])
   importRecordId    String?                  @unique
+  isPrimary         Boolean                  @default(false)
+  @@unique([recipeId, ingredientGroupId])
 }
 
 model NutritionLabelNutrient {

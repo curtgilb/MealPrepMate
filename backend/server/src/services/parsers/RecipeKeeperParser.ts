@@ -67,8 +67,11 @@ class Recipe {
   private parseProperty(prop: HTMLElement) {
     let key = prop.getAttribute("itemprop");
     if (!key) return;
-    const value = this.getValue(key, prop);
-    key = key.startsWith("photo") ? "photos" : key;
+    let value = this.getValue(key, prop);
+    if (key.startsWith("photo")) {
+      key = "photos";
+      value = value.split("/").pop() as string;
+    }
     this.addProperty(key, value);
   }
 

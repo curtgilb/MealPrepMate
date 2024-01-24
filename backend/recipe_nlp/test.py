@@ -8,7 +8,7 @@ def convertToFloat(string):
         return string
 
 parsed_ingredients = []
-for ingredient in ["1-2 tbsp of milk"]:
+for ingredient in ["fresh lemon for garnish"]:
     result = parse_ingredient(ingredient)
     transformedOutput = {}
     transformedOutput["sentence"] = "hello",
@@ -16,7 +16,7 @@ for ingredient in ["1-2 tbsp of milk"]:
     transformedOutput["comment"] = result.comment
     transformedOutput["other"] = result.other
     transformedOutput["preparation"] = result.preparation
-    transformedOutput["quantity"] = convertToFloat(result.amount[0].quantity)
-    transformedOutput["unit"] = result.amount[0].unit
+    transformedOutput["quantity"] = None if len(result.amount) == 0 else convertToFloat(result.amount[0].quantity)
+    transformedOutput["unit"] = None if len(result.amount) == 0 else result.amount[0].unit
     parsed_ingredients.append(transformedOutput)
 print(parsed_ingredients)

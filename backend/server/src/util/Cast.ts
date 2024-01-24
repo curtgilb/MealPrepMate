@@ -6,7 +6,7 @@ import {
   NutrientType,
 } from "@prisma/client";
 
-enum CastType {
+export enum CastType {
   NUMBER,
   BOOLEAN,
   STRING,
@@ -97,7 +97,7 @@ function toNutrientTypeEnum(value: string): NutrientType {
     else if (["PROTEIN", "PROTEINS"].includes(nutrientType)) return "PROTEIN";
     else if (["CARBS", "CARBOHYDRATES", "CARBOHYDRATE"].includes(nutrientType))
       return "CARBOHYDRATE";
-    else if (nutrientType === "ALCOHOL") return "ALCHOHOL";
+    else if (nutrientType === "ALCOHOL") return "ALCOHOL";
   }
   return "OTHER";
 }

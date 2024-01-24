@@ -8,7 +8,7 @@ import { useMutation, gql } from "@urql/next";
 
 const UPLOAD_FILE = gql`
   mutation importRecipeKeeper($file: File!) {
-    importCronometer(file: $file) {
+    importRecipeKeeper(file: $file, type: RECIPE_KEEPER) {
       id
       records {
         name
@@ -22,8 +22,8 @@ const UPLOAD_FILE = gql`
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<File>();
   const [result, uploadFile] = useMutation(UPLOAD_FILE);
-
   const { data, fetching, error } = result;
+
   const handleFileUpload = () => {
     console.log(`${selectedFile}`);
     uploadFile({ file: selectedFile });
