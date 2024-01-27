@@ -3,6 +3,7 @@ import { NumericalComparison, RecipeInput } from "./types/gql.js";
 
 const recipe: RecipeInput = {
   title: "Chicken Soup",
+  source: ""
   servings: 6,
   ingredients: "1 cup chicken, 2 cups water",
 };
@@ -20,7 +21,7 @@ const recipe: RecipeInput = {
 //     nutritionLabel: true,
 //   },
 // });
-const filter: NumericalComparison = {};
+
 
 const data = await db.recipe.findMany({
   where: {

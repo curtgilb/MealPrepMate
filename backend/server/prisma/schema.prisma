@@ -341,10 +341,15 @@ model Nutrient {
   NutritionLabelNutrients NutritionLabelNutrient[]
   unit                    MeasurementUnit          @relation(fields: [unitId], references: [id])
   unitId                  String
-  recipeKeeperMapping     String?
-  cronometerMapping       String?
-  myFitnessPalMapping     String?
-  driMapping              String?
+  mappings                NutrientMapping[]
+}
+
+model NutrientMapping {
+  id            String   @id @default(cuid())
+  importType    ImportType
+  nutrient      Nutrient @relation(fields: [nutrientId], references: [id])
+  nutrientId    String
+  lookupName    String
 }
 
 model DailyReferenceIntake {

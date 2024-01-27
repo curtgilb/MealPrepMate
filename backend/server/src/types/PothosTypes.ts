@@ -1,5 +1,5 @@
 /* eslint-disable */
-import type { Prisma, MealPlanChain, MealPlan, MealPlanServing, MealPlanRecipe, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, DailyReferenceIntake, HealthProfile } from "@prisma/client";
+import type { Prisma, MealPlanChain, MealPlan, MealPlanServing, MealPlanRecipe, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, NutrientMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
 export default interface PrismaTypes {
     MealPlanChain: {
         Name: "MealPlanChain";
@@ -558,8 +558,8 @@ export default interface PrismaTypes {
         Where: Prisma.NutrientWhereInput;
         Create: {};
         Update: {};
-        RelationName: "dri" | "parentNutrient" | "subNutrients" | "NutritionLabelNutrients" | "unit";
-        ListRelations: "dri" | "subNutrients" | "NutritionLabelNutrients";
+        RelationName: "dri" | "parentNutrient" | "subNutrients" | "NutritionLabelNutrients" | "unit" | "mappings";
+        ListRelations: "dri" | "subNutrients" | "NutritionLabelNutrients" | "mappings";
         Relations: {
             dri: {
                 Shape: DailyReferenceIntake[];
@@ -580,6 +580,29 @@ export default interface PrismaTypes {
             unit: {
                 Shape: MeasurementUnit;
                 Name: "MeasurementUnit";
+            };
+            mappings: {
+                Shape: NutrientMapping[];
+                Name: "NutrientMapping";
+            };
+        };
+    };
+    NutrientMapping: {
+        Name: "NutrientMapping";
+        Shape: NutrientMapping;
+        Include: Prisma.NutrientMappingInclude;
+        Select: Prisma.NutrientMappingSelect;
+        OrderBy: Prisma.NutrientMappingOrderByWithRelationInput;
+        WhereUnique: Prisma.NutrientMappingWhereUniqueInput;
+        Where: Prisma.NutrientMappingWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "nutrient";
+        ListRelations: never;
+        Relations: {
+            nutrient: {
+                Shape: Nutrient;
+                Name: "Nutrient";
             };
         };
     };

@@ -1,5 +1,5 @@
 import { MeasurementUnit, Nutrient, Prisma } from "@prisma/client";
-import { readCSV } from "../io/Readers.js";
+import { readCSV } from "../../services/io/Readers.js";
 import { db } from "../../db.js";
 import {
   toGenderEnum,

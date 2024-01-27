@@ -4,7 +4,7 @@ import { hash } from "../../util/utils.js";
 import { v4 as uuidv4 } from "uuid";
 import { storage } from "../../storage.js";
 import { RecipeKeeperRecipe } from "../../types/CustomTypes.js";
-import { RecipeKeeperParser } from "../parsers/RecipeKeeperParser.js";
+import { RecipeKeeperParser } from "../parse/RecipeKeeperParser.js";
 import { compareTwoStrings } from "../../util/utils.js";
 import { getFileMetaData, FileMetaData } from "./ImportService.js";
 import { Prisma, ImportRecord, RecordStatus, Recipe } from "@prisma/client";
@@ -257,5 +257,5 @@ async function unzipFile(source: string | File): Promise<CentralDirectory> {
     const fileBuffer = Buffer.from(await source.arrayBuffer());
     return await Open.buffer(fileBuffer);
   }
-  throw Error();
+  throw Error(`Invalid object passed to unzipFile`);
 }

@@ -2,7 +2,6 @@ import { builder } from "../builder.js";
 import { Prisma } from "@prisma/client";
 import { db } from "../../db.js";
 import { toTitleCase } from "../../util/utils.js";
-import { z } from "zod";
 
 // ============================================ Types ===================================
 
@@ -130,7 +129,6 @@ builder.mutationFields((t) => ({
     args: {
       name: t.arg.string({
         required: true,
-        validate: { schema: z.string().min(1).max(100).transform(toTitleCase) },
       }),
     },
     resolve: async (query, root, args) => {
@@ -290,17 +288,16 @@ builder.mutationFields((t) => ({
       });
     },
   }),
-  // uploadPhoto: t.prismaField({
-  //   type: "Photo",
-  //   args: {
-  //     photo: t.arg({ type: "File", required: true }),
-  //   },
-  //   resolve: async (query, root, args) => {
-  //     // Hash the file
-  //     const buffer = Buffer.from(await args.photo.arrayBuffer());
-  //     return db.photo.uploadPhoto(buffer, args.photo.name, query);
-  //   },
-  // }),
+  uploadPhoto: t.prismaField({
+    type: "Photo",
+    args: {
+      photo: t.arg({ type: "File", required: true }),
+    },
+    resolve: async (query, root, args) => {
+      const buffer = Buffer.from(await args.photo.arrayBuffer());
+      return db.photo.uploadPhoto(buffer, args.photo.name, query);
+    },
+  }),
   // markPrimaryRecipePhoto: t.prismaField({
   //   type: "Recipe",
   //   args: {

@@ -5,8 +5,8 @@ import { storage } from "../storage.js";
 import { cast, toMeasurementUnitTypeEnum } from "../util/Cast.js";
 const prisma = new PrismaClient();
 import { db } from "../db.js";
-import { NutrientParser } from "../services/parsers/NutrientParser.js";
-import { IngredientParser } from "../services/parsers/IngredientParser.js";
+import { NutrientParser } from "./dataloaders/NutrientParser.js";
+import { IngredientParser } from "./dataloaders/IngredientParser.js";
 const bucketPolicy = `{
     "Version": "2012-10-17",
     "Statement": [

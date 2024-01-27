@@ -3,7 +3,7 @@ import { getFileMetaData } from "./ImportService.js";
 import { hash } from "./ImportService.js";
 import { db } from "../../db.js";
 import { Match } from "./RecipeKeeperImport.js";
-import { CronometerParser } from "../parsers/CronometerParser.js";
+import { CronometerParser } from "../parse/CronometerParser.js";
 import { CronometerNutrition } from "../../types/CustomTypes.js";
 import { ImportQuery } from "../../types/CustomTypes.js";
 // Does hashing the buffer or string result in a different hash

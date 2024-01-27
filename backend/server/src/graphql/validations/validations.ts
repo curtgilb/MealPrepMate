@@ -1,5 +1,5 @@
-import { z, ZodError } from "zod";
-import { RecipeInput, NumericalComparison } from "../../types/gql.js";
+import { z } from "zod";
+import { RecipeInput } from "../../types/gql.js";
 import { toTitleCase } from "../../util/utils.js";
 
 function cleanString(value: string, format?: (val: string) => string): string {
@@ -16,7 +16,7 @@ const schemaForType =
   };
 
 // creating a schema for strings
-export const recipeInputValidation = schemaForType<RecipeInput>()(
+const RecipeInputValidation = schemaForType<RecipeInput>()(
   z.object({
     title: z
       .string()
@@ -43,10 +43,6 @@ export const recipeInputValidation = schemaForType<RecipeInput>()(
   })
 );
 
-const test = {
-  gte: 5,
-  lte: 2,
-};
 const numericalComparisonValidation = z
   .object({
     gte: z.number().int().positive().optional(),
@@ -58,19 +54,19 @@ const numericalComparisonValidation = z
     return obj;
   });
 
-const nutritionFilterValidation = z.object({
+const NutritionFilterValidation = z.object({
   nutrientID: z.string().uuid(),
   perServing: z.boolean(),
   target: numericalComparisonValidation,
 });
 
-const ingredientFilterValidation = z.object({
+const IngredientFilterValidation = z.object({
   ingredientID: z.string().cuid(),
   perServing: z.boolean(),
   target: numericalComparisonValidation,
 });
 
-const recipeFilterValidation = z.object({
+const RecipeFilterValidation = z.object({
   searchString: z.string().optional(),
   numOfServings: numericalComparisonValidation.optional(),
   courseIds: z.string().cuid().array().optional(),
@@ -81,10 +77,14 @@ const recipeFilterValidation = z.object({
   marinadeTime: numericalComparisonValidation.optional(),
   totalPrepTime: numericalComparisonValidation.optional(),
   isFavorite: z.boolean().optional(),
-  nutrientFilters: nutritionFilterValidation.array().optional(),
-  ingredientFilter: ingredientFilterValidation.array().optional(),
+  nutrientFilters: NutritionFilterValidation.array().optional(),
+  ingredientFilter: IngredientFilterValidation.array().optional(),
+  ingredientFreshDays: numericalComparisonValidation.optional(),
+  recipePrice: numericalComparisonValidation.optional(),
 });
 
-const result = numericalComparisonValidation.parse(test);
-
-console.log(result.eq);
+export {
+  NutritionFilterValidation,
+  RecipeFilterValidation,
+  RecipeInputValidation,
+};

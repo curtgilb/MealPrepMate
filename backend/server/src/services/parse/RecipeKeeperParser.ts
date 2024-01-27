@@ -1,34 +1,80 @@
-import { RecipeKeeperRecipe } from "../../types/CustomTypes.js";
+import { FileMetaData, RecipeKeeperRecipe } from "../../types/CustomTypes.js";
 import { HTMLElement } from "node-html-parser";
 import { parse as parseHTML } from "node-html-parser";
 import { cast } from "../../util/Cast.js";
 import { db } from "../../db.js";
+import { Parser, ParsedOutput, ParsedRecord } from "../parsers/Parser.js";
+import { RecipeInput } from "../../types/gql.js";
+import { ImportType } from "@prisma/client";
+import { File as ZipFile } from "unzipper";
+import { hash } from "../../util/utils.js";
+import { z } from "zod";
 
-export class RecipeKeeperParser {
-  async parse(data: string): Promise<RecipeKeeperRecipe[]> {
-    const parsedRecipes: RecipeKeeperRecipe[] = [];
-    const html = parseHTML(data);
-    const nutrients = await db.nutrient.findMany({
-      where: { recipeKeeperMapping: { not: null } },
-    });
-    const mapping = nutrients.reduce((acc, curr) => {
-      if (curr.recipeKeeperMapping) {
-        acc.set(curr.recipeKeeperMapping, curr.id);
+type Recipe = {
+  recipeId: string;
+  recipeShareId: string;
+  recipeIsFavourite: string;
+  recipeRating: string;
+  name: string;
+  recipeSource: string;
+  recipeYield: string;
+  prepTime: string;
+  cookTime: string;
+  recipeIngredients: string;
+  recipeDirections: string;
+  recipeNotes: string;
+  nutritionServingSize: string;
+  nutrients: { name: string; value: string }[];
+  recipeCourse: string[];
+  photos: string[];
+  recipeCollection: string[];
+  recipeCategory: string[];
+};
+
+class RecipeKeeperRecord extends ParsedRecord<RecipeInput> {
+  externalId: string | number | undefined;
+  deserializedData: RecipeKeeperHtml;
+  importType: ImportType = "RECIPE_KEEPER";
+
+  constructor(input: string, parsedHtml: HTMLElement) {
+    super(input);
+    this.deserializedData = new RecipeKeeperHtml(parsedHtml);
+  }
+
+  async toObject<T extends z.ZodTypeAny>(
+    schema: T,
+    matchingId?: string
+  ): Promise<z.infer<T>> {}
+}
+
+class RecipeKeeperParser extends Parser<RecipeInput> {
+  protected records: RecipeKeeperRecord[] = [];
+
+  constructor(source: string | File) {
+    super(source);
+  }
+  async parse(): Promise<ParsedOutput<RecipeInput>> {
+    const directory = await this.unzipFile(this.source);
+    await this.traverseDirectory(directory);
+  }
+
+  async processFile(file: ZipFile, metaData: FileMetaData): Promise<void> {
+    if (metaData.ext === "html") {
+      const htmlData = (await file.buffer()).toString();
+      this.fileHash = hash(htmlData);
+      const html = parseHTML((await file.buffer()).toString());
+      const recipes = html.querySelectorAll(".recipe-details");
+      for (const recipe of recipes) {
+        this.records.push(new RecipeKeeperRecord(recipe.toString(), recipe));
       }
-      return acc;
-    }, new Map<string, string>());
-
-    const recipes = html.querySelectorAll(".recipe-details");
-    for (const recipe of recipes) {
-      const parsedRecipe = new Recipe(recipe, mapping);
-      parsedRecipes.push(parsedRecipe.toObject());
+    } else if (["jpg", "png", "tiff"].includes(metaData.ext)) {
+      await processImage(file, imageNameToHash, fileMetaData);
     }
-    return parsedRecipes;
   }
 }
 
-class Recipe {
-  recipe: RecipeKeeperRecipe = {
+class RecipeKeeperHtml {
+  recipe: Recipe = {
     recipeId: "",
     recipeShareId: "",
     recipeIsFavourite: "",
@@ -42,22 +88,14 @@ class Recipe {
     recipeDirections: "",
     recipeNotes: "",
     nutritionServingSize: "",
-    rawInput: "",
     recipeCourse: [],
     photos: [],
     recipeCollection: [],
     recipeCategory: [],
     nutrients: [],
   };
-  existingNutrients: Map<string, string>;
 
-  constructor(
-    input: HTMLElement,
-    // recipeKeeperColumnName: idInDB
-    existingNutrients: Map<string, string>
-  ) {
-    this.recipe.rawInput = input.toString();
-    this.existingNutrients = existingNutrients;
+  constructor(input: HTMLElement) {
     const properties = input.querySelectorAll("*[itemProp]");
     properties.forEach((property) => {
       this.parseProperty(property);
@@ -77,22 +115,24 @@ class Recipe {
 
   private addProperty(prop: string, value: string): void {
     if (prop in this.recipe) {
-      if (!Array.isArray(this.recipe[prop as keyof RecipeKeeperRecipe])) {
-        (this.recipe[prop as keyof RecipeKeeperRecipe] as string) = value;
-      } else {
-        (this.recipe[prop as keyof RecipeKeeperRecipe] as string[]).push(value);
+      // handle scalar values
+      if (!Array.isArray(this.recipe[prop as keyof Recipe])) {
+        (this.recipe[prop as keyof Recipe] as string) = value;
       }
-    } else if (prop.includes("recipeNut")) {
+      // handle arrays
+      else {
+        (this.recipe[prop as keyof Recipe] as string[]).push(value);
+      }
+    }
+    // Handle nutrients
+    else if (prop.includes("recipeNut")) {
       if (prop === "recipeNutServingSize") {
         this.recipe.nutritionServingSize = value;
       } else {
-        const matchingId = this.existingNutrients.get(prop);
-        if (matchingId) {
-          this.recipe.nutrients.push({
-            id: matchingId,
-            amount: cast(value) as number,
-          });
-        }
+        this.recipe.nutrients.push({
+          name: prop,
+          value: value,
+        });
       }
     }
   }
@@ -143,7 +183,7 @@ class Recipe {
     return "1";
   }
 
-  toObject(): RecipeKeeperRecipe {
+  toObject(): Recipe {
     this.recipe.prepTime = this.getTime(this.recipe.prepTime);
     this.recipe.cookTime = this.getTime(this.recipe.cookTime);
     this.recipe.recipeYield = this.extractServingSize(this.recipe.recipeYield);
@@ -153,9 +193,3 @@ class Recipe {
     return this.recipe;
   }
 }
-
-// Test
-// const htmlData = readFile("../../../data/RecipeKeeper/recipes.html");
-// const parser = new RecipeKeeperParser();
-// const recipes = await parser.parse(htmlData);
-// console.log(recipes);

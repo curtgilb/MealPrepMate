@@ -1,59 +1,104 @@
-import { raw } from "@prisma/client/runtime/library.js";
-import { readCSV } from "../io/Readers.js";
-import { CronometerNutrition } from "../../types/CustomTypes.js";
-import { db } from "../../db.js";
-import { cast } from "../../util/Cast.js";
+import { CreateNutritionLabelInput } from "../../types/gql.js";
+import { Parser, ParsedRecord, ParsedOutput } from "./Parser.js";
+import { File as ZipFile } from "unzipper";
 
-export class CronometerParser {
-  async parse(
-    source: string,
-    filePath = false
-  ): Promise<CronometerNutrition[]> {
-    const csvData = await readCSV(source, filePath);
-    const mappings = await this.getNutrientCronometerMapping();
-    const labels: CronometerNutrition[] = csvData.map((row) => {
-      const { day, time, group, foodName, amount, category, ...rest } =
-        row.record;
-      const parsedAmount = this.parseAmount(amount);
+import { z } from "zod";
+import { readText } from "../io/Readers.js";
+import { ImportType } from "@prisma/client";
 
-      return {
-        day: new Date(day),
-        time: time,
-        group: group,
-        foodName: foodName,
-        amount: parsedAmount?.[0],
-        unit: parsedAmount?.[1],
-        category: category,
-        nutrients: Object.entries(rest).map(([name, value]) => {
-          const nutrientName = mappings.get(name);
-          if (!nutrientName) throw Error(`No mapping for ${name}`);
-          return { id: nutrientName.id, amount: cast(value) as number };
-        }),
-        rawInput: row.raw,
-      };
-    });
-    return labels;
+type CronometerJson = {
+  nutrients: {
+    amount: number;
+    id: number;
+    type: string;
+  }[];
+  measures: {
+    amount: number;
+    name: string;
+    id: number;
+    type: string;
+    value: number;
+  }[];
+  rawImports: { [key: string]: string };
+  name: string;
+  defaultMeasureId: number;
+  id: number;
+};
+
+class CronometerRecord extends ParsedRecord<CreateNutritionLabelInput> {
+  recordHash: string;
+  externalId: string | number | undefined;
+  deserializedData: CronometerJson;
+  importType: ImportType = "CRONOMETER";
+
+  constructor(input: string) {
+    super(input);
+    this.deserializedData = JSON.parse(input) as CronometerJson;
+    this.externalId = this.deserializedData.id;
   }
 
-  parseAmount(input: string): [number, string] | null {
-    const regex = /(\d+(\.\d+)?)(.*)/;
-    const match = input.match(regex);
-    return match ? [parseFloat(match[1]), match[3].trim()] : null;
+  private getServings(): number {
+    const servings = this.deserializedData.measures.find(
+      (measure) => measure.name === "serving"
+    )?.value;
+    return servings ?? 1;
   }
 
-  async getNutrientCronometerMapping(): Promise<
-    Map<string, { id: string; name: string }>
-  > {
-    const result = await db.nutrient.findMany({
-      where: { cronometerMapping: { not: null } },
-    });
+  async toObject<T extends z.ZodTypeAny>(
+    schema: T,
+    matchingId?: string
+  ): Promise<z.infer<T>> {
+    const nutrients = await Promise.all(
+      this.deserializedData.nutrients.map(async (nutrient) => ({
+        value: nutrient.amount,
+        nutrientId: await this.matchNutrients(nutrient.id),
+      }))
+    );
 
-    return result.reduce((aggregation, nutrient) => {
-      aggregation.set(nutrient.cronometerMapping as string, {
-        id: nutrient.id,
-        name: nutrient.name,
-      });
-      return aggregation;
-    }, new Map<string, { id: string; name: string }>());
+    const label = schema.parse({
+      name: this.deserializedData.name,
+      connectingId: matchingId,
+      servings: this.getServings(),
+      nutrients: nutrients.filter(
+        (nutrient) => nutrient.nutrientId !== undefined
+      ),
+    }) as z.infer<T>;
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return label;
   }
 }
+
+class CronometerParser extends Parser<CreateNutritionLabelInput> {
+  protected records: CronometerRecord[] = [];
+  protected imageMapping: { [key: string]: string } = {};
+  protected fileHash: string = "";
+
+  constructor(source: string | File) {
+    super(source);
+  }
+  async parse(): Promise<ParsedOutput<CreateNutritionLabelInput>> {
+    // Single JSON file path
+    if (typeof this.source === "string" && this.source.endsWith(".json")) {
+      const data = readText(this.source);
+      this.fileHash = hash(data);
+      this.records.push(new CronometerRecord(data));
+    }
+    // Zip file path
+    else {
+      const directory = await this.unzipFile(this.source);
+      await this.traverseDirectory(directory);
+    }
+    return {
+      records: this.records,
+      fileHash: this.fileHash,
+    };
+  }
+
+  protected async processFile(file: ZipFile): Promise<void> {
+    const fileData = (await file.buffer()).toString();
+    this.records.push(new CronometerRecord(fileData));
+  }
+}
+
+export { CronometerParser, CronometerRecord };

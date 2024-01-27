@@ -1,5 +1,5 @@
 import { ExpirationRule, IngredientCategory, Prisma } from "@prisma/client";
-import { readCSV } from "../io/Readers.js";
+import { readCSV } from "../../services/io/Readers.js";
 import { cast } from "../../util/Cast.js";
 import { toTitleCase } from "../../util/utils.js";
 

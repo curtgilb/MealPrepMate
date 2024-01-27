@@ -1,59 +1,89 @@
-﻿Nutrient,Unit Abbreviation,Unit,Advanced View,Order,Notes,Alternate Names,Type,Parent Nutrient,Cronometer,Recipe Keeper,My Fitness Pal,DRI
-Calories,kcal,calorie,FALSE,1,,,General,,Energy (kcal),recipeNutCalories,Calories,
-Total Fat,g,gram,FALSE,2,,,Fats,,Fat (g),recipeNutTotalFat,Fat (g),
-Saturated Fat,g,gram,FALSE,3,,,Fats,Total Fat,Saturated (g),recipeNutSaturatedFat,Saturated Fat,
-Trans Fat,g,gram,FALSE,4,,,Fats,Total Fat,Trans-Fats (g),,Trans Fat,
-Polyunsaturated Fat,g,gram,FALSE,5,,,Fats,Total Fat,Polyunsaturated (g),,Polyunsaturated Fat,
-Omega-3,g,gram,TRUE,6,,α-Linolenic Acid,Fats,Polyunsaturated Fat,Omega-3 (g),,,
-Omega-6,g,gram,TRUE,7,,Linoleic Acid,Fats,Polyunsaturated Fat,Omega-6 (g),,,
-Monounsaturated Fat,g,gram,FALSE,8,,,Fats,Total Fat,Monounsaturated (g),,Monounsaturated Fat,
-Cholesterol,mg,miligram,FALSE,9,,,Fats,,Cholesterol (mg),recipeNutCholesterol,Cholesterol,
-Sodium,mg,miligram,FALSE,10,,,Mineral,,Sodium (mg),recipeNutSodium,Sodium (mg),sodium
-Total Carbohydrates,g,gram,FALSE,11,,,Carbohydrates,,Carbs (g),recipeNutTotalCarbohydrate,Carbohydrates (g),
-Dietary Fiber,g,gram,FALSE,12,,,Carbohydrates,Total Carbohydrates,Fiber (g),recipeNutDietaryFiber,Fiber,
-Sugars,g,gram,FALSE,13,,,Carbohydrates,Total Carbohydrates,Sugars (g),recipeNutSugars,Sugar,
-Added Sugars,g,gram,FALSE,14,,,Carbohydrates,Sugars,,,,
-Starch,g,gram,FALSE,15,,,Carbohydrates,Total Carbohydrates,Starch (g),,,
-Protein,g,gram,FALSE,16,"Based on g protein per kg of body weight for the reference body weight, e.g., for adults 0.8 g/kg body weight for the reference body weight.",,Protein,,Protein (g),recipeNutProtein,Protein (g),
-Cystine,g,gram,TRUE,17,,,Protein,Protein,Cystine (g),,,
-Histidine,g,gram,TRUE,18,,,Protein,Protein,Histidine (g),,,
-Isoleucine,g,gram,TRUE,19,,,Protein,Protein,Isoleucine (g),,,
-Leucine,g,gram,TRUE,20,,,Protein,Protein,Leucine (g),,,
-Lysine,g,gram,TRUE,21,,,Protein,Protein,Lysine (g),,,
-Methionine,g,gram,TRUE,22,,,Protein,,Methionine (g),,,
-Phenylalanine,g,gram,TRUE,23,,,Protein,Protein,Phenylalanine (g),,,
-Threonine,g,gram,TRUE,24,,,Protein,Protein,Threonine (g),,,
-Tryptophan,g,gram,TRUE,25,,,Protein,,Tryptophan (g),,,
-Tyrosine,g,gram,TRUE,26,,,Protein,Protein,Tyrosine (g),,,
-Valine,g,gram,TRUE,27,,,Protein,Protein,Valine (g),,,
-Biotin,μg,microgram,TRUE,28,,,Vitamin,,,,,biotin
-Calcium,mg,miligram,FALSE,29,,,Mineral,,Calcium (mg),,Calcium,calcium
-Chloride,g,gram,TRUE,30,,,Mineral,,,,,chloride
-Choline,mg,miligram,TRUE,31,,,Vitamin,,,,,choline
-Chromium,μg,microgram,TRUE,32,,,Mineral,,,,,chromium
-Cobalamin,μg,microgram,TRUE,33,,Vitamin B12,Vitamin,,B12 (Cobalamin) (Âµg),,,vitaminB12
-Copper,μg,microgram,FALSE,34,,,Mineral,,Copper (mg),,,copper
-Fluoride,mg,miligram,TRUE,35,,,Mineral,,,,,fluoride
-Folate,μg,microgram,FALSE,36,,Vitamin B9,Vitamin,,Folate (Âµg),,,folate
-Iodine,μg,microgram,TRUE,37,,,Mineral,,,,,iodine
-Iron,mg,miligram,FALSE,38,,,Mineral,,Iron (mg),,Iron,iron
-Magnesium,mg,miligram,FALSE,39,,,Mineral,,Magnesium (mg),,,magnesium
-Manganese,mg,miligram,FALSE,40,,,Mineral,,Manganese (mg),,,manganese
-Molybdenum,μg,microgram,TRUE,41,,,Mineral,,,,,molybdenum
-Niacin,mg,miligram,FALSE,42,,Vitamin B3,Vitamin,,B3 (Niacin) (mg),,,niacin
-Pantothenic Acid,mg,miligram,TRUE,43,,Vitamin B5,Vitamin,,B5 (Pantothenic Acid) (mg),,pantothenicAcid,
-Phosphorus,mg,miligram,TRUE,44,,,Mineral,,Phosphorus (mg),,,phosphorus
-Potassium,mg,miligram,FALSE,45,,,Mineral,,Potassium (mg),,Potassium,potassium
-Pyridoxine,mg,miligram,TRUE,46,,Vitamin B6,Vitamin,,B6 (Pyridoxine) (mg),,,vitaminB6
-Riboflavin,mg,miligram,FALSE,47,,Vitamin B2,Vitamin,,B2 (Riboflavin) (mg),,,riboflavin
-Selenium,μg,microgram,TRUE,48,,,Mineral,,Selenium (Âµg),,,selenium
-Thiamin,mg,miligram,TRUE,49,,Vitamin B1,Vitamin,,B1 (Thiamine) (mg),,,thiamin
-Vitamin A,μg,microgram,FALSE,50,,,Vitamin,,Vitamin A (Âµg),,Vitamin A,vitaminA
-Vitamin C,mg,miligram,FALSE,51,,,Vitamin,,Vitamin C (mg),,Vitamin C,vitaminC
-Vitamin D,μg,microgram,FALSE,52,,,Vitamin,,Vitamin D (IU),,,vitaminD
-Vitamin E,mg,miligram,FALSE,53,,,Vitamin,,Vitamin E (mg),,,vitaminE
-Vitamin K,μg,microgram,FALSE,54,,,Vitamin,,Vitamin K (Âµg),,,vitaminK
-Zinc,mg,miligram,FALSE,55,,,Mineral,,Zinc (mg),,,zinc
-Alcohol,g,gram,FALSE,56,,,Alcohol,,Alcohol (g),,,
-Caffeine,mg,miligram,FALSE,57,,,General,,Caffeine (mg),,,
-Water,L,liter,FALSE,58,,,General,,Water (g),,,
+﻿Nutrient,Unit Abbreviation,Unit,Advanced View,Order,Notes,Alternate Names,Type,Parent Nutrient,Cronometer,Cronometer ID,Recipe Keeper,My Fitness Pal,DRI
+Calories,kcal,calorie,FALSE,1,,,General,,Energy (kcal),208,recipeNutCalories,Calories,
+Total Fat,g,gram,FALSE,2,,,Fats,,Fat (g),204,recipeNutTotalFat,Fat (g),
+Saturated Fat,g,gram,FALSE,3,,,Fats,Total Fat,Saturated (g),606,recipeNutSaturatedFat,Saturated Fat,
+Trans Fat,g,gram,FALSE,4,,,Fats,Total Fat,Trans-Fats (g),605,,Trans Fat,
+Polyunsaturated Fat,g,gram,FALSE,5,,,Fats,Total Fat,Polyunsaturated (g),646,,Polyunsaturated Fat,
+Omega-3,g,gram,TRUE,6,,α-Linolenic Acid,Fats,Polyunsaturated Fat,Omega-3 (g),10001,,,
+Omega-6,g,gram,TRUE,7,,Linoleic Acid,Fats,Polyunsaturated Fat,Omega-6 (g),10002,,,
+Monounsaturated Fat,g,gram,FALSE,8,,,Fats,Total Fat,Monounsaturated (g),645,,Monounsaturated Fat,
+Cholesterol,mg,miligram,FALSE,9,,,Fats,,Cholesterol (mg),601,recipeNutCholesterol,Cholesterol,
+Sodium,mg,miligram,FALSE,10,,,Mineral,,Sodium (mg),307,recipeNutSodium,Sodium (mg),sodium
+Total Carbohydrates,g,gram,FALSE,11,,,Carbohydrates,,Carbs (g),205,recipeNutTotalCarbohydrate,Carbohydrates (g),
+Dietary Fiber,g,gram,FALSE,12,,,Carbohydrates,Total Carbohydrates,Fiber (g),291,recipeNutDietaryFiber,Fiber,
+Sugars,g,gram,FALSE,13,,,Carbohydrates,Total Carbohydrates,Sugars (g),269,recipeNutSugars,Sugar,
+Added Sugars,g,gram,FALSE,14,,,Carbohydrates,Sugars,Added Sugars (g),10009,,,
+Starch,g,gram,FALSE,15,,,Carbohydrates,Total Carbohydrates,Starch (g),209,,,
+Protein,g,gram,FALSE,16,"Based on g protein per kg of body weight for the reference body weight, e.g., for adults 0.8 g/kg body weight for the reference body weight.",,Protein,,Protein (g),203,recipeNutProtein,Protein (g),
+Cystine,g,gram,TRUE,17,,,Protein,Protein,Cystine (g),507,,,
+Histidine,g,gram,TRUE,18,,,Protein,Protein,Histidine (g),512,,,
+Isoleucine,g,gram,TRUE,19,,,Protein,Protein,Isoleucine (g),503,,,
+Leucine,g,gram,TRUE,20,,,Protein,Protein,Leucine (g),504,,,
+Lysine,g,gram,TRUE,21,,,Protein,Protein,Lysine (g),505,,,
+Methionine,g,gram,TRUE,22,,,Protein,,Methionine (g),506,,,
+Phenylalanine,g,gram,TRUE,23,,,Protein,Protein,Phenylalanine (g),508,,,
+Threonine,g,gram,TRUE,24,,,Protein,Protein,Threonine (g),502,,,
+Tryptophan,g,gram,TRUE,25,,,Protein,,Tryptophan (g),501,,,
+Tyrosine,g,gram,TRUE,26,,,Protein,Protein,Tyrosine (g),509,,,
+Valine,g,gram,TRUE,27,,,Protein,Protein,Valine (g),510,,,
+Biotin,μg,microgram,TRUE,28,,,Vitamin,,Biotin (Âµg),10004,,,biotin
+Calcium,mg,miligram,FALSE,29,,,Mineral,,Calcium (mg),301,,Calcium,calcium
+Chloride,g,gram,TRUE,30,,,Mineral,,,#N/A,,,chloride
+Choline,mg,miligram,TRUE,31,,,Vitamin,,Choline (mg),421,,,choline
+Chromium,μg,microgram,TRUE,32,,,Mineral,,Chromium (Âµg),#N/A,,,chromium
+Cobalamin,μg,microgram,TRUE,33,,Vitamin B12,Vitamin,,B12 (Cobalamin) (Âµg),418,,,vitaminB12
+Copper,μg,microgram,FALSE,34,,,Mineral,,Copper (mg),312,,,copper
+Fluoride,mg,miligram,TRUE,35,,,Mineral,,Fluoride (Âµg),313,,,fluoride
+Folate,μg,microgram,FALSE,36,,Vitamin B9,Vitamin,,Folate (Âµg),417,,,folate
+Iodine,μg,microgram,TRUE,37,,,Mineral,,Iodine (Âµg),10005,,,iodine
+Iron,mg,miligram,FALSE,38,,,Mineral,,Iron (mg),303,,Iron,iron
+Magnesium,mg,miligram,FALSE,39,,,Mineral,,Magnesium (mg),304,,,magnesium
+Manganese,mg,miligram,FALSE,40,,,Mineral,,Manganese (mg),315,,,manganese
+Molybdenum,μg,microgram,TRUE,41,,,Mineral,,Molybdenum (Âµg),#N/A,,,molybdenum
+Niacin,mg,miligram,FALSE,42,,Vitamin B3,Vitamin,,B3 (Niacin) (mg),406,,,niacin
+Pantothenic Acid,mg,miligram,TRUE,43,,Vitamin B5,Vitamin,,B5 (Pantothenic Acid) (mg),410,,pantothenicAcid,
+Phosphorus,mg,miligram,TRUE,44,,,Mineral,,Phosphorus (mg),305,,,phosphorus
+Potassium,mg,miligram,FALSE,45,,,Mineral,,Potassium (mg),306,,Potassium,potassium
+Pyridoxine,mg,miligram,TRUE,46,,Vitamin B6,Vitamin,,B6 (Pyridoxine) (mg),415,,,vitaminB6
+Riboflavin,mg,miligram,FALSE,47,,Vitamin B2,Vitamin,,B2 (Riboflavin) (mg),405,,,riboflavin
+Selenium,μg,microgram,TRUE,48,,,Mineral,,Selenium (Âµg),317,,,selenium
+Thiamin,mg,miligram,TRUE,49,,Vitamin B1,Vitamin,,B1 (Thiamine) (mg),404,,,thiamin
+Vitamin A,μg,microgram,FALSE,50,,,Vitamin,,Vitamin A (Âµg),320,,Vitamin A,vitaminA
+Vitamin C,mg,miligram,FALSE,51,,,Vitamin,,Vitamin C (mg),401,,Vitamin C,vitaminC
+Vitamin D,μg,microgram,FALSE,52,,,Vitamin,,Vitamin D (IU),324,,,vitaminD
+Vitamin E,mg,miligram,FALSE,53,,,Vitamin,,Vitamin E (mg),323,,,vitaminE
+Vitamin K,μg,microgram,FALSE,54,,,Vitamin,,Vitamin K (Âµg),430,,,vitaminK
+Zinc,mg,miligram,FALSE,55,,,Mineral,,Zinc (mg),309,,,zinc
+Alcohol,g,gram,FALSE,56,,,Alcohol,,Alcohol (g),221,,,
+Caffeine,mg,miligram,FALSE,57,,,General,,Caffeine (mg),262,,,
+Water,L,liter,FALSE,58,,,General,,Water (g),255,,,
+,,,,,,,,Protein,Alanine (g),513,,,
+,,,,,,,,Sugars,Allulose (g),,,,
+,,,,,,,,Vitamin A,Alpha-carotene (Âµg),322,,,
+,,,,,,,,Protein,Arginine (g),511,,,
+,,,,,,,,,Ash (g),207,,,
+,,,,,,,,Protein,Aspartic acid (g),514,,,
+,,,,,,,,,Beta Tocopherol (mg),341,,,
+,,,,,,,,,Beta-carotene (Âµg),321,,,
+,,,,,,,,,Beta-cryptoxanthin (Âµg),334,,,
+,,,,,,,,,Beta-Hydroxybutyrate (g),,,,
+,,,,,,,,,Delta Tocopherol (mg),343,,,
+,,,,,,,,,Fructose (g),212,,,
+,,,,,,,,,Galactose (g),287,,,
+,,,,,,,,,Gamma Tocopherol (mg),342,,,
+,,,,,,,,,Glucose (g),211,,,
+,,,,,,,,,Glutamic acid (g),515,,,
+,,,,,,,,,Glycine (g),516,,,
+,,,,,,,,,Hydroxyproline (g),521,,,
+,,,,,,,,,Lactose (g),213,,,
+,,,,,,,,,Lutein+Zeaxanthin (Âµg),338,,,
+,,,,,,,,,Lycopene (Âµg),337,,,
+,,,,,,,,,Maltose (g),214,,,
+,,,,,,,,,Net Carbs (g),-1205,,,
+,,,,,,,,,Oxalate (mg),10012,,,
+,,,,,,,,,Phytosterol (mg),636,,,
+,,,,,,,,,Proline (g),517,,,
+,,,,,,,,,Retinol (Âµg),319,,,
+,,,,,,,,,Serine (g),518,,,
+,,,,,,,,,Sucrose (g),210,,,
+,,,,,,,,,Sugar Alcohol (g),10007,,,

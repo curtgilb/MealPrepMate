@@ -1,7 +1,13 @@
 import { db } from "../../db.js";
 import { builder } from "../builder.js";
 import { numericalComparison } from "./UtilitySchema.js";
-import { recipeInputValidation } from "../validations/validations.js";
+import { Recipe } from "@prisma/client";
+import {
+  RecipeInputValidation,
+  NutritionFilterValidation,
+} from "../validations/validations.js";
+
+type ExtendedRecipe = Recipe & { ingredientFreshness: number };
 
 // ============================================ Types ===================================
 builder.prismaObject("Recipe", {
@@ -22,6 +28,16 @@ builder.prismaObject("Recipe", {
     course: t.relation("course"),
     ingredients: t.relation("ingredients"),
     photos: t.relation("photos"),
+    ingredientFreshness: t.int({
+      resolve: (recipe, args, context, info) => {
+        if (
+          Object.prototype.hasOwnProperty.call(recipe, "ingredientFreshness")
+        ) {
+          return (recipe as ExtendedRecipe).ingredientFreshness;
+        }
+        return 2;
+      },
+    }),
   }),
 });
 
@@ -37,7 +53,7 @@ builder.prismaObject("RecipeIngredient", {
     name: t.exposeString("name", { nullable: true }),
     comment: t.exposeString("comment", { nullable: true }),
     other: t.exposeString("other", { nullable: true }),
-    recipes: t.relation("recipe"),
+    recipe: t.relation("recipe"),
     baseIngredient: t.relation("ingredient", { nullable: true }),
   }),
 });
@@ -72,6 +88,36 @@ const recipeInput = builder.inputType("RecipeInput", {
   }),
 });
 
+const recipeIngredientInput = builder.inputType("RecipeIngredientInput", {
+  fields: (t) => ({
+    id: t.id(),
+    order: t.int(),
+    sentence: t.string(),
+    quantity: t.int(),
+    unitId: t.string(),
+    name: t.string(),
+    comment: t.string(),
+    other: t.string(),
+    ingredientId: t.string(),
+    groupName: t.string(),
+    groupId: t.id(),
+  }),
+});
+
+const recipeIngredientUpdateInput = builder.inputType(
+  "RecipeIngredientUpdateInput",
+  {
+    fields: (t) => ({
+      recipeId: t.id({ required: true }),
+      ingredientsToAdd: t.field({ type: [recipeIngredientInput] }),
+      ingredientsToDelete: t.idList(),
+      ingredientsToUpdate: t.field({ type: [recipeIngredientInput] }),
+      groupsToAdd: t.stringList(),
+      groupsToDelete: t.idList(),
+    }),
+  }
+);
+
 const nutritionFilter = builder.inputType("NutritionFilter", {
   fields: (t) => ({
     nutrientID: t.string({ required: true }),
@@ -99,10 +145,12 @@ const recipeFilter = builder.inputType("RecipeFilter", {
     prepTime: t.field({ type: numericalComparison }),
     cookTime: t.field({ type: numericalComparison }),
     marinadeTime: t.field({ type: numericalComparison }),
-    // totalPrepTime: t.field({ type: numericalComparison }),
+    totalPrepTime: t.field({ type: numericalComparison }),
     isFavorite: t.boolean(),
     nutrientFilters: t.field({ type: [nutritionFilter] }),
     ingredientFilter: t.field({ type: [ingredientFilter] }),
+    ingredientFreshDays: t.field({ type: numericalComparison }),
+    recipePrice: t.field({ type: numericalComparison }),
   }),
 });
 
@@ -132,18 +180,47 @@ builder.mutationFields((t) => ({
         type: recipeInput,
         required: true,
         validate: {
-          schema: recipeInputValidation,
+          schema: RecipeInputValidation,
         },
       }),
     },
-    resolve: async (query, root, args) => {
+    resolve: async (query, root, args, context, info) => {
       console.log(args.recipe);
       return await db.recipe.createRecipe(args.recipe, query);
     },
   }),
+  updateRecipe: t.prismaField({
+    type: "Recipe",
+    args: {
+      recipeId: t.arg.string({ required: true }),
+      recipe: t.arg({
+        type: recipeInput,
+        required: true,
+        validate: {
+          schema: RecipeInputValidation,
+        },
+      }),
+    },
+    resolve: async (query, root, args) => {
+      return await db.recipe.updateRecipe(args.recipeId, args.recipe, query);
+    },
+  }),
+  updateRecipeIngredients: t.prismaField({
+    type: ["RecipeIngredient"],
+    args: {
+      ingredient: t.arg({
+        type: recipeIngredientUpdateInput,
+        required: true,
+      }),
+    },
+    resolve: async (query, root, args) => {
+      return await db.recipeIngredient.findMany({});
+    },
+  }),
+  // deleteRecipe: t.prismaField({
+  //   type: ,
+  //   args: {
+  //     recipeId: t.id({ required: true }),
+  //   },
+  // }),
 }));
-
-// type: "Recipe",
-// args: {
-//   filter: t.arg({ type: recipeFilter, required: true }),
-// },

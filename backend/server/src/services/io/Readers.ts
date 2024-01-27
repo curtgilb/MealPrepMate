@@ -46,10 +46,14 @@ function writeJson(relativePath: string, data: unknown) {
   fs.writeFileSync(path.join(__dirname, relativePath), JSON.stringify(data));
 }
 
-function readJSON(relativePath: string): object {
+function readJSON<T>(relativePath: string): T {
   return JSON.parse(
     fs.readFileSync(path.join(__dirname, relativePath), "utf8")
-  ) as object;
+  ) as T;
+}
+
+function readText(relativePath: string): string {
+  return fs.readFileSync(path.join(__dirname, relativePath), "utf8");
 }
 
 function readFile(
@@ -59,4 +63,4 @@ function readFile(
   return fs.readFileSync(path.join(__dirname, filePath), encoding);
 }
 
-export { writeJson, readJSON, readCSV, readFile };
+export { writeJson, readJSON, readCSV, readFile, readText };
