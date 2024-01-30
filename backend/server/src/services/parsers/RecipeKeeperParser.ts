@@ -1,10 +1,10 @@
-import { FileMetaData, RecipeKeeperRecipe } from "../../types/CustomTypes.js";
+import { FileMetaData } from "../../types/CustomTypes.js";
 import { HTMLElement } from "node-html-parser";
 import { parse as parseHTML } from "node-html-parser";
 import { db } from "../../db.js";
-import { Parser, ParsedOutput, ParsedRecord } from "../parsers/Parser.js";
+import { Parser, ParsedOutput, ParsedRecord } from "./Parser.js";
 import { RecipeInput } from "../../types/gql.js";
-import { ImportType, PrismaClient } from "@prisma/client";
+import { ImportType } from "@prisma/client";
 import { File as ZipFile } from "unzipper";
 import { hash } from "../../util/utils.js";
 import { z } from "zod";
@@ -32,36 +32,36 @@ type RecipeKeeperRecipe = {
 
 class RecipeKeeperRecord extends ParsedRecord<RecipeInput> {
   externalId: string | number | undefined;
-  deserializedData: RecipeKeeperHtml;
+  parsedData: RecipeKeeperHtml;
   importType: ImportType = "RECIPE_KEEPER";
 
   constructor(input: string, parsedHtml: HTMLElement) {
     super(input);
-    this.deserializedData = new RecipeKeeperHtml(parsedHtml);
+    this.parsedData = new RecipeKeeperHtml(parsedHtml);
   }
 
   toNutritionLabel<T extends z.ZodTypeAny>(
     schema: T,
     connectingId: string
   ): Promise<z.infer<T>> {
-    this.matchNutrients();
-    return {
-      name: this.deserializedData.recipe.name,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return schema.parse({
+      name: this.parsedData.recipe.name,
       connectingId: connectingId,
-      servings: this.deserializedData.recipe.recipeYield,
-      servingSize: this.deserializedData.recipe.nutritionServingSize,
-      nutrition: this.deserializedData.recipe.nutrients.map((nutrient) => ({
+      servings: this.parsedData.recipe.recipeYield,
+      servingSize: this.parsedData.recipe.nutritionServingSize,
+      nutrition: this.parsedData.recipe.nutrients.map((nutrient) => ({
         value: nutrient.value,
-        nutrientId: nutrient.name,
+        nutrientId: this.matchNutrients(nutrient.name),
       })),
-    } as z.infer<T>;
+    }) as z.infer<T>;
   }
 
-  async toObject<T extends z.ZodTypeAny>(
+  async transform<T extends z.ZodTypeAny>(
     schema: T,
-    imageMapping: Map<string, string>
+    imageMapping?: Map<string, string>
   ): Promise<z.infer<T>> {
-    const recipe = this.deserializedData.toObject();
+    const recipe = this.parsedData.toObject();
     const courses = await Promise.all(
       recipe.recipeCourse.map(
         async (course) => (await db.course.findOrCreate(course))?.id
@@ -88,7 +88,7 @@ class RecipeKeeperRecord extends ParsedRecord<RecipeInput> {
       cookTime: recipe.cookTime,
       directions: recipe.recipeDirections,
       notes: recipe.recipeNotes,
-      photos: recipe.photos.map((photoPath) => imageMapping.get(photoPath)),
+      photos: recipe.photos.map((photoPath) => imageMapping?.get(photoPath)),
       isFavorite: recipe.recipeIsFavourite,
       courseIds: courses,
       categoryIds: categories,
@@ -100,6 +100,7 @@ class RecipeKeeperRecord extends ParsedRecord<RecipeInput> {
 
 class RecipeKeeperParser extends Parser<RecipeInput> {
   protected records: RecipeKeeperRecord[] = [];
+  protected fileHash: string | undefined = undefined;
 
   constructor(source: string | File) {
     super(source);
@@ -254,3 +255,5 @@ class RecipeKeeperHtml {
     return this.recipe;
   }
 }
+
+export { RecipeKeeperParser };

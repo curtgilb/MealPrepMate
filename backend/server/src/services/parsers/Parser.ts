@@ -9,7 +9,7 @@ import { hash } from "../../util/utils.js";
 
 interface ParsedOutput<O> {
   records: ParsedRecord<O>[];
-  recordHash: string;
+  recordHash: string | undefined;
   imageMapping?: Map<string, string>;
 }
 
@@ -25,11 +25,15 @@ abstract class ParsedRecord<O> {
     this.recordHash = hash(input);
   }
 
-  abstract toObject<T extends ZodTypeAny>(schema: T): Promise<O>;
+  abstract transform<T extends ZodTypeAny>(
+    schema: T,
+    imageMapping?: Map<string, string>,
+    matchingId?: string
+  ): Promise<O>;
 
-  async matchNutrients(id: number): Promise<string | undefined> {
+  async matchNutrients(externalId: string): Promise<string | undefined> {
     await this.intializeMapping();
-    return ParsedRecord.nutrientMapping.get(id.toString());
+    return ParsedRecord.nutrientMapping.get(externalId);
   }
 
   async intializeMapping() {
@@ -51,7 +55,7 @@ abstract class ParsedRecord<O> {
 
 abstract class Parser<O> {
   protected abstract records: ParsedRecord<O>[];
-  protected abstract fileHash: string;
+  protected fileHash: string | undefined;
   // Original file name -> hash
   protected imageMapping = new Map<string, string>();
   protected source: string | File;
