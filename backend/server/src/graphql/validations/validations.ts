@@ -2,10 +2,17 @@ import { z } from "zod";
 import { RecipeInput } from "../../types/gql.js";
 import { toTitleCase } from "../../util/utils.js";
 
-function cleanString(value: string, format?: (val: string) => string): string {
-  let cleanedString = value.trim().replace(/\s\s+/g, " ");
-  if (format) cleanedString = format(cleanedString);
-  return cleanedString;
+
+
+function cleanedStringSchema(max: number, formatter?: (val: string) => string) {
+  return z
+    .string()
+    .transform((value) => {
+      let cleanedString = value.trim().replace(/\s\s+/g, " ");
+      if (formatter) cleanedString = formatter(cleanedString);
+      return cleanedString;
+    })
+    .pipe(z.string().min(1).max(max));
 }
 
 const schemaForType =
@@ -14,6 +21,8 @@ const schemaForType =
   <S extends z.ZodType<T, any, any>>(arg: S) => {
     return arg;
   };
+
+const max25string = 
 
 // creating a schema for strings
 const RecipeInputValidation = schemaForType<RecipeInput>()(
@@ -84,6 +93,7 @@ const RecipeFilterValidation = z.object({
 });
 
 export {
+  cleanedStringSchema,
   NutritionFilterValidation,
   RecipeFilterValidation,
   RecipeInputValidation,

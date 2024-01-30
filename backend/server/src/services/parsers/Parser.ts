@@ -9,8 +9,8 @@ import { hash } from "../../util/utils.js";
 
 interface ParsedOutput<O> {
   records: ParsedRecord<O>[];
-  fileHash: string;
-  imageMapping?: { [key: string]: string };
+  recordHash: string;
+  imageMapping?: Map<string, string>;
 }
 
 abstract class ParsedRecord<O> {
@@ -53,7 +53,7 @@ abstract class Parser<O> {
   protected abstract records: ParsedRecord<O>[];
   protected abstract fileHash: string;
   // Original file name -> hash
-  protected abstract imageMapping: { [key: string]: string };
+  protected imageMapping = new Map<string, string>();
   protected source: string | File;
 
   constructor(source: string | File) {

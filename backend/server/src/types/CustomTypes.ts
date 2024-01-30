@@ -28,17 +28,7 @@ type RecipeKeeperRecipe = {
   recipeDirections: string;
   recipeNotes: string;
   nutritionServingSize: string;
-  // recipeNutServingSize: string;
-  // recipeNutCalories: string;
-  // recipeNutTotalFat: string;
-  // recipeNutSaturatedFat: string;
-  // recipeNutSodium: string;
-  // recipeNutTotalCarbohydrate: string;
-  // recipeNutSugars: string;
-  // recipeNutProtein: string;
-  // recipeNutCholesterol: string;
-  // recipeNutDietaryFiber: string;
-  nutrients: Nutrient[];
+  nutrients: { name: string; value: string }[];
   recipeCourse: string[];
   photos: string[];
   recipeCollection: string[];
