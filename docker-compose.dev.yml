@@ -8,6 +8,12 @@ services:
       - 5432:5432
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+  dbeaver:
+    image: dbeaver/cloudbeaver
+    ports:
+      - 8080:8978
+    volumes:
+      - ./cloudbeaver/workspace:/opt/cloudbeaver/workspace
   recipe_nlp:
     build:
       context: ./backend/recipe_nlp

@@ -1,6 +1,6 @@
 import { Prisma, Course, Cuisine, Category } from "@prisma/client";
 import { toTitleCase } from "../util/utils.js";
-import { cleanedStringSchema } from "../graphql/validations/validations.js";
+import { cleanedStringSchema } from "../validations/graphqlValidation.js";
 
 type CourseQuery = {
   include?: Prisma.CourseInclude | undefined;

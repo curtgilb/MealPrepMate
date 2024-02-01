@@ -1,12 +1,18 @@
-import { MeasurementUnit, Nutrient, Prisma } from "@prisma/client";
+import { Gender, ImportType, Prisma, SpecialCondition } from "@prisma/client";
 import { readCSV } from "../../services/io/Readers.js";
 import { db } from "../../db.js";
-import {
-  toGenderEnum,
-  toNutrientTypeEnum,
-  toSpecialConditionEnum,
-} from "../../util/Cast.js";
+import { toGenderEnum, toSpecialConditionEnum } from "../../util/Cast.js";
 import { cast } from "../../util/Cast.js";
+import { nativeEnum, z } from "zod";
+import {
+  cleanedStringSchema,
+  nullableString,
+  stringArray,
+} from "../../validations/utilValidations.js";
+import { toTitleCase } from "../../util/utils.js";
+import { UnitSearch } from "../../search/UnitSearch.js";
+import { NutrientType } from "@prisma/client";
+import { spec } from "node:test/reporters";
 
 type NutrientParseInput = {
   nutrientPath: string;
@@ -15,7 +21,70 @@ type NutrientParseInput = {
   mappingSavePath: string;
 };
 
-export class NutrientParser {
+const nutrientSchema = z.object({
+  nutrient: cleanedStringSchema(30, toTitleCase),
+  unitAbbreviation: nullableString,
+  unit: cleanedStringSchema(10),
+  advancedView: z.boolean(),
+  order: z.number().int().positive(),
+  notes: nullableString,
+  alternateNames: stringArray,
+  type: z.nativeEnum(NutrientType),
+  parentNutrient: nullableString,
+  cronometer: nullableString,
+  recipeKeeper: nullableString,
+  myFitnessPal: nullableString,
+  dri: nullableString,
+});
+
+const vitaminDriSchema = z.array(
+  z.object({
+    gender: nativeEnum(Gender),
+    specialCondition: nativeEnum(SpecialCondition),
+    minAge: z.number().int().positive(),
+    maxAge: z.number().int().positive(),
+    vitaminA: z.number().int().positive(),
+    vitaminC: z.number().int().positive(),
+    vitaminD: z.number().int().positive(),
+    vitaminE: z.number().int().positive(),
+    vitaminK: z.number().int().positive(),
+    thiamin: z.number().int().positive(),
+    riboflavin: z.number().int().positive(),
+    niacin: z.number().int().positive(),
+    vitaminB6: z.number().int().positive(),
+    folate: z.number().int().positive(),
+    vitaminB12: z.number().int().positive(),
+    pantothenicAcid: z.number().int().positive(),
+    biotin: z.number().int().positive(),
+    choline: z.number().int().positive(),
+  })
+);
+
+const mineralDriSchema = z.array(
+  z.object({
+    gender: nativeEnum(Gender),
+    specialCondition: nativeEnum(SpecialCondition),
+    minAge: z.number().int().positive(),
+    maxAge: z.number().int().positive(),
+    calcium: z.number().int().positive(),
+    chromium: z.number().int().positive(),
+    copper: z.number().int().positive(),
+    fluoride: z.number().int().positive(),
+    iodine: z.number().int().positive(),
+    iron: z.number().int().positive(),
+    magnesium: z.number().int().positive(),
+    manganese: z.number().int().positive(),
+    molybdenum: z.number().int().positive(),
+    phosphorus: z.number().int().positive(),
+    selenium: z.number().int().positive(),
+    zinc: z.number().int().positive(),
+    potassium: z.number().int().positive(),
+    sodium: z.number().int().positive(),
+    chloride: z.number().int().positive(),
+  })
+);
+
+export class NutrientLoader {
   nutrientPath: string;
   mineralDriPath: string;
   vitaminDriPath: string;
@@ -32,60 +101,65 @@ export class NutrientParser {
       : "../../../data/seed_data/minerals_dri.csv";
   }
 
-  private findUnitMatch(
-    units: MeasurementUnit[],
-    searchString: string
-  ): string {
-    const result = units.filter(
-      (unit) =>
-        searchString === unit.name || unit.abbreviations.includes(searchString)
-    );
-    if (result.length !== 1)
-      throw Error("More than one match returned for nutrient unit");
-    return result[0].id;
-  }
-
   async parseNutrients(): Promise<{
-    createNutrientsStmt: Prisma.NutrientCreateManyInput[];
+    createNutrientsStmt: Prisma.NutrientCreateInput[];
     updateNutrientsStmt: Prisma.NutrientUpdateArgs[];
   }> {
     const data = await readCSV(this.nutrientPath);
 
     // read in nutrients to create mapping
     // Use mapping to map DRI to nutrient,
-    const createNutrientsStmt: Prisma.NutrientCreateManyInput[] = [];
+    const createNutrientsStmt: Prisma.NutrientCreateInput[] = [];
     const updateNutrientsStmt: Prisma.NutrientUpdateArgs[] = [];
+    const units = new UnitSearch(await db.measurementUnit.findMany({}));
     for (const { record } of data) {
-      // Grab the available units
-      const units = await db.measurementUnit.findMany({});
-      if (units.length === 0)
-        throw Error("Measurement units need to be loaded before nutrients");
+      // Validate the record
+      const cleanedRecord = nutrientSchema.parse(record);
+      const matchedUnit = units.search(cleanedRecord.nutrient);
 
       //   Create stmts for creating nutrients
-      const createStmt: Prisma.NutrientCreateManyInput = {
-        name: cast(record.nutrient) as string,
-        type: toNutrientTypeEnum(record.type),
-        advancedView: cast(record.advancedView) as boolean,
-        unitId: this.findUnitMatch(units, record.unit),
-        recipeKeeperMapping: cast(record.recipeKeeper) as string,
-        cronometerMapping: cast(record.cronometer) as string,
-        myFitnessPalMapping: cast(record.myFitnessPal) as string,
-        driMapping: cast(record.dri) as string,
+      const createStmt: Prisma.NutrientCreateInput = {
+        name: cleanedRecord.nutrient,
+        alternateNames: cleanedRecord.alternateNames,
+        type: cleanedRecord.type,
+        advancedView: cleanedRecord.advancedView,
+        unit: matchedUnit ? { connect: { id: matchedUnit.id } } : {},
+        mappings: {
+          createMany: {
+            data: [
+              {
+                importType: "CRONOMETER" as ImportType,
+                lookupName: cleanedRecord.cronometer,
+              },
+              {
+                importType: "RECIPE_KEEPER" as ImportType,
+                lookupName: cleanedRecord.recipeKeeper,
+              },
+              {
+                importType: "MY_FITNESS_PAL" as ImportType,
+                lookupName: cleanedRecord.myFitnessPal,
+              },
+              {
+                importType: "DRI" as ImportType,
+                lookupName: cleanedRecord.dri,
+              },
+            ].filter(
+              (row) => row.lookupName
+            ) as Prisma.NutrientMappingCreateInput[],
+          },
+        },
       };
-      const altNames = record.alternateNames.split(", ").filter((name) => name);
-      if (altNames.length > 0) {
-        createStmt.alternateNames = altNames;
-      }
+
       createNutrientsStmt.push(createStmt);
 
       // Connect parent and child nutrients
-      if (record.parentNutrient) {
+      if (cleanedRecord.parentNutrient) {
         updateNutrientsStmt.push({
-          where: { name: record.nutrient },
+          where: { name: cleanedRecord.nutrient },
           data: {
             parentNutrient: {
               connect: {
-                name: record.parentNutrient,
+                name: cleanedRecord.parentNutrient,
               },
             },
           },
@@ -98,19 +172,28 @@ export class NutrientParser {
     };
   }
 
-  async parseDRIs(
-    nutrients: Nutrient[]
-  ): Promise<Prisma.DailyReferenceIntakeCreateInput[]> {
+  async getDriMapping(): Promise<Map<string, string>> {
+    const nutrients = await db.nutrientMapping.findMany({
+      where: { importType: "DRI" },
+      include: { nutrient: true },
+    });
+    if (nutrients.length === 0)
+      throw Error("Nutrients and mappings need to be loaded first");
+
+    return nutrients.reduce((agg, val) => {
+      agg.set(val.lookupName, val.nutrient.id);
+      return agg;
+    }, new Map<string, string>());
+  }
+
+  async parseDRIs(): Promise<Prisma.DailyReferenceIntakeCreateInput[]> {
     const mineralDRI = await readCSV(this.mineralDriPath);
     const vitaminDRI = await readCSV(this.vitaminDriPath);
+
     const dris = [...mineralDRI, ...vitaminDRI];
+    const mapping = await this.getDriMapping();
+
     const createDriStmts: Prisma.DailyReferenceIntakeCreateInput[] = [];
-    const mapping = nutrients.reduce((aggregate, nutrient) => {
-      if (nutrient.driMapping) {
-        aggregate.set(nutrient.driMapping, nutrient.id);
-      }
-      return aggregate;
-    }, new Map<string, string>());
     for (const { record } of dris) {
       const { gender, specialCondition, minAge, maxAge, ...rest } = record;
 
@@ -118,11 +201,13 @@ export class NutrientParser {
         if (mapping.has(nutrient)) {
           createDriStmts.push({
             nutrient: { connect: { id: mapping.get(nutrient) } },
-            value: cast(value) as number,
-            gender: toGenderEnum(gender),
-            ageMin: cast(minAge) as number,
-            ageMax: cast(maxAge) as number,
-            specialCondition: toSpecialConditionEnum(specialCondition),
+            value: z.number().int().positive().parse(value),
+            gender: z.nativeEnum(Gender).parse(gender),
+            ageMin: z.number().int().positive().parse(minAge),
+            ageMax: z.number().int().positive().parse(maxAge),
+            specialCondition: z
+              .nativeEnum(SpecialCondition)
+              .parse(specialCondition),
           });
         }
       }

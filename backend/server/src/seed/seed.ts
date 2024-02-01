@@ -4,9 +4,9 @@ import { readCSV } from "../services/io/Readers.js";
 import { storage } from "../storage.js";
 import { cast, toMeasurementUnitTypeEnum } from "../util/Cast.js";
 const prisma = new PrismaClient();
+import { NutrientLoader } from "./dataloaders/NutrientParser.js";
+import { IngredientLoader } from "./dataloaders/IngredientParser.js";
 import { db } from "../db.js";
-import { NutrientParser } from "./dataloaders/NutrientParser.js";
-import { IngredientParser } from "./dataloaders/IngredientParser.js";
 const bucketPolicy = `{
     "Version": "2012-10-17",
     "Statement": [
@@ -167,17 +167,20 @@ async function loadCuisines() {
 }
 
 async function loadNutrients() {
-  const nutrients = new NutrientParser();
+  const nutrients = new NutrientLoader();
   const stmts = await nutrients.parseNutrients();
   // Create Nutrients
-  await db.nutrient.createMany({ data: stmts.createNutrientsStmt });
+  for (const stmt of stmts.createNutrientsStmt) {
+    await db.nutrient.create({ data: stmt });
+  }
 
   // Update Stmt for linking child nutrients
   const createdNutrients: Nutrient[] = [];
   for (const updateStmt of stmts.updateNutrientsStmt) {
     createdNutrients.push(await db.nutrient.update(updateStmt));
   }
-  const driStmt = await nutrients.parseDRIs(createdNutrients);
+  // Create DRI's
+  const driStmt = await nutrients.parseDRIs();
   for (const driCreateStmt of driStmt) {
     await db.dailyReferenceIntake.create({ data: driCreateStmt });
   }
@@ -185,7 +188,7 @@ async function loadNutrients() {
 
 async function loadIngredients() {
   // Load in Ingredients
-  const parser = new IngredientParser();
+  const parser = new IngredientLoader();
   const expRulesStmt = await parser.parseExpirationRules();
   await db.expirationRule.createMany({ data: expRulesStmt });
   const ingredientStmt = await parser.parseIngredients();

@@ -5,7 +5,7 @@ import { Recipe } from "@prisma/client";
 import {
   RecipeInputValidation,
   NutritionFilterValidation,
-} from "../validations/validations.js";
+} from "../../validations/graphqlValidation.js";
 
 type ExtendedRecipe = Recipe & { ingredientFreshness: number };
 

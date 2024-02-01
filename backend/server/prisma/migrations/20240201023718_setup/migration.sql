@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "ImportType" AS ENUM ('MY_FITNESS_PAL', 'RECIPE_KEEPER', 'CRONOMETER');
+CREATE TYPE "ImportType" AS ENUM ('MY_FITNESS_PAL', 'RECIPE_KEEPER', 'CRONOMETER', 'DRI');
 
 -- CreateEnum
 CREATE TYPE "NutrientType" AS ENUM ('CARBOHYDRATE', 'FAT', 'PROTEIN', 'ALCOHOL', 'MINERAL', 'VITAMIN', 'OTHER');
@@ -264,6 +264,7 @@ CREATE TABLE "NutritionLabel" (
     "unitId" TEXT,
     "servingsUsed" DOUBLE PRECISION,
     "importRecordId" TEXT,
+    "isPrimary" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "NutritionLabel_pkey" PRIMARY KEY ("id")
 );
@@ -288,12 +289,18 @@ CREATE TABLE "Nutrient" (
     "customTarget" DOUBLE PRECISION,
     "parentNutrientId" TEXT,
     "unitId" TEXT NOT NULL,
-    "recipeKeeperMapping" TEXT,
-    "cronometerMapping" TEXT,
-    "myFitnessPalMapping" TEXT,
-    "driMapping" TEXT,
 
     CONSTRAINT "Nutrient_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "NutrientMapping" (
+    "id" TEXT NOT NULL,
+    "importType" "ImportType" NOT NULL,
+    "nutrientId" TEXT NOT NULL,
+    "lookupName" TEXT NOT NULL,
+
+    CONSTRAINT "NutrientMapping_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -369,6 +376,9 @@ CREATE UNIQUE INDEX "NutritionLabel_ingredientGroupId_key" ON "NutritionLabel"("
 
 -- CreateIndex
 CREATE UNIQUE INDEX "NutritionLabel_importRecordId_key" ON "NutritionLabel"("importRecordId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "NutritionLabel_recipeId_ingredientGroupId_key" ON "NutritionLabel"("recipeId", "ingredientGroupId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Nutrient_name_key" ON "Nutrient"("name");
@@ -471,6 +481,9 @@ ALTER TABLE "Nutrient" ADD CONSTRAINT "Nutrient_parentNutrientId_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "Nutrient" ADD CONSTRAINT "Nutrient_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "MeasurementUnit"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "NutrientMapping" ADD CONSTRAINT "NutrientMapping_nutrientId_fkey" FOREIGN KEY ("nutrientId") REFERENCES "Nutrient"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "DailyReferenceIntake" ADD CONSTRAINT "DailyReferenceIntake_nutrientId_fkey" FOREIGN KEY ("nutrientId") REFERENCES "Nutrient"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

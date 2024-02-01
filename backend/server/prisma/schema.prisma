@@ -20,6 +20,7 @@ enum ImportType {
   MY_FITNESS_PAL
   RECIPE_KEEPER
   CRONOMETER
+  DRI
 }
 
 enum NutrientType {

@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { RecipeInput } from "../../types/gql.js";
-import { toTitleCase } from "../../util/utils.js";
+import { RecipeInput } from "../types/gql.js";
+import { toTitleCase } from "../util/utils.js";
 
 
 
