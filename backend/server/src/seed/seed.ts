@@ -1,6 +1,5 @@
-import { Nutrient, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { readCSV } from "../services/io/Readers.js";
-
 import { storage } from "../storage.js";
 import { cast, toMeasurementUnitTypeEnum } from "../util/Cast.js";
 const prisma = new PrismaClient();
@@ -175,9 +174,8 @@ async function loadNutrients() {
   }
 
   // Update Stmt for linking child nutrients
-  const createdNutrients: Nutrient[] = [];
   for (const updateStmt of stmts.updateNutrientsStmt) {
-    createdNutrients.push(await db.nutrient.update(updateStmt));
+    await db.nutrient.update(updateStmt);
   }
   // Create DRI's
   const driStmt = await nutrients.parseDRIs();

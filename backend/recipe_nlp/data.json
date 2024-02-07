@@ -1,0 +1,73 @@
+{
+  "author": "Lisa Bryan",
+  "canonical_url": "https://downshiftology.com/recipes/lemon-pepper-chicken/",
+  "category": "Dinner",
+  "equipment": ["Le Creuset Braiser"],
+  "host": "downshiftology.com",
+  "image": "https://i2.wp.com/www.downshiftology.com/wp-content/uploads/2024/01/Lemon-Pepper-Chicken-main.jpg",
+  "ingredient_groups": [
+    {
+      "ingredients": [
+        "2 large chicken breasts (about 1 \u00bd pounds)",
+        "1 tablespoon arrowroot powder (or flour of choice)",
+        "1 tablespoon lemon pepper seasoning",
+        "\u00bd teaspoon kosher salt",
+        "2 tablespoons extra virgin olive oil",
+        "2 tablespoons unsalted butter",
+        "2 garlic cloves (minced)",
+        "3 tablespoons lemon juice (from 1 lemon)",
+        "\u00bc cup low-sodium chicken broth",
+        "1 teaspoon lemon zest",
+        "optional: garnish with freshly chopped parsley and lemon slices"
+      ],
+      "purpose": null
+    }
+  ],
+  "ingredients": [
+    "2 large chicken breasts (about 1 \u00bd pounds)",
+    "1 tablespoon arrowroot powder (or flour of choice)",
+    "1 tablespoon lemon pepper seasoning",
+    "\u00bd teaspoon kosher salt",
+    "2 tablespoons extra virgin olive oil",
+    "2 tablespoons unsalted butter",
+    "2 garlic cloves (minced)",
+    "3 tablespoons lemon juice (from 1 lemon)",
+    "\u00bc cup low-sodium chicken broth",
+    "1 teaspoon lemon zest",
+    "optional: garnish with freshly chopped parsley and lemon slices"
+  ],
+  "instructions": "Cut chicken\nCut the chicken: Slice the chicken breasts in half horizontally.\nMix seasoning\nMix the seasoning: In a small mixing bowl, stir together the flour, lemon pepper seasoning, and salt.\nSeason chicken\nSeason the chicken: Sprinkle the seasoning evenly over both sides of the chicken, pressing it in with your hands.\nCook chicken\nCook the chicken: Heat the oil in a large pan over medium-high heat. Add the chicken and sear for 3 to 4 minutes on one side, then flip over and cook another 3 to 4 minutes (until an instant-read thermometer reaches 160 to 165\u00b0F). Remove to a plate.\nMake sauce\nMake the sauce: Add the butter to the pan, and saute the garlic in the butter for about 30 seconds. Add the chicken broth and lemon juice, and reduce the sauce for a minute or two.\nFinish and serve: Add the chicken back to the pan, and spoon the sauce on top. Garnish with lemon zest, and if you'd like, chopped parsley and lemon slices.",
+  "instructions_list": [
+    "Cut chicken",
+    "Cut the chicken: Slice the chicken breasts in half horizontally.",
+    "Mix seasoning",
+    "Mix the seasoning: In a small mixing bowl, stir together the flour, lemon pepper seasoning, and salt.",
+    "Season chicken",
+    "Season the chicken: Sprinkle the seasoning evenly over both sides of the chicken, pressing it in with your hands.",
+    "Cook chicken",
+    "Cook the chicken: Heat the oil in a large pan over medium-high heat. Add the chicken and sear for 3 to 4 minutes on one side, then flip over and cook another 3 to 4 minutes (until an instant-read thermometer reaches 160 to 165\u00b0F). Remove to a plate.",
+    "Make sauce",
+    "Make the sauce: Add the butter to the pan, and saute the garlic in the butter for about 30 seconds. Add the chicken broth and lemon juice, and reduce the sauce for a minute or two.",
+    "Finish and serve: Add the chicken back to the pan, and spoon the sauce on top. Garnish with lemon zest, and if you'd like, chopped parsley and lemon slices."
+  ],
+  "language": "en-US",
+  "nutrients": {
+    "calories": "259 kcal",
+    "carbohydrateContent": "4 g",
+    "proteinContent": "25 g",
+    "fatContent": "16 g",
+    "saturatedFatContent": "5 g",
+    "transFatContent": "0.2 g",
+    "cholesterolContent": "87 mg",
+    "sodiumContent": "428 mg",
+    "fiberContent": "1 g",
+    "sugarContent": "0.4 g",
+    "unsaturatedFatContent": "8 g",
+    "servingSize": "1 serving"
+  },
+  "ratings": 5.0,
+  "site_name": "Downshiftology",
+  "title": "Lemon Pepper Chicken",
+  "total_time": 15,
+  "yields": "4 servings"
+}

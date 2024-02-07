@@ -1,4 +1,4 @@
-﻿Name,Category,Variant,Storage Instructions,Expiration Rule,Alternative Names
+﻿Name,Category,Variant,Storage Instructions,ruleRefId,Alternative Names
 Agave Nectar,Juice,,,,
 Almond Milk,Milk,,,,
 Almonds,Nuts,,,,
@@ -20,12 +20,12 @@ Basil,Spice,,,,
 Bay Leaf,Spice,,,,
 Beef,Beef,,,,
 Beef Jerky,Beef,,,,
-Beef Patties,Beef,,,,
+Beef Patties,Beef,,,,Hamburger patty
 Beets,Vegetable,,,,
-Bell Pepper,Vegetable,,,,
+Bell Pepper,Vegetable,,,,"Yellow bell pepper, red bell pepper, orange bell pepper"
 Biscuit Mix,Baking,,,,
 Black Beans,Vegetable,,,,
-Black Pepper,Spice,,,,
+Black Pepper,Spice,,,,pepper
 Blue Cheese,Cheese,,,,
 Blueberries,Fruit,,,,
 Bok Choy,Vegetable,,,,

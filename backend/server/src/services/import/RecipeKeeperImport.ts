@@ -1,261 +1,134 @@
-import { Open, CentralDirectory, File as ZipFile } from "unzipper";
-import fs from "fs/promises";
-import { hash } from "../../util/utils.js";
-import { v4 as uuidv4 } from "uuid";
-import { storage } from "../../storage.js";
-import { RecipeKeeperRecipe } from "../../types/CustomTypes.js";
-import { RecipeKeeperParser } from "../parsers/RecipeKeeperParser.js";
-import { compareTwoStrings } from "../../util/utils.js";
-import { getFileMetaData, FileMetaData } from "./ImportService.js";
-import { Prisma, ImportRecord, RecordStatus, Recipe } from "@prisma/client";
+import {
+  RecipeKeeperParser,
+  RecipeKeeperRecord,
+} from "./parsers/RecipeKeeperParser.js";
+import { Prisma } from "@prisma/client";
 import { db } from "../../db.js";
 import { ImportQuery } from "../../types/CustomTypes.js";
-
-const APPROX_MATCH_THRESHOLD = 0.8;
-
-type RecipeKeeperExtractedData = {
-  htmlHash: string;
-  fileMetaData: FileMetaData;
-  recipes: RecipeKeeperRecipe[];
-  imageNameToHash: { [key: string]: string };
-};
+import {
+  NutritionLabelValidation,
+  RecipeInputValidation,
+} from "../../validations/graphqlValidation.js";
 
 export async function processRecipeKeeperImport(
   source: string | File,
-  query: ImportQuery
+  query?: ImportQuery
 ) {
   // 1. unzip file and get the last import to compare against (if it is the same hash, it will not import)
-  const fileBuffer = await unzipFile(source);
+  const recipeKeeperUpload = new RecipeKeeperParser(source);
+  const output = await recipeKeeperUpload.parse();
   const lastImport = await db.import.findFirst({
     where: { type: "RECIPE_KEEPER" },
     orderBy: { createdAt: "desc" },
   });
 
-  // 2. Extract files including images, search for html file, return if already imported
-  const { htmlHash, fileMetaData, recipes, imageNameToHash } =
-    await extractRecipes(fileBuffer);
-
-  if (lastImport?.fileHash === htmlHash)
-    throw Error("No changes made since the last import");
-
-  //  3. Search for any matching recipes already in the database.
-  const matches = await findRecipeMatches(recipes);
-
-  //  4. Save the data to the database
-  return await saveRecipeData(
-    fileMetaData.name,
-    htmlHash,
-    imageNameToHash,
-    recipes,
-    matches,
-    query
-  );
-}
-
-async function saveRecipeData(
-  htmlFileName: string,
-  htmlFileHash: string,
-  imageNameToHash: { [key: string]: string },
-  recipes: RecipeKeeperRecipe[],
-  matches: Match[],
-  query: ImportQuery
-) {
-  return await db.$transaction(async (tx) => {
-    for (const [index, recipe] of recipes.entries()) {
-      if (!matches[index].matchingRecipeId) {
-        const importedRecipe = await tx.recipe.createRecipeKeeperRecipe(
-          recipe,
-          imageNameToHash
-        );
-        matches[index].matchingRecipeId = importedRecipe.id;
-      }
-    }
-    return await tx.import.create({
+  // Check if duplicate
+  if (lastImport?.fileHash === output.recordHash)
+    return await db.import.create({
       data: {
-        fileName: htmlFileName,
-        fileHash: htmlFileHash,
+        fileName: output.fileName,
+        fileHash: output.recordHash,
         type: "RECIPE_KEEPER",
-        status: "PENDING",
-        imageMapping: imageNameToHash as Prisma.JsonObject,
-        importRecords: {
-          createMany: {
-            data: recipes.map((recipe, index) => ({
-              name: recipe.name,
-              status: matches[index].importStatus,
-              parsedFormat: recipe as Prisma.JsonObject,
-              rawInput: recipe.rawInput,
-              recipeId: matches[index].matchingRecipeId,
-            })),
-          },
-        },
+        status: "DUPLICATE",
       },
       ...query,
     });
-  });
-}
 
-export type Match = {
-  matchingRecipeId?: string | undefined;
-  matchingLabelId?: string | undefined;
-  importStatus: RecordStatus;
-};
+  //  3. Search for any matching recipes already in the database.
+  for (const record of output.records) {
+    await findRecipeMatches(record);
+  }
 
-// Order of matches returned is important. They should align with the recipes array passed in.
-async function findRecipeMatches(
-  recipes: RecipeKeeperRecipe[]
-): Promise<Match[]> {
-  const matches: Match[] = [];
-  const existingRecipes = await db.recipe.findMany({
-    select: {
-      id: true,
-      title: true,
-      directions: true,
-    },
-  });
-
-  for (const recipe of recipes) {
-    // 1. Check for an exact match by comparing raw input
-    const previousMatch = await findExactRecipe(recipe);
-
-    if (previousMatch) {
-      matches.push({
-        matchingRecipeId: previousMatch.id,
-        importStatus: "DUPLICATE",
-      });
-      continue;
-    } else {
-      // 2. Check for updateable match by comparing keys (title + ingredients) for a similar match
-
-      if (existingRecipes.length > 0) {
-        const approximateMatch = findApproximateRecipe(recipe, existingRecipes);
-        if (approximateMatch) {
-          matches.push({
-            matchingRecipeId: approximateMatch.id,
-            importStatus: "PENDING",
+  //  4. Save the data to the database
+  return await db.$transaction(
+    async (tx) => {
+      for (const record of output.records) {
+        const match = record.getMatch();
+        if (!match?.matchId) {
+          const recipeInput = await record.transform(
+            RecipeInputValidation,
+            output.imageMapping
+          );
+          const { id } = await tx.recipe.createRecipe(recipeInput);
+          record.setMatch({ matchId: id, status: "IMPORTED" });
+          const nutritionLabel = await record.toNutritionLabel(
+            NutritionLabelValidation,
+            id
+          );
+          await tx.nutritionLabel.createNutritionLabel({
+            baseLabel: nutritionLabel,
           });
-          continue;
         }
       }
-      // 3. If no match is found, mark the recipe to be imported
-      matches.push({ matchingRecipeId: undefined, importStatus: "IMPORTED" });
-    }
-  }
-  return matches;
-}
-
-async function findExactRecipe(
-  recipe: RecipeKeeperRecipe
-): Promise<ImportRecord | null> {
-  return await db.importRecord.findFirst({
-    where: {
-      rawInput: {
-        equals: recipe.rawInput,
-      },
+      return await tx.import.create({
+        data: {
+          fileName: output.fileName,
+          fileHash: output.recordHash,
+          type: "RECIPE_KEEPER",
+          status: "PENDING",
+          imageMapping: Object.fromEntries(
+            output.imageMapping
+          ) as Prisma.JsonObject,
+          importRecords: {
+            createMany: {
+              data: output.records.map((record) => ({
+                name: record.getTitle(),
+                hash: record.getRecordHash(),
+                status: record.getMatch()?.status || "PENDING",
+                parsedFormat: record.getParsedObject() as Prisma.JsonObject,
+                recipeId: record.getMatch()?.matchId,
+                externalId: record.getExternalId(),
+              })),
+            },
+          },
+        },
+        ...query,
+      });
     },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+    { timeout: 10000 }
+  );
 }
 
-function findApproximateRecipe(
-  recipe: RecipeKeeperRecipe,
-  existingRecipes: {
-    id: string;
-    title: string;
-    directions: string | null;
-  }[]
-): Recipe | undefined {
-  const newComparisonKey = `${recipe.name} ${recipe.recipeDirections}`;
-  let highestPercentMatch = 0;
-  let bestMatch;
-
-  existingRecipes.forEach((existingRecipe) => {
-    const oldComparisonKey = `${existingRecipe.title} ${existingRecipe.directions}`;
-    const percentMatch = compareTwoStrings(oldComparisonKey, newComparisonKey);
-
-    if (
-      percentMatch > APPROX_MATCH_THRESHOLD &&
-      percentMatch > highestPercentMatch
-    ) {
-      highestPercentMatch = percentMatch;
-      bestMatch = existingRecipe;
-    }
+// Order of matches returned is important. They should align with the recipes array passed in.
+async function findRecipeMatches(recipe: RecipeKeeperRecord) {
+  // 1. Check for an exact match by comparing hash : DUPLICATE
+  const importRecord = await db.importRecord.findFirst({
+    where: { OR: [{ hash: recipe.getRecordHash() }, {}] },
+    select: { recipeId: true, hash: true, externalId: true },
   });
-  return bestMatch;
-}
-
-async function extractRecipes(
-  zipFile: CentralDirectory
-): Promise<RecipeKeeperExtractedData> {
-  let recipeKeeperRecipes: RecipeKeeperRecipe[] = [];
-  const imageNameToHash: { [key: string]: string } = {};
-  let htmlFileHash;
-  let htmlFileMetaData;
-
-  for (const file of zipFile.files) {
-    if (file.type === "File") {
-      const fileMetaData = getFileMetaData(file.path);
-      if (fileMetaData.ext === "html") {
-        const htmlData = (await file.buffer()).toString();
-        htmlFileHash = hash(htmlData);
-        htmlFileMetaData = JSON.parse(
-          JSON.stringify(fileMetaData)
-        ) as FileMetaData;
-        const parser = new RecipeKeeperParser();
-        recipeKeeperRecipes = await parser.parse(htmlData);
-      } else if (["jpg", "png", "tiff"].includes(fileMetaData.ext)) {
-        await processImage(file, imageNameToHash, fileMetaData);
-      }
-    }
-  }
-  if (!htmlFileHash) throw Error("No Html file was found in zip file");
-  if (!htmlFileMetaData) throw Error("No HTML file was found in zip file");
-  return {
-    htmlHash: htmlFileHash,
-    recipes: recipeKeeperRecipes,
-    imageNameToHash: imageNameToHash,
-    fileMetaData: htmlFileMetaData,
-  };
-}
-
-async function processImage(
-  image: ZipFile,
-  hashLookup: { [key: string]: string },
-  fileMeta: FileMetaData
-) {
-  // 1. Hash the image and check if it exists in the database
-  const inputImageHash = hash(await image.buffer());
-  const existingImage = await db.photo.findUnique({
-    where: { hash: inputImageHash },
-  });
-
-  // 2. If it does not exist, upload it to the storage and add it to the database
-  if (!existingImage) {
-    const fileName = `${uuidv4()}.${fileMeta.ext}`;
-    await storage.putObject("images", fileName, await image.buffer());
-    await db.photo.create({
-      data: {
-        path: `images/${fileName}`,
-        hash: inputImageHash,
-      },
+  if (
+    importRecord &&
+    importRecord.recipeId &&
+    importRecord.hash === recipe.getRecordHash()
+  ) {
+    recipe.setMatch({
+      matchId: importRecord.recipeId,
+      status: "DUPLICATE",
     });
   }
-  //  3. Add the image to the map of image names to hashes
-  hashLookup[fileMeta.name] = inputImageHash;
+  // 2. Check for updateable match by comparing externalID : UPDATE
+  else if (
+    importRecord &&
+    importRecord.recipeId &&
+    importRecord.externalId === recipe.externalId
+  ) {
+    recipe.setMatch({
+      matchId: importRecord.recipeId,
+      status: "UPDATED",
+    });
+  }
+  // 3. Check for updateable match by comparing title : UPDATE
+  const recipeMatch = await db.recipe.findFirst({
+    where: { title: { contains: recipe.getTitle(), mode: "insensitive" } },
+    select: { id: true },
+  });
+  if (recipeMatch) {
+    recipe.setMatch({ matchId: recipeMatch.id, status: "PENDING" });
+  }
+  // 4. If no match is found, mark the recipe to be imported : IMPORTED
+  recipe.setMatch({ matchId: undefined, status: "IMPORTED" });
 }
 
-async function unzipFile(source: string | File): Promise<CentralDirectory> {
-  if (typeof source === "string") {
-    try {
-      await fs.access(source);
-      return await Open.file(source);
-    } catch {
-      throw Error(`File at ${source} could not be opened.`);
-    }
-  } else if (typeof source == "object" && Object.hasOwn(source, "name")) {
-    const fileBuffer = Buffer.from(await source.arrayBuffer());
-    return await Open.buffer(fileBuffer);
-  }
-  throw Error(`Invalid object passed to unzipFile`);
-}
+await processRecipeKeeperImport(
+  "C:\\Users\\cgilb\\Documents\\Code\\mealplanner\\backend\\server\\data\\RecipeKeeper.zip"
+);

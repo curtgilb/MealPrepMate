@@ -1,12 +1,12 @@
-import { FileMetaData } from "../../types/CustomTypes.js";
+import { FileMetaData, Match } from "../../../types/CustomTypes.js";
 import { HTMLElement } from "node-html-parser";
 import { parse as parseHTML } from "node-html-parser";
-import { db } from "../../db.js";
+import { db } from "../../../db.js";
 import { Parser, ParsedOutput, ParsedRecord } from "./Parser.js";
-import { RecipeInput } from "../../types/gql.js";
+import { RecipeInput } from "../../../types/gql.js";
 import { ImportType } from "@prisma/client";
 import { File as ZipFile } from "unzipper";
-import { hash } from "../../util/utils.js";
+import { hash } from "../../../util/utils.js";
 import { z } from "zod";
 
 type RecipeKeeperRecipe = {
@@ -31,29 +31,52 @@ type RecipeKeeperRecipe = {
 };
 
 class RecipeKeeperRecord extends ParsedRecord<RecipeInput> {
-  externalId: string | number | undefined;
+  externalId: string | undefined;
   parsedData: RecipeKeeperHtml;
   importType: ImportType = "RECIPE_KEEPER";
 
   constructor(input: string, parsedHtml: HTMLElement) {
     super(input);
     this.parsedData = new RecipeKeeperHtml(parsedHtml);
+    this.externalId = this.parsedData.recipe.recipeId;
+  }
+
+  getTitle(): string {
+    return this.parsedData.recipe.name;
+  }
+
+  getIngredients(): string {
+    return this.parsedData.recipe.recipeIngredients;
+  }
+
+  getParsedObject(): RecipeKeeperRecipe {
+    return this.parsedData.toObject();
   }
 
   toNutritionLabel<T extends z.ZodTypeAny>(
     schema: T,
     connectingId: string
   ): Promise<z.infer<T>> {
+    const nutrients = this.parsedData.recipe.nutrients
+      .filter((nutrient) => {
+        const result = z.coerce.number().positive().safeParse(nutrient.value);
+        return result.success;
+      })
+      .map(async (nutrient) => ({
+        value: nutrient.value,
+        nutrientId: await ParsedRecord.matchNutrient(
+          nutrient.name,
+          this.importType
+        ),
+      }));
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return schema.parse({
       name: this.parsedData.recipe.name,
       connectingId: connectingId,
       servings: this.parsedData.recipe.recipeYield,
       servingSize: this.parsedData.recipe.nutritionServingSize,
-      nutrition: this.parsedData.recipe.nutrients.map((nutrient) => ({
-        value: nutrient.value,
-        nutrientId: this.matchNutrients(nutrient.name),
-      })),
+      nutrition: nutrients,
     }) as z.infer<T>;
   }
 
@@ -80,6 +103,7 @@ class RecipeKeeperRecord extends ParsedRecord<RecipeInput> {
     cuisine = cuisine
       ? (await db.cuisine.findOrCreate(cuisine))?.id
       : undefined;
+    console.log(recipe.recipeIsFavourite);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return schema.parse({
       title: recipe.name,
@@ -98,20 +122,24 @@ class RecipeKeeperRecord extends ParsedRecord<RecipeInput> {
   }
 }
 
-class RecipeKeeperParser extends Parser<RecipeInput> {
+class RecipeKeeperParser extends Parser<RecipeInput, RecipeKeeperRecord> {
   protected records: RecipeKeeperRecord[] = [];
   protected fileHash: string | undefined = undefined;
+  protected fileName: string | undefined = undefined;
 
   constructor(source: string | File) {
     super(source);
   }
-  async parse(): Promise<ParsedOutput<RecipeInput>> {
+  async parse(): Promise<ParsedOutput<RecipeInput, RecipeKeeperRecord>> {
     const directory = await this.unzipFile(this.source);
+    this.fileName =
+      this.source instanceof File ? this.source.name : this.source;
     await this.traverseDirectory(directory);
     return {
       records: this.records,
       recordHash: this.fileHash,
       imageMapping: this.imageMapping,
+      fileName: this.fileName,
     };
   }
 
@@ -130,7 +158,8 @@ class RecipeKeeperParser extends Parser<RecipeInput> {
         metaData.name,
         { select: { id: true } }
       );
-      this.imageMapping.set(metaData.path, photo.id);
+
+      this.imageMapping.set(`images/${metaData.name}`, photo.id);
     }
   }
 }
@@ -183,7 +212,10 @@ class RecipeKeeperHtml {
       }
       // handle arrays
       else {
-        (this.recipe[prop as keyof RecipeKeeperRecipe] as string[]).push(value);
+        if (value)
+          (this.recipe[prop as keyof RecipeKeeperRecipe] as string[]).push(
+            value
+          );
       }
     }
     // Handle nutrients
@@ -221,7 +253,7 @@ class RecipeKeeperHtml {
 
   private getTime(input: string): string {
     const match = Array.from(input.matchAll(/(?<time>\d+)(?<unit>.)/gm))[0];
-    if (match.groups) {
+    if (match && match.groups) {
       const time: number = parseInt(match.groups.time);
       const unit: string = match.groups.unit;
       if (unit === "S") {
@@ -256,4 +288,8 @@ class RecipeKeeperHtml {
   }
 }
 
-export { RecipeKeeperParser };
+export { RecipeKeeperParser, RecipeKeeperRecord };
+
+// const rkParser = new RecipeKeeperParser("../../../data/recipekeeper.zip");
+// const result = await rkParser.parse();
+// console.log("finish");

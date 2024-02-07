@@ -25,7 +25,7 @@
     "@pothos/core": "^3.38.0",
     "@pothos/plugin-prisma": "^3.61.0",
     "@pothos/plugin-validation": "^3.10.1",
-    "@prisma/client": "^5.9.0",
+    "@prisma/client": "5.8.1",
     "@types/unzipper": "^0.10.8",
     "@types/uuid": "^9.0.6",
     "csv": "^6.3.5",
@@ -56,8 +56,9 @@
     "node-html-parser": "^6.1.11",
     "nodemon": "^3.0.1",
     "prettier": "3.0.3",
-    "prisma": "^5.9.0",
+    "prisma": "5.8.1",
     "ts-node": "^10.9.2",
+    "tsx": "^4.7.0",
     "typescript": "^5.2.2",
     "vitest": "^0.34.6"
   }

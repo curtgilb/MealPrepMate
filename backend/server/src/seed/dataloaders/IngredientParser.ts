@@ -18,20 +18,19 @@ const ingredientSchema = z.object({
   category: cleanedStringSchema(30, toTitleCase),
   variant: nullableString,
   storageInstruction: nullableString,
-  expirationRule: z.number().int().positive().nullish(),
   alternativeNanes: stringArray,
-  ruleRefId: z.number().int().positive().nullish(),
+  ruleRefId: z.coerce.number().int().positive().nullish(),
 });
 
 const expirationRuleSchema = z.object({
-  refId: z.number().int().positive(),
-  name: cleanedStringSchema(30, toTitleCase),
+  refId: z.coerce.number().int().positive(),
+  name: cleanedStringSchema(50, toTitleCase),
   variant: nullableString,
-  leftoverFreshness: z.number().int().positive(),
-  tableDays: z.number().int().positive().nullish(),
-  fridgeDays: z.number().int().positive().nullish(),
-  freezerDays: z.number().int().positive().nullish(),
-  defrostTime: z.number().positive().nullish(),
+  leftoverFreshness: z.coerce.number().int().positive(),
+  tableDays: z.coerce.number().int().nullish(),
+  fridgeDays: z.coerce.number().int().nullish(),
+  freezerDays: z.coerce.number().int().nullish(),
+  defrostTime: z.coerce.number().nullish(),
 });
 
 export class IngredientLoader {

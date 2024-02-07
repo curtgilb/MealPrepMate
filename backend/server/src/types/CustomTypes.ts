@@ -1,17 +1,9 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, RecordStatus } from "@prisma/client";
 
-type RecipeNlpResponse = {
-  sentence: string;
-  quantity: number;
-  unit: string;
-  name: string;
-  comment: string;
-  preparation: string;
-  other: string;
-
-  minQty?: number;
-  maxQty?: number;
-  matchedIngredient?: string;
+type Match = {
+  recipeMatchId: string | undefined;
+  labelMatchId: string | undefined;
+  status: RecordStatus;
 };
 
 type RecipeKeeperRecipe = {
@@ -130,6 +122,7 @@ export {
   CronometerNutrition,
   MyFitnessPalNutrition,
   ImportQuery,
+  Match,
   // Ingredient,
   // Nutrient,
   // NutritionFact,

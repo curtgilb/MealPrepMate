@@ -1,22 +1,9 @@
-from ingredient_parser import parse_ingredient
 from recipe_scrapers import scrape_me
+import json
 
-def convertToFloat(string):
-    try:
-        return float(string)
-    except ValueError:
-        return string
+scraper = scrape_me('https://downshiftology.com/recipes/lemon-pepper-chicken/')
+result = scraper.to_json()
 
-parsed_ingredients = []
-for ingredient in ["fresh lemon for garnish"]:
-    result = parse_ingredient(ingredient)
-    transformedOutput = {}
-    transformedOutput["sentence"] = "hello",
-    transformedOutput["name"] = result.name.text
-    transformedOutput["comment"] = result.comment
-    transformedOutput["other"] = result.other
-    transformedOutput["preparation"] = result.preparation
-    transformedOutput["quantity"] = None if len(result.amount) == 0 else convertToFloat(result.amount[0].quantity)
-    transformedOutput["unit"] = None if len(result.amount) == 0 else result.amount[0].unit
-    parsed_ingredients.append(transformedOutput)
-print(parsed_ingredients)
+
+with open('data.json', 'w') as f:
+    json.dump(result, f)

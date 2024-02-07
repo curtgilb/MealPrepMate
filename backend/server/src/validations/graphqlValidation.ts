@@ -1,8 +1,7 @@
 import { z } from "zod";
 import { RecipeInput } from "../types/gql.js";
 import { toTitleCase } from "../util/utils.js";
-
-
+import { nullableString } from "./utilValidations.js";
 
 function cleanedStringSchema(max: number, formatter?: (val: string) => string) {
   return z
@@ -22,35 +21,39 @@ const schemaForType =
     return arg;
   };
 
-const max25string = 
-
 // creating a schema for strings
-const RecipeInputValidation = schemaForType<RecipeInput>()(
-  z.object({
-    title: z
-      .string()
-      .transform((val) => cleanString(val, toTitleCase))
-      .pipe(z.string().min(1).max(100)),
-    source: z
-      .string()
-      .transform((val) => cleanString(val))
-      .pipe(z.string().min(1).max(30).nullable().optional()),
-    prepTime: z.number().int().positive().nullable().optional(),
-    cookTime: z.number().int().positive().nullable().optional(),
-    marinadeTime: z.number().int().positive().nullable().optional(),
-    directions: z.string().trim().nullable().optional(),
-    notes: z.string().trim().nullable().optional(),
-    stars: z.number().int().min(0).max(5).nullable().optional(),
-    isFavorite: z.boolean().optional(),
-    leftoverFridgeLife: z.number().int().positive().nullable().optional(),
-    leftoverFreezerLife: z.number().int().positive().nullable().optional(),
-    ingredients: z.string().trim().min(1).nullable().optional(),
-    cuisineId: z.string().cuid().nullable().optional(),
-    categoryIds: z.string().cuid().array().nullable().optional(),
-    courseIds: z.string().cuid().array().nullable().optional(),
-    photoIds: z.string().cuid().array().nullable().optional(),
-  })
-);
+const RecipeInputValidation = z.object({
+  title: cleanedStringSchema(100, toTitleCase),
+  source: z.string().trim().optional(),
+  prepTime: z.coerce.number().nullable().optional(),
+  cookTime: z.coerce.number().nullable().optional(),
+  marinadeTime: z.coerce.number().nullable().optional(),
+  directions: nullableString,
+  notes: nullableString,
+  isFavorite: z.coerce.boolean().optional(),
+  leftoverFridgeLife: z.coerce.number().int().positive().nullable().optional(),
+  leftoverFreezerLife: z.coerce.number().int().positive().nullable().optional(),
+  ingredients: nullableString,
+  cuisineId: z.coerce.string().cuid().nullable().optional(),
+  categoryIds: z.coerce.string().cuid().array().nullable().optional(),
+  courseIds: z.coerce.string().cuid().array().nullable().optional(),
+  photoIds: z.coerce.string().cuid().array().nullable().optional(),
+});
+
+const NutritionLabelValidation = z.object({
+  name: cleanedStringSchema(100, toTitleCase),
+  connectingId: z.string().cuid().optional(),
+  servings: z.coerce.number().positive(),
+  servingSize: z.coerce.number().positive().optional(),
+  servingSizeUnitId: z.string().cuid().optional(),
+  servingsUsed: z.number().optional(),
+  nutrition: z.array(
+    z.object({
+      value: z.coerce.number(),
+      nutrientId: z.string().cuid(),
+    })
+  ),
+});
 
 const numericalComparisonValidation = z
   .object({
@@ -97,4 +100,5 @@ export {
   NutritionFilterValidation,
   RecipeFilterValidation,
   RecipeInputValidation,
+  NutritionLabelValidation,
 };

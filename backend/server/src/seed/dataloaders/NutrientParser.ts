@@ -1,9 +1,7 @@
 import { Gender, ImportType, Prisma, SpecialCondition } from "@prisma/client";
 import { readCSV } from "../../services/io/Readers.js";
 import { db } from "../../db.js";
-import { toGenderEnum, toSpecialConditionEnum } from "../../util/Cast.js";
-import { cast } from "../../util/Cast.js";
-import { nativeEnum, z } from "zod";
+import { z } from "zod";
 import {
   cleanedStringSchema,
   nullableString,
@@ -12,7 +10,6 @@ import {
 import { toTitleCase } from "../../util/utils.js";
 import { UnitSearch } from "../../search/UnitSearch.js";
 import { NutrientType } from "@prisma/client";
-import { spec } from "node:test/reporters";
 
 type NutrientParseInput = {
   nutrientPath: string;
@@ -25,64 +22,19 @@ const nutrientSchema = z.object({
   nutrient: cleanedStringSchema(30, toTitleCase),
   unitAbbreviation: nullableString,
   unit: cleanedStringSchema(10),
-  advancedView: z.boolean(),
-  order: z.number().int().positive(),
+  advancedView: z.coerce.boolean(),
+  order: z.coerce.number().int().positive(),
   notes: nullableString,
   alternateNames: stringArray,
-  type: z.nativeEnum(NutrientType),
+  type: z.preprocess((val) => {
+    return String(val).toUpperCase();
+  }, z.nativeEnum(NutrientType)),
   parentNutrient: nullableString,
   cronometer: nullableString,
   recipeKeeper: nullableString,
   myFitnessPal: nullableString,
   dri: nullableString,
 });
-
-const vitaminDriSchema = z.array(
-  z.object({
-    gender: nativeEnum(Gender),
-    specialCondition: nativeEnum(SpecialCondition),
-    minAge: z.number().int().positive(),
-    maxAge: z.number().int().positive(),
-    vitaminA: z.number().int().positive(),
-    vitaminC: z.number().int().positive(),
-    vitaminD: z.number().int().positive(),
-    vitaminE: z.number().int().positive(),
-    vitaminK: z.number().int().positive(),
-    thiamin: z.number().int().positive(),
-    riboflavin: z.number().int().positive(),
-    niacin: z.number().int().positive(),
-    vitaminB6: z.number().int().positive(),
-    folate: z.number().int().positive(),
-    vitaminB12: z.number().int().positive(),
-    pantothenicAcid: z.number().int().positive(),
-    biotin: z.number().int().positive(),
-    choline: z.number().int().positive(),
-  })
-);
-
-const mineralDriSchema = z.array(
-  z.object({
-    gender: nativeEnum(Gender),
-    specialCondition: nativeEnum(SpecialCondition),
-    minAge: z.number().int().positive(),
-    maxAge: z.number().int().positive(),
-    calcium: z.number().int().positive(),
-    chromium: z.number().int().positive(),
-    copper: z.number().int().positive(),
-    fluoride: z.number().int().positive(),
-    iodine: z.number().int().positive(),
-    iron: z.number().int().positive(),
-    magnesium: z.number().int().positive(),
-    manganese: z.number().int().positive(),
-    molybdenum: z.number().int().positive(),
-    phosphorus: z.number().int().positive(),
-    selenium: z.number().int().positive(),
-    zinc: z.number().int().positive(),
-    potassium: z.number().int().positive(),
-    sodium: z.number().int().positive(),
-    chloride: z.number().int().positive(),
-  })
-);
 
 export class NutrientLoader {
   nutrientPath: string;
@@ -115,7 +67,7 @@ export class NutrientLoader {
     for (const { record } of data) {
       // Validate the record
       const cleanedRecord = nutrientSchema.parse(record);
-      const matchedUnit = units.search(cleanedRecord.nutrient);
+      const matchedUnit = units.search(cleanedRecord.unit);
 
       //   Create stmts for creating nutrients
       const createStmt: Prisma.NutrientCreateInput = {
@@ -181,7 +133,7 @@ export class NutrientLoader {
       throw Error("Nutrients and mappings need to be loaded first");
 
     return nutrients.reduce((agg, val) => {
-      agg.set(val.lookupName, val.nutrient.id);
+      agg.set(val.lookupName, val.nutrientId);
       return agg;
     }, new Map<string, string>());
   }
@@ -201,12 +153,20 @@ export class NutrientLoader {
         if (mapping.has(nutrient)) {
           createDriStmts.push({
             nutrient: { connect: { id: mapping.get(nutrient) } },
-            value: z.number().int().positive().parse(value),
-            gender: z.nativeEnum(Gender).parse(gender),
-            ageMin: z.number().int().positive().parse(minAge),
-            ageMax: z.number().int().positive().parse(maxAge),
+            value: z.coerce.number().positive().parse(value),
+            gender: z
+              .preprocess(
+                (val) => String(val).toUpperCase(),
+                z.nativeEnum(Gender)
+              )
+              .parse(gender),
+            ageMin: z.coerce.number().int().positive().parse(minAge),
+            ageMax: z.coerce.number().int().positive().parse(maxAge),
             specialCondition: z
-              .nativeEnum(SpecialCondition)
+              .preprocess(
+                (val) => String(val).toUpperCase(),
+                z.nativeEnum(SpecialCondition)
+              )
               .parse(specialCondition),
           });
         }

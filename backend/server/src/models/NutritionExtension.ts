@@ -119,8 +119,8 @@ export const nutritionExtension = Prisma.defineExtension((client) => {
       nutritionLabel: {
         async createNutritionLabel(
           args: NutritionLabelsInput,
-          query: NutritionLabelQuery
-        ) {
+          query?: NutritionLabelQuery
+        ): Promise<NutritionLabel[]> {
           // Create base label
           const baseLabel = await client.nutritionLabel.create({
             data: createNutritionLabelStmt(args.baseLabel, true),

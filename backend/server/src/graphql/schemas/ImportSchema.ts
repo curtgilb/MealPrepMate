@@ -1,15 +1,13 @@
 import { builder } from "../builder.js";
 import { processRecipeKeeperImport } from "../../services/import/RecipeKeeperImport.js";
 import { processCronometerImport } from "../../services/import/CronometerImport.js";
-import { ImportType } from "@prisma/client";
 import { db } from "../../db.js";
-import { CronometerNutrition } from "../../types/CustomTypes.js";
 
 // ============================================ Types ===================================
 builder.prismaObject("Import", {
   fields: (t) => ({
     id: t.exposeID("id"),
-    fileName: t.exposeString("fileName"),
+    fileName: t.exposeString("fileName", { nullable: true }),
     type: t.exposeString("type"),
     status: t.exposeString("status"),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
@@ -27,6 +25,25 @@ builder.prismaObject("ImportRecord", {
   }),
 });
 // ============================================ Inputs ==================================
+enum ImportType {
+  RECIPE_KEEPER,
+  CRONOMETER,
+}
+
+enum RecordAction {
+  REIMPORT,
+  DUPLICATE,
+  IGNORE,
+  VERIFY,
+}
+
+builder.enumType(ImportType, {
+  name: "ImportType",
+});
+
+builder.enumType(RecordAction, {
+  name: "RecordAction",
+});
 
 // ============================================ Queries =================================
 builder.queryFields((t) => ({
@@ -52,7 +69,7 @@ builder.queryFields((t) => ({
 // ============================================ Mutations ===============================
 
 builder.mutationFields((t) => ({
-  importRecipeKeeper: t.prismaField({
+  import: t.prismaField({
     type: "Import",
     args: {
       file: t.arg({
@@ -65,12 +82,13 @@ builder.mutationFields((t) => ({
       }),
     },
     resolve: async (query, root, args) => {
-      if (args.type === "RECIPE_KEEPER") {
-        return await processRecipeKeeperImport(args.file, query);
-      } else if (args.type === "CRONOMETER")
-        return await processCronometerImport(args.file, query);
-      else {
-        throw new Error("Unsupported import type");
+      switch (args.type) {
+        case ImportType.CRONOMETER:
+          return await processCronometerImport(args.file, query);
+        case ImportType.RECIPE_KEEPER:
+          return await processRecipeKeeperImport(args.file, query);
+        default:
+          throw new Error("Unsupported import type");
       }
     },
   }),
@@ -97,29 +115,17 @@ builder.mutationFields((t) => ({
       });
     },
   }),
-  // If a record was marked as duplicate or ignored, user can call this to reimport it
-  // Need to mark status as imported
-  // reimportRecord: t.prismaField({
-  //   type: "ImportRecord",
-  //   args: {
-  //     id: t.arg.string({ required: true }),
-  //   },
-  //   resolve: async (query, root, args) => {
-  //     const lastImport = await db.importRecord.findUniqueOrThrow({
-  //       where: { id: args.id },
-  //       include: { import: true },
-  //     });
-  //     if (lastImport.import.type === "CRONOMETER") {
-  //       const cronometer =
-  //         lastImport.parsedFormat as unknown as CronometerNutrition;
-  //       return await db.nutritionLabel.createCronometerNutritionLabel(
-  //         cronometer,
-  //         lastImport.recipeId,
-  //         query
-  //       );
-  //     }
-  //   },
-  // }),
+  changeRecordStatus: t.prismaField({
+    type: ["ImportRecord"],
+    args: {
+      id: t.arg.string({ required: true }),
+      args: t.arg({
+        type: ImportType,
+        required: true,
+      }),
+    },
+    resolve: async (query, root, args) => {},
+  }),
 }));
 
 // Actions

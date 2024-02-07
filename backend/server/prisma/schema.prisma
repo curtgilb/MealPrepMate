@@ -31,6 +31,7 @@ enum NutrientType {
   MINERAL
   VITAMIN
   OTHER
+  GENERAL
 }
 
 enum UnitType {
@@ -102,8 +103,8 @@ model MealPlanRecipe {
 
 model Import {
   id            String         @id @default(cuid())
-  fileName      String
-  fileHash      String
+  fileName      String?
+  fileHash      String?
   type          ImportType
   status        ImportStatus
   imageMapping  Json?
@@ -115,20 +116,23 @@ model ImportRecord {
   id             String          @id @default(cuid())
   import         Import          @relation(fields: [importId], references: [id])
   importId       String
-  rawInput       String
+  hash       String
+  externalId    String?
   name           String
   parsedFormat   Json
   doNotImport    Boolean         @default(false)
   status         RecordStatus
   recipe         Recipe?         @relation(fields: [recipeId], references: [id])
   recipeId       String?
-  nutritionLabel NutritionLabel?
+  nutritionLabel NutritionLabel? @relation(fields: [nutritionLabelId], references: [id])
+  nutritionLabelId String?
   createdAt      DateTime        @default(now())
 }
 
 // Status for entire import
 enum ImportStatus {
   PENDING
+  DUPLICATE
   COMPLETED
 }
 
@@ -244,7 +248,6 @@ model IngredientPrice {
 
 model Recipe {
   id                  String             @id @default(cuid())
-  recipeKeeperId      String?
   title               String
   source              String?
   preparationTime     Int?
@@ -306,14 +309,13 @@ model NutritionLabel {
   ingredientGroupId String?                  @unique
   nutrients         NutritionLabelNutrient[]
   name              String?
-  verfied           Boolean                  @default(false)
+  verifed           Boolean                  @default(false)
   servings          Float?
   servingSize       Float?
   servingSizeUnit   MeasurementUnit?         @relation(fields: [unitId], references: [id])
   unitId            String?
   servingsUsed      Float?
-  importRecord      ImportRecord?            @relation(fields: [importRecordId], references: [id])
-  importRecordId    String?                  @unique
+  importRecord      ImportRecord[]
   isPrimary         Boolean                  @default(false)
   @@unique([recipeId, ingredientGroupId])
 }
@@ -324,7 +326,6 @@ model NutritionLabelNutrient {
   nutrient         Nutrient       @relation(fields: [nutrientId], references: [id], onDelete: Restrict)
   nutrientId       String
   value            Float
-  valuePerServing  Float?
   @@id([nutritionLabelId, nutrientId])
 }
 

@@ -501,7 +501,7 @@ export default interface PrismaTypes {
         Create: {};
         Update: {};
         RelationName: "recipe" | "ingredientGroup" | "nutrients" | "servingSizeUnit" | "importRecord";
-        ListRelations: "nutrients";
+        ListRelations: "nutrients" | "importRecord";
         Relations: {
             recipe: {
                 Shape: Recipe | null;
@@ -520,7 +520,7 @@ export default interface PrismaTypes {
                 Name: "MeasurementUnit";
             };
             importRecord: {
-                Shape: ImportRecord | null;
+                Shape: ImportRecord[];
                 Name: "ImportRecord";
             };
         };

@@ -14,6 +14,11 @@ services:
       - 8080:8978
     volumes:
       - ./cloudbeaver/workspace:/opt/cloudbeaver/workspace
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    volume: -./redis:/data
   recipe_nlp:
     build:
       context: ./backend/recipe_nlp
