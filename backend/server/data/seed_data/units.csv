@@ -1,0 +1,27 @@
+﻿Name,Lookup Names,Symbol,Type
+tablespoon,"tablespoons, tbsp.",Tbsp,volume
+teaspoon,"teaspoon, teaspoons, tsp, tsp.",tsp,volume
+cup,"cup, cups, c, c.",c,volume
+quart,"quart, quarts, qts, qt, qt.",qt,volume
+fluid ounce,,fl oz,volume
+pint,,pt,volume
+gallon,,gal,volume
+liter,,L,volume
+milimeter,,ml,volume
+ounce,,oz,weight
+pound,,lb,weight
+gram,,g,weight
+kilogram,,kg,weight
+miligram,,mg,weight
+microgram,,μg,weight
+"""unit""",,,count
+dozen,,,count
+dash,,,count
+pinch,,,count
+drop,,,count
+sprig,,,count
+slice,,,count
+clove,,,count
+can,,,count
+stick,,,count
+calorie,,kcal,Energy

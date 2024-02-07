@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  # app: build
+  db:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+  dbeaver:
+    image: dbeaver/cloudbeaver
+    ports:
+      - 8080:8978
+    volumes:
+      - ./cloudbeaver/workspace:/opt/cloudbeaver/workspace
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    volume: -./redis:/data
+  recipe_nlp:
+    build:
+      context: ./backend/recipe_nlp
+    ports:
+      - 80:80
+  storage:
+    image: minio/minio
+    ports:
+      - 9000:9000
+      - 9090:9090
+    volumes:
+      - ./backend/storage:/mnt/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: minio server --console-address ":9090" /mnt/data

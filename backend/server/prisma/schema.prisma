@@ -1,0 +1,384 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator pothos {
+  provider     = "prisma-pothos-types"
+  clientOutput = "@prisma/client"
+  output       = "../src/types/PothosTypes.ts"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ImportType {
+  MY_FITNESS_PAL
+  RECIPE_KEEPER
+  CRONOMETER
+  DRI
+}
+
+enum NutrientType {
+  CARBOHYDRATE
+  FAT
+  PROTEIN
+  ALCOHOL
+  MINERAL
+  VITAMIN
+  OTHER
+  GENERAL
+}
+
+enum UnitType {
+  VOLUME
+  WEIGHT
+  COUNT
+  ENERGY
+}
+
+enum Meal {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+}
+
+model ShoppingDay {
+  id   String @id @default(cuid())
+  week Int
+  day  Int
+  mealPlan  MealPlan @relation(fields: [mealPlanId], references: [id])
+  mealPlanId String
+}
+
+model MealPlan {
+  id                   String            @id @default(cuid())
+  name                 String
+  mealPrepInstructions String?
+  planRecipes          MealPlanRecipe[]
+  mealPlanServings     MealPlanServing[]
+  shoppingDays          ShoppingDay[]
+}
+
+model MealPlanServing {
+  id               String         @id @default(cuid())
+  mealPlan         MealPlan       @relation(fields: [mealPlanId], references: [id])
+  mealPlanId       String
+  day              Int
+  meal             Meal
+  week             Int
+  recipe           MealPlanRecipe @relation(fields: [mealPlanRecipeId], references: [id])
+  mealPlanRecipeId String
+  numberOfServings Int
+
+  @@unique([mealPlanId, day, meal, mealPlanRecipeId])
+}
+
+model MealPlanRecipe {
+  id            String            @id @default(cuid())
+  mealPlan      MealPlan          @relation(fields: [mealPlanId], references: [id])
+  mealPlanId    String
+  recipe        Recipe            @relation(fields: [recipeId], references: [id])
+  recipeId      String
+  factor        Float
+  totalServings Int
+  servings      MealPlanServing[]
+}
+
+model Import {
+  id            String         @id @default(cuid())
+  fileName      String?
+  fileHash      String?
+  type          ImportType
+  status        ImportStatus
+  imageMapping  Json?
+  createdAt     DateTime       @default(now())
+  importRecords ImportRecord[]
+}
+
+model ImportRecord {
+  id               String          @id @default(cuid())
+  import           Import          @relation(fields: [importId], references: [id])
+  importId         String
+  hash             String
+  externalId       String?
+  name             String
+  parsedFormat     Json
+  doNotImport      Boolean         @default(false)
+  status           RecordStatus
+  recipe           Recipe?         @relation(fields: [recipeId], references: [id])
+  recipeId         String?
+  nutritionLabel   NutritionLabel? @relation(fields: [nutritionLabelId], references: [id])
+  nutritionLabelId String?
+  createdAt        DateTime        @default(now())
+}
+
+// Status for entire import
+enum ImportStatus {
+  PENDING
+  DUPLICATE
+  COMPLETED
+}
+
+// Status for individual record
+enum RecordStatus {
+  IMPORTED //Item was imported into DB
+  DUPLICATE //Already exists in the DB
+  UPDATED //Item was updated in the DB to match the import
+  IGNORED // item was ignored as requested by user
+  PENDING // item is pending user action, may already exist in DB
+  VERIFIED // User has marked this item as verified
+}
+
+model RecipeIngredient {
+  id                String                 @id @default(cuid())
+  sentence          String
+  minQuantity       Float?
+  maxQuantity       Float?
+  quantity          Float?
+  name              String?
+  comment           String?
+  other             String?
+  order             Int
+  unit              MeasurementUnit?       @relation(fields: [measurementUnitId], references: [id])
+  measurementUnitId String?
+  recipe            Recipe                 @relation(fields: [recipeId], references: [id])
+  recipeId          String // relation scalar field (used in the `@relation` attribute above)
+  ingredient        Ingredient?            @relation(fields: [ingredientId], references: [id])
+  ingredientId      String? // relation scalar field (used in the `@relation` attribute above)
+  group             RecipeIngredientGroup? @relation(fields: [groupId], references: [id])
+  groupId           String?
+}
+
+model MeasurementUnit {
+  id              String                  @id @default(cuid())
+  name            String                  @unique
+  abbreviations   String[]
+  symbol          String?
+  type            UnitType?
+  ingredients     RecipeIngredient[]
+  nutrients       Nutrient[]
+  ingredientPrice IngredientPrice[]
+  servingSizes    NutritionLabel[]
+  fromUnit        MeasurementConversion[] @relation("FromUnit")
+  toUnit          MeasurementConversion[] @relation("ToUnit")
+}
+
+model RecipeIngredientGroup {
+  id               String             @id @default(cuid())
+  name             String
+  servings         Int?
+  servingsInRecipe Int?
+  ingredients      RecipeIngredient[]
+  nutritionLabel   NutritionLabel?
+}
+
+model Ingredient {
+  id                  String                  @id @default(cuid())
+  recipeIngredient    RecipeIngredient[]
+  name                String                  @unique
+  alternateNames      String[]
+  variant             String?
+  category            IngredientCategory?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId          String?
+  storageInstructions String?
+  priceHistory        IngredientPrice[]
+  expirationRule      ExpirationRule?         @relation(fields: [expirationRuleId], references: [id], onDelete: SetNull)
+  expirationRuleId    String?
+  conversionRatio     MeasurementConversion[]
+}
+
+model MeasurementConversion {
+  id              String          @id @default(cuid())
+  fromUnit        MeasurementUnit @relation("FromUnit", fields: [fromUnitId], references: [id])
+  fromUnitId      String
+  toUnit          MeasurementUnit @relation("ToUnit", fields: [toUnitId], references: [id])
+  toUnitId        String
+  conversionRatio Float
+  ingredient      Ingredient?     @relation(fields: [ingredientId], references: [id])
+  ingredientId    String?
+}
+
+model IngredientCategory {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  ingredients Ingredient[]
+}
+
+model ExpirationRule {
+  id          String       @id @default(cuid())
+  name        String
+  variant     String?
+  defrostTime Int?
+  perishable  Boolean?
+  tableLife   Int?
+  fridgeLife  Int?
+  freezerLife Int?
+  ingredients Ingredient[]
+}
+
+model IngredientPrice {
+  id           String          @id @default(cuid())
+  date         DateTime
+  retailer     String
+  price        Float
+  quantity     Float
+  pricePerUnit Float
+  ingredient   Ingredient      @relation(fields: [ingredientId], references: [id])
+  ingredientId String
+  unit         MeasurementUnit @relation(fields: [unitId], references: [id])
+  unitId       String
+}
+
+model Recipe {
+  id                  String             @id @default(cuid())
+  title               String
+  source              String?
+  preparationTime     Int?
+  cookingTime         Int?
+  marinadeTime        Int?
+  directions          String?
+  notes               String?
+  stars               Int?
+  photos              Photo[]
+  isFavorite          Boolean            @default(false)
+  course              Course[]
+  category            Category[]
+  cuisine             Cuisine?           @relation(fields: [cuisineId], references: [id], onDelete: SetNull)
+  cuisineId           String?
+  ingredients         RecipeIngredient[]
+  mealPlans           MealPlanRecipe[]
+  importId            String?
+  leftoverFridgeLife  Int?
+  leftoverFreezerLife Int?
+  isVerified          Boolean            @default(false)
+  nutritionLabel      NutritionLabel[]
+  importRecords       ImportRecord[]
+}
+
+// BREAKFAST, LUNCH, DINNER, SNACK
+model Course {
+  id      String   @id @default(cuid())
+  name    String   @unique
+  recipes Recipe[]
+}
+
+// Main Dish, Side Dish, Dessert, Appetizer, Salad, Soup, Bread, Beverage, Sauce or Condiment, Seasoning or Spice, Marinade, Fingerfood, Snack, Drink
+model Category {
+  id      String   @id @default(cuid())
+  name    String   @unique
+  recipes Recipe[]
+}
+
+model Cuisine {
+  id      String   @id @default(cuid())
+  name    String   @unique
+  recipes Recipe[]
+}
+
+model Photo {
+  id        String  @id @default(cuid())
+  path      String
+  isPrimary Boolean @default(false)
+  hash      String  @unique
+  recipe    Recipe? @relation(fields: [recipeId], references: [id], onDelete: SetNull)
+  recipeId  String?
+}
+
+model NutritionLabel {
+  id                String                   @id @default(cuid())
+  recipe            Recipe?                  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId          String?
+  ingredientGroup   RecipeIngredientGroup?   @relation(fields: [ingredientGroupId], references: [id], onDelete: Cascade)
+  ingredientGroupId String?                  @unique
+  nutrients         NutritionLabelNutrient[]
+  name              String?
+  verifed           Boolean                  @default(false)
+  servings          Float?
+  servingSize       Float?
+  servingSizeUnit   MeasurementUnit?         @relation(fields: [unitId], references: [id])
+  unitId            String?
+  servingsUsed      Float?
+  importRecord      ImportRecord[]
+  isPrimary         Boolean                  @default(false)
+
+  @@unique([recipeId, ingredientGroupId])
+}
+
+model NutritionLabelNutrient {
+  nutritionLabel   NutritionLabel @relation(fields: [nutritionLabelId], references: [id], onDelete: Cascade)
+  nutritionLabelId String
+  nutrient         Nutrient       @relation(fields: [nutrientId], references: [id], onDelete: Restrict)
+  nutrientId       String
+  value            Float
+
+  @@id([nutritionLabelId, nutrientId])
+}
+
+model Nutrient {
+  id                      String                   @id @default(cuid())
+  name                    String                   @unique
+  alternateNames          String[]
+  type                    NutrientType
+  advancedView            Boolean
+  customTarget            Float?
+  dri                     DailyReferenceIntake[]
+  parentNutrientId        String?
+  parentNutrient          Nutrient?                @relation("SubNutrients", fields: [parentNutrientId], references: [id])
+  subNutrients            Nutrient[]               @relation("SubNutrients")
+  NutritionLabelNutrients NutritionLabelNutrient[]
+  unit                    MeasurementUnit          @relation(fields: [unitId], references: [id])
+  unitId                  String
+  mappings                NutrientMapping[]
+}
+
+model NutrientMapping {
+  id         String     @id @default(cuid())
+  importType ImportType
+  nutrient   Nutrient   @relation(fields: [nutrientId], references: [id])
+  nutrientId String
+  lookupName String
+}
+
+model DailyReferenceIntake {
+  id               String           @id @default(cuid())
+  value            Float
+  gender           Gender
+  ageMin           Int
+  ageMax           Int
+  specialCondition SpecialCondition
+  nutrient         Nutrient         @relation(fields: [nutrientId], references: [id])
+  nutrientId       String
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum SpecialCondition {
+  PREGNANT
+  LACTATING
+  NONE
+}
+
+model HealthProfile {
+  id                      String @id @default(cuid())
+  weight                  Float
+  gender                  Gender
+  bodyFatPercentage       Float
+  height                  Float
+  yearBorn                Int
+  activityLevel           Float
+  targetProteinPercentage Float?
+  targetProteinGrams      Float?
+  targetCarbsPercentage   Float?
+  targetCarbsGrams        Float?
+  targetFatPercentage     Float?
+  targetFatGrams          Float?
+}
