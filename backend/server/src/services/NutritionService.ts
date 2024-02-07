@@ -190,3 +190,5 @@ function aggregateNutrients(labels: LabelWithNutrients[]) {
   }
   return nutrientAgg;
 }
+
+export { compareValues, isValidCommparison };

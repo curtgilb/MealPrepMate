@@ -1,29 +1,6 @@
 /* eslint-disable */
-import type { Prisma, MealPlanChain, MealPlan, MealPlanServing, MealPlanRecipe, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, NutrientMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
+import type { Prisma, MealPlan, MealPlanServing, MealPlanRecipe, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, NutrientMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
 export default interface PrismaTypes {
-    MealPlanChain: {
-        Name: "MealPlanChain";
-        Shape: MealPlanChain;
-        Include: Prisma.MealPlanChainInclude;
-        Select: Prisma.MealPlanChainSelect;
-        OrderBy: Prisma.MealPlanChainOrderByWithRelationInput;
-        WhereUnique: Prisma.MealPlanChainWhereUniqueInput;
-        Where: Prisma.MealPlanChainWhereInput;
-        Create: {};
-        Update: {};
-        RelationName: "prevWeek" | "nextWeek";
-        ListRelations: never;
-        Relations: {
-            prevWeek: {
-                Shape: MealPlan | null;
-                Name: "MealPlan";
-            };
-            nextWeek: {
-                Shape: MealPlan | null;
-                Name: "MealPlan";
-            };
-        };
-    };
     MealPlan: {
         Name: "MealPlan";
         Shape: MealPlan;
@@ -34,24 +11,16 @@ export default interface PrismaTypes {
         Where: Prisma.MealPlanWhereInput;
         Create: {};
         Update: {};
-        RelationName: "planRecipes" | "MealPlanServings" | "prevWeeks" | "nextWeeks";
-        ListRelations: "planRecipes" | "MealPlanServings" | "prevWeeks" | "nextWeeks";
+        RelationName: "planRecipes" | "mealPlanServings";
+        ListRelations: "planRecipes" | "mealPlanServings";
         Relations: {
             planRecipes: {
                 Shape: MealPlanRecipe[];
                 Name: "MealPlanRecipe";
             };
-            MealPlanServings: {
+            mealPlanServings: {
                 Shape: MealPlanServing[];
                 Name: "MealPlanServing";
-            };
-            prevWeeks: {
-                Shape: MealPlanChain[];
-                Name: "MealPlanChain";
-            };
-            nextWeeks: {
-                Shape: MealPlanChain[];
-                Name: "MealPlanChain";
             };
         };
     };

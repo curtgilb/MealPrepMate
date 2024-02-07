@@ -41,16 +41,6 @@ enum UnitType {
   ENERGY
 }
 
-enum DayOfWeek {
-  SUNDAY
-  MONDAY
-  TUESDAY
-  WEDNESDAY
-  THURSDAY
-  FRIDAY
-  SATURDAY
-}
-
 enum Meal {
   BREAKFAST
   LUNCH
@@ -58,31 +48,30 @@ enum Meal {
   SNACK
 }
 
-model MealPlanChain {
-  id         String    @id @default(cuid())
-  name       String
-  prevWeek   MealPlan? @relation("PrevWeek", fields: [prevWeekId], references: [id])
-  prevWeekId String?
-  nextWeek   MealPlan? @relation("NextWeek", fields: [nextWeekId], references: [id])
-  nextWeekId String?
+model ShoppingDay {
+  id   String @id @default(cuid())
+  week Int
+  day  Int
+  mealPlan  MealPlan @relation(fields: [mealPlanId], references: [id])
+  mealPlanId String
 }
 
 model MealPlan {
   id                   String            @id @default(cuid())
   name                 String
-  mealPrepInstructions String
+  mealPrepInstructions String?
   planRecipes          MealPlanRecipe[]
-  MealPlanServings     MealPlanServing[]
-  prevWeeks            MealPlanChain[]   @relation("PrevWeek")
-  nextWeeks            MealPlanChain[]   @relation("NextWeek")
+  mealPlanServings     MealPlanServing[]
+  shoppingDays          ShoppingDay[]
 }
 
 model MealPlanServing {
   id               String         @id @default(cuid())
   mealPlan         MealPlan       @relation(fields: [mealPlanId], references: [id])
   mealPlanId       String
-  day              DayOfWeek
+  day              Int
   meal             Meal
+  week             Int
   recipe           MealPlanRecipe @relation(fields: [mealPlanRecipeId], references: [id])
   mealPlanRecipeId String
   numberOfServings Int
@@ -96,7 +85,7 @@ model MealPlanRecipe {
   mealPlanId    String
   recipe        Recipe            @relation(fields: [recipeId], references: [id])
   recipeId      String
-  factor        Int
+  factor        Float
   totalServings Int
   servings      MealPlanServing[]
 }
@@ -113,20 +102,20 @@ model Import {
 }
 
 model ImportRecord {
-  id             String          @id @default(cuid())
-  import         Import          @relation(fields: [importId], references: [id])
-  importId       String
-  hash       String
-  externalId    String?
-  name           String
-  parsedFormat   Json
-  doNotImport    Boolean         @default(false)
-  status         RecordStatus
-  recipe         Recipe?         @relation(fields: [recipeId], references: [id])
-  recipeId       String?
-  nutritionLabel NutritionLabel? @relation(fields: [nutritionLabelId], references: [id])
+  id               String          @id @default(cuid())
+  import           Import          @relation(fields: [importId], references: [id])
+  importId         String
+  hash             String
+  externalId       String?
+  name             String
+  parsedFormat     Json
+  doNotImport      Boolean         @default(false)
+  status           RecordStatus
+  recipe           Recipe?         @relation(fields: [recipeId], references: [id])
+  recipeId         String?
+  nutritionLabel   NutritionLabel? @relation(fields: [nutritionLabelId], references: [id])
   nutritionLabelId String?
-  createdAt      DateTime        @default(now())
+  createdAt        DateTime        @default(now())
 }
 
 // Status for entire import
@@ -317,6 +306,7 @@ model NutritionLabel {
   servingsUsed      Float?
   importRecord      ImportRecord[]
   isPrimary         Boolean                  @default(false)
+
   @@unique([recipeId, ingredientGroupId])
 }
 
@@ -326,6 +316,7 @@ model NutritionLabelNutrient {
   nutrient         Nutrient       @relation(fields: [nutrientId], references: [id], onDelete: Restrict)
   nutrientId       String
   value            Float
+
   @@id([nutritionLabelId, nutrientId])
 }
 
@@ -347,11 +338,11 @@ model Nutrient {
 }
 
 model NutrientMapping {
-  id            String   @id @default(cuid())
-  importType    ImportType
-  nutrient      Nutrient @relation(fields: [nutrientId], references: [id])
-  nutrientId    String
-  lookupName    String
+  id         String     @id @default(cuid())
+  importType ImportType
+  nutrient   Nutrient   @relation(fields: [nutrientId], references: [id])
+  nutrientId String
+  lookupName String
 }
 
 model DailyReferenceIntake {
