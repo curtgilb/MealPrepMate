@@ -1,6 +1,25 @@
 /* eslint-disable */
-import type { Prisma, MealPlan, MealPlanServing, MealPlanRecipe, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, NutrientMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
+import type { Prisma, ShoppingDay, MealPlan, MealPlanServing, MealPlanRecipe, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, NutrientMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
 export default interface PrismaTypes {
+    ShoppingDay: {
+        Name: "ShoppingDay";
+        Shape: ShoppingDay;
+        Include: Prisma.ShoppingDayInclude;
+        Select: Prisma.ShoppingDaySelect;
+        OrderBy: Prisma.ShoppingDayOrderByWithRelationInput;
+        WhereUnique: Prisma.ShoppingDayWhereUniqueInput;
+        Where: Prisma.ShoppingDayWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "mealPlan";
+        ListRelations: never;
+        Relations: {
+            mealPlan: {
+                Shape: MealPlan;
+                Name: "MealPlan";
+            };
+        };
+    };
     MealPlan: {
         Name: "MealPlan";
         Shape: MealPlan;
@@ -11,8 +30,8 @@ export default interface PrismaTypes {
         Where: Prisma.MealPlanWhereInput;
         Create: {};
         Update: {};
-        RelationName: "planRecipes" | "mealPlanServings";
-        ListRelations: "planRecipes" | "mealPlanServings";
+        RelationName: "planRecipes" | "mealPlanServings" | "shoppingDays";
+        ListRelations: "planRecipes" | "mealPlanServings" | "shoppingDays";
         Relations: {
             planRecipes: {
                 Shape: MealPlanRecipe[];
@@ -21,6 +40,10 @@ export default interface PrismaTypes {
             mealPlanServings: {
                 Shape: MealPlanServing[];
                 Name: "MealPlanServing";
+            };
+            shoppingDays: {
+                Shape: ShoppingDay[];
+                Name: "ShoppingDay";
             };
         };
     };

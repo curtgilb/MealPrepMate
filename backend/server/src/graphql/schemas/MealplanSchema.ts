@@ -34,6 +34,25 @@ builder.prismaObject("MealPlanRecipe", {
     mealPlanServings: t.relation("servings"),
     totalServings: t.exposeInt("totalServings"),
     mealPlan: t.relation("mealPlan"),
+    nutrition: t.field({
+      type: "String",
+      args: {
+        nutrientIds: t.arg.stringList(),
+      },
+      resolve: async (parent, args) => {
+        parent.totalServings;
+        parent.factor;
+        parent.recipeId;
+      },
+    }),
+    servingsUsed: t.relationCount("servings", {
+      args: {
+        mealId: t.arg.string({ required: true }),
+      },
+      where: (args) => ({
+        mealPlanId: args.mealId,
+      }),
+    }),
   }),
 });
 

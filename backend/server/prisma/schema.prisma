@@ -63,6 +63,7 @@ model MealPlan {
   planRecipes          MealPlanRecipe[]
   mealPlanServings     MealPlanServing[]
   shoppingDays          ShoppingDay[]
+  draft               Boolean @default(true)
 }
 
 model MealPlanServing {
@@ -329,6 +330,7 @@ model Nutrient {
   customTarget            Float?
   dri                     DailyReferenceIntake[]
   parentNutrientId        String?
+  order                   Int
   parentNutrient          Nutrient?                @relation("SubNutrients", fields: [parentNutrientId], references: [id])
   subNutrients            Nutrient[]               @relation("SubNutrients")
   NutritionLabelNutrients NutritionLabelNutrient[]
