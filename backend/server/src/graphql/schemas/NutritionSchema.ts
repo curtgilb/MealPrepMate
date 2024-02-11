@@ -4,14 +4,13 @@ import {
   FullNutritionLabel,
   NutrientTest,
   convertToLabel,
-} from "../../services/NutritionService.js";
+} from "../../services/nutrition/NutritionAggregator.js";
 import { Gender, SpecialCondition } from "@prisma/client";
 
 // TODO: Put full label on recipe that aggregates everything
 // Then put on each label that just converts to more readble form
 
 // Create function that returns recipe normally or can pass in scale factors to change it
-
 
 // ============================================ Types ===================================
 const NutrientObject = builder.objectRef<NutrientTest>("NutrientTest");
@@ -33,9 +32,9 @@ NutrientObject.implement({
 LabelObject.implement({
   fields: (t) => ({
     calories: t.exposeFloat("calories"),
-    caloriesPerServing: t.exposeFloat("caloriesPerServing"),
-    servings: t.exposeInt("servings"),
-    servingsUsed: t.exposeInt("servings"),
+    caloriesPerServing: t.exposeFloat("caloriesPerServing", { nullable: true }),
+    servings: t.exposeInt("servings", { nullable: true }),
+    servingsUsed: t.exposeInt("servings", { nullable: true }),
     servingUnit: t.exposeString("servingUnit", { nullable: true }),
     servingSize: t.exposeFloat("servingSize", { nullable: true }),
     general: t.field({
@@ -208,17 +207,17 @@ builder.mutationFields((t) => ({
       return (await convertToLabel([label]))[0];
     },
   }),
-  editNutritionLabel: t.field({
-    type: LabelObject,
-    args: {
-      label: t.arg({ type: editNutritionLabelInput, required: true }),
-    },
-    resolve: async (query, root, args) => {
-      await db.nutritionLabel.update({
-        where: {id: }
-      });
-    },
-  }),
+  // editNutritionLabel: t.field({
+  //   type: LabelObject,
+  //   args: {
+  //     label: t.arg({ type: editNutritionLabelInput, required: true }),
+  //   },
+  //   resolve: async (query, root, args) => {
+  //     await db.nutritionLabel.update({
+  //       where: {id: args.label}
+  //     });
+  //   },
+  // }),
   deleteNutritionLabel: t.prismaField({
     type: ["NutritionLabel"],
     args: {
@@ -322,10 +321,9 @@ builder.mutationFields((t) => ({
   }),
 }));
 
-
+export { LabelObject, NutrientObject };
 
 // ==========
-
 
 // import { builder } from "../builder.js";
 // import { db } from "../../db.js";

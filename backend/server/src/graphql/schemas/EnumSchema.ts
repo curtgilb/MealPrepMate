@@ -4,17 +4,44 @@ import {
   ImportStatus,
   RecordStatus,
   Meal,
-  ImportType,
   NutrientType,
+  ImportType,
 } from "@prisma/client";
 import { builder } from "../builder.js";
 
+enum ExternalImportType {
+  RECIPE_KEEPER,
+  CRONOMETER,
+}
+
+enum RecordAction {
+  REIMPORT,
+  DUPLICATE,
+  IGNORE,
+  VERIFY,
+}
+
 builder.enumType(Gender, { name: "Gender" });
 builder.enumType(SpecialCondition, { name: "SpecialCondition" });
-builder.enumType(ImportStatus, { name: "ImportStatus" });
-builder.enumType(RecordStatus, { name: "RecordStatus" });
+const importStatus = builder.enumType(ImportStatus, { name: "ImportStatus" });
+const recordStatus = builder.enumType(RecordStatus, { name: "RecordStatus" });
 const meal = builder.enumType(Meal, { name: "Meal" });
-builder.enumType(ImportType, { name: "ImportType" });
+const externalImportType = builder.enumType(ExternalImportType, {
+  name: "ImportType",
+});
+const PrismaImportType = builder.enumType(ImportType, {
+  name: "PrismaImportType",
+});
 builder.enumType(NutrientType, { name: "NutrientType" });
+builder.enumType(RecordAction, {
+  name: "RecordAction",
+});
 
-export { meal };
+export {
+  meal,
+  externalImportType,
+  ExternalImportType,
+  PrismaImportType,
+  importStatus,
+  recordStatus,
+};

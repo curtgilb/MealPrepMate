@@ -1,11 +1,6 @@
-import {
-  NutrientType,
-  NutritionLabel,
-  NutritionLabelNutrient,
-  Prisma,
-} from "@prisma/client";
-import { db } from "../db.js";
-import { NumericalComparison, NutritionFilter } from "../types/gql.js";
+import { NutrientType, NutritionLabelNutrient, Prisma } from "@prisma/client";
+import { db } from "../../db.js";
+import { NumericalComparison, NutritionFilter } from "../../types/gql.js";
 
 type NutrientPerServing = NutritionLabelNutrient & {
   valuePerServing: number;
@@ -41,10 +36,13 @@ type NutrientTest = {
 };
 
 // Argument of whether or not you want advanced view
-type FullNutritionLabel = {
+type AggreagtedNutritionLabel = {
   calories: number;
-  caloriesPerServing: number;
-  servings: number;
+  caloriesPerServing?: number;
+  carbPercentage: number;
+  proteinPercentage: number;
+  fatPercentage: number;
+  servings?: number;
   servingsUsed?: number;
   servingSize?: number;
   servingUnit?: string;
@@ -56,42 +54,58 @@ type FullNutritionLabel = {
   vitamins: NutrientTest[];
 };
 
-type AggregateNutritionLabelParameters = {
-  recipeId: string;
-  scaleFactor: number;
-  totalServings: number;
-};
-
 type ServingInfo = {
-  servings: number;
+  servings?: number;
   servingsUsed?: number;
   servingUnit?: string;
   servingSize?: number;
 };
 
-// Use Cases
-//  Get nutrition for a recipe in a meal plan  | aggreagte
-//  Get total nutrition for a day on a meal plan | aggreagte
-//  Get total nutrition for a recipe | aggregate
-//  Filter recipe list by nutrition filter ?|aggreate
-//  Get all nutrition labels associated with a recipe in aggregate form |
+type FullNutritionLabel = AggreagtedNutritionLabel & ServingInfo;
 
-async function getRecipeAggreagteLabel(recipeId: string, advanced = false) {
-  const labels = await db.nutritionLabel.findMany({
-    where: { recipeId: recipeId },
-    include: { nutrients: true, servingSizeUnit: true },
-  });
-  const baseLabel = labels.find((item) => !item.ingredientGroupId);
-  const scaledNutrients = labels.map((label) => {
-    return scaleNutrients(baseLabel?.servingSize ?? 1, 1, label.nutrients);
-  });
+type AggregateLabelInput = {
+  recipeId: string;
+  totalServings?: number;
+  scaleFactor?: number;
+  totalServingsUsed?: number;
+};
+
+type GroupAggreagteLabelInput = {
+  recipes: AggregateLabelInput[];
+  advanced: boolean;
+};
+
+async function getAggregateLabel(input: GroupAggreagteLabelInput) {
+  const scaledNutrients: NutrientMap[] = [];
+  for (const recipe of input.recipes) {
+    const labels = await db.nutritionLabel.findMany({
+      where: { recipeId: recipe.recipeId },
+      include: { nutrients: true, servingSizeUnit: true },
+    });
+
+    const baseLabel = labels.find(
+      (item) => !item.ingredientGroupId && item.isPrimary
+    );
+
+    const totalServings = [recipe?.totalServings, baseLabel?.servings, 1].find(
+      (number) => !Number.isNaN(number) && number !== 0
+    ) as number;
+
+    labels.forEach((label) => {
+      scaledNutrients.push(
+        scaleNutrients(label.nutrients, {
+          totalServings: totalServings,
+          servings: baseLabel?.servings ?? 1,
+          scaleFactor: recipe.scaleFactor ?? 1,
+          servingsUsed: label.servingsUsed ?? 1,
+          totalServingsUsed: recipe.totalServingsUsed,
+        })
+      );
+    });
+  }
+
   const summed = sumNutrients(scaledNutrients);
-  return toLabel(summed, advanced, {
-    servings: baseLabel?.servings ?? 1,
-    servingsUsed: baseLabel?.servingsUsed ?? 1,
-    servingSize: baseLabel?.servingSize ?? 1,
-    servingUnit: baseLabel?.servingSizeUnit?.name ?? "unit",
-  });
+  return toLabel(summed, input.advanced);
 }
 
 async function convertToLabel(
@@ -100,16 +114,16 @@ async function convertToLabel(
 ): Promise<FullNutritionLabel[]> {
   return await Promise.all(
     inputLabels.map(async (label) => {
-      const scaledNutrients = scaleNutrients(
-        label?.servingSize ?? 1,
-        1,
-        label.nutrients
-      );
+      const servings = label?.servings ?? 1;
+      const scaledNutrients = scaleNutrients(label.nutrients, {
+        servings: servings,
+        servingsUsed: label?.servingsUsed ?? servings,
+      });
 
       const summed = sumNutrients([scaledNutrients]);
       return await toLabel(summed, advanced, {
-        servings: label?.servings ?? 1,
-        servingsUsed: label?.servingsUsed ?? 1,
+        servings: servings,
+        servingsUsed: label?.servingsUsed ?? servings,
         servingSize: label?.servingSize ?? 1,
         servingUnit: label?.servingSizeUnit?.name ?? "unit",
       });
@@ -121,23 +135,35 @@ async function convertToLabel(
 type NutrientValue = { value: number; valuePerServing: number };
 type NutrientMap = Map<string, NutrientValue>;
 
+type ScalingAdjustementsInput = {
+  totalServings?: number;
+  scaleFactor?: number;
+  servings: number;
+  servingsUsed?: number;
+  totalServingsUsed?: number;
+};
+
 function scaleNutrients(
-  totalServings: number,
-  scaleFactor: number,
   nutrients: NutritionLabelNutrient[],
-  servings: number = 1,
-  servingsUsed: number = 1
+  scale: ScalingAdjustementsInput
 ): NutrientMap {
-  const newNutrientValues = new Map<
+  const newNutrientValues: NutrientMap = new Map<
     string,
     { value: number; valuePerServing: number }
   >();
   for (const nutrient of nutrients) {
-    const servingRatio = servingsUsed / servings;
-    const newValue = nutrient.value * scaleFactor * servingRatio;
-    const perValue = newValue / totalServings;
+    const servingRatio = scale.servingsUsed
+      ? scale.servingsUsed / scale.servings
+      : 1;
+    const scaleFactor = scale?.scaleFactor ?? 1;
+    const totalServings = scale?.totalServings ?? scale.servings;
+    let value = nutrient.value * scaleFactor * servingRatio;
+    const perValue = value / totalServings;
+    if (scale.totalServingsUsed) {
+      value = value * scale.totalServingsUsed;
+    }
     newNutrientValues.set(nutrient.nutrientId, {
-      value: newValue,
+      value: value,
       valuePerServing: perValue,
     });
   }
@@ -173,12 +199,14 @@ function sumNutrients(nutrients: NutrientMap[]): NutrientMap {
 async function toLabel(
   nutrients: NutrientMap,
   advanced: boolean,
-  servings: ServingInfo
+  servings?: ServingInfo
 ): Promise<FullNutritionLabel> {
   const newLabel: FullNutritionLabel = {
     calories: 0,
     caloriesPerServing: 0,
-    servings: servings.servings,
+    carbPercentage: 0,
+    proteinPercentage: 0,
+    fatPercentage: 0,
     general: [],
     carbohydrates: [],
     fats: [],
@@ -201,20 +229,35 @@ async function toLabel(
     if (nutrients.has(baseNutrient.id)) {
       const inputNutrient = nutrients.get(baseNutrient.id);
 
-      if (baseNutrient.name === "Calories") {
-        newLabel.calories = inputNutrient?.value ?? 0;
-        newLabel.caloriesPerServing = inputNutrient?.valuePerServing ?? 0;
-      } else if (inputNutrient) {
-        getCategoryList(baseNutrient, newLabel).push({
-          value: inputNutrient?.value,
-          perServing: inputNutrient?.valuePerServing,
-          unit: baseNutrient.unit.name,
-          name: baseNutrient.name,
-          children: getChildNutrients(baseNutrient, nutrients),
-        });
+      switch (baseNutrient.name) {
+        case "Calories":
+          newLabel.calories = inputNutrient?.value ?? 0;
+          newLabel.caloriesPerServing = inputNutrient?.valuePerServing ?? 0;
+          break;
+        case "Total Carbohydrates":
+          newLabel.carbPercentage = inputNutrient?.value ?? 0;
+          break;
+        case "Total Fat":
+          newLabel.fatPercentage = inputNutrient?.value ?? 0;
+          break;
+        case "Protein":
+          newLabel.proteinPercentage = inputNutrient?.value ?? 0;
+          break;
       }
+
+      getCategoryList(baseNutrient, newLabel).push({
+        value: inputNutrient?.value ?? 0,
+        perServing: inputNutrient?.valuePerServing ?? 0,
+        unit: baseNutrient.unit.name,
+        name: baseNutrient.name,
+        children: getChildNutrients(baseNutrient, nutrients),
+      });
     }
   }
+  newLabel.carbPercentage = (newLabel.carbPercentage * 4) / newLabel.calories;
+  newLabel.fatPercentage = (newLabel.fatPercentage * 9) / newLabel.calories;
+  newLabel.proteinPercentage =
+    (newLabel.proteinPercentage * 4) / newLabel.calories;
   return {
     ...servings,
     ...newLabel,
@@ -300,7 +343,7 @@ async function filterRecipesByNutrition(
       recipeId: { in: recipeIds },
       verifed: true,
     },
-    include: { nutrients: true },
+    include: { nutrients: true, servingSizeUnit: true },
   });
 
   // Group all the nutrition labels by recipe
@@ -323,14 +366,12 @@ async function filterRecipesByNutrition(
     const baseLabel = labels[0];
     const totalServings = baseLabel.servings ?? 1;
     const scaledNutrients = labels.map((label) => {
-      const { servings, servingsUsed } = label;
-      return scaleNutrients(
-        totalServings,
-        1,
-        label.nutrients,
-        servings ?? 1,
-        servingsUsed ?? 1
-      );
+      let { servings } = label;
+      servings = servings ?? 1;
+      return scaleNutrients(label.nutrients, {
+        servings,
+        servingsUsed: label?.servingsUsed ?? servings,
+      });
     });
 
     const summedNutrients = sumNutrients(scaledNutrients);
@@ -419,9 +460,12 @@ class FilterError extends Error {
 }
 
 export {
-  passFilter as compareValues,
+  passFilter,
+  getAggregateLabel,
   convertToLabel,
   NutrientPerServing,
   FullNutritionLabel,
   NutrientTest,
+  filterRecipesByNutrition,
+  FilterError,
 };

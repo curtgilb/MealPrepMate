@@ -129,10 +129,10 @@ enum ImportStatus {
 // Status for individual record
 enum RecordStatus {
   IMPORTED //Item was imported into DB
-  DUPLICATE //Already exists in the DB
-  UPDATED //Item was updated in the DB to match the import
-  IGNORED // item was ignored as requested by user
-  PENDING // item is pending user action, may already exist in DB
+  DUPLICATE // Item already exists, if duplicate record was created, it will be deleted
+  UPDATE // Item will be updated with matching recipe/ nutrition label
+  IGNORED // Do not import/update, future imports will not look at it
+  PENDING // item is pending user review
   VERIFIED // User has marked this item as verified
 }
 
@@ -243,6 +243,7 @@ model Recipe {
   preparationTime     Int?
   cookingTime         Int?
   marinadeTime        Int?
+  totalTime           Int?
   directions          String?
   notes               String?
   stars               Int?

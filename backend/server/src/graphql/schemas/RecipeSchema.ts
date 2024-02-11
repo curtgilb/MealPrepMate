@@ -1,13 +1,10 @@
 import { db } from "../../db.js";
 import { builder } from "../builder.js";
 import { numericalComparison } from "./UtilitySchema.js";
-import { Recipe } from "@prisma/client";
-import {
-  RecipeInputValidation,
-  NutritionFilterValidation,
-} from "../../validations/graphqlValidation.js";
-
-type ExtendedRecipe = Recipe & { ingredientFreshness: number };
+import { ExtendedRecipe } from "../../services/RecipeSearch.js";
+import { RecipeInputValidation } from "../../validations/graphqlValidation.js";
+import { LabelObject } from "./NutritionSchema.js";
+import { getAggregateLabel } from "../../services/nutrition/NutritionAggregator.js";
 
 // ============================================ Types ===================================
 builder.prismaObject("Recipe", {
@@ -28,6 +25,18 @@ builder.prismaObject("Recipe", {
     course: t.relation("course"),
     ingredients: t.relation("ingredients"),
     photos: t.relation("photos"),
+    aggregateLabel: t.field({
+      type: LabelObject,
+      resolve: async (parent, args, context, info) => {
+        if (Object.prototype.hasOwnProperty.call(parent, "aggregateLabel")) {
+          return (parent as ExtendedRecipe).aggregateLabel;
+        }
+        return await getAggregateLabel({
+          recipes: [{ recipeId: parent.id }],
+          advanced: false,
+        });
+      },
+    }),
     ingredientFreshness: t.int({
       resolve: (recipe, args, context, info) => {
         if (
