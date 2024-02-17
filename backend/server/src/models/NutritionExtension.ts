@@ -4,7 +4,6 @@ import {
   CreateNutritionLabelInput,
 } from "../types/gql.js";
 import { Prisma, NutritionLabel } from "@prisma/client";
-import { CronometerNutrition } from "../types/CustomTypes.js";
 
 type NutritionLabelQuery = {
   include?: Prisma.NutritionLabelInclude | undefined;
@@ -15,105 +14,108 @@ type LabelWithNutrients = Prisma.NutritionLabelGetPayload<{
   include: { nutrients: true };
 }>;
 
-export const nutritionExtension = Prisma.defineExtension((client) => {
-  function getCorrectServings(
-    args: EditNutritionLabelInput,
-    original: LabelWithNutrients
-  ): number {
-    if (
-      !Number.isNaN(args.servingsUsed) &&
-      original.servingsUsed !== args.servingsUsed
-    ) {
-      return original.servingsUsed as number;
-    } else if (
-      !Number.isNaN(args.servings) &&
-      original.servings !== args.servings
-    ) {
-      return original.servings as number;
-    } else if (!Number.isNaN(original.servingsUsed)) {
-      return original.servingsUsed as number;
-    } else if (!Number.isNaN(original.servings)) {
-      return original.servings as number;
+function getCorrectServings(
+  args: EditNutritionLabelInput,
+  original: LabelWithNutrients
+): number {
+  if (
+    !Number.isNaN(args.servingsUsed) &&
+    original.servingsUsed !== args.servingsUsed
+  ) {
+    return original.servingsUsed as number;
+  } else if (
+    !Number.isNaN(args.servings) &&
+    original.servings !== args.servings
+  ) {
+    return original.servings as number;
+  } else if (!Number.isNaN(original.servingsUsed)) {
+    return original.servingsUsed as number;
+  } else if (!Number.isNaN(original.servings)) {
+    return original.servings as number;
+  } else {
+    return 1;
+  }
+}
+
+function createNutritionLabelStmt(
+  input: CreateNutritionLabelInput,
+  isBaseLabel: boolean,
+  verifed: boolean = false
+):
+  | Prisma.NutritionLabelCreateInput
+  | Prisma.NutritionLabelCreateWithoutRecipeInput {
+  const stmt:
+    | Prisma.NutritionLabelCreateInput
+    | Prisma.NutritionLabelCreateWithoutRecipeInput = {
+    name: input.name,
+    servings: input.servings,
+    servingSize: input.servingSize,
+    servingsUsed: input.servingsUsed,
+    isPrimary: isBaseLabel,
+    verifed,
+  };
+
+  if (input.servingSizeUnitId) {
+    stmt.servingSizeUnit = { connect: { id: input.servingSizeUnitId } };
+  }
+
+  //   Add nutrients
+  if (input.nutrients) {
+    stmt.nutrients = {
+      createMany: {
+        data: input.nutrients.map((nutrient) => ({
+          nutrientId: nutrient.nutrientId,
+          value: nutrient.value,
+        })),
+      },
+    };
+  }
+
+  if (input.connectingId) {
+    if (isBaseLabel) {
+      (stmt as Prisma.NutritionLabelCreateInput).recipe = {
+        connect: { id: input.connectingId },
+      };
     } else {
-      return 1;
+      stmt.ingredientGroup = { connect: { id: input.connectingId } };
     }
   }
 
-  function createNutritionLabelStmt(
-    input: CreateNutritionLabelInput,
-    isBaseLabel: boolean
-  ): Prisma.NutritionLabelCreateInput {
-    const stmt: Prisma.NutritionLabelCreateInput = {
-      name: input.name,
-      servings: input.servings,
-      servingSize: input.servingSize,
-      servingsUsed: input.servingsUsed,
+  return stmt;
+}
+
+function createEditLabelStatment(
+  input: EditNutritionLabelInput,
+  servings: number
+): Prisma.NutritionLabelUpdateInput {
+  const stmt: Prisma.NutritionLabelUpdateInput = {
+    name: input.name,
+    servings: input.servings,
+    servingSize: input.servingSize,
+    servingsUsed: input.servingSize,
+  };
+
+  if (input.nutrientsToAdd) {
+    stmt.nutrients = {
+      createMany: {
+        data: input.nutrientsToAdd?.map((nutrient) => ({
+          nutrientId: nutrient.nutrientId,
+          value: nutrient.value,
+          valuePerServing: nutrient.value / servings,
+        })),
+      },
     };
-
-    const servings = [input.servingsUsed, input.servings, 1].filter(
-      (serving) => {
-        !Number.isNaN(serving);
-      }
-    )[0];
-
-    if (input.connectingId) {
-      if (isBaseLabel) {
-        stmt.recipe = { connect: { id: input.connectingId } };
-      } else {
-        stmt.ingredientGroup = { connect: { id: input.connectingId } };
-      }
-    }
-
-    if (input.servingSizeUnitId) {
-      stmt.servingSizeUnit = { connect: { id: input.servingSizeUnitId } };
-    }
-
-    //   Add nutrients
-    if (input.nutrients) {
-      stmt.nutrients = {
-        createMany: {
-          data: input.nutrients.map((nutrient) => ({
-            nutrientId: nutrient.nutrientId,
-            value: nutrient.value,
-            valuePerServing: nutrient.value / (servings as number),
-          })),
-        },
-      };
-    }
-
-    return stmt;
   }
 
-  function createEditLabelStatment(
-    input: EditNutritionLabelInput,
-    servings: number
-  ): Prisma.NutritionLabelUpdateInput {
-    const stmt: Prisma.NutritionLabelUpdateInput = {
-      name: input.name,
-      servings: input.servings,
-      servingSize: input.servingSize,
-      servingsUsed: input.servingSize,
+  if (input.servingSizeUnitId) {
+    stmt.servingSizeUnit = {
+      connect: { id: input.servingSizeUnitId },
     };
-
-    if (input.nutrientsToAdd) {
-      stmt.nutrients = {
-        createMany: {
-          data: input.nutrientsToAdd?.map((nutrient) => ({
-            nutrientId: nutrient.nutrientId,
-            value: nutrient.value,
-            valuePerServing: nutrient.value / servings,
-          })),
-        },
-      };
-    }
-
-    if (input.servingSizeUnitId) {
-      stmt.servingSizeUnit = {
-        connect: { id: input.servingSizeUnitId },
-      };
-    }
-    return stmt;
   }
+  return stmt;
+}
+
+export const nutritionExtension = Prisma.defineExtension((client) => {
   return client.$extends({
     model: {
       nutritionLabel: {
@@ -141,28 +143,6 @@ export const nutritionExtension = Prisma.defineExtension((client) => {
           return [baseLabel, ...subLabels];
         },
 
-        async createCronometerNutritionLabel(
-          input: CronometerNutrition,
-          query?: NutritionLabelQuery
-        ) {
-          const servingsDenominator = input.amount ? input.amount : 1;
-          return await client.nutritionLabel.create({
-            data: {
-              name: input.foodName,
-              servings: input.amount,
-              nutrients: {
-                createMany: {
-                  data: input.nutrients.map((nutrient) => ({
-                    value: nutrient.amount,
-                    valuePerServing: nutrient.amount / servingsDenominator,
-                    nutrientId: nutrient.id,
-                  })),
-                },
-              },
-            },
-            ...query,
-          });
-        },
         async editNutritionLabels(
           args: EditNutritionLabelInput,
           query: NutritionLabelQuery
@@ -193,7 +173,6 @@ export const nutritionExtension = Prisma.defineExtension((client) => {
                   },
                   data: {
                     value: nutrient.value,
-                    valuePerServing: nutrient.value / servings,
                   },
                 });
               }
@@ -216,3 +195,5 @@ export const nutritionExtension = Prisma.defineExtension((client) => {
     },
   });
 });
+
+export { createNutritionLabelStmt };

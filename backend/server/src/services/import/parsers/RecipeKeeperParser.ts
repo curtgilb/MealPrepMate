@@ -35,7 +35,7 @@ class RecipeKeeperRecord extends ParsedRecord<RecipeInput> {
   parsedData: RecipeKeeperHtml;
   importType: ImportType = "RECIPE_KEEPER";
 
-  constructor(input: string, parsedHtml: HTMLElement) {
+  constructor(input: string, parsedHtml: HTMLElement | RecipeKeeperRecipe) {
     super(input);
     this.parsedData = new RecipeKeeperHtml(parsedHtml);
     this.externalId = this.parsedData.recipe.recipeId;
@@ -55,7 +55,7 @@ class RecipeKeeperRecord extends ParsedRecord<RecipeInput> {
 
   toNutritionLabel<T extends z.ZodTypeAny>(
     schema: T,
-    connectingId: string
+    connectingId?: string
   ): Promise<z.infer<T>> {
     const nutrients = this.parsedData.recipe.nutrients
       .filter((nutrient) => {
@@ -186,11 +186,15 @@ class RecipeKeeperHtml {
     nutrients: [],
   };
 
-  constructor(input: HTMLElement) {
-    const properties = input.querySelectorAll("*[itemProp]");
-    properties.forEach((property) => {
-      this.parseProperty(property);
-    });
+  constructor(input: HTMLElement | RecipeKeeperRecipe) {
+    if (input instanceof HTMLElement) {
+      const properties = input.querySelectorAll("*[itemProp]");
+      properties.forEach((property) => {
+        this.parseProperty(property);
+      });
+    } else {
+      this.recipe = input;
+    }
   }
 
   private parseProperty(prop: HTMLElement) {
@@ -288,7 +292,7 @@ class RecipeKeeperHtml {
   }
 }
 
-export { RecipeKeeperParser, RecipeKeeperRecord };
+export { RecipeKeeperParser, RecipeKeeperRecord, RecipeKeeperHtml };
 
 // const rkParser = new RecipeKeeperParser("../../../data/recipekeeper.zip");
 // const result = await rkParser.parse();

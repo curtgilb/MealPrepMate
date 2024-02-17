@@ -1,106 +1,166 @@
-import { Import, Prisma } from "@prisma/client";
+import { Prisma, ImportRecord, Import } from "@prisma/client";
 import { db } from "../../db.js";
-import { ImportQuery } from "../../types/CustomTypes.js";
 import {
   CronometerParser,
   CronometerRecord,
 } from "./parsers/CronometerParser.js";
 import { NutritionLabelValidation } from "../../validations/graphqlValidation.js";
+import {
+  ImportService,
+  ImportServiceInput,
+  MatchManager,
+} from "./ImportService.js";
+import { createNutritionLabelStmt } from "../../models/NutritionExtension.js";
+import { Match, RecordWithImport } from "../../types/CustomTypes.js";
 
-export async function processCronometerImport(
-  source: File | string,
-  query: ImportQuery
-): Promise<Import> {
-  const parser = new CronometerParser(source);
-  const output = await parser.parse();
+class CronometerImport extends ImportService {
+  constructor(input: ImportServiceInput | Import) {
+    super(input);
+  }
 
-  const lastImport = await db.import.findFirst({
-    where: { type: "CRONOMETER" },
-    orderBy: { createdAt: "desc" },
-  });
+  async processImport(): Promise<void> {
+    const parser = new CronometerParser(this.input.source);
+    const output = await parser.parse();
+    const lastImport = await this.getLastImport();
 
-  if (lastImport?.fileHash === output.recordHash) {
-    return await db.import.create({
-      data: {
+    if (lastImport?.fileHash === output.recordHash) {
+      await this.updateImport({
         fileName: output.fileName,
         fileHash: output.recordHash,
-        type: "CRONOMETER",
         status: "DUPLICATE",
-      },
-      ...query,
+      });
+    }
+
+    // Attempt to find match and create nutrition label if needed
+    type MatchedData = {
+      record: CronometerRecord;
+      match: Match;
+      dbStmt?: Prisma.RecipeCreateInput;
+    };
+
+    const preparedRecords = await Promise.all(
+      output.records.map(async (record) => {
+        const match = await this.findCronometerLabelMatches(record);
+        let dbStmt;
+        if (match.status === "IMPORTED" || match.status === "UPDATED") {
+          const nutritionLabel = await record.transform(
+            NutritionLabelValidation
+          );
+          dbStmt = createNutritionLabelStmt(nutritionLabel, true);
+        }
+        return { record, match, dbStmt } as MatchedData;
+      })
+    );
+
+    await db.$transaction(async (tx) => {
+      for (const { record, match, dbStmt } of preparedRecords) {
+        let draftId;
+        if (dbStmt) {
+          draftId = (
+            await tx.nutritionLabel.create({
+              data: dbStmt,
+              select: { id: true },
+            })
+          ).id;
+        }
+
+        await tx.importRecord.create({
+          data: {
+            import: { connect: { id: this.input.import.id } },
+            hash: output.recordHash,
+            externalId: record.getExternalId(),
+            name: record.getParsedData().name,
+            parsedFormat: record.getParsedData() as Prisma.JsonObject,
+            status: match.status,
+            verifed: false,
+            recipe: { connect: { id: match.recipeMatchId } },
+            nutritionLabel: { connect: { id: match.labelMatchId } },
+            draftId: draftId,
+          },
+        });
+
+        await this.updateImport(
+          {
+            fileName: output.fileName,
+            fileHash: output.recordHash,
+            status: "REVIEW",
+          },
+          tx
+        );
+      }
     });
   }
 
-  // Attempt to find match and create nutrition label if needed
-  for (const record of output.records) {
-    await findCronometerLabelMatches(record);
-    if (record.getMatch()?.status === "IMPORTED") {
-      const matchingRecipe = await db.recipe.findFirst({
-        where: {
-          title: { contains: record.getParsedData().name, mode: "insensitive" },
-        },
-      });
-      const nutritionLabel = await record.transform(
-        NutritionLabelValidation,
-        output.imageMapping,
-        matchingRecipe?.id ?? undefined
-      );
-      const createdLabel = await db.nutritionLabel.createNutritionLabel({
-        baseLabel: nutritionLabel,
-      });
-      record.setMatch({ matchId: createdLabel[0].id, status: "IMPORTED" });
-      record.setMatchingRecipeId(matchingRecipe?.id);
-    }
+  async recreateRecord(record: ImportRecord): Promise<string> {
+    const label = record.parsedFormat as Prisma.JsonObject;
+    const rehydrated = new CronometerRecord(JSON.stringify(label));
+    const input = await rehydrated.transform(NutritionLabelValidation);
+    const newLabel = await db.nutritionLabel.create({
+      data: createNutritionLabelStmt(input, true),
+    });
+    return newLabel.id;
   }
 
-  return await db.import.create({
-    data: {
-      fileName: output.fileName,
-      fileHash: output.recordHash,
-      type: "CRONOMETER",
-      status: "PENDING",
-      importRecords: {
-        createMany: {
-          data: output.records.map((record) => ({
-            rawInput: record.getRawInput(),
-            hash: record.getRecordHash(),
-            name: record.getParsedData().name,
-            parsedFormat:
-              record.getParsedData() as unknown as Prisma.JsonObject,
-            status: record.getMatch()?.status || "PENDING",
-            recipeId: record.getMatchingRecipeId(),
-            nutritionLabelId: record.getMatch()?.matchId,
-          })),
-        },
-      },
-    },
-    ...query,
-  });
-}
+  async findCronometerLabelMatches(label: CronometerRecord) {
+    const match = new MatchManager({ status: "IMPORTED" });
+    const [importRecord, matchingLabel, matchingRecipe] = await db.$transaction(
+      [
+        db.importRecord.findFirst({
+          where: {
+            OR: [
+              { hash: label.getRecordHash() },
+              { externalId: label.getExternalId() },
+            ],
+          },
+        }),
+        db.nutritionLabel.findFirst({
+          where: {
+            name: { contains: label.getParsedData().name, mode: "insensitive" },
+          },
+        }),
+        db.recipe.findFirst({
+          where: {
+            title: {
+              contains: label.getParsedData().name,
+              mode: "insensitive",
+            },
+          },
+        }),
+      ]
+    );
 
-async function findCronometerLabelMatches(label: CronometerRecord) {
-  const importRecord = await db.importRecord.findFirst({
-    where: {
-      OR: [
-        { hash: label.getRecordHash() },
-        { externalId: label.getExternalId() },
-      ],
-    },
-  });
-  if (importRecord) {
-    if (importRecord.hash === label.getRecordHash()) {
-      label.setMatch({ matchId: importRecord.id, status: "DUPLICATE" });
-    } else if (importRecord.externalId === label.getExternalId()) {
-      label.setMatch({ matchId: importRecord.id, status: "UPDATED" });
+    if (importRecord) {
+      const ignore = importRecord.status === "IGNORED";
+      if (importRecord.hash === label.getRecordHash()) {
+        match.setMatch({
+          labelMatchId: importRecord.nutritionLabelId ?? undefined,
+          recipeMatchId: importRecord.recipeId ?? undefined,
+          status: ignore ? "IGNORED" : "DUPLICATE",
+        });
+      } else if (importRecord.externalId === label.getExternalId()) {
+        match.setMatch({
+          labelMatchId: importRecord.nutritionLabelId ?? undefined,
+          recipeMatchId: importRecord.recipeId ?? undefined,
+          status: "UPDATED",
+        });
+      }
+      return match.getMatch();
     }
+    // Check for standalone label with matching name
+    if (matchingLabel) {
+      match.setMatch({ labelMatchId: matchingLabel.id, status: "UPDATED" });
+    }
+
+    // Check for a recipe with matching name
+    if (matchingRecipe) {
+      match.setMatch({
+        recipeMatchId: matchingRecipe.id,
+        status: match.getMatch().status,
+      });
+    }
+
+    return match.getMatch();
   }
-
-  const matchingName = await db.nutritionLabel.findFirst({
-    where: { name: label.getParsedData().name },
-  });
-
-  matchingName &&
-    label.setMatch({ matchId: matchingName.id, status: "PENDING" });
-
-  label.setMatch({ matchId: undefined, status: "IMPORTED" });
 }
+
+export { CronometerImport };

@@ -8,4 +8,18 @@ const numericalComparison = builder.inputType("NumericalComparison", {
   }),
 });
 
-export { numericalComparison };
+const offsetPagination = builder.inputType("OffsetPagination", {
+  fields: (t) => ({
+    offset: t.int({ required: true }),
+    take: t.int({ required: true }),
+  }),
+});
+
+const cursorPagination = builder.inputType("CursorPagination", {
+  fields: (t) => ({
+    cursor: t.field({ type: "DateTime" }),
+    take: t.int(),
+  }),
+});
+
+export { numericalComparison, offsetPagination, cursorPagination };

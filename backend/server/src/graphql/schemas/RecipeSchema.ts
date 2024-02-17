@@ -55,8 +55,6 @@ builder.prismaObject("RecipeIngredient", {
   fields: (t) => ({
     order: t.exposeInt("order"),
     sentence: t.exposeString("sentence"),
-    minQuantity: t.exposeFloat("minQuantity", { nullable: true }),
-    maxQuantity: t.exposeFloat("maxQuantity", { nullable: true }),
     quantity: t.exposeFloat("quantity", { nullable: true }),
     unit: t.relation("unit"),
     name: t.exposeString("name", { nullable: true }),

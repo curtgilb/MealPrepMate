@@ -5,7 +5,6 @@ import { getFileMetaData, hash } from "../../../util/utils.js";
 import { z } from "zod";
 import { readText } from "../../io/Readers.js";
 import { ImportType } from "@prisma/client";
-import { Match } from "../../../types/CustomTypes.js";
 
 type CronometerJson = {
   nutrients: {
@@ -39,14 +38,6 @@ class CronometerRecord extends ParsedRecord<CreateNutritionLabelInput> {
     this.recordHash = hash(input);
   }
 
-  setMatchingRecipeId(id: string | undefined): void {
-    this.matchingRecipeId = id;
-  }
-
-  getMatchingRecipeId(): string | undefined {
-    return this.matchingRecipeId;
-  }
-
   getParsedData(): CronometerJson {
     return this.parsedData;
   }
@@ -66,7 +57,10 @@ class CronometerRecord extends ParsedRecord<CreateNutritionLabelInput> {
     const nutrients = await Promise.all(
       this.parsedData.nutrients.map(async (nutrient) => ({
         value: nutrient.amount,
-        nutrientId: await this.matchNutrients(nutrient.id.toString()),
+        nutrientId: await CronometerRecord.matchNutrient(
+          nutrient.id.toString(),
+          this.importType
+        ),
       }))
     );
 

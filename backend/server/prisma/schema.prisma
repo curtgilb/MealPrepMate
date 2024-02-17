@@ -5,6 +5,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator json {
+  provider = "prisma-json-types-generator"
+}
+
 generator pothos {
   provider     = "prisma-pothos-types"
   clientOutput = "@prisma/client"
@@ -97,6 +101,7 @@ model Import {
   fileHash      String?
   type          ImportType
   status        ImportStatus
+  /// [ImageMapping]
   imageMapping  Json?
   createdAt     DateTime       @default(now())
   importRecords ImportRecord[]
@@ -110,18 +115,20 @@ model ImportRecord {
   externalId       String?
   name             String
   parsedFormat     Json
-  doNotImport      Boolean         @default(false)
   status           RecordStatus
+  verifed          Boolean        @default(false)
   recipe           Recipe?         @relation(fields: [recipeId], references: [id])
   recipeId         String?
   nutritionLabel   NutritionLabel? @relation(fields: [nutritionLabelId], references: [id])
   nutritionLabelId String?
+  draftId          String?
   createdAt        DateTime        @default(now())
 }
 
 // Status for entire import
 enum ImportStatus {
   PENDING
+  REVIEW
   DUPLICATE
   COMPLETED
 }
@@ -130,17 +137,13 @@ enum ImportStatus {
 enum RecordStatus {
   IMPORTED //Item was imported into DB
   DUPLICATE // Item already exists, if duplicate record was created, it will be deleted
-  UPDATE // Item will be updated with matching recipe/ nutrition label
+  UPDATED // Item will be updated with matching recipe/ nutrition label
   IGNORED // Do not import/update, future imports will not look at it
-  PENDING // item is pending user review
-  VERIFIED // User has marked this item as verified
 }
 
 model RecipeIngredient {
   id                String                 @id @default(cuid())
   sentence          String
-  minQuantity       Float?
-  maxQuantity       Float?
   quantity          Float?
   name              String?
   comment           String?

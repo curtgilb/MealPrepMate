@@ -1,5 +1,11 @@
-import { Prisma, Recipe } from "@prisma/client";
-import { RecipeInput } from "../types/gql.js";
+import {
+  Ingredient,
+  MeasurementUnit,
+  Prisma,
+  Recipe,
+  RecipeIngredient,
+} from "@prisma/client";
+import { CreateNutritionLabelInput, RecipeInput } from "../types/gql.js";
 import { toTitleCase } from "../util/utils.js";
 import { db } from "../db.js";
 import { UnitSearch } from "../search/UnitSearch.js";
@@ -7,6 +13,7 @@ import { z } from "zod";
 import { IngredientSearch } from "../search/IngredientSearch.js";
 import fetch from "node-fetch";
 import { coerceNumeric } from "../validations/utilValidations.js";
+import { createNutritionLabelStmt } from "./NutritionExtension.js";
 
 type RecipeQuery = {
   include?: Prisma.RecipeInclude | undefined;
@@ -43,23 +50,112 @@ async function tagIngredients(
   return (await response.json()) as RecipeNlpResponse[];
 }
 
+async function createRecipeCreateStmt(
+  input: {
+    recipe: RecipeInput;
+    nutritionLabel?: CreateNutritionLabelInput;
+    matchingRecipeId?: string;
+  },
+  units: MeasurementUnit[],
+  ingredients: Ingredient[],
+  verifed: boolean = false
+) {
+  const { recipe, nutritionLabel, matchingRecipeId } = input;
+  return {
+    title: recipe.title,
+    source: recipe.source,
+    preparationTime: recipe.prepTime,
+    cookingTime: recipe.cookTime,
+    marinadeTime: recipe.marinadeTime,
+    directions: recipe.directions,
+    notes: recipe.notes,
+    photos: {
+      connect: recipe.photoIds?.map((photoId) => ({ id: photoId })),
+    },
+    isFavorite: recipe.isFavorite || false,
+    course: {
+      connect: recipe.courseIds?.map((id) => ({ id })),
+    },
+    category: {
+      connect: recipe.categoryIds?.map((id) => ({ id })),
+    },
+    cuisine: {
+      connect: { id: recipe.cuisineId ?? undefined },
+    },
+    ingredients: await createRecipeIngredientsStmt({
+      ingredientTxt: recipe.ingredients,
+      matchingRecipeId,
+      units,
+      ingredients,
+    }),
+    nutritionLabel: {
+      create: nutritionLabel
+        ? (createNutritionLabelStmt(
+            nutritionLabel,
+            true
+          ) as Prisma.NutritionLabelCreateWithoutRecipeInput)
+        : undefined,
+    },
+    leftoverFreezerLife: recipe.leftoverFreezerLife,
+    leftoverFridgeLife: recipe.leftoverFridgeLife,
+    isVerified: verifed,
+  };
+}
+
+async function getMatchingRecipeIngredients(existingRecipeId: string) {
+  const ingredients = await db.recipeIngredient.findMany({
+    where: { recipeId: existingRecipeId },
+  });
+  return ingredients.reduce((agg, ingredient) => {
+    agg.set(ingredient.sentence, ingredient);
+    return agg;
+  }, new Map<string, RecipeIngredient>());
+}
+
+type RecipeIngredientInput = {
+  ingredientTxt: string | undefined | null;
+  units?: MeasurementUnit[];
+  ingredients?: Ingredient[];
+  matchingRecipeId?: string;
+};
+
 async function createRecipeIngredientsStmt(
-  ingredientTxt: string | undefined | null
+  input: RecipeIngredientInput | undefined
 ): Promise<
   Prisma.RecipeIngredientCreateNestedManyWithoutRecipeInput | undefined
 > {
-  if (!ingredientTxt) {
+  if (!input || !input.ingredientTxt) {
     return undefined;
   }
-  const taggedIngredients = await tagIngredients(ingredientTxt);
-  const units = new UnitSearch(await db.measurementUnit.findMany({}));
-  const ingredients = new IngredientSearch(await db.ingredient.findMany({}));
 
-  const ingredientsToCreate = taggedIngredients.map((ingredient, index) => {
-    const matchingIngredient = ingredients.search(ingredient.name);
-    const matchedUnit = units.search(ingredient.unit);
-    console.log(ingredient.quantity);
-    return {
+  const taggedIngredients = await tagIngredients(input.ingredientTxt);
+  const unitSearch = input.units
+    ? new UnitSearch(input.units)
+    : new UnitSearch(await db.measurementUnit.findMany({}));
+
+  const ingredientSearch = input.ingredients
+    ? new IngredientSearch(input.ingredients)
+    : new IngredientSearch(await db.ingredient.findMany({}));
+
+  const matchingRecipe = input.matchingRecipeId
+    ? await getMatchingRecipeIngredients(input.matchingRecipeId)
+    : undefined;
+
+  const stmt: Prisma.RecipeIngredientCreateWithoutRecipeInput[] = [];
+  taggedIngredients.forEach((ingredient, index) => {
+    const matchingRecipeIngredient = matchingRecipe?.get(ingredient.sentence);
+
+    const matchingIngredient = matchingRecipeIngredient
+      ? matchingRecipeIngredient.ingredientId
+      : ingredientSearch.search(ingredient.name)?.id;
+
+    const matchedUnit = matchingRecipeIngredient
+      ? matchingRecipeIngredient.measurementUnitId
+      : unitSearch.search(ingredient.unit)?.id;
+
+    const matchedGroup = matchingRecipeIngredient?.groupId;
+
+    stmt.push({
       order: index,
       sentence: z.coerce.string().parse(ingredient.sentence),
       name: z.coerce.string().parse(ingredient.name),
@@ -68,23 +164,19 @@ async function createRecipeIngredientsStmt(
         .parse(ingredient.quantity),
       comment: z.coerce.string().parse(ingredient.comment),
       other: z.coerce.string().parse(ingredient.other),
-      ingredient: matchingIngredient
-        ? { connect: { id: matchingIngredient.id } }
-        : undefined,
-      unit: matchedUnit ? { connect: { id: matchedUnit.id } } : undefined,
-    };
+      ingredient: { connect: { id: matchingIngredient ?? undefined } },
+      unit: { connect: { id: matchedUnit ?? undefined } },
+      group: { connect: { id: matchedGroup ?? undefined } },
+    });
   });
-  return { create: ingredientsToCreate };
+  return { create: stmt };
 }
 
 export const recipeExtensions = Prisma.defineExtension((client) => {
   return client.$extends({
     model: {
       recipe: {
-        async createRecipe(
-          recipe: RecipeInput,
-          query?: RecipeQuery
-        ): Promise<Recipe> {
+        async createRecipe(recipe: RecipeInput, query?: RecipeQuery) {
           return await client.recipe.create({
             data: {
               title: recipe.title,
@@ -162,3 +254,5 @@ export const recipeExtensions = Prisma.defineExtension((client) => {
     },
   });
 });
+
+export { createRecipeCreateStmt };

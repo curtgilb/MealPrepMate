@@ -14,7 +14,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 interface ParsedOutput<O, T extends ParsedRecord<O>> {
   records: T[];
-  recordHash: string | undefined;
+  recordHash: string;
   imageMapping: Map<string, string>;
   fileName: string | undefined;
 }
@@ -24,7 +24,6 @@ abstract class ParsedRecord<O> {
   abstract externalId: string | undefined;
   abstract importType: ImportType;
   protected originalText: string;
-  protected match: Match | undefined;
   protected static nutrientMapping = new Map<string, string>();
 
   protected static async initializeMapping(importType: ImportType) {
@@ -52,14 +51,6 @@ abstract class ParsedRecord<O> {
   constructor(input: string) {
     this.originalText = input;
     this.recordHash = hash(input);
-  }
-
-  getMatch(): Match | undefined {
-    return this.match;
-  }
-
-  setMatch(match: Match): void {
-    this.match = match;
   }
 
   getRecordHash(): string {

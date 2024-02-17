@@ -1,8 +1,15 @@
 import { Prisma, RecordStatus } from "@prisma/client";
 
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace PrismaJson {
+    type ImageMapping = { [key: string]: string };
+  }
+}
+
 type Match = {
-  recipeMatchId: string | undefined;
-  labelMatchId: string | undefined;
+  recipeMatchId?: string | undefined;
+  labelMatchId?: string | undefined;
   status: RecordStatus;
 };
 
@@ -114,8 +121,27 @@ type FileMetaData = {
   ext: string;
 };
 
+const recordWithImport = Prisma.validator<Prisma.ImportRecordDefaultArgs>()({
+  include: {
+    import: true,
+  },
+});
+
+type RecordWithImport = Prisma.ImportRecordGetPayload<typeof recordWithImport>;
+
+const recipeWithIngredients = Prisma.validator<Prisma.RecipeDefaultArgs>()({
+  include: {
+    ingredients: true,
+  },
+});
+
+type RecipeWithIngredients = Prisma.RecipeGetPayload<
+  typeof recipeWithIngredients
+>;
+
 export {
-  RecipeNlpResponse,
+  RecordWithImport,
+  RecipeWithIngredients,
   RecipeKeeperRecipe,
   Mappings,
   FileMetaData,
@@ -123,10 +149,4 @@ export {
   MyFitnessPalNutrition,
   ImportQuery,
   Match,
-  // Ingredient,
-  // Nutrient,
-  // NutritionFact,
-  // NutritionLabel,
-  // DailyRecommendedIntake,
-  // DriLookup,
 };

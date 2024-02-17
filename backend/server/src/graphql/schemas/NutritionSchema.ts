@@ -64,6 +64,64 @@ LabelObject.implement({
   }),
 });
 
+builder.prismaObject("NutritionLabel", {
+  name: "NutritionLabel",
+  fields: (t) => ({
+    id: t.exposeID("id"),
+    name: t.exposeString("name", { nullable: true }),
+    recipe: t.relation("recipe", { nullable: true }),
+    ingredientGroup: t.relation("ingredientGroup"),
+    nutrients: t.relation("nutrients"),
+    servings: t.exposeFloat("servings", { nullable: true }),
+    servingSize: t.exposeFloat("servingSize", { nullable: true }),
+    servingsUsed: t.exposeFloat("servingsUsed", { nullable: true }),
+    importRecord: t.relation("importRecord", { nullable: true }),
+  }),
+});
+
+builder.prismaObject("NutritionLabelNutrient", {
+  name: "NutritionLabelNutrient",
+  fields: (t) => ({
+    value: t.exposeFloat("value"),
+    nutrient: t.relation("nutrient"),
+  }),
+});
+
+builder.prismaObject("Nutrient", {
+  fields: (t) => ({
+    id: t.exposeString("id"),
+    name: t.exposeString("name"),
+    otherNames: t.exposeStringList("alternateNames"),
+    childNutrients: t.relation("subNutrients"),
+    unit: t.relation("unit"),
+    type: t.exposeString("type"),
+    dailyReferenceIntakeValue: t.float({
+      args: {
+        age: t.arg({ type: "Int", required: true }),
+        gender: t.arg({ type: Gender, required: true }),
+        specialCondition: t.arg({ type: SpecialCondition, required: true }),
+      },
+      select: (args) => {
+        return {
+          dri: {
+            take: 1,
+            where: {
+              ageMax: { lte: args.age },
+              ageMin: { gte: args.age },
+              gender: args.gender,
+              specialCondition: args.specialCondition,
+            },
+          },
+        };
+      },
+      resolve: (nutrient) => {
+        return nutrient.dri[0].value;
+      },
+    }),
+    customTarget: t.exposeFloat("customTarget", { nullable: true }),
+  }),
+});
+
 builder.prismaObject("MeasurementUnit", {
   name: "Unit",
   fields: (t) => ({
