@@ -14,13 +14,6 @@ enum ExternalImportType {
   CRONOMETER,
 }
 
-enum RecordAction {
-  REIMPORT,
-  DUPLICATE,
-  IGNORE,
-  VERIFY,
-}
-
 builder.enumType(Gender, { name: "Gender" });
 builder.enumType(SpecialCondition, { name: "SpecialCondition" });
 const importStatus = builder.enumType(ImportStatus, { name: "ImportStatus" });
@@ -33,9 +26,6 @@ const PrismaImportType = builder.enumType(ImportType, {
   name: "PrismaImportType",
 });
 builder.enumType(NutrientType, { name: "NutrientType" });
-builder.enumType(RecordAction, {
-  name: "RecordAction",
-});
 
 export {
   meal,

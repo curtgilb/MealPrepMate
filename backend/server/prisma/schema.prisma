@@ -101,6 +101,7 @@ model Import {
   fileHash      String?
   type          ImportType
   status        ImportStatus
+    storagePath      String
   /// [ImageMapping]
   imageMapping  Json?
   createdAt     DateTime       @default(now())
@@ -111,7 +112,7 @@ model ImportRecord {
   id               String          @id @default(cuid())
   import           Import          @relation(fields: [importId], references: [id])
   importId         String
-  hash             String
+  hash             String?
   externalId       String?
   name             String
   parsedFormat     Json
@@ -131,6 +132,7 @@ enum ImportStatus {
   REVIEW
   DUPLICATE
   COMPLETED
+  FAILED
 }
 
 // Status for individual record

@@ -1,11 +1,6 @@
 import { builder } from "../builder.js";
 import { Prisma } from "@prisma/client";
 import { db } from "../../db.js";
-// perishable: t.arg.boolean(),
-// defrostTime: t.arg({ type: numericalComparison }),
-// tableLife: t.arg({ type: numericalComparison }),
-// fridgeLife: t.arg({ type: numericalComparison }),
-// freezerLife: t.arg({ type: numericalComparison }),
 
 // ============================================ Types ===================================
 
@@ -89,14 +84,6 @@ const createExpirationRule = builder.inputType("CreateExpirationRule", {
     ingredientId: t.id(),
   }),
 });
-
-const paginationInput = builder.inputType("Pagination", {
-  fields: (t) => ({
-    start: t.int({ required: true }),
-    limit: t.int({ required: true }),
-  }),
-});
-// const ingredientsFilter = builder.inputType("IngredientFilter", {});
 
 // ============================================ Queries ===================================
 
@@ -346,7 +333,7 @@ builder.mutationFields((t) => ({
           id: args.expirationRuleId,
         },
       });
-      return await db.expirationRule.findMany({});
+      return await db.expirationRule.findMany({ ...query });
     },
   }),
   createIngredient: t.prismaField({

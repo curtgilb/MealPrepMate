@@ -140,40 +140,40 @@ builder.prismaObject("DailyReferenceIntake", {
   }),
 });
 
-builder.prismaObject("Nutrient", {
-  fields: (t) => ({
-    name: t.exposeString("name"),
-    alternateNames: t.exposeStringList("alternateNames"),
-    type: t.exposeString("type"),
-    advancedView: t.exposeBoolean("advancedView"),
-    customTarget: t.exposeFloat("customTarget", { nullable: true }),
-    dri: t.float({
-      args: {
-        age: t.arg({ type: "Int", required: true }),
-        gender: t.arg({ type: Gender, required: true }),
-        specialCondition: t.arg({ type: SpecialCondition, required: true }),
-      },
-      select: (args) => {
-        return {
-          dri: {
-            take: 1,
-            where: {
-              ageMax: { lte: args.age },
-              ageMin: { gte: args.age },
-              gender: args.gender,
-              specialCondition: args.specialCondition,
-            },
-          },
-        };
-      },
-      resolve: (nutrient) => {
-        return nutrient.dri[0].value;
-      },
-    }),
-    order: t.exposeInt("order"),
-    unit: t.relation("unit"),
-  }),
-});
+// builder.prismaObject("Nutrient", {
+//   fields: (t) => ({
+//     name: t.exposeString("name"),
+//     alternateNames: t.exposeStringList("alternateNames"),
+//     type: t.exposeString("type"),
+//     advancedView: t.exposeBoolean("advancedView"),
+//     customTarget: t.exposeFloat("customTarget", { nullable: true }),
+//     dri: t.float({
+//       args: {
+//         age: t.arg({ type: "Int", required: true }),
+//         gender: t.arg({ type: Gender, required: true }),
+//         specialCondition: t.arg({ type: SpecialCondition, required: true }),
+//       },
+//       select: (args) => {
+//         return {
+//           dri: {
+//             take: 1,
+//             where: {
+//               ageMax: { lte: args.age },
+//               ageMin: { gte: args.age },
+//               gender: args.gender,
+//               specialCondition: args.specialCondition,
+//             },
+//           },
+//         };
+//       },
+//       resolve: (nutrient) => {
+//         return nutrient.dri[0].value;
+//       },
+//     }),
+//     order: t.exposeInt("order"),
+//     unit: t.relation("unit"),
+//   }),
+// });
 // ============================================ Inputs ==================================
 const createNutrient = builder.inputType("CreateNutrientInput", {
   fields: (t) => ({

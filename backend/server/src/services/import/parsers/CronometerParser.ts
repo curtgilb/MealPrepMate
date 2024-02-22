@@ -110,7 +110,7 @@ class CronometerParser extends Parser<
     }
     return {
       records: this.records,
-      recordHash: this.fileHash,
+      hash: this.fileHash,
       imageMapping: this.imageMapping,
       fileName: this.fileName,
     };

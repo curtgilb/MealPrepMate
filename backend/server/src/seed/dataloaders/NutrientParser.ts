@@ -76,6 +76,7 @@ export class NutrientLoader {
         type: cleanedRecord.type,
         advancedView: cleanedRecord.advancedView,
         unit: matchedUnit ? { connect: { id: matchedUnit.id } } : {},
+        order: cleanedRecord.order,
         mappings: {
           createMany: {
             data: [

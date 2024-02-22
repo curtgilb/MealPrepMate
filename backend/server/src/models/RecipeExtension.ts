@@ -79,9 +79,11 @@ async function createRecipeCreateStmt(
     category: {
       connect: recipe.categoryIds?.map((id) => ({ id })),
     },
-    cuisine: {
-      connect: { id: recipe.cuisineId ?? undefined },
-    },
+    cuisine: recipe.cuisineId
+      ? {
+          connect: { id: recipe.cuisineId },
+        }
+      : {},
     ingredients: await createRecipeIngredientsStmt({
       ingredientTxt: recipe.ingredients,
       matchingRecipeId,
@@ -164,9 +166,11 @@ async function createRecipeIngredientsStmt(
         .parse(ingredient.quantity),
       comment: z.coerce.string().parse(ingredient.comment),
       other: z.coerce.string().parse(ingredient.other),
-      ingredient: { connect: { id: matchingIngredient ?? undefined } },
-      unit: { connect: { id: matchedUnit ?? undefined } },
-      group: { connect: { id: matchedGroup ?? undefined } },
+      ingredient: matchingIngredient
+        ? { connect: { id: matchingIngredient } }
+        : {},
+      unit: matchedUnit ? { connect: { id: matchedUnit } } : {},
+      group: matchedGroup ? { connect: { id: matchedGroup ?? undefined } } : {},
     });
   });
   return { create: stmt };
@@ -201,9 +205,9 @@ export const recipeExtensions = Prisma.defineExtension((client) => {
                   ? { id: recipe.cuisineId }
                   : undefined,
               },
-              ingredients: await createRecipeIngredientsStmt(
-                recipe.ingredients
-              ),
+              ingredients: await createRecipeIngredientsStmt({
+                ingredientTxt: recipe.ingredients,
+              }),
               leftoverFreezerLife: recipe.leftoverFreezerLife,
               leftoverFridgeLife: recipe.leftoverFridgeLife,
             },
@@ -239,11 +243,9 @@ export const recipeExtensions = Prisma.defineExtension((client) => {
               category: {
                 set: recipe.categoryIds?.map((id) => ({ id })),
               },
-              cuisine: {
-                connect: recipe.cuisineId
-                  ? { id: recipe.cuisineId }
-                  : undefined,
-              },
+              cuisine: recipe.cuisineId
+                ? { connect: { id: recipe.cuisineId } }
+                : {},
               leftoverFreezerLife: recipe.leftoverFreezerLife,
               leftoverFridgeLife: recipe.leftoverFridgeLife,
             },

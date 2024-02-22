@@ -1,27 +1,17 @@
 import { builder } from "../builder.js";
-import { processRecipeKeeperImport } from "../../services/import/RecipeKeeperImport.js";
-import { processCronometerImport } from "../../services/import/CronometerImport.js";
-import { ExternalImportType } from "./EnumSchema.js";
 import { db } from "../../db.js";
-import {
-  PrismaImportType,
-  externalImportType,
-  importStatus,
-  recordStatus,
-} from "./EnumSchema.js";
+import { PrismaImportType, importStatus, recordStatus } from "./EnumSchema.js";
 import { offsetPagination } from "./UtilitySchema.js";
-import { Import, ImportRecord, ImportStatus } from "@prisma/client";
-import { record } from "zod";
-
-type WithCount = {
-  count: number;
-};
-
-type ImportWithCount = Import & WithCount;
-type ImportRecordWithCount = ImportRecord & WithCount;
+import { Import, ImportRecord, ImportType } from "@prisma/client";
+import { storage } from "../../storage.js";
+import { FileUploadQueue } from "../../test.js";
+import { fileTypeFromBuffer } from "file-type";
+import { v4 as uuidv4 } from "uuid";
+import { Context } from "../../services/import/state/states.js";
+import { queryFromInfo } from "@pothos/plugin-prisma";
 
 // ============================================ Types ===================================
-builder.prismaObject("Import", {
+const Import = builder.prismaObject("Import", {
   fields: (t) => ({
     id: t.exposeID("id"),
     fileName: t.exposeString("fileName", { nullable: true }),
@@ -30,67 +20,78 @@ builder.prismaObject("Import", {
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     records: t.relation("importRecords"),
     recordsCount: t.relationCount("importRecords"),
-    count: t.field({
-      type: "Int",
-      resolve: (parent) => {
-        if (Object.prototype.hasOwnProperty.call(parent, "count")) {
-          return (parent as ImportWithCount).count;
-        }
-        return 0;
-      },
-    }),
   }),
 });
 
-builder.prismaObject("ImportRecord", {
+const ImportRecord = builder.prismaObject("ImportRecord", {
   fields: (t) => ({
     name: t.exposeString("name"),
     status: t.field({ type: recordStatus, resolve: (parent) => parent.status }),
     recipe: t.relation("recipe"),
     nutritionLabel: t.relation("nutritionLabel"),
-    count: t.field({
-      type: "Int",
-      resolve: (parent) => {
-        if (Object.prototype.hasOwnProperty.call(parent, "count")) {
-          return (parent as ImportRecordWithCount).count;
-        }
-        return 0;
-      },
-    }),
   }),
 });
-// ============================================ Inputs ==================================
 
-const recordEditInput = builder.inputType("RecordEditInput", {
-  fields: (t) => ({
-    id: t.string({ required: true }),
-    status: t.field({ type: recordStatus, required: true }),
-    matchingRecipeId: t.string(),
-    matchingLabel: t.string(),
-  }),
-});
+const ImportsQuery = builder
+  .objectRef<{
+    nextOffset: number | null;
+    itemsRemaining: number;
+    imports: Import[];
+  }>("ImportsQuery")
+  .implement({
+    fields: (t) => ({
+      nextOffset: t.exposeInt("nextOffset", { nullable: true }),
+      itemsRemaining: t.exposeInt("itemsRemaining"),
+      imports: t.field({
+        type: [Import],
+        resolve: (result) => result.imports,
+      }),
+    }),
+  });
+
+const ImportRecordsQuery = builder
+  .objectRef<{
+    nextOffset: number;
+    itemsRemaining: number;
+    imports: ImportRecord[];
+  }>("ImportRecordsQuery")
+  .implement({
+    fields: (t) => ({
+      nextOffset: t.exposeInt("nextOffset"),
+      itemsRemaining: t.exposeInt("itemsRemaining"),
+      imports: t.field({
+        type: [ImportRecord],
+        resolve: (result) => result.imports,
+      }),
+    }),
+  });
+// ============================================ Inputs ==================================
 
 // ============================================ Queries =================================
 builder.queryFields((t) => ({
-  imports: t.prismaField({
-    type: ["Import"],
+  imports: t.field({
+    type: ImportsQuery,
     args: {
       pagination: t.arg({
         type: offsetPagination,
         required: true,
       }),
     },
-    resolve: async (query, root, args) => {
+    resolve: async (parent, args, context, info) => {
       const [data, count] = await db.$transaction([
         db.import.findMany({
+          ...queryFromInfo({ context, info, path: ["imports"] }),
           take: args.pagination.take,
           skip: args.pagination.offset,
           orderBy: { createdAt: "asc" },
-          ...query,
         }),
         db.import.count(),
       ]);
-      return { ...data, count };
+
+      let nextOffset: number | null = data.length + args.pagination.offset;
+      if (nextOffset >= count) nextOffset = null;
+      const itemsRemaining = count - (args.pagination.offset + data.length);
+      return { imports: data, nextOffset, itemsRemaining };
     },
   }),
   importRecords: t.prismaField({
@@ -128,80 +129,96 @@ builder.mutationFields((t) => ({
         required: true,
       }),
       type: t.arg({
-        type: externalImportType,
+        type: ImportType,
         required: true,
       }),
     },
     resolve: async (query, root, args) => {
-      switch (args.type) {
-        case ExternalImportType.CRONOMETER:
-          return await processCronometerImport(args.file, query);
-        case ExternalImportType.RECIPE_KEEPER:
-          return await processRecipeKeeperImport(args.file, query);
-        default:
-          throw new Error("Unsupported import type");
-      }
+      const fileBuffer = Buffer.from(await args.file.arrayBuffer());
+      const meta = await fileTypeFromBuffer(fileBuffer);
+      const renamedFile = `${uuidv4()}.${meta?.ext ?? ".zip"}`;
+
+      const parentImport = await db.import.create({
+        data: {
+          fileName: args.file.name,
+          type: args.type,
+          status: "PENDING",
+          storagePath: renamedFile,
+        },
+        ...query,
+      });
+
+      await storage.putObject("imports", renamedFile, fileBuffer, {
+        "Content-Type": meta?.mime,
+      });
+
+      await FileUploadQueue.add(parentImport.id, {
+        fileName: renamedFile,
+        type: args.type,
+        id: parentImport.id,
+      });
+      console.log(parentImport);
+      return parentImport;
     },
   }),
-  // Verify there are not any pending records
-  // Connect all import record's to their respective
-  // markImportAsComplete: t.prismaField({
-  //   type: "Import",
-  //   args: {
-  //     id: t.arg.string({ required: true }),
-  //   },
-  //   resolve: async (query, root, args) => {
-  //     const importRecords = await db.importRecord.findMany({
-  //       where: { importId: args.id },
-  //     });
-  //     const isCompleted = importRecords.every(
-  //       (record) => record.status !== "PENDING"
-  //     );
-  //     if (!isCompleted) {
-  //       throw new Error("Import is not completed");
-  //     }
-  //     return await db.import.update({
-  //       where: { id: args.id },
-  //       data: { status: "COMPLETED" },
-  //     });
-  //   },
-  // }),
-  editRecord: t.prismaField({
+  changeRecordStatus: t.prismaField({
     type: "ImportRecord",
     args: {
-      record: t.arg({ type: recordEditInput, required: true }),
+      recordId: t.arg.string({ required: true }),
+      status: t.arg({ type: recordStatus, required: true }),
     },
     resolve: async (query, root, args) => {
-      return await db.$transaction(async (tx) => {
-        const parentImportStatus = await tx.import.findFirst({
-          where: { importRecords: { some: { id: args.record.id } } },
-        });
-        if (parentImportStatus?.status === ImportStatus.COMPLETED)
-          throw new Error("Import has already been completed");
-        return tx.importRecord.update({
-          ...query,
-          where: { id: args.record.id },
-          data: {
-            status: args.record.status,
-            nutritionLabel: {
-              connect: { id: args.record.matchingLabel ?? undefined },
-            },
-            recipe: {
-              connect: { id: args.record.matchingRecipeId ?? undefined },
-            },
-          },
-        });
+      const importParent = await db.importRecord.findUniqueOrThrow({
+        where: { id: args.recordId },
+        include: { import: true },
+      });
+      const context = new Context(importParent);
+      await context.transitionTo(args.status);
+      return await db.importRecord.findUniqueOrThrow({
+        where: { id: args.recordId },
+        ...query,
+      });
+    },
+  }),
+  updateMatches: t.prismaField({
+    type: "ImportRecord",
+    args: {
+      recordId: t.arg.string({ required: true }),
+      recipeId: t.arg.string(),
+      labelId: t.arg.string(),
+    },
+    resolve: async (query, root, args) => {
+      const importRecord = await db.importRecord.findUniqueOrThrow({
+        where: { id: args.recordId },
+        include: { import: true },
+      });
+      const context = new Context(importRecord);
+      await context.updateMatches(
+        args.recipeId ?? undefined,
+        args.labelId ?? undefined
+      );
+      return await db.importRecord.findUniqueOrThrow({
+        where: { id: args.recordId },
+        ...query,
+      });
+    },
+  }),
+  finalize: t.prismaField({
+    type: "ImportRecord",
+    args: {
+      recordId: t.arg.string({ required: true }),
+    },
+    resolve: async (query, root, args) => {
+      const importRecord = await db.importRecord.findUniqueOrThrow({
+        where: { id: args.recordId },
+        include: { import: true },
+      });
+      const context = new Context(importRecord);
+      await context.finalize();
+      return await db.importRecord.findUniqueOrThrow({
+        where: { id: args.recordId },
+        ...query,
       });
     },
   }),
 }));
-
-// If there is already an existing matching record, create another record of it to replace it.
-// Create a status for column for both recipe and nutrition fact
-
-// previewChanges, if record was to be updated, what changes would be made?
-// editChanges, make changes to draft copy
-// FieldsToChange,
-
-// completeImport
-// verifyChanges

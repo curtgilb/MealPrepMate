@@ -8,13 +8,12 @@ import { db } from "../../../db.js";
 import { hash } from "../../../util/utils.js";
 import path from "path";
 import { fileURLToPath } from "url";
-import { Match } from "../../../types/CustomTypes.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 interface ParsedOutput<O, T extends ParsedRecord<O>> {
   records: T[];
-  recordHash: string;
+  hash: string | undefined;
   imageMapping: Map<string, string>;
   fileName: string | undefined;
 }
@@ -111,7 +110,7 @@ abstract class Parser<O, T extends ParsedRecord<O>> {
       } catch {
         throw Error(`File at ${source} could not be opened.`);
       }
-    } else if (typeof source == "object" && Object.hasOwn(source, "name")) {
+    } else if (source instanceof File) {
       const fileBuffer = Buffer.from(await source.arrayBuffer());
       return await Open.buffer(fileBuffer);
     }

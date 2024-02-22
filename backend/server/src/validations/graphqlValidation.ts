@@ -47,7 +47,7 @@ const NutritionLabelValidation = z.object({
   servingSize: z.coerce.number().positive().optional(),
   servingSizeUnitId: z.string().cuid().optional(),
   servingsUsed: z.number().optional(),
-  nutrition: z.array(
+  nutrients: z.array(
     z.object({
       value: z.coerce.number(),
       nutrientId: z.string().cuid(),

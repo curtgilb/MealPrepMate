@@ -201,13 +201,23 @@ type Mutation {
   addRecipeCourse(course: String!, recipeId: String!): Recipe!
   addRecipePhotos(photoId: [String!]!, recipeId: String!): Recipe!
   changeRecipeCuisine(cuisineId: String!, recipeId: String!): Recipe!
-  connectExpirationRule(expirationRuleId: String!, ingredientId: String!): Ingredient!
-  connectNutritionLabelToIngredientGroup(groupId: String!, labelId: String!, recipeId: String!): RecipeIngredientGroup!
+  connectExpirationRule(
+    expirationRuleId: String!
+    ingredientId: String!
+  ): Ingredient!
+  connectNutritionLabelToIngredientGroup(
+    groupId: String!
+    labelId: String!
+    recipeId: String!
+  ): RecipeIngredientGroup!
   connectNutritionLabeltoRecipe(labelId: String!, recipeId: String!): Recipe!
   createCategory(name: String!): [Category!]!
   createCourse(name: String!): [Course!]!
   createCuisine(name: String!): [Cuisine!]!
-  createExpirationRule(ingredientId: String, rule: CreateExpirationRule!): ExpirationRule!
+  createExpirationRule(
+    ingredientId: String
+    rule: CreateExpirationRule!
+  ): ExpirationRule!
   createIngredient(ingredient: CreateIngredientInput!): Ingredient!
   createProfile(profile: ProfileInput!): HealthProfile!
   createRecipe(recipe: RecipeInput!): Recipe!
@@ -217,16 +227,39 @@ type Mutation {
   deleteExpirationRule(expirationRuleId: String!): [ExpirationRule!]!
   deleteIngredient(ingredientToDeleteId: String!): [Ingredient!]!
   deleteNutritionLabel(id: String!): [NutritionLabel!]!
-  deletePriceHistory(ingredientId: String!, ingredientPriceId: [String!]!): [IngredientPrice!]!
-  disconnectNutritionLabelFromIngredientGroup(deleteLabel: Boolean!, groupId: String!, labelId: String!, recipeId: String!): RecipeIngredientGroup!
-  disconnectNutritionLabelFromRecipe(labelId: String!, recipeId: String!): Recipe!
-  editExpirationRule(expirationRule: CreateExpirationRule!, expirationRuleId: String!): ExpirationRule!
-  editIngredient(ingredient: CreateIngredientInput!, ingredientId: String!): Ingredient!
-  editPriceHistory(price: EditPriceHistoryInput!, priceId: String!): IngredientPrice!
+  deletePriceHistory(
+    ingredientId: String!
+    ingredientPriceId: [String!]!
+  ): [IngredientPrice!]!
+  disconnectNutritionLabelFromIngredientGroup(
+    deleteLabel: Boolean!
+    groupId: String!
+    labelId: String!
+    recipeId: String!
+  ): RecipeIngredientGroup!
+  disconnectNutritionLabelFromRecipe(
+    labelId: String!
+    recipeId: String!
+  ): Recipe!
+  editExpirationRule(
+    expirationRule: CreateExpirationRule!
+    expirationRuleId: String!
+  ): ExpirationRule!
+  editIngredient(
+    ingredient: CreateIngredientInput!
+    ingredientId: String!
+  ): Ingredient!
+  editPriceHistory(
+    price: EditPriceHistoryInput!
+    priceId: String!
+  ): IngredientPrice!
   editProfile(id: String!, profile: ProfileInput!): HealthProfile!
   importRecipeKeeper(file: File!, type: ImportType!): Import!
   markImportAsComplete(id: String!): Import!
-  mergeIngredients(ingredientIdToDelete: String!, ingredientIdToKeep: String!): Ingredient!
+  mergeIngredients(
+    ingredientIdToDelete: String!
+    ingredientIdToKeep: String!
+  ): Ingredient!
   removeCategoryFromRecipe(categoryId: String!, recipeId: String!): Recipe!
   removeCourseFromRecipe(courseId: String!, recipeId: String!): Recipe!
   removeRecipeCuisine(cuisineId: String!, recipeId: String!): Recipe!
@@ -242,7 +275,11 @@ input NumericalComparison {
 type Nutrient {
   childNutrients: [Nutrient!]!
   customTarget: Float
-  dailyReferenceIntakeValue(age: Int!, gender: Gender!, specialCondition: SpecialCondition!): Float!
+  dailyReferenceIntakeValue(
+    age: Int!
+    gender: Gender!
+    specialCondition: SpecialCondition!
+  ): Float!
   id: String!
   name: String!
   otherNames: [String!]!

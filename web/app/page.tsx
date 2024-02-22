@@ -8,12 +8,8 @@ import { useMutation, gql } from "@urql/next";
 
 const UPLOAD_FILE = gql`
   mutation importRecipeKeeper($file: File!) {
-    importRecipeKeeper(file: $file, type: RECIPE_KEEPER) {
+    import(file: $file, type: CRONOMETER) {
       id
-      records {
-        name
-        status
-      }
       status
     }
   }

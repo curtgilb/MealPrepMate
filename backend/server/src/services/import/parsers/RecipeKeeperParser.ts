@@ -53,22 +53,24 @@ class RecipeKeeperRecord extends ParsedRecord<RecipeInput> {
     return this.parsedData.toObject();
   }
 
-  toNutritionLabel<T extends z.ZodTypeAny>(
+  async toNutritionLabel<T extends z.ZodTypeAny>(
     schema: T,
     connectingId?: string
   ): Promise<z.infer<T>> {
-    const nutrients = this.parsedData.recipe.nutrients
-      .filter((nutrient) => {
-        const result = z.coerce.number().positive().safeParse(nutrient.value);
-        return result.success;
-      })
-      .map(async (nutrient) => ({
-        value: nutrient.value,
-        nutrientId: await ParsedRecord.matchNutrient(
-          nutrient.name,
-          this.importType
-        ),
-      }));
+    const nutrients = await Promise.all(
+      this.parsedData.recipe.nutrients
+        .filter((nutrient) => {
+          const result = z.coerce.number().positive().safeParse(nutrient.value);
+          return result.success;
+        })
+        .map(async (nutrient) => ({
+          value: nutrient.value,
+          nutrientId: await ParsedRecord.matchNutrient(
+            nutrient.name,
+            this.importType
+          ),
+        }))
+    );
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return schema.parse({
@@ -137,7 +139,7 @@ class RecipeKeeperParser extends Parser<RecipeInput, RecipeKeeperRecord> {
     await this.traverseDirectory(directory);
     return {
       records: this.records,
-      recordHash: this.fileHash,
+      hash: this.fileHash,
       imageMapping: this.imageMapping,
       fileName: this.fileName,
     };
