@@ -39,12 +39,7 @@ export default function RootLayout({
   return (
     <UrqlProvider client={client} ssr={ssr}>
       <html lang="en">
-        <body
-          className={cn(
-            "min-h-screen bg-background font-sans antialiased",
-            fontSans.variable
-          )}
-        >
+        <body>
           <NavBar />
           <SideDrawer />
           {children}

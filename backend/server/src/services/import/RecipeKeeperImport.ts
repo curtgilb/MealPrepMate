@@ -30,7 +30,6 @@ class RecipeKeeperImport extends ImportService {
     // Check if duplicate
     if (lastImport?.fileHash === output.hash) {
       await this.updateImport({
-        fileName: output.fileName,
         fileHash: output.hash,
       });
     }

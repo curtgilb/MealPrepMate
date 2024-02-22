@@ -202,7 +202,6 @@ class DuplicateState extends RecordImportState {
   async toUpdate() {
     await db.$transaction(async (tx) => {
       const record = this.context.importRecord;
-      await this.context.importService.deleteDraft(record.draftId, tx);
       const draftId = await this.context.importService.createDraft(record, tx);
       this.context.importRecord = await tx.importRecord.update({
         where: { id: record.id },

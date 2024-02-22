@@ -18,7 +18,7 @@ const Import = builder.prismaObject("Import", {
     type: t.field({ type: PrismaImportType, resolve: (parent) => parent.type }),
     status: t.field({ type: importStatus, resolve: (parent) => parent.status }),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
-    records: t.relation("importRecords"),
+    records: t.relation("importRecords", { nullable: true }),
     recordsCount: t.relationCount("importRecords"),
   }),
 });
@@ -27,8 +27,8 @@ const ImportRecord = builder.prismaObject("ImportRecord", {
   fields: (t) => ({
     name: t.exposeString("name"),
     status: t.field({ type: recordStatus, resolve: (parent) => parent.status }),
-    recipe: t.relation("recipe"),
-    nutritionLabel: t.relation("nutritionLabel"),
+    recipe: t.relation("recipe", { nullable: true }),
+    nutritionLabel: t.relation("nutritionLabel", { nullable: true }),
   }),
 });
 
@@ -69,6 +69,18 @@ const ImportRecordsQuery = builder
 
 // ============================================ Queries =================================
 builder.queryFields((t) => ({
+  getImport: t.prismaField({
+    type: "Import",
+    args: {
+      importId: t.arg.string({ required: true }),
+    },
+    resolve: async (query, root, args) => {
+      return await db.import.findUniqueOrThrow({
+        where: { id: args.importId },
+        ...query,
+      });
+    },
+  }),
   imports: t.field({
     type: ImportsQuery,
     args: {

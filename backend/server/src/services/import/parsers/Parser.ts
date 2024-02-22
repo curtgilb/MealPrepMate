@@ -15,7 +15,6 @@ interface ParsedOutput<O, T extends ParsedRecord<O>> {
   records: T[];
   hash: string | undefined;
   imageMapping: Map<string, string>;
-  fileName: string | undefined;
 }
 
 abstract class ParsedRecord<O> {
@@ -77,7 +76,6 @@ abstract class Parser<O, T extends ParsedRecord<O>> {
   // Original file name -> hash
   protected imageMapping = new Map<string, string>();
   protected source: string | File;
-  protected abstract fileName: string | undefined;
 
   constructor(source: string | File) {
     this.source = source;

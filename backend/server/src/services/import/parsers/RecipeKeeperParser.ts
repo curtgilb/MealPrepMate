@@ -78,7 +78,7 @@ class RecipeKeeperRecord extends ParsedRecord<RecipeInput> {
       connectingId: connectingId,
       servings: this.parsedData.recipe.recipeYield,
       servingSize: this.parsedData.recipe.nutritionServingSize,
-      nutrition: nutrients,
+      nutrients: nutrients,
     }) as z.infer<T>;
   }
 
@@ -141,7 +141,6 @@ class RecipeKeeperParser extends Parser<RecipeInput, RecipeKeeperRecord> {
       records: this.records,
       hash: this.fileHash,
       imageMapping: this.imageMapping,
-      fileName: this.fileName,
     };
   }
 

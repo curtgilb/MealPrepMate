@@ -102,7 +102,6 @@ class CronometerImport extends ImportService {
 
     if (lastImport?.fileHash === output.hash) {
       await this.updateImport({
-        fileName: output.fileName,
         fileHash: output.hash,
         status: "DUPLICATE",
       });
@@ -144,7 +143,7 @@ class CronometerImport extends ImportService {
         await tx.importRecord.create({
           data: {
             import: { connect: { id: this.input.import.id } },
-            hash: output.hash,
+            hash: record.getRecordHash(),
             externalId: record.getExternalId(),
             name: record.getParsedData().name,
             parsedFormat: record.getParsedData() as Prisma.JsonObject,
@@ -162,7 +161,6 @@ class CronometerImport extends ImportService {
 
         await this.updateImport(
           {
-            fileName: output.fileName,
             fileHash: output.hash,
             status: "REVIEW",
           },
