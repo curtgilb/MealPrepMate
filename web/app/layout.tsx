@@ -1,19 +1,11 @@
-"use client";
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { cn } from "@/lib/utils";
-import "./globals.css";
-import { useMemo } from "react";
-import {
-  UrqlProvider,
-  ssrExchange,
-  cacheExchange,
-  fetchExchange,
-  createClient,
-} from "@urql/next";
+import "@/styles/globals.css";
 import { Inter as FontSans } from "next/font/google";
-import { SideDrawer } from "@/components/SideDrawer";
-import { NavBar } from "@/components/NavBar";
+import { cn } from "@/lib/utils";
+import { Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { SideNav } from "@/components/SideNav";
+import { navigationLinks } from "@/data/NavigationLinks";
+import { useState } from "react";
 
 export const fontSans = FontSans({
   subsets: ["latin"],
@@ -22,29 +14,29 @@ export const fontSans = FontSans({
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
-  const [client, ssr] = useMemo(() => {
-    const ssr1 = ssrExchange();
-    const client = createClient({
-      url: "http://localhost:3025/graphql",
-      exchanges: [cacheExchange, ssr1, fetchExchange],
-      suspense: true,
-    });
-
-    return [client, ssr1];
-  }, []);
-
+}>) {
+  const [collapsed, setCollapsed] = useState(false);
   return (
-    <UrqlProvider client={client} ssr={ssr}>
-      <html lang="en">
-        <body>
-          <NavBar />
-          <SideDrawer />
-          {children}
-        </body>
-      </html>
-    </UrqlProvider>
+    <html lang="en">
+      <body
+        className={cn(
+          "h-full bg-background font-sans antialiased",
+          fontSans.variable
+        )}
+      >
+        <header className="px-3 py-2 flex items-center border-b">
+          <Button variant="ghost">
+            <Menu />
+          </Button>
+          <p className="text-2xl font-bold ml-2">Meal Planner</p>
+        </header>
+        <div className="flex">
+          <SideNav links={navigationLinks} isCollapsed={collapsed} />
+          <main>{children}</main>
+        </div>
+      </body>
+    </html>
   );
 }
