@@ -1,16 +1,18 @@
-import {
-  Import,
-  ImportRecord,
-  ImportStatus,
-  ImportType,
-  Prisma,
-} from "@prisma/client";
+import { Import, ImportRecord, ImportStatus, Prisma } from "@prisma/client";
 import { DbTransactionClient, db } from "../../db.js";
-import { Match, RecordWithImport } from "../../types/CustomTypes.js";
+import { Match } from "../../types/CustomTypes.js";
 
 type ImportServiceInput = {
   source: string | File;
   import: Import;
+};
+
+type MatchUpdate = {
+  record: ImportRecord;
+  matchingRecipeId?: string;
+  matchingLabelId?: string;
+  createDraft: boolean;
+  tx?: DbTransactionClient;
 };
 
 type UpdateImportInput = {
@@ -50,7 +52,19 @@ abstract class ImportService {
     }
   }
 
-  abstract recreateRecord(record: ImportRecord): Promise<string>;
+  abstract updateMatch(update: MatchUpdate): Promise<ImportRecord>;
+
+  abstract createDraft(
+    record: ImportRecord,
+    tx?: DbTransactionClient
+  ): Promise<string>;
+
+  abstract finalize(record: ImportRecord): Promise<void>;
+
+  abstract deleteDraft(
+    draftId: string | null,
+    tx?: DbTransactionClient
+  ): Promise<void>;
 
   abstract processImport(): Promise<void>;
 
@@ -95,4 +109,4 @@ abstract class ImportService {
   }
 }
 
-export { ImportService, ImportServiceInput, MatchManager };
+export { ImportService, ImportServiceInput, MatchManager, MatchUpdate };

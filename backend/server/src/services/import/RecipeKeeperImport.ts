@@ -3,18 +3,18 @@ import {
   RecipeKeeperRecord,
 } from "./parsers/RecipeKeeperParser.js";
 import { Prisma, RecordStatus, ImportRecord, Import } from "@prisma/client";
-import { db } from "../../db.js";
-import {
-  Match,
-  RecipeKeeperRecipe,
-  RecordWithImport,
-} from "../../types/CustomTypes.js";
+import { DbTransactionClient, db } from "../../db.js";
+import { Match, RecipeKeeperRecipe } from "../../types/CustomTypes.js";
 import {
   NutritionLabelValidation,
   RecipeInputValidation,
 } from "../../validations/graphqlValidation.js";
 import { createRecipeCreateStmt } from "../../models/RecipeExtension.js";
-import { ImportService, ImportServiceInput } from "./ImportService.js";
+import {
+  ImportService,
+  ImportServiceInput,
+  MatchUpdate,
+} from "./ImportService.js";
 
 class RecipeKeeperImport extends ImportService {
   constructor(input: ImportServiceInput | Import) {
@@ -28,10 +28,9 @@ class RecipeKeeperImport extends ImportService {
     const lastImport = await this.getLastImport();
 
     // Check if duplicate
-    if (lastImport?.fileHash === output.recordHash) {
+    if (lastImport?.fileHash === output.hash) {
       await this.updateImport({
-        fileName: output.fileName,
-        fileHash: output.recordHash,
+        fileHash: output.hash,
       });
     }
 
@@ -94,16 +93,20 @@ class RecipeKeeperImport extends ImportService {
               status: item.match.status || "IMPORTED",
               parsedFormat: item.record.getParsedObject() as Prisma.JsonObject,
               externalId: item.record.getExternalId(),
-              recipe: {
-                connect: {
-                  id: item.match.recipeMatchId,
-                },
-              },
-              nutritionLabel: {
-                connect: {
-                  id: item.match.labelMatchId ?? undefined,
-                },
-              },
+              recipe: item.match.recipeMatchId
+                ? {
+                    connect: {
+                      id: item.match.recipeMatchId,
+                    },
+                  }
+                : {},
+              nutritionLabel: item.match.labelMatchId
+                ? {
+                    connect: {
+                      id: item.match.labelMatchId,
+                    },
+                  }
+                : {},
               draftId: draftId,
             },
             select: { id: true },
@@ -113,8 +116,7 @@ class RecipeKeeperImport extends ImportService {
         }
         await this.updateImport(
           {
-            fileName: output.fileName,
-            fileHash: output.recordHash,
+            fileHash: output.hash,
             status: "REVIEW",
             imageMapping: Object.fromEntries(
               output.imageMapping
@@ -128,7 +130,54 @@ class RecipeKeeperImport extends ImportService {
     );
   }
 
-  async recreateRecord(record: ImportRecord): Promise<string> {
+  async deleteDraft(draftId: string, tx?: DbTransactionClient): Promise<void> {
+    const dbClient = tx ? tx : db;
+    await dbClient.recipe.delete({ where: { id: draftId } });
+  }
+
+  async finalize(record: ImportRecord): Promise<void> {
+    await db.$transaction(async (tx) => {
+      if (
+        record.draftId &&
+        (record.status === RecordStatus.IMPORTED ||
+          record.status === RecordStatus.UPDATED)
+      ) {
+        await tx.importRecord.update({
+          where: { id: record.id },
+          data: { recipe: { connect: { id: record.draftId } }, draftId: null },
+        });
+
+        // Update the newly verified recipe
+        await tx.recipe.update({
+          where: { id: record.draftId },
+          data: {
+            nutritionLabel: record.nutritionLabelId
+              ? { connect: { id: record.nutritionLabelId } }
+              : {},
+            importRecords: { connect: { id: record.id } },
+            isVerified: true,
+          },
+        });
+
+        // Delete existing recipe if needed
+        if (record.recipeId) {
+          await tx.recipe.delete({
+            where: { id: record.recipeId },
+          });
+        }
+      }
+      await tx.importRecord.update({
+        where: { id: record.id },
+        data: { verifed: true },
+      });
+    });
+  }
+
+  async createDraft(
+    record: ImportRecord,
+    tx?: DbTransactionClient
+  ): Promise<string> {
+    const dbClient = tx ? tx : db;
     const recipe = record.parsedFormat as Prisma.JsonObject;
     const rehydrated = new RecipeKeeperRecord("", recipe as RecipeKeeperRecipe);
     const imageMapping = this.getImageMapping();
@@ -137,17 +186,47 @@ class RecipeKeeperImport extends ImportService {
       RecipeInputValidation,
       imageMapping
     );
-    const { id } = await db.recipe.createRecipe(validatedRecipe);
 
     const validatedNutritionLabel = await rehydrated.toNutritionLabel(
-      NutritionLabelValidation,
-      id
+      NutritionLabelValidation
     );
 
-    await db.nutritionLabel.createNutritionLabel({
-      baseLabel: validatedNutritionLabel,
-    });
+    const stmt = await createRecipeCreateStmt(
+      {
+        recipe: validatedRecipe,
+        nutritionLabel: validatedNutritionLabel,
+        matchingRecipeId: record.recipeId ?? undefined,
+      },
+      await dbClient.measurementUnit.findMany({}),
+      await dbClient.ingredient.findMany({})
+    );
+
+    const { id } = await dbClient.recipe.create({ data: stmt });
+
     return id;
+  }
+
+  async updateMatch(update: MatchUpdate): Promise<ImportRecord> {
+    const dbClient = update.tx ? update.tx : db;
+    let draft;
+    if (
+      update.matchingRecipeId &&
+      update.matchingRecipeId !== update.record.recipeId &&
+      update.createDraft
+    ) {
+      await dbClient.recipe.delete({
+        where: { id: update.record.draftId ?? undefined },
+      });
+      draft = await this.createDraft(update.record, dbClient);
+    }
+    return await dbClient.importRecord.update({
+      where: { id: update.record.id },
+      data: {
+        recipe: { connect: { id: update.matchingRecipeId } },
+        nutritionLabel: { connect: { id: update.matchingLabelId } },
+        draftId: draft,
+      },
+    });
   }
 
   // Order of matches returned is important. They should align with the recipes array passed in.

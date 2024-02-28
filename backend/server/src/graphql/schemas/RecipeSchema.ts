@@ -1,10 +1,6 @@
 import { db } from "../../db.js";
 import { builder } from "../builder.js";
 import { numericalComparison } from "./UtilitySchema.js";
-import { ExtendedRecipe } from "../../services/RecipeSearch.js";
-import { RecipeInputValidation } from "../../validations/graphqlValidation.js";
-import { LabelObject } from "./NutritionSchema.js";
-import { getAggregateLabel } from "../../services/nutrition/NutritionAggregator.js";
 
 // ============================================ Types ===================================
 builder.prismaObject("Recipe", {
@@ -25,28 +21,28 @@ builder.prismaObject("Recipe", {
     course: t.relation("course"),
     ingredients: t.relation("ingredients"),
     photos: t.relation("photos"),
-    aggregateLabel: t.field({
-      type: LabelObject,
-      resolve: async (parent, args, context, info) => {
-        if (Object.prototype.hasOwnProperty.call(parent, "aggregateLabel")) {
-          return (parent as ExtendedRecipe).aggregateLabel;
-        }
-        return await getAggregateLabel({
-          recipes: [{ recipeId: parent.id }],
-          advanced: false,
-        });
-      },
-    }),
-    ingredientFreshness: t.int({
-      resolve: (recipe, args, context, info) => {
-        if (
-          Object.prototype.hasOwnProperty.call(recipe, "ingredientFreshness")
-        ) {
-          return (recipe as ExtendedRecipe).ingredientFreshness;
-        }
-        return 2;
-      },
-    }),
+    // aggregateLabel: t.field({
+    //   type: LabelObject,
+    //   resolve: async (parent, args, context, info) => {
+    //     if (Object.prototype.hasOwnProperty.call(parent, "aggregateLabel")) {
+    //       return (parent as ExtendedRecipe).aggregateLabel;
+    //     }
+    //     return await getAggregateLabel({
+    //       recipes: [{ recipeId: parent.id }],
+    //       advanced: false,
+    //     });
+    //   },
+    // }),
+    // ingredientFreshness: t.int({
+    //   resolve: (recipe, args, context, info) => {
+    //     if (
+    //       Object.prototype.hasOwnProperty.call(recipe, "ingredientFreshness")
+    //     ) {
+    //       return (recipe as ExtendedRecipe).ingredientFreshness;
+    //     }
+    //     return 2;
+    //   },
+    // }),
   }),
 });
 
@@ -186,9 +182,6 @@ builder.mutationFields((t) => ({
       recipe: t.arg({
         type: recipeInput,
         required: true,
-        validate: {
-          schema: RecipeInputValidation,
-        },
       }),
     },
     resolve: async (query, root, args, context, info) => {
@@ -203,9 +196,6 @@ builder.mutationFields((t) => ({
       recipe: t.arg({
         type: recipeInput,
         required: true,
-        validate: {
-          schema: RecipeInputValidation,
-        },
       }),
     },
     resolve: async (query, root, args) => {

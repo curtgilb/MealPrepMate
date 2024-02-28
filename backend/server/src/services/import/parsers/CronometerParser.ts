@@ -1,10 +1,10 @@
 import { CreateNutritionLabelInput } from "../../../types/gql.js";
 import { Parser, ParsedRecord, ParsedOutput } from "./Parser.js";
 import { File as ZipFile } from "unzipper";
-import { getFileMetaData, hash } from "../../../util/utils.js";
 import { z } from "zod";
 import { readText } from "../../io/Readers.js";
 import { ImportType } from "@prisma/client";
+import { hash } from "../../../util/utils.js";
 
 type CronometerJson = {
   nutrients: {
@@ -35,7 +35,6 @@ class CronometerRecord extends ParsedRecord<CreateNutritionLabelInput> {
     super(input);
     this.parsedData = JSON.parse(input) as CronometerJson;
     this.externalId = String(this.parsedData.id);
-    this.recordHash = hash(input);
   }
 
   getParsedData(): CronometerJson {
@@ -55,13 +54,15 @@ class CronometerRecord extends ParsedRecord<CreateNutritionLabelInput> {
     matchingId?: string
   ): Promise<z.infer<T>> {
     const nutrients = await Promise.all(
-      this.parsedData.nutrients.map(async (nutrient) => ({
-        value: nutrient.amount,
-        nutrientId: await CronometerRecord.matchNutrient(
-          nutrient.id.toString(),
-          this.importType
-        ),
-      }))
+      this.parsedData.nutrients
+        .filter((nutrient) => nutrient.amount > 0)
+        .map(async (nutrient) => ({
+          value: nutrient.amount,
+          nutrientId: await CronometerRecord.matchNutrient(
+            nutrient.id.toString(),
+            this.importType
+          ),
+        }))
     );
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -81,9 +82,7 @@ class CronometerParser extends Parser<
   CronometerRecord
 > {
   protected records: CronometerRecord[] = [];
-  protected fileName: string | undefined;
   protected fileHash: string | undefined;
-
   constructor(source: string | File) {
     super(source);
   }
@@ -93,26 +92,22 @@ class CronometerParser extends Parser<
   > {
     // Single JSON file path
     if (typeof this.source === "string" && this.source.endsWith(".json")) {
-      this.fileName = this.source;
       const data = readText(this.source);
-      this.fileHash = hash(data);
       this.records.push(new CronometerRecord(data));
     }
     // Zip file
     else {
       const directory = await this.unzipFile(this.source);
-
-      this.fileName =
-        this.source instanceof File
-          ? this.source.name
-          : getFileMetaData(this.source).path;
       await this.traverseDirectory(directory);
     }
     return {
       records: this.records,
-      recordHash: this.fileHash,
+      hash: hash(
+        this.source instanceof File
+          ? Buffer.from(await this.source.arrayBuffer())
+          : this.source
+      ),
       imageMapping: this.imageMapping,
-      fileName: this.fileName,
     };
   }
 

@@ -1,5 +1,5 @@
-import { Prisma, ImportRecord, Import } from "@prisma/client";
-import { db } from "../../db.js";
+import { Prisma, ImportRecord, Import, RecordStatus } from "@prisma/client";
+import { db, DbTransactionClient } from "../../db.js";
 import {
   CronometerParser,
   CronometerRecord,
@@ -9,13 +9,90 @@ import {
   ImportService,
   ImportServiceInput,
   MatchManager,
+  MatchUpdate,
 } from "./ImportService.js";
 import { createNutritionLabelStmt } from "../../models/NutritionExtension.js";
-import { Match, RecordWithImport } from "../../types/CustomTypes.js";
+import { Match } from "../../types/CustomTypes.js";
 
 class CronometerImport extends ImportService {
   constructor(input: ImportServiceInput | Import) {
     super(input);
+  }
+
+  async updateMatch(update: MatchUpdate): Promise<ImportRecord> {
+    const dbClient = update.tx ? update.tx : db;
+    return await dbClient.importRecord.update({
+      where: { id: update.record.id },
+      data: {
+        recipe: { connect: { id: update.matchingRecipeId } },
+        nutritionLabel: { connect: { id: update.matchingLabelId } },
+      },
+    });
+  }
+
+  async createDraft(
+    record: ImportRecord,
+    tx?: DbTransactionClient
+  ): Promise<string> {
+    const dbClient = tx ? tx : db;
+    const label = record.parsedFormat as Prisma.JsonObject;
+    const rehydrated = new CronometerRecord(JSON.stringify(label));
+    const input = await rehydrated.transform(NutritionLabelValidation);
+    const newLabel = await dbClient.nutritionLabel.create({
+      data: createNutritionLabelStmt(input, true),
+    });
+    return newLabel.id;
+  }
+
+  async deleteDraft(
+    draftId: string | null,
+    tx?: DbTransactionClient
+  ): Promise<void> {
+    if (draftId) {
+      const dbClient = tx ? tx : db;
+      await dbClient.nutritionLabel.delete({ where: { id: draftId } });
+    }
+  }
+
+  async finalize(record: ImportRecord): Promise<void> {
+    await db.$transaction(async (tx) => {
+      if (
+        record.draftId &&
+        (record.status === RecordStatus.IMPORTED ||
+          record.status === RecordStatus.UPDATED)
+      ) {
+        // Replace it with the existing
+        await tx.importRecord.update({
+          where: { id: record.id },
+          data: {
+            nutritionLabel: { connect: { id: record.draftId } },
+            draftId: null,
+          },
+        });
+
+        // Update the newly verified label
+        await tx.nutritionLabel.update({
+          where: { id: record.draftId },
+          data: {
+            recipe: record.recipeId ? { connect: { id: record.recipeId } } : {},
+            importRecord: { connect: { id: record.id } },
+            verifed: true,
+          },
+        });
+
+        // Delete existing recipe if needed
+        if (record.nutritionLabelId) {
+          await tx.nutritionLabel.delete({
+            where: { id: record.nutritionLabelId },
+          });
+        }
+      }
+
+      await tx.importRecord.update({
+        where: { id: record.id },
+        data: { verifed: true },
+      });
+    });
   }
 
   async processImport(): Promise<void> {
@@ -23,10 +100,9 @@ class CronometerImport extends ImportService {
     const output = await parser.parse();
     const lastImport = await this.getLastImport();
 
-    if (lastImport?.fileHash === output.recordHash) {
+    if (lastImport?.fileHash === output.hash) {
       await this.updateImport({
-        fileName: output.fileName,
-        fileHash: output.recordHash,
+        fileHash: output.hash,
         status: "DUPLICATE",
       });
     }
@@ -67,38 +143,31 @@ class CronometerImport extends ImportService {
         await tx.importRecord.create({
           data: {
             import: { connect: { id: this.input.import.id } },
-            hash: output.recordHash,
+            hash: record.getRecordHash(),
             externalId: record.getExternalId(),
             name: record.getParsedData().name,
             parsedFormat: record.getParsedData() as Prisma.JsonObject,
             status: match.status,
             verifed: false,
-            recipe: { connect: { id: match.recipeMatchId } },
-            nutritionLabel: { connect: { id: match.labelMatchId } },
+            recipe: match.recipeMatchId
+              ? { connect: { id: match.recipeMatchId } }
+              : {},
+            nutritionLabel: match.labelMatchId
+              ? { connect: { id: match.labelMatchId } }
+              : {},
             draftId: draftId,
           },
         });
 
         await this.updateImport(
           {
-            fileName: output.fileName,
-            fileHash: output.recordHash,
+            fileHash: output.hash,
             status: "REVIEW",
           },
           tx
         );
       }
     });
-  }
-
-  async recreateRecord(record: ImportRecord): Promise<string> {
-    const label = record.parsedFormat as Prisma.JsonObject;
-    const rehydrated = new CronometerRecord(JSON.stringify(label));
-    const input = await rehydrated.transform(NutritionLabelValidation);
-    const newLabel = await db.nutritionLabel.create({
-      data: createNutritionLabelStmt(input, true),
-    });
-    return newLabel.id;
   }
 
   async findCronometerLabelMatches(label: CronometerRecord) {
