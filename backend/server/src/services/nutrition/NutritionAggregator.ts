@@ -28,6 +28,7 @@ const nutrientWithUnit = Prisma.validator<Prisma.NutrientDefaultArgs>()({
 type NutrientWithUnit = Prisma.NutrientGetPayload<typeof nutrientWithUnit>;
 
 type NutrientTest = {
+  id: string;
   name: string;
   value: number;
   unit: string;
@@ -42,10 +43,6 @@ type AggreagtedNutritionLabel = {
   carbPercentage: number;
   proteinPercentage: number;
   fatPercentage: number;
-  servings?: number;
-  servingsUsed?: number;
-  servingSize?: number;
-  servingUnit?: string;
   general: NutrientTest[];
   carbohydrates: NutrientTest[];
   fats: NutrientTest[];
@@ -246,6 +243,7 @@ async function toLabel(
       }
 
       getCategoryList(baseNutrient, newLabel).push({
+        id: baseNutrient.id,
         value: inputNutrient?.value ?? 0,
         perServing: inputNutrient?.valuePerServing ?? 0,
         unit: baseNutrient.unit.name,
@@ -305,6 +303,7 @@ function getChildNutrients(
         const nutrientToAdd = nutrientMapping.get(childNutrient.id);
         if (nutrientToAdd) {
           list.push({
+            id: childNutrient.id,
             value: nutrientToAdd?.value,
             perServing: nutrientToAdd?.valuePerServing,
             unit: baseNutrient.unit.name,

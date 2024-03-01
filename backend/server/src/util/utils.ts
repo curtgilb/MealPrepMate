@@ -1,5 +1,7 @@
 import crypto from "crypto";
 import { FileMetaData } from "../types/CustomTypes.js";
+import path from "path";
+import fs from "fs";
 
 function toTitleCase(str: string): string {
   return str

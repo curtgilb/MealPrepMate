@@ -8,7 +8,7 @@ import {
   stringArray,
 } from "../../validations/utilValidations.js";
 import { toTitleCase } from "../../util/utils.js";
-import { UnitSearch } from "../../search/UnitSearch.js";
+import { UnitSearch } from "../../services/search/UnitSearch.js";
 import { NutrientType } from "@prisma/client";
 
 type NutrientParseInput = {
@@ -19,6 +19,7 @@ type NutrientParseInput = {
 };
 
 const nutrientSchema = z.object({
+  id: z.string().cuid(),
   nutrient: cleanedStringSchema(30, toTitleCase),
   unitAbbreviation: nullableString,
   unit: cleanedStringSchema(10),
@@ -71,6 +72,7 @@ export class NutrientLoader {
 
       //   Create stmts for creating nutrients
       const createStmt: Prisma.NutrientCreateInput = {
+        id: cleanedRecord.id,
         name: cleanedRecord.nutrient,
         alternateNames: cleanedRecord.alternateNames,
         type: cleanedRecord.type,

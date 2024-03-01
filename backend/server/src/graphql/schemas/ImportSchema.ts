@@ -3,15 +3,39 @@ import { db } from "../../db.js";
 import { PrismaImportType, importStatus, recordStatus } from "./EnumSchema.js";
 import { offsetPagination } from "./UtilitySchema.js";
 import { Import, ImportRecord, ImportType } from "@prisma/client";
-import { storage } from "../../storage.js";
-import { FileUploadQueue } from "../../test.js";
-import { fileTypeFromBuffer } from "file-type";
-import { v4 as uuidv4 } from "uuid";
-import { Context } from "../../services/import/state/states.js";
 import { queryFromInfo } from "@pothos/plugin-prisma";
+import {
+  changeRecordStatus,
+  finalizeImportRecord,
+  updateMatches,
+  uploadImportFile,
+} from "../../services/import/ImportService.js";
+import { LabelObject } from "./NutritionSchema.js";
+import { recipe } from "./RecipeSchema.js";
+
+function nextPageInfo(dataLength: number, offset: number, totalCount: number) {
+  let nextOffset: number | null = dataLength + offset;
+  if (nextOffset >= totalCount) nextOffset = null;
+  const itemsRemaining = totalCount - (offset + dataLength);
+  return {
+    nextOffset,
+    itemsRemaining,
+  };
+}
 
 // ============================================ Types ===================================
-const Import = builder.prismaObject("Import", {
+const Draft = builder.unionType("Draft", {
+  types: [recipe, LabelObject],
+  resolveType: (draft) => {
+    if ("calories" in draft) {
+      return LabelObject;
+    } else {
+      return recipe;
+    }
+  },
+});
+
+const ImportJob = builder.prismaObject("Import", {
   fields: (t) => ({
     id: t.exposeID("id"),
     fileName: t.exposeString("fileName", { nullable: true }),
@@ -23,12 +47,30 @@ const Import = builder.prismaObject("Import", {
   }),
 });
 
-const ImportRecord = builder.prismaObject("ImportRecord", {
+const ImportJobRecord = builder.prismaObject("ImportRecord", {
   fields: (t) => ({
+    id: t.exposeString("id"),
     name: t.exposeString("name"),
     status: t.field({ type: recordStatus, resolve: (parent) => parent.status }),
     recipe: t.relation("recipe", { nullable: true }),
+    verifed: t.exposeBoolean("verifed"),
     nutritionLabel: t.relation("nutritionLabel", { nullable: true }),
+    draft: t.field({
+      type: Draft,
+      nullable: true,
+      resolve: async (importRecord) => {
+        if (importRecord.draftId) {
+          const [recipe, label] = await db.$transaction([
+            db.recipe.findUnique({ where: { id: importRecord.draftId } }),
+            db.nutritionLabel.findUnique({
+              where: { id: importRecord.draftId },
+            }),
+          ]);
+          return recipe ?? label;
+        }
+        return null;
+      },
+    }),
   }),
 });
 
@@ -36,32 +78,32 @@ const ImportsQuery = builder
   .objectRef<{
     nextOffset: number | null;
     itemsRemaining: number;
-    imports: Import[];
+    importJobs: Import[];
   }>("ImportsQuery")
   .implement({
     fields: (t) => ({
       nextOffset: t.exposeInt("nextOffset", { nullable: true }),
       itemsRemaining: t.exposeInt("itemsRemaining"),
-      imports: t.field({
-        type: [Import],
-        resolve: (result) => result.imports,
+      importJobs: t.field({
+        type: [ImportJob],
+        resolve: (result) => result.importJobs,
       }),
     }),
   });
 
 const ImportRecordsQuery = builder
   .objectRef<{
-    nextOffset: number;
+    nextOffset: number | null;
     itemsRemaining: number;
-    imports: ImportRecord[];
+    records: ImportRecord[];
   }>("ImportRecordsQuery")
   .implement({
     fields: (t) => ({
-      nextOffset: t.exposeInt("nextOffset"),
+      nextOffset: t.exposeInt("nextOffset", { nullable: true }),
       itemsRemaining: t.exposeInt("itemsRemaining"),
-      imports: t.field({
-        type: [ImportRecord],
-        resolve: (result) => result.imports,
+      records: t.field({
+        type: [ImportJobRecord],
+        resolve: (result) => result.records,
       }),
     }),
   });
@@ -69,7 +111,7 @@ const ImportRecordsQuery = builder
 
 // ============================================ Queries =================================
 builder.queryFields((t) => ({
-  getImport: t.prismaField({
+  import: t.prismaField({
     type: "Import",
     args: {
       importId: t.arg.string({ required: true }),
@@ -100,14 +142,27 @@ builder.queryFields((t) => ({
         db.import.count(),
       ]);
 
-      let nextOffset: number | null = data.length + args.pagination.offset;
-      if (nextOffset >= count) nextOffset = null;
-      const itemsRemaining = count - (args.pagination.offset + data.length);
-      return { imports: data, nextOffset, itemsRemaining };
+      const { itemsRemaining, nextOffset } = nextPageInfo(
+        data.length,
+        args.pagination.offset,
+        count
+      );
+      return { importJobs: data, nextOffset, itemsRemaining };
     },
   }),
-  importRecords: t.prismaField({
-    type: ["ImportRecord"],
+  importRecord: t.prismaField({
+    type: "ImportRecord",
+    args: {
+      id: t.arg.string({ required: true }),
+    },
+    resolve: async (query, root, args) => {
+      return await db.importRecord.findUniqueOrThrow({
+        where: { id: args.id },
+      });
+    },
+  }),
+  importRecords: t.field({
+    type: ImportRecordsQuery,
     args: {
       importId: t.arg.string({ required: true }),
       pagination: t.arg({
@@ -115,25 +170,30 @@ builder.queryFields((t) => ({
         required: true,
       }),
     },
-    resolve: async (query, root, args) => {
+    resolve: async (root, args, context, info) => {
       const [data, count] = await db.$transaction([
         db.importRecord.findMany({
           take: args.pagination.take,
           skip: args.pagination.offset,
           where: { importId: args.importId },
           orderBy: { createdAt: "asc" },
-          ...query,
+          ...queryFromInfo({ context, info, path: ["importRecords"] }),
         }),
         db.importRecord.count({ where: { importId: args.importId } }),
       ]);
-      return { ...data, count };
+      const { itemsRemaining, nextOffset } = nextPageInfo(
+        data.length,
+        args.pagination.offset,
+        count
+      );
+      return { records: data, itemsRemaining, nextOffset };
     },
   }),
 }));
 // ============================================ Mutations ===============================
 
 builder.mutationFields((t) => ({
-  import: t.prismaField({
+  uploadImport: t.prismaField({
     type: "Import",
     args: {
       file: t.arg({
@@ -146,50 +206,21 @@ builder.mutationFields((t) => ({
       }),
     },
     resolve: async (query, root, args) => {
-      const fileBuffer = Buffer.from(await args.file.arrayBuffer());
-      const meta = await fileTypeFromBuffer(fileBuffer);
-      const renamedFile = `${uuidv4()}.${meta?.ext ?? ".zip"}`;
-
-      const parentImport = await db.import.create({
-        data: {
-          fileName: args.file.name,
-          type: args.type,
-          status: "PENDING",
-          storagePath: renamedFile,
-        },
-        ...query,
-      });
-
-      await storage.putObject("imports", renamedFile, fileBuffer, {
-        "Content-Type": meta?.mime,
-      });
-
-      await FileUploadQueue.add(parentImport.id, {
-        fileName: renamedFile,
+      return await uploadImportFile({
+        file: args.file,
         type: args.type,
-        id: parentImport.id,
+        query,
       });
-      console.log(parentImport);
-      return parentImport;
     },
   }),
   changeRecordStatus: t.prismaField({
     type: "ImportRecord",
     args: {
-      recordId: t.arg.string({ required: true }),
+      id: t.arg.string({ required: true }),
       status: t.arg({ type: recordStatus, required: true }),
     },
     resolve: async (query, root, args) => {
-      const importParent = await db.importRecord.findUniqueOrThrow({
-        where: { id: args.recordId },
-        include: { import: true },
-      });
-      const context = new Context(importParent);
-      await context.transitionTo(args.status);
-      return await db.importRecord.findUniqueOrThrow({
-        where: { id: args.recordId },
-        ...query,
-      });
+      return await changeRecordStatus(args.id, args.status, query);
     },
   }),
   updateMatches: t.prismaField({
@@ -200,18 +231,11 @@ builder.mutationFields((t) => ({
       labelId: t.arg.string(),
     },
     resolve: async (query, root, args) => {
-      const importRecord = await db.importRecord.findUniqueOrThrow({
-        where: { id: args.recordId },
-        include: { import: true },
-      });
-      const context = new Context(importRecord);
-      await context.updateMatches(
-        args.recipeId ?? undefined,
-        args.labelId ?? undefined
-      );
-      return await db.importRecord.findUniqueOrThrow({
-        where: { id: args.recordId },
-        ...query,
+      return await updateMatches({
+        id: args.recordId,
+        labelId: args.labelId ?? undefined,
+        recipeId: args.recipeId ?? undefined,
+        query,
       });
     },
   }),
@@ -221,16 +245,7 @@ builder.mutationFields((t) => ({
       recordId: t.arg.string({ required: true }),
     },
     resolve: async (query, root, args) => {
-      const importRecord = await db.importRecord.findUniqueOrThrow({
-        where: { id: args.recordId },
-        include: { import: true },
-      });
-      const context = new Context(importRecord);
-      await context.finalize();
-      return await db.importRecord.findUniqueOrThrow({
-        where: { id: args.recordId },
-        ...query,
-      });
+      return await finalizeImportRecord(args.recordId, query);
     },
   }),
 }));

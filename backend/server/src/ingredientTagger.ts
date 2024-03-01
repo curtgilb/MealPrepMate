@@ -28,10 +28,9 @@ async function tagIngredients(
     headers: { "Content-Type": "application/json" },
   });
   const taggedIngredients = (await response.json()) as RecipeNlpResponse[];
-  return taggedIngredients.map((ingredient, index) => {
+  return taggedIngredients.map((ingredient) => {
     const { minQty, maxQty } = parse(ingredient.sentence, "eng");
     return {
-      order: index,
       minQty,
       maxQty,
       ...ingredient,

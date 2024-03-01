@@ -2,7 +2,7 @@ import { CreateNutritionLabelInput } from "../../../types/gql.js";
 import { Parser, ParsedRecord, ParsedOutput } from "./Parser.js";
 import { File as ZipFile } from "unzipper";
 import { z } from "zod";
-import { readText } from "../../io/Readers.js";
+import { readFile } from "../../io/Readers.js";
 import { ImportType } from "@prisma/client";
 import { hash } from "../../../util/utils.js";
 
@@ -92,7 +92,7 @@ class CronometerParser extends Parser<
   > {
     // Single JSON file path
     if (typeof this.source === "string" && this.source.endsWith(".json")) {
-      const data = readText(this.source);
+      const data = readFile(this.source);
       this.records.push(new CronometerRecord(data));
     }
     // Zip file

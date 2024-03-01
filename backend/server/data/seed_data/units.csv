@@ -1,27 +1,28 @@
-﻿Name,Lookup Names,Symbol,Type
-tablespoon,"tablespoons, tbsp.",Tbsp,volume
-teaspoon,"teaspoon, teaspoons, tsp, tsp.",tsp,volume
-cup,"cup, cups, c, c.",c,volume
-quart,"quart, quarts, qts, qt, qt.",qt,volume
-fluid ounce,,fl oz,volume
-pint,,pt,volume
-gallon,,gal,volume
-liter,,L,volume
-milimeter,,ml,volume
-ounce,,oz,weight
-pound,,lb,weight
-gram,,g,weight
-kilogram,,kg,weight
-miligram,,mg,weight
-microgram,,μg,weight
-"""unit""",,,count
-dozen,,,count
-dash,,,count
-pinch,,,count
-drop,,,count
-sprig,,,count
-slice,,,count
-clove,,,count
-can,,,count
-stick,,,count
-calorie,,kcal,Energy
+﻿ID,Name,Lookup Names,Symbol,Type
+clt6gfaib00008gv9fdsyfmgc,tablespoon,"tablespoons, tbsp.",Tbsp,volume
+clt6gfaic00018gv97hstbg6h,teaspoon,"teaspoon, teaspoons, tsp, tsp.",tsp,volume
+clt6gfaic00028gv95ja6drhq,cup,"cup, cups, c, c.",c,volume
+clt6gfaic00038gv9clxffpsr,quart,"quart, quarts, qts, qt, qt.",qt,volume
+clt6gfaid00048gv9fnsh4nz6,fluid ounce,"fl oz, fl. Oz,",fl oz,volume
+clt6gfaid00058gv9b6oi24zu,pint,"pt, pt.,",pt,volume
+clt6gfaid00068gv9adyb21rj,gallon,,gal,volume
+clt6gfaid00078gv9as9t84xw,liter,,L,volume
+clt6gfaie00088gv9amr23ubo,milimeter,,ml,volume
+clt6gfaie00098gv9eegc2e8q,ounce,,oz,weight
+clt6gfaie000a8gv93iprake6,pound,,lb,weight
+clt6gfaie000b8gv9ailj1i11,gram,,g,weight
+clt6gfaie000c8gv92gusbbvx,kilogram,,kg,weight
+clt6gfaif000d8gv94rzxdey6,miligram,,mg,weight
+clt6gfaif000e8gv99xwqbe7c,microgram,,μg,weight
+clt6gfaif000f8gv973yi9mbr,unit,,,count
+clt6gfaif000g8gv936n0hhf3,dozen,,,count
+clt6gfaif000h8gv9ahceeg9s,dash,,,count
+clt6gfaig000i8gv9fj0kgn2x,pinch,,,count
+clt6gfaig000j8gv99kvj91xd,drop,,,count
+clt6gfaig000k8gv91ozfeh9f,sprig,,,count
+clt6gfaig000l8gv9cidzbbgg,slice,,,count
+clt6gfaig000m8gv96xxg76hk,clove,,,count
+clt6gfaig000n8gv9a4e95i8j,can,,,count
+clt6gfaih000o8gv980cgciqz,stick,,,count
+clt6gfaih000p8gv90tkcdp5y,calorie,,kcal,Energy
+clt6uhm4b00030sv9ae1z3y0e,crank,,,count

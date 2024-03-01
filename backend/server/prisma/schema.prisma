@@ -241,8 +241,14 @@ model IngredientPrice {
   unitId       String
 }
 
+enum EntityType {
+  RECIPE
+  LABEL
+}
+
 model Recipe {
   id                  String             @id @default(cuid())
+  type                EntityType          @default(RECIPE)
   title               String
   source              String?
   preparationTime     Int?
@@ -299,6 +305,7 @@ model Photo {
 
 model NutritionLabel {
   id                String                   @id @default(cuid())
+  type                EntityType          @default(LABEL)
   recipe            Recipe?                  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId          String?
   ingredientGroup   RecipeIngredientGroup?   @relation(fields: [ingredientGroupId], references: [id], onDelete: Cascade)

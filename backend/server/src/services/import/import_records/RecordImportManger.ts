@@ -1,8 +1,8 @@
 import { Import, ImportRecord, ImportType, RecordStatus } from "@prisma/client";
 import { RecordWithImport } from "../../../types/CustomTypes.js";
-import { CronometerImport } from "../CronometerImport.js";
-import { RecipeKeeperImport } from "../RecipeKeeperImport.js";
-import { ImportService } from "../ImportService.js";
+import { CronometerImport } from "../importers/CronometerImport.js";
+import { RecipeKeeperImport } from "../importers/RecipeKeeperImport.js";
+import { Importer } from "../importers/Import.js";
 import { db } from "../../../db.js";
 
 interface Operations {
@@ -24,11 +24,11 @@ function importServiceFactory(importRecord: Import) {
   }
 }
 
-class Context {
+class ImportRecordManager {
   public importRecord: ImportRecord;
   public parentImport: Import;
   private state: RecordImportState;
-  public importService: ImportService;
+  public importService: Importer;
 
   constructor(record: RecordWithImport) {
     this.parentImport = record.import;
@@ -53,17 +53,6 @@ class Context {
     }
   }
 
-  public async updateMatches(
-    recipeId: string | undefined,
-    labelId: string | undefined
-  ) {
-    await this.state.updateMatches(recipeId, labelId);
-  }
-
-  public async finalize() {
-    await this.importService.finalize(this.importRecord);
-  }
-
   public async transitionTo(action: RecordStatus): Promise<void> {
     switch (action) {
       case RecordStatus.IMPORTED:
@@ -86,12 +75,23 @@ class Context {
         throw new Error("Record not in an acceptable state");
     }
   }
+
+  public async updateMatches(
+    recipeId: string | undefined,
+    labelId: string | undefined
+  ) {
+    await this.state.updateMatches(recipeId, labelId);
+  }
+
+  public async finalize() {
+    await this.importService.finalize(this.importRecord);
+  }
 }
 
 abstract class RecordImportState implements Operations {
-  protected context: Context;
+  protected context: ImportRecordManager;
 
-  constructor(context: Context) {
+  constructor(context: ImportRecordManager) {
     this.context = context;
   }
 
@@ -276,4 +276,4 @@ class UpdateState extends RecordImportState {
   }
 }
 
-export { Context };
+export { ImportRecordManager };

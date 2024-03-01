@@ -1,22 +1,18 @@
 import {
   RecipeKeeperParser,
   RecipeKeeperRecord,
-} from "./parsers/RecipeKeeperParser.js";
+} from "../parsers/RecipeKeeperParser.js";
 import { Prisma, RecordStatus, ImportRecord, Import } from "@prisma/client";
-import { DbTransactionClient, db } from "../../db.js";
-import { Match, RecipeKeeperRecipe } from "../../types/CustomTypes.js";
+import { DbTransactionClient, db } from "../../../db.js";
+import { Match, RecipeKeeperRecipe } from "../../../types/CustomTypes.js";
 import {
   NutritionLabelValidation,
   RecipeInputValidation,
-} from "../../validations/graphqlValidation.js";
-import { createRecipeCreateStmt } from "../../models/RecipeExtension.js";
-import {
-  ImportService,
-  ImportServiceInput,
-  MatchUpdate,
-} from "./ImportService.js";
+} from "../../../validations/graphqlValidation.js";
+import { createRecipeCreateStmt } from "../../../model_extensions/RecipeExtension.js";
+import { Importer, ImportServiceInput, MatchUpdate } from "./Import.js";
 
-class RecipeKeeperImport extends ImportService {
+class RecipeKeeperImport extends Importer {
   constructor(input: ImportServiceInput | Import) {
     super(input);
   }
@@ -142,6 +138,9 @@ class RecipeKeeperImport extends ImportService {
         (record.status === RecordStatus.IMPORTED ||
           record.status === RecordStatus.UPDATED)
       ) {
+        if (record.status === RecordStatus.UPDATED && !record.recipeId) {
+          throw new Error("Record must have a matching recipe to update");
+        }
         await tx.importRecord.update({
           where: { id: record.id },
           data: { recipe: { connect: { id: record.draftId } }, draftId: null },

@@ -1,20 +1,20 @@
 import { Prisma, ImportRecord, Import, RecordStatus } from "@prisma/client";
-import { db, DbTransactionClient } from "../../db.js";
+import { db, DbTransactionClient } from "../../../db.js";
 import {
   CronometerParser,
   CronometerRecord,
-} from "./parsers/CronometerParser.js";
-import { NutritionLabelValidation } from "../../validations/graphqlValidation.js";
+} from "../parsers/CronometerParser.js";
+import { NutritionLabelValidation } from "../../../validations/graphqlValidation.js";
 import {
-  ImportService,
+  Importer,
   ImportServiceInput,
   MatchManager,
   MatchUpdate,
-} from "./ImportService.js";
-import { createNutritionLabelStmt } from "../../models/NutritionExtension.js";
-import { Match } from "../../types/CustomTypes.js";
+} from "./Import.js";
+import { createNutritionLabelStmt } from "../../../model_extensions/NutritionExtension.js";
+import { Match } from "../../../types/CustomTypes.js";
 
-class CronometerImport extends ImportService {
+class CronometerImport extends Importer {
   constructor(input: ImportServiceInput | Import) {
     super(input);
   }

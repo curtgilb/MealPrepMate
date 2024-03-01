@@ -69,16 +69,13 @@ builder.queryFields((t) => ({
       searchString: t.arg.string(),
     },
     resolve: async (query, root, args) => {
-      const search: Prisma.CategoryFindManyArgs = { ...query };
-      if (args.searchString) {
-        search.where = {
-          name: {
-            contains: args.searchString,
-            mode: "insensitive",
-          },
-        };
-      }
-      return await db.category.findMany(search);
+      return await db.category.findMany({
+        where: {
+          name: args.searchString
+            ? { contains: args.searchString, mode: "insensitive" }
+            : undefined,
+        },
+      });
     },
   }),
   courses: t.prismaField({

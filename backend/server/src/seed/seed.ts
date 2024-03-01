@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { readCSV } from "../services/io/Readers.js";
 import { storage } from "../storage.js";
-import { cast, toMeasurementUnitTypeEnum } from "../util/Cast.js";
+import { toMeasurementUnitTypeEnum } from "../util/Cast.js";
 const prisma = new PrismaClient();
 import { NutrientLoader } from "./dataloaders/NutrientParser.js";
 import { IngredientLoader } from "./dataloaders/IngredientParser.js";
@@ -26,7 +26,7 @@ const bucketPolicy = `{
     ]
 }`;
 
-(async () => {
+async function seedDb() {
   await deleteAllRecords();
   await deleteBuckets();
   await createBuckets();
@@ -36,20 +36,10 @@ const bucketPolicy = `{
   await loadCuisines();
   await loadNutrients();
   await loadIngredients();
-
-  // await loadRecipes();
   await loadHealthProfile();
-})()
-  .then(() => {
-    console.log("Seeding complete");
-  })
-  .catch((error) => {
-    console.error(error);
-  })
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  console.log("Seeding complete");
+  await prisma.$disconnect();
+}
 
 async function deleteBuckets() {
   const buckets = await storage.listBuckets();
@@ -83,9 +73,10 @@ async function loadUnits() {
   const data = await readCSV("../../../data/seed_data/units.csv");
   await db.measurementUnit.createMany({
     data: data.map(({ record }) => ({
-      name: cast(record.name) as string,
+      id: record.id,
+      name: record.name,
       abbreviations: record.lookupNames?.split(", "),
-      symbol: cast(record.symbol) as string,
+      symbol: record.symbol ?? undefined,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       type: toMeasurementUnitTypeEnum(record.type),
     })),
@@ -195,7 +186,7 @@ async function loadIngredients() {
   }
 }
 
-export async function deleteAllRecords() {
+async function deleteAllRecords() {
   const tablenames = await prisma.$queryRaw<
     Array<{ tablename: string }>
   >`SELECT tablename FROM pg_tables WHERE schemaname='public'`;
@@ -212,3 +203,5 @@ export async function deleteAllRecords() {
     console.log(error);
   }
 }
+
+export { seedDb, deleteAllRecords, deleteBuckets };

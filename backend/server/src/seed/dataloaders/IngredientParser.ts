@@ -7,6 +7,7 @@ import {
   nullableString,
   stringArray,
 } from "../../validations/utilValidations.js";
+import { validate } from "graphql";
 
 type IngredientParserInput = {
   ingredientCsvPath: string;
@@ -14,6 +15,7 @@ type IngredientParserInput = {
 };
 
 const ingredientSchema = z.object({
+  id: z.string().cuid(),
   name: cleanedStringSchema(30, toTitleCase),
   category: cleanedStringSchema(30, toTitleCase),
   variant: nullableString,
@@ -58,6 +60,7 @@ export class IngredientLoader {
         this.addToMapping(validatedData.ruleRefId, validatedData.name);
 
       const createStmt: Prisma.IngredientCreateInput = {
+        id: validatedData.id,
         name: validatedData.name,
         variant: validatedData.variant,
         storageInstructions: validatedData.storageInstruction,

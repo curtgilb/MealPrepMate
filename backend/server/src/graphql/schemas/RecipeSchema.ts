@@ -3,7 +3,7 @@ import { builder } from "../builder.js";
 import { numericalComparison } from "./UtilitySchema.js";
 
 // ============================================ Types ===================================
-builder.prismaObject("Recipe", {
+const recipe = builder.prismaObject("Recipe", {
   fields: (t) => ({
     id: t.exposeID("id"),
     name: t.exposeString("title"),
@@ -221,3 +221,5 @@ builder.mutationFields((t) => ({
   //   },
   // }),
 }));
+
+export { recipe };

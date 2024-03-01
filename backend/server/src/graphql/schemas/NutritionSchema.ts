@@ -13,23 +13,24 @@ import { Gender, SpecialCondition } from "@prisma/client";
 // Create function that returns recipe normally or can pass in scale factors to change it
 
 // ============================================ Types ===================================
-const NutrientObject = builder.objectRef<NutrientTest>("NutrientTest");
-const LabelObject = builder.objectRef<FullNutritionLabel>("Label");
+const AggregateNutrient = builder.objectRef<NutrientTest>("AggregateNutrient");
+const AggregateLabel = builder.objectRef<FullNutritionLabel>("AggregateLabel");
 
-NutrientObject.implement({
+AggregateNutrient.implement({
   fields: (t) => ({
+    id: t.exposeString("id"),
     name: t.exposeString("name"),
     value: t.exposeFloat("value"),
     unit: t.exposeString("unit"),
     perServing: t.exposeFloat("perServing"),
     children: t.field({
-      type: [NutrientObject],
+      type: [AggregateNutrient],
       resolve: (parent) => parent.children,
     }),
   }),
 });
 
-LabelObject.implement({
+AggregateLabel.implement({
   fields: (t) => ({
     calories: t.exposeFloat("calories"),
     caloriesPerServing: t.exposeFloat("caloriesPerServing", { nullable: true }),
@@ -37,28 +38,31 @@ LabelObject.implement({
     servingsUsed: t.exposeInt("servings", { nullable: true }),
     servingUnit: t.exposeString("servingUnit", { nullable: true }),
     servingSize: t.exposeFloat("servingSize", { nullable: true }),
+    carbPercentage: t.exposeFloat("carbPercentage"),
+    proteinPercentage: t.exposeFloat("proteinPercentage"),
+    fatPercentage: t.exposeFloat("fatPercentage"),
     general: t.field({
-      type: [NutrientObject],
+      type: [AggregateNutrient],
       resolve: (parent) => parent.general,
     }),
     carbohydrates: t.field({
-      type: [NutrientObject],
+      type: [AggregateNutrient],
       resolve: (parent) => parent.carbohydrates,
     }),
     fats: t.field({
-      type: [NutrientObject],
+      type: [AggregateNutrient],
       resolve: (parent) => parent.fats,
     }),
     proteins: t.field({
-      type: [NutrientObject],
+      type: [AggregateNutrient],
       resolve: (parent) => parent.proteins,
     }),
     minerals: t.field({
-      type: [NutrientObject],
+      type: [AggregateNutrient],
       resolve: (parent) => parent.minerals,
     }),
     vitamins: t.field({
-      type: [NutrientObject],
+      type: [AggregateNutrient],
       resolve: (parent) => parent.vitamins,
     }),
   }),
@@ -76,6 +80,12 @@ builder.prismaObject("NutritionLabel", {
     servingSize: t.exposeFloat("servingSize", { nullable: true }),
     servingsUsed: t.exposeFloat("servingsUsed", { nullable: true }),
     importRecord: t.relation("importRecord", { nullable: true }),
+    aggregate: t.field({
+      type: AggregateLabel,
+      resolve: async (label) => {
+        label.
+      },
+    }),
   }),
 });
 
@@ -228,7 +238,7 @@ const editNutritionLabelInput = builder.inputType("EditNutritionLabelInput", {
 // ============================================ Mutations ===============================
 builder.mutationFields((t) => ({
   createNutritionLabels: t.field({
-    type: LabelObject,
+    type: AggregateLabel,
     args: {
       recipeId: t.arg.string(),
       recipeIngredientGroupId: t.arg.string(),
@@ -379,7 +389,7 @@ builder.mutationFields((t) => ({
   }),
 }));
 
-export { LabelObject, NutrientObject };
+export { AggregateLabel as LabelObject, NutrientObject };
 
 // ==========
 

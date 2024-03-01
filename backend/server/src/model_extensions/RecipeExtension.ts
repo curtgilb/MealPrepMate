@@ -8,9 +8,9 @@ import {
 import { CreateNutritionLabelInput, RecipeInput } from "../types/gql.js";
 import { toTitleCase } from "../util/utils.js";
 import { db } from "../db.js";
-import { UnitSearch } from "../search/UnitSearch.js";
+import { UnitSearch } from "../services/search/UnitSearch.js";
 import { z } from "zod";
-import { IngredientSearch } from "../search/IngredientSearch.js";
+import { IngredientSearch } from "../services/search/IngredientSearch.js";
 import fetch from "node-fetch";
 import { coerceNumeric } from "../validations/utilValidations.js";
 import { createNutritionLabelStmt } from "./NutritionExtension.js";

@@ -1,112 +1,138 @@
-import { Import, ImportRecord, ImportStatus, Prisma } from "@prisma/client";
-import { DbTransactionClient, db } from "../../db.js";
-import { Match } from "../../types/CustomTypes.js";
+import { ImportType, RecordStatus } from "@prisma/client";
+import { fileTypeFromBuffer } from "file-type";
+import { v4 as uuidv4 } from "uuid";
+import { db } from "../../db.js";
+import { storage } from "../../storage.js";
+import { openFile } from "../io/Readers.js";
+import { Prisma, Import } from "@prisma/client";
+import { FileUploadQueue } from "./ProcessImportJob.js";
+import { ImportRecordManager } from "./import_records/RecordImportManger.js";
+import { CronometerImport } from "./importers/CronometerImport.js";
+import { RecipeKeeperImport } from "./importers/RecipeKeeperImport.js";
+import { ImportServiceInput } from "./importers/Import.js";
+import { getFileMetaData } from "../../util/utils.js";
 
-type ImportServiceInput = {
-  source: string | File;
-  import: Import;
+type ImportQuery = {
+  include?: Prisma.ImportInclude | undefined;
+  select?: Prisma.ImportSelect | undefined;
 };
 
-type MatchUpdate = {
-  record: ImportRecord;
-  matchingRecipeId?: string;
-  matchingLabelId?: string;
-  createDraft: boolean;
-  tx?: DbTransactionClient;
+type ImportRecordQuery = {
+  include?: Prisma.ImportRecordInclude | undefined;
+  select?: Prisma.ImportRecordSelect | undefined;
 };
 
-type UpdateImportInput = {
-  fileName?: string;
-  fileHash?: string;
-  status?: ImportStatus;
-  imageMapping?: Prisma.JsonObject;
-  recordIds?: string[];
+type UploadImportArgs = {
+  file: File | string;
+  type: ImportType;
+  query?: ImportQuery;
 };
 
-class MatchManager {
-  match: Match;
-  constructor(match: Match) {
-    this.match = match;
-  }
-
-  setMatch(match: Match) {
-    this.match = {
-      ...this.match,
-      ...match,
-    };
-  }
-
-  getMatch() {
-    return this.match;
+function importServiceFactory(
+  importRecord: ImportServiceInput | Import,
+  type: ImportType
+) {
+  switch (type) {
+    case ImportType.CRONOMETER:
+      return new CronometerImport(importRecord);
+    case ImportType.RECIPE_KEEPER:
+      return new RecipeKeeperImport(importRecord);
+    default:
+      throw new Error("No importer exists");
   }
 }
 
-abstract class ImportService {
-  input: ImportServiceInput;
+async function uploadImportFile({ file, type, query }: UploadImportArgs) {
+  const openedFile = openFile(file);
+  const fileBuffer = Buffer.from(await openedFile.arrayBuffer());
+  const meta = await fileTypeFromBuffer(fileBuffer);
+  const renamedFile = `${uuidv4()}.${meta?.ext ?? ".zip"}`;
 
-  constructor(input: ImportServiceInput | Import) {
-    if (Object.hasOwn(input, "id"))
-      this.input = { source: "", import: input as Import };
-    else {
-      this.input = input as ImportServiceInput;
-    }
-  }
+  await storage.putObject("imports", renamedFile, fileBuffer, {
+    "Content-Type": meta?.mime,
+  });
 
-  abstract updateMatch(update: MatchUpdate): Promise<ImportRecord>;
+  const parentImport = await db.import.create({
+    data: {
+      fileName: getFileMetaData(openedFile.name).name,
+      type: type,
+      status: "PENDING",
+      storagePath: renamedFile,
+    },
+    ...query,
+  });
 
-  abstract createDraft(
-    record: ImportRecord,
-    tx?: DbTransactionClient
-  ): Promise<string>;
+  await FileUploadQueue.add(parentImport.id, {
+    fileName: renamedFile,
+    type: type,
+    id: parentImport.id,
+  });
 
-  abstract finalize(record: ImportRecord): Promise<void>;
-
-  abstract deleteDraft(
-    draftId: string | null,
-    tx?: DbTransactionClient
-  ): Promise<void>;
-
-  abstract processImport(): Promise<void>;
-
-  getImageMapping() {
-    return this.input.import.imageMapping
-      ? new Map<string, string>(Object.entries(this.input.import.imageMapping))
-      : undefined;
-  }
-
-  protected async getLastImport(): Promise<Import | null> {
-    return await db.import.findFirst({
-      where: {
-        type: this.input.import.type,
-        id: { not: this.input.import.id },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-  }
-
-  protected async updateImport(
-    update: UpdateImportInput,
-    tx?: DbTransactionClient
-  ) {
-    const dbClient = tx ? tx : db;
-    const updatedImport = await dbClient.import.update({
-      where: {
-        id: this.input.import.id,
-      },
-      data: {
-        fileName: update.fileName,
-        fileHash: update.fileHash,
-        status: update.status,
-        imageMapping: update.imageMapping,
-        importRecords: {
-          set: update.recordIds?.map((id) => ({
-            id,
-          })),
-        },
-      },
-    });
-    this.input.import = updatedImport;
-  }
+  return parentImport;
 }
 
-export { ImportService, ImportServiceInput, MatchManager, MatchUpdate };
+async function changeRecordStatus(
+  id: string,
+  status: RecordStatus,
+  query?: ImportRecordQuery
+) {
+  const importParent = await db.importRecord.findUniqueOrThrow({
+    where: { id: id },
+    include: { import: true },
+  });
+  const recordManager = new ImportRecordManager(importParent);
+  await recordManager.transitionTo(status);
+  return await db.importRecord.findUniqueOrThrow({
+    where: { id: id },
+    ...query,
+  });
+}
+
+type UpdateMatchesArgs = {
+  id: string;
+  recipeId?: string;
+  labelId?: string;
+  query?: ImportRecordQuery;
+};
+
+async function updateMatches({
+  id,
+  recipeId,
+  labelId,
+  query,
+}: UpdateMatchesArgs) {
+  const importRecord = await db.importRecord.findUniqueOrThrow({
+    where: { id: id },
+    include: { import: true },
+  });
+  const recordManager = new ImportRecordManager(importRecord);
+  await recordManager.updateMatches(
+    recipeId ?? undefined,
+    labelId ?? undefined
+  );
+  return await db.importRecord.findUniqueOrThrow({
+    where: { id: id },
+    ...query,
+  });
+}
+
+async function finalizeImportRecord(id: string, query?: ImportRecordQuery) {
+  const importRecord = await db.importRecord.findUniqueOrThrow({
+    where: { id: id },
+    include: { import: true },
+  });
+  const recordManager = new ImportRecordManager(importRecord);
+  await recordManager.finalize();
+  return await db.importRecord.findUniqueOrThrow({
+    where: { id: id },
+    ...query,
+  });
+}
+
+export {
+  updateMatches,
+  changeRecordStatus,
+  uploadImportFile,
+  finalizeImportRecord,
+  importServiceFactory,
+};

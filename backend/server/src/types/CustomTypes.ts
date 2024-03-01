@@ -139,6 +139,27 @@ type RecipeWithIngredients = Prisma.RecipeGetPayload<
   typeof recipeWithIngredients
 >;
 
+const nutritionLabelWithNutrients =
+  Prisma.validator<Prisma.NutritionLabelDefaultArgs>()({
+    include: {
+      nutrients: true,
+      servingSizeUnit: true,
+    },
+  });
+
+type LabelWithNutrients = Prisma.NutritionLabelGetPayload<
+  typeof nutritionLabelWithNutrients
+>;
+
+const nutrientWithUnit = Prisma.validator<Prisma.NutrientDefaultArgs>()({
+  include: {
+    subNutrients: { include: { subNutrients: true, unit: true } },
+    unit: true,
+  },
+});
+
+type NutrientWithUnit = Prisma.NutrientGetPayload<typeof nutrientWithUnit>;
+
 export {
   RecordWithImport,
   RecipeWithIngredients,
@@ -149,4 +170,6 @@ export {
   MyFitnessPalNutrition,
   ImportQuery,
   Match,
+  LabelWithNutrients,
+  NutrientWithUnit,
 };

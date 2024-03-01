@@ -1,5 +1,5 @@
 import { Ingredient } from "@prisma/client";
-import { db } from "../db.js";
+import { db } from "../../db.js";
 import Fuse from "fuse.js";
 
 export class IngredientSearch {
