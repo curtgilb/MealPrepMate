@@ -1,6 +1,15 @@
-import { NutritionLabel, Recipe } from "@prisma/client";
+import {
+  NutritionLabel,
+  Recipe,
+  NutrientType,
+  MeasurementUnit,
+} from "@prisma/client";
 import { db } from "../../db.js";
-import { LabelWithNutrients } from "../../types/CustomTypes.js";
+import {
+  LabelWithNutrients,
+  NutrientWithChildren,
+  NutrientWithUnit,
+} from "../../types/CustomTypes.js";
 
 type NutrientAggregatorArgs = string[] | Recipe[] | NutritionLabel[];
 
@@ -11,11 +20,11 @@ type NutrientValue = { value: number; valuePerServing: number };
 type ScalingArgs = {
   factor?: number;
   totalServings?: number;
+  servingsUsed?: number;
 };
 
-type LabelArgs = {
+type NutrientMapArgs = {
   id: string;
-  advanced?: boolean;
 } & ScalingArgs;
 
 class NutrientAggregator {
@@ -56,13 +65,15 @@ class NutrientAggregator {
     }
   }
 
-  getNutrientMap(args: LabelArgs[]): NutrientMap {
+  getNutrientMap(args: NutrientMapArgs[]): NutrientMap {
     const mappings = args.map((arg) => {
       const label = this.aggregatedNutrients.get(arg.id);
       if (!label) throw new Error("ID does not match any in aggregation");
-      return label?.getLabelNutrientMap({
+
+      return label.getLabelNutrientMap({
         factor: arg.factor,
         totalServings: arg.totalServings,
+        servingsUsed: arg.servingsUsed,
       });
     });
 
@@ -76,8 +87,6 @@ class NutrientAggregator {
       return mappings[0];
     }
   }
-
-  //   convertToLabel(args: LabelArgs[]);
 }
 
 class LabelAggregator {
@@ -101,11 +110,17 @@ class LabelAggregator {
     return usageRatio;
   }
 
-  private sumNutrients(mapping: NutrientMap, scaleFactor: number) {
+  private sumNutrients(
+    mapping: NutrientMap,
+    scaleFactor = 1,
+    totalServings = 1,
+    servingsUsed = 1
+  ) {
     for (const label of this.labels) {
       const ratio = this.getUsageRatio(label);
       for (const nutrient of label.nutrients) {
-        const adjustedValue = nutrient.value * ratio * scaleFactor;
+        let adjustedValue = nutrient.value * ratio * scaleFactor;
+        adjustedValue = adjustedValue * (servingsUsed / totalServings);
         const existing = mapping.get(nutrient.nutrientId);
         if (!existing) {
           mapping.set(nutrient.nutrientId, {
@@ -147,18 +162,188 @@ class LabelAggregator {
 
   getLabelNutrientMap(args: ScalingArgs) {
     const mapping = new Map<string, NutrientValue>();
-    const totalServings = [
+    let totalServings = [
       args.totalServings,
       this.primaryLabel?.servings,
       1,
-    ].find((servings) => !Number.isNaN(servings));
+    ].find((servings) => servings);
+    totalServings = totalServings ?? 1;
     const globalScaleFactor = args.factor ?? 1;
+    const servingsUsed = args.servingsUsed ?? totalServings;
 
-    this.sumNutrients(mapping, globalScaleFactor);
-    this.scaleNutrients(mapping, totalServings ?? 1);
+    this.sumNutrients(mapping, globalScaleFactor, totalServings, servingsUsed);
+    this.scaleNutrients(mapping, totalServings);
     this.mapping = mapping;
     return mapping;
   }
 }
 
-export { NutrientAggregator };
+type FullNutrient = {
+  id: string;
+  name: string;
+  value: number;
+  category: NutrientType;
+  unit: MeasurementUnit;
+  perServing?: number;
+  target?: NutrientTarget;
+  children: FullNutrient[];
+};
+
+type NutrientTarget = {
+  dri?: number;
+  customTarget?: number;
+};
+
+type PrettyNutritionLabel = {
+  calories: number;
+  caloriesPerServing?: number;
+  carbPercentage: number;
+  proteinPercentage: number;
+  fatPercentage: number;
+};
+
+type ServingInfo = {
+  servings?: number;
+  servingsUsed?: number;
+  servingUnit?: string;
+  servingSize?: number;
+};
+
+type CreateLabelArgs = {
+  nutrients: NutrientMap;
+  servings: ServingInfo;
+  advanced: boolean;
+};
+
+type FullNutritionLabel = PrettyNutritionLabel &
+  ServingInfo & { nutrients: FullNutrient[] };
+
+class LabelMaker {
+  private parentNutrients: NutrientWithUnit[] = [];
+  private childNutrients = new Map<string, NutrientWithUnit[]>();
+
+  private async initializeExistingNutrients() {
+    const profile = await db.healthProfile.findFirstOrThrow({});
+    const age = new Date().getFullYear() - profile.yearBorn;
+    // Get nutrients in order
+    this.parentNutrients = await db.nutrient.findMany({
+      include: {
+        unit: true,
+        dri: {
+          where: {
+            gender: profile.gender,
+            ageMin: { lte: age },
+            ageMax: { gte: age },
+            specialCondition: "NONE",
+          },
+        },
+      },
+      orderBy: { order: "asc" },
+    });
+
+    this.childNutrients = this.parentNutrients
+      .filter((nutrient) => nutrient.parentNutrientId)
+      .reduce((acc, curr) => {
+        let childList = acc.get(curr.parentNutrientId as string);
+        if (!childList) {
+          childList = [];
+          acc.set(curr.parentNutrientId as string, childList);
+        }
+        childList.push(curr);
+        return acc;
+      }, new Map<string, NutrientWithUnit[]>());
+
+    this.parentNutrients = this.parentNutrients.filter(
+      (nutrient) => !nutrient.parentNutrientId
+    );
+  }
+
+  private getMacroDistribution(nutrients: NutrientMap, servings: number) {
+    const CALORIE_ID = "clt6dqtz90000awv9anfb343o";
+    const CARB_ID = "clt6dqtzc0007awv9h1mv5pbi";
+    const PROTIEN_ID = "clt6dqtzg000uawv918m4fxsm";
+    const FAT_ID = "clt6dqtze000lawv9b3w34hxe";
+
+    const calories = nutrients.get(CALORIE_ID)?.value ?? 0;
+    const carbs = nutrients.get(CARB_ID)?.value ?? 0;
+    const protien = nutrients.get(PROTIEN_ID)?.value ?? 0;
+    const fat = nutrients.get(FAT_ID)?.value ?? 0;
+
+    const carbCalories = carbs * 4;
+    const fatCalories = fat * 9;
+    const proteinCalories = protien * 4;
+    const totalCalories = carbCalories + fatCalories + proteinCalories;
+
+    return {
+      calories,
+      caloriesPerServing: calories / servings,
+      carbPercentage: carbCalories / totalCalories,
+      proteinPercentage: proteinCalories / calories,
+      fatPercentage: fatCalories / calories,
+    };
+  }
+
+  private populateNutrients(
+    parentNutrients: NutrientWithUnit[],
+    nutrientMap: NutrientMap,
+    outputList: FullNutrient[],
+    advanced: boolean
+  ): FullNutrient[] {
+    // Find all nutrients that have the baseNutrientId as their parent
+    for (const baseNutrient of parentNutrients) {
+      const matchingLabelNutrient = nutrientMap.get(baseNutrient.id)
+      if ()
+    }
+  }
+
+  // outputList.push({
+  //   id: baseNutrient.id,
+  //   name: baseNutrient.name,
+  //   value: values?.value,
+  //   category: baseNutrient.type,
+  //   unit: baseNutrient.unit,
+  //   perServing: values?.valuePerServing,
+  //   target: {
+  //     dri:
+  //       baseNutrient.dri.length > 0
+  //         ? baseNutrient.dri[0].value
+  //         : undefined,
+  //     customTarget: baseNutrient.customTarget ?? undefined,
+  //   },
+  //   children: this.populateNutrients(
+  //     children,
+  //     nutrientMap,
+  //     childList,
+  //     advanced
+  //   ),
+  // });
+
+  // (values && (advanced || !baseNutrient.advancedView))
+
+  async createLabel({
+    nutrients,
+    servings,
+    advanced,
+  }: CreateLabelArgs): Promise<FullNutritionLabel> {
+    if (this.parentNutrients.length == 0) {
+      await this.initializeExistingNutrients();
+    }
+
+    const macros = this.getMacroDistribution(nutrients, servings.servings ?? 1);
+
+    const fullNutrients = this.populateNutrients(
+      this.parentNutrients.filter((nutrient) => !nutrient.parentNutrientId),
+      nutrients,
+      [],
+      advanced
+    );
+
+    return {
+      ...macros,
+      ...servings,
+      nutrients: fullNutrients,
+    };
+  }
+}
+
+export { NutrientAggregator, LabelMaker, FullNutrient, FullNutritionLabel };

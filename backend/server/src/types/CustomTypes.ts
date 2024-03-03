@@ -153,8 +153,8 @@ type LabelWithNutrients = Prisma.NutritionLabelGetPayload<
 
 const nutrientWithUnit = Prisma.validator<Prisma.NutrientDefaultArgs>()({
   include: {
-    subNutrients: { include: { subNutrients: true, unit: true } },
     unit: true,
+    dri: true,
   },
 });
 
@@ -167,9 +167,9 @@ export {
   Mappings,
   FileMetaData,
   CronometerNutrition,
+  LabelWithNutrients,
   MyFitnessPalNutrition,
   ImportQuery,
   Match,
-  LabelWithNutrients,
   NutrientWithUnit,
 };

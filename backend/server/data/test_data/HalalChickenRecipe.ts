@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 
-export const ingredientGroups: Prisma.RecipeIngredientGroupCreateInput[] = [
+const ingredientGroups: Prisma.RecipeIngredientGroupCreateInput[] = [
   {
     id: "clt6uhm4c00050sv9a0i62syo",
     name: "Yellow Rice",
@@ -18,7 +18,7 @@ export const ingredientGroups: Prisma.RecipeIngredientGroupCreateInput[] = [
 const nutritionLabels: Prisma.NutritionLabelCreateWithoutRecipeInput[] = [
   {
     name: "Street Cart Chicken & Yellow Rice (Red Sauce)",
-    servings: 1,
+    servings: 2,
     servingsUsed: 1,
     isPrimary: false,
     verifed: true,
@@ -92,8 +92,8 @@ const nutritionLabels: Prisma.NutritionLabelCreateWithoutRecipeInput[] = [
   },
   {
     name: "Street Cart Chicken & Yellow Rice (White Sauce)",
-    servings: 1,
-    servingsUsed: 1,
+    servings: 4,
+    servingsUsed: 3,
     isPrimary: false,
     verifed: true,
     ingredientGroup: { connect: { id: "clt6uhm4c00060sv96su7dp36" } },
@@ -271,7 +271,6 @@ const nutritionLabels: Prisma.NutritionLabelCreateWithoutRecipeInput[] = [
   {
     name: "Street Cart Chicken & Yellow Rice",
     servings: 4,
-    servingsUsed: 4,
     isPrimary: true,
     verifed: true,
     nutrients: {
@@ -713,3 +712,5 @@ const recipe: Prisma.RecipeCreateInput = {
     },
   },
 };
+
+export { ingredientGroups, recipe };

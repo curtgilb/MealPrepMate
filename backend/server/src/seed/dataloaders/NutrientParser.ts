@@ -18,12 +18,16 @@ type NutrientParseInput = {
   mappingSavePath: string;
 };
 
+const booleanParamSchema = z
+  .enum(["TRUE", "FALSE"])
+  .transform((value) => value === "TRUE");
+
 const nutrientSchema = z.object({
   id: z.string().cuid(),
   nutrient: cleanedStringSchema(30, toTitleCase),
   unitAbbreviation: nullableString,
   unit: cleanedStringSchema(10),
-  advancedView: z.coerce.boolean(),
+  advancedView: booleanParamSchema,
   order: z.coerce.number().int().positive(),
   notes: nullableString,
   alternateNames: stringArray,

@@ -194,7 +194,7 @@ const nutritionLabels: Prisma.NutritionLabelCreateWithoutRecipeInput[] = [
   {
     name: "Chicken Gyro with Tzatziki Sauce (Infused Oil)",
     ingredientGroup: { connect: { id: "clt6irl0a00074wv95kwkeih7" } },
-    servings: 2,
+    servings: 3,
     servingsUsed: 1,
     isPrimary: false,
     verifed: true,
