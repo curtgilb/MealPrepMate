@@ -140,20 +140,27 @@ const ingredientFilter = builder.inputType("IngredientFilter", {
 // Filter by ingredient
 const recipeFilter = builder.inputType("RecipeFilter", {
   fields: (t) => ({
-    searchString: t.string(), // Searches recipe titles
+    searchString: t.string({ required: false }), // Searches recipe titles
     numOfServings: t.field({ type: numericalComparison }),
-    courseIds: t.stringList(),
-    cuisineId: t.stringList(),
-    categoryIds: t.stringList(),
-    prepTime: t.field({ type: numericalComparison }),
-    cookTime: t.field({ type: numericalComparison }),
-    marinadeTime: t.field({ type: numericalComparison }),
-    totalPrepTime: t.field({ type: numericalComparison }),
-    isFavorite: t.boolean(),
-    nutrientFilters: t.field({ type: [nutritionFilter] }),
-    ingredientFilter: t.field({ type: [ingredientFilter] }),
-    ingredientFreshDays: t.field({ type: numericalComparison }),
-    recipePrice: t.field({ type: numericalComparison }),
+    courseIds: t.stringList({ required: false }),
+    cuisineId: t.stringList({ required: false }),
+    categoryIds: t.stringList({ required: false }),
+    prepTime: t.field({ type: numericalComparison, required: false }),
+    cookTime: t.field({ type: numericalComparison, required: false }),
+    marinadeTime: t.field({ type: numericalComparison, required: false }),
+    totalPrepTime: t.field({ type: numericalComparison, required: false }),
+    leftoverFridgeLife: t.field({ type: numericalComparison, required: false }),
+    leftoverFreezerLife: t.field({
+      type: numericalComparison,
+      required: false,
+    }),
+    isFavorite: t.boolean({ required: false }),
+    nutrientFilters: t.field({ type: [nutritionFilter], required: false }),
+    ingredientFilter: t.field({ type: [ingredientFilter], required: false }),
+    ingredientFreshDays: t.field({
+      type: numericalComparison,
+      required: false,
+    }),
   }),
 });
 
@@ -184,8 +191,7 @@ builder.mutationFields((t) => ({
         required: true,
       }),
     },
-    resolve: async (query, root, args, context, info) => {
-      console.log(args.recipe);
+    resolve: async (query, root, args) => {
       return await db.recipe.createRecipe(args.recipe, query);
     },
   }),
@@ -211,7 +217,7 @@ builder.mutationFields((t) => ({
       }),
     },
     resolve: async (query, root, args) => {
-      return await db.recipeIngredient.findMany({});
+      return await db.recipeIngredient.findMany({ ...query });
     },
   }),
   // deleteRecipe: t.prismaField({

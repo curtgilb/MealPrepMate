@@ -1,6 +1,6 @@
 import { db } from "../db.js";
 import { RecipeFilter } from "../types/gql.js";
-import { Prisma } from "@prisma/client";
+import { EntityType, Photo, Prisma } from "@prisma/client";
 import { filterIngredients } from "./IngredientSearch.js";
 import { filterRecipesByNutrition } from "./nutrition/NutritionAggregator.js";
 import { Recipe } from "@prisma/client";
@@ -16,10 +16,21 @@ type ExtendedRecipe = Recipe & {
   aggregateLabel?: FullNutritionLabel;
 };
 
-async function searchRecipes(
-  query: RecipeQuery,
-  filter: RecipeFilter
-): Promise<ExtendedRecipe[]> {
+type CombinedSearch = {
+  name: string;
+  type: EntityType;
+  servings: number;
+  caloriesPerServing: number;
+  photo: Photo;
+};
+
+class RecipeSearch {
+  searchRecipesAndLabels(query: RecipeQuery, filter: RecipeFilter) {}
+  searchRecipes(query: RecipeQuery, filter: RecipeFilter) {}
+  matchRecipe() {}
+}
+
+async function searchRecipes(query: RecipeQuery, filter: RecipeFilter) {
   const recipes = await db.recipe.findMany({
     include: {
       ...query.include,
@@ -29,10 +40,20 @@ async function searchRecipes(
       id: true,
     },
     where: {
-      title: {
-        contains: filter.searchString ?? undefined,
-        mode: "insensitive",
-      },
+      OR: [
+        {
+          title: {
+            contains: filter.searchString ?? undefined,
+            mode: "insensitive",
+          },
+        },
+        {
+          source: {
+            contains: filter.searchString ?? undefined,
+            mode: "insensitive",
+          },
+        },
+      ],
       course: {
         every: {
           id: { in: filter.courseIds ?? undefined },
@@ -69,26 +90,29 @@ async function searchRecipes(
       isFavorite: filter.isFavorite ?? undefined,
     },
   });
-  const recipeIds = recipes.map((recipe) => recipe.id);
 
-  const filteredByIngredients = await filterIngredients(
-    recipeIds,
-    filter.ingredientFilter,
-    filter.ingredientFreshDays
-  );
+  // Filter by nutrient
 
-  const filteredByNutrition = await filterRecipesByNutrition(
-    filter.nutrientFilters,
-    filter.numOfServings,
-    recipeIds
-  );
+  // const recipeIds = recipes.map((recipe) => recipe.id);
 
-  return recipes.filter(
-    (recipe) =>
-      !filteredByIngredients ||
-      (filteredByIngredients.has(recipe.id) && !filteredByNutrition) ||
-      filteredByNutrition.has(recipe.id)
-  );
+  // const filteredByIngredients = await filterIngredients(
+  //   recipeIds,
+  //   filter.ingredientFilter,
+  //   filter.ingredientFreshDays
+  // );
+
+  // const filteredByNutrition = await filterRecipesByNutrition(
+  //   filter.nutrientFilters,
+  //   filter.numOfServings,
+  //   recipeIds
+  // );
+
+  // return recipes.filter(
+  //   (recipe) =>
+  //     !filteredByIngredients ||
+  //     (filteredByIngredients.has(recipe.id) && !filteredByNutrition) ||
+  //     filteredByNutrition.has(recipe.id)
+  // );
 }
 
 export { ExtendedRecipe };

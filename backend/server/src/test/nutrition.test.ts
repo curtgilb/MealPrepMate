@@ -1,4 +1,4 @@
-import { NutrientAggregator } from "../services/nutrition/NutrientAggregator2.js";
+import { NutrientAggregator } from "../services/nutrition/NutritionAggregator.js";
 import { deleteAllRecords, deleteBuckets, seedDb } from "../seed/seed.js";
 import { db } from "../db.js";
 import { beforeAll, expect, test } from "vitest";

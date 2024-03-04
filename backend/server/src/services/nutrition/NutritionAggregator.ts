@@ -7,7 +7,6 @@ import {
 import { db } from "../../db.js";
 import {
   LabelWithNutrients,
-  NutrientWithChildren,
   NutrientWithUnit,
 } from "../../types/CustomTypes.js";
 
@@ -290,35 +289,33 @@ class LabelMaker {
     advanced: boolean
   ): FullNutrient[] {
     // Find all nutrients that have the baseNutrientId as their parent
-    for (const baseNutrient of parentNutrients) {
-      const matchingLabelNutrient = nutrientMap.get(baseNutrient.id)
-      if ()
+    for (const parentNutrient of parentNutrients) {
+      const matchingLabelNutrient = nutrientMap.get(parentNutrient.id);
+      if (matchingLabelNutrient && (advanced || !parentNutrient.advancedView)) {
+        const childNutrients = this.childNutrients.get(parentNutrient.id);
+
+        outputList.push({
+          id: parentNutrient.id,
+          name: parentNutrient.name,
+          value: matchingLabelNutrient?.value,
+          category: parentNutrient.type,
+          unit: parentNutrient.unit,
+          perServing: matchingLabelNutrient?.valuePerServing,
+          target: {
+            dri:
+              parentNutrient.dri.length > 0
+                ? parentNutrient.dri[0].value
+                : undefined,
+            customTarget: parentNutrient.customTarget ?? undefined,
+          },
+          children: childNutrients
+            ? this.populateNutrients(childNutrients, nutrientMap, [], advanced)
+            : [],
+        });
+      }
     }
+    return outputList;
   }
-
-  // outputList.push({
-  //   id: baseNutrient.id,
-  //   name: baseNutrient.name,
-  //   value: values?.value,
-  //   category: baseNutrient.type,
-  //   unit: baseNutrient.unit,
-  //   perServing: values?.valuePerServing,
-  //   target: {
-  //     dri:
-  //       baseNutrient.dri.length > 0
-  //         ? baseNutrient.dri[0].value
-  //         : undefined,
-  //     customTarget: baseNutrient.customTarget ?? undefined,
-  //   },
-  //   children: this.populateNutrients(
-  //     children,
-  //     nutrientMap,
-  //     childList,
-  //     advanced
-  //   ),
-  // });
-
-  // (values && (advanced || !baseNutrient.advancedView))
 
   async createLabel({
     nutrients,

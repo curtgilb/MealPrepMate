@@ -257,7 +257,6 @@ model Recipe {
   totalTime           Int?
   directions          String?
   notes               String?
-  stars               Int?
   photos              Photo[]
   isFavorite          Boolean            @default(false)
   course              Course[]

@@ -2,7 +2,7 @@
 import {
   LabelMaker,
   NutrientAggregator,
-} from "./services/nutrition/NutrientAggregator2.js";
+} from "./services/nutrition/NutritionAggregator.js";
 import { deleteAllRecords, deleteBuckets, seedDb } from "./seed/seed.js";
 import { db } from "./db.js";
 import {
@@ -35,4 +35,3 @@ const label = await labelMaker.createLabel({
   },
   advanced: true,
 });
-console.log("done");

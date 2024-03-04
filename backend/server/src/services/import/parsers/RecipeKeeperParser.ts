@@ -1,4 +1,4 @@
-import { FileMetaData, Match } from "../../../types/CustomTypes.js";
+import { FileMetaData } from "../../../types/CustomTypes.js";
 import { HTMLElement } from "node-html-parser";
 import { parse as parseHTML } from "node-html-parser";
 import { db } from "../../../db.js";
@@ -294,7 +294,3 @@ class RecipeKeeperHtml {
 }
 
 export { RecipeKeeperParser, RecipeKeeperRecord, RecipeKeeperHtml };
-
-// const rkParser = new RecipeKeeperParser("../../../data/recipekeeper.zip");
-// const result = await rkParser.parse();
-// console.log("finish");
