@@ -8,18 +8,28 @@ services:
       - 5432:5432
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-  dbeaver:
-    image: dbeaver/cloudbeaver
+  # dbeaver:
+  #   image: dbeaver/cloudbeaver
+  #   ports:
+  #     - 8080:8978
+  #   volumes:
+  #     - ./cloudbeaver/workspace:/opt/cloudbeaver/workspace
+  pgadmin:
+    image: dpage/pgadmin4:latest
     ports:
-      - 8080:8978
+      - 8000:80
     volumes:
-      - ./cloudbeaver/workspace:/opt/cloudbeaver/workspace
+      - ./backend/pgadmin/config:/var/lib/pgadmin
+      - ./backend/pgadmin/servers.json:/pgadmin4/servers.json
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
+      PGADMIN_DEFAULT_PASSWORD: password1
   redis:
     image: redis
     ports:
       - 6379:6379
     volumes:
-      - ./redis:/data
+      - ./backend/redis:/data
   recipe_nlp:
     build:
       context: ./backend/recipe_nlp

@@ -39,9 +39,11 @@ function toNumber(value: string): number {
 }
 
 const stringArray = z
-  .string()
-  .transform((value) => value.split(",").map((value) => value.trim()))
-  .pipe(z.string().array())
-  .optional();
+  .nullable(z.string())
+  .transform((value) => {
+    if (!value) return [];
+    return value.split(",").map((value) => value.trim());
+  })
+  .pipe(z.string().array());
 
 export { cleanedStringSchema, nullableString, stringArray, coerceNumeric };

@@ -232,7 +232,6 @@ export const recipeExtensions = Prisma.defineExtension((client) => {
               marinadeTime: recipe.marinadeTime,
               directions: recipe.directions,
               notes: recipe.notes,
-
               photos: {
                 set: recipe.photoIds?.map((photoId) => ({ id: photoId })),
               },

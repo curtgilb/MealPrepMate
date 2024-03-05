@@ -104,7 +104,7 @@ export class NutrientLoader {
               },
             ].filter(
               (row) => row.lookupName
-            ) as Prisma.NutrientMappingCreateInput[],
+            ) as Prisma.NutrientImportMappingCreateInput[],
           },
         },
       };
@@ -132,7 +132,7 @@ export class NutrientLoader {
   }
 
   async getDriMapping(): Promise<Map<string, string>> {
-    const nutrients = await db.nutrientMapping.findMany({
+    const nutrients = await db.nutrientImportMapping.findMany({
       where: { importType: "DRI" },
       include: { nutrient: true },
     });
