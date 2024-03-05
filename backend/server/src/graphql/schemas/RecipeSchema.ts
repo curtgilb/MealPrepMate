@@ -11,7 +11,6 @@ const recipe = builder.prismaObject("Recipe", {
     cookTime: t.exposeInt("cookingTime", { nullable: true }),
     marinadeTime: t.exposeInt("marinadeTime", { nullable: true }),
     notes: t.exposeString("notes", { nullable: true }),
-    stars: t.exposeInt("stars", { nullable: true }),
     isFavorite: t.exposeBoolean("isFavorite"),
     leftoverFridgeLife: t.exposeInt("leftoverFridgeLife", { nullable: true }),
     directions: t.exposeString("directions", { nullable: true }),

@@ -233,7 +233,7 @@ class LabelMaker {
             gender: profile.gender,
             ageMin: { lte: age },
             ageMax: { gte: age },
-            specialCondition: "NONE",
+            specialCondition: profile.specialCondition,
           },
         },
       },
@@ -343,4 +343,10 @@ class LabelMaker {
   }
 }
 
-export { NutrientAggregator, LabelMaker, FullNutrient, FullNutritionLabel };
+export {
+  NutrientAggregator,
+  LabelMaker,
+  FullNutrient,
+  FullNutritionLabel,
+  NutrientTarget,
+};

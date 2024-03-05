@@ -10,7 +10,7 @@ import {
   updateMatches,
   uploadImportFile,
 } from "../../services/import/ImportService.js";
-import { LabelObject } from "./NutritionSchema.js";
+import { AggregateLabel } from "./NutritionSchema.js";
 import { recipe } from "./RecipeSchema.js";
 
 function nextPageInfo(dataLength: number, offset: number, totalCount: number) {
@@ -25,10 +25,10 @@ function nextPageInfo(dataLength: number, offset: number, totalCount: number) {
 
 // ============================================ Types ===================================
 const Draft = builder.unionType("Draft", {
-  types: [recipe, LabelObject],
+  types: [recipe, AggregateLabel],
   resolveType: (draft) => {
     if ("calories" in draft) {
-      return LabelObject;
+      return AggregateLabel;
     } else {
       return recipe;
     }
@@ -55,22 +55,22 @@ const ImportJobRecord = builder.prismaObject("ImportRecord", {
     recipe: t.relation("recipe", { nullable: true }),
     verifed: t.exposeBoolean("verifed"),
     nutritionLabel: t.relation("nutritionLabel", { nullable: true }),
-    draft: t.field({
-      type: Draft,
-      nullable: true,
-      resolve: async (importRecord) => {
-        if (importRecord.draftId) {
-          const [recipe, label] = await db.$transaction([
-            db.recipe.findUnique({ where: { id: importRecord.draftId } }),
-            db.nutritionLabel.findUnique({
-              where: { id: importRecord.draftId },
-            }),
-          ]);
-          return recipe ?? label;
-        }
-        return null;
-      },
-    }),
+    // draft: t.field({
+    //   type: Draft,
+    //   nullable: true,
+    //   resolve: async (importRecord) => {
+    //     if (importRecord.draftId) {
+    //       const [recipe, label] = await db.$transaction([
+    //         db.recipe.findUnique({ where: { id: importRecord.draftId } }),
+    //         db.nutritionLabel.findUnique({
+    //           where: { id: importRecord.draftId },
+    //         }),
+    //       ]);
+    //       return recipe ?? label;
+    //     }
+    //     return null;
+    //   },
+    // }),
   }),
 });
 

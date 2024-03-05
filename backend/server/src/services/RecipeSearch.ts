@@ -1,5 +1,5 @@
 import { db } from "../db.js";
-import { RecipeFilter } from "../types/gql.js";
+import { RecipeFilter, NumericalComparison } from "../types/gql.js";
 import { EntityType, Photo, Prisma } from "@prisma/client";
 import { filterIngredients } from "./IngredientSearch.js";
 import { filterRecipesByNutrition } from "./nutrition/NutritionAggregator.js";
@@ -14,14 +14,6 @@ type RecipeQuery = {
 type ExtendedRecipe = Recipe & {
   ingredientFreshness?: number;
   aggregateLabel?: FullNutritionLabel;
-};
-
-type CombinedSearch = {
-  name: string;
-  type: EntityType;
-  servings: number;
-  caloriesPerServing: number;
-  photo: Photo;
 };
 
 class RecipeSearch {
@@ -54,13 +46,23 @@ async function searchRecipes(query: RecipeQuery, filter: RecipeFilter) {
           },
         },
       ],
+      nutritionLabel: {
+        some: {
+          isPrimary: true,
+          servings: {
+            lte: filter.numOfServings?.lte ?? undefined,
+            gte: filter.numOfServings?.lte ?? undefined,
+            equals: filter.numOfServings?.lte ?? undefined,
+          },
+        },
+      },
       course: {
         every: {
           id: { in: filter.courseIds ?? undefined },
         },
       },
       cuisine: {
-        id: { in: filter.cuisineIds ?? undefined },
+        id: { in: filter.cuisineId ?? [] },
       },
       category: {
         every: {
@@ -91,7 +93,23 @@ async function searchRecipes(query: RecipeQuery, filter: RecipeFilter) {
     },
   });
 
-  // Filter by nutrient
+  recipes.filter((recipe) => {
+    try {
+      // Nutrient filters
+      if (filter.nutrientFilters && filter.nutrientFilters.length > 0) {
+        for (const nutrientFilter of filter.nutrientFilters) {
+          passFilter(1, nutrientFilter.target);
+        }
+      }
+      // Ingredient Freshness
+    } catch (err) {
+      if (err instanceof FilterError) {
+        return false;
+      }
+    }
+    return true;
+  });
+  // Check for nutrient filters and filter if needed
 
   // const recipeIds = recipes.map((recipe) => recipe.id);
 
@@ -113,6 +131,36 @@ async function searchRecipes(query: RecipeQuery, filter: RecipeFilter) {
   //     (filteredByIngredients.has(recipe.id) && !filteredByNutrition) ||
   //     filteredByNutrition.has(recipe.id)
   // );
+}
+
+function passFilter(
+  value: number,
+  filter: NumericalComparison | null | undefined
+): void {
+  if (!filter) {
+    return;
+  }
+
+  if (!Number.isNaN(filter.eq) && value !== filter.eq) {
+    throw new FilterError(`${value} does not equal ${filter.eq}`);
+  }
+
+  if (filter.gte || filter.lte) {
+    const gte = (!Number.isNaN(filter.gte) ? filter.gte : -Infinity) as number;
+    const lte = (!Number.isNaN(filter.lte) ? filter.lte : Infinity) as number;
+
+    if (value < gte && value > lte) {
+      throw new FilterError(`${value} is not between ${gte} and ${lte}`);
+    }
+  }
+}
+
+// Define a custom error class
+class FilterError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "FilterError";
+  }
 }
 
 export { ExtendedRecipe };

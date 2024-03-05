@@ -389,6 +389,7 @@ model HealthProfile {
   height                  Float
   yearBorn                Int
   activityLevel           Float
+  specialCondition        SpecialCondition
   targetProteinPercentage Float?
   targetProteinGrams      Float?
   targetCarbsPercentage   Float?
