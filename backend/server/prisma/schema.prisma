@@ -58,6 +58,7 @@ model ShoppingDay {
   day  Int
   mealPlan  MealPlan @relation(fields: [mealPlanId], references: [id])
   mealPlanId String
+   @@map("shopping_day")
 }
 
 model MealPlan {
@@ -68,6 +69,7 @@ model MealPlan {
   mealPlanServings     MealPlanServing[]
   shoppingDays          ShoppingDay[]
   draft               Boolean @default(true)
+  @@map("meal_plan")
 }
 
 model MealPlanServing {
@@ -80,7 +82,7 @@ model MealPlanServing {
   recipe           MealPlanRecipe @relation(fields: [mealPlanRecipeId], references: [id])
   mealPlanRecipeId String
   numberOfServings Int
-
+  @@map("meal_plan_serving")
   @@unique([mealPlanId, day, meal, mealPlanRecipeId])
 }
 
@@ -93,6 +95,7 @@ model MealPlanRecipe {
   factor        Float
   totalServings Int
   servings      MealPlanServing[]
+  @@map("meal_plan_recipe")
 }
 
 model Import {
@@ -106,6 +109,7 @@ model Import {
   imageMapping  Json?
   createdAt     DateTime       @default(now())
   importRecords ImportRecord[]
+  @@map("import")
 }
 
 model ImportRecord {
@@ -124,6 +128,7 @@ model ImportRecord {
   nutritionLabelId String?
   draftId          String?
   createdAt        DateTime        @default(now())
+  @@map("import_record")
 }
 
 // Status for entire import
@@ -159,6 +164,7 @@ model RecipeIngredient {
   ingredientId      String? // relation scalar field (used in the `@relation` attribute above)
   group             RecipeIngredientGroup? @relation(fields: [groupId], references: [id])
   groupId           String?
+  @@map("recipe_ingredient")
 }
 
 model MeasurementUnit {
@@ -173,6 +179,7 @@ model MeasurementUnit {
   servingSizes    NutritionLabel[]
   fromUnit        MeasurementConversion[] @relation("FromUnit")
   toUnit          MeasurementConversion[] @relation("ToUnit")
+  @@map("measurement_unit")
 }
 
 model RecipeIngredientGroup {
@@ -182,6 +189,7 @@ model RecipeIngredientGroup {
   servingsInRecipe Int?
   ingredients      RecipeIngredient[]
   nutritionLabel   NutritionLabel?
+  @@map("recipe_ingredient_group")
 }
 
 model Ingredient {
@@ -197,6 +205,7 @@ model Ingredient {
   expirationRule      ExpirationRule?         @relation(fields: [expirationRuleId], references: [id], onDelete: SetNull)
   expirationRuleId    String?
   conversionRatio     MeasurementConversion[]
+  @@map("ingredient")
 }
 
 model MeasurementConversion {
@@ -208,12 +217,14 @@ model MeasurementConversion {
   conversionRatio Float
   ingredient      Ingredient?     @relation(fields: [ingredientId], references: [id])
   ingredientId    String?
+  @@map("measurement_conversion")
 }
 
 model IngredientCategory {
   id          String       @id @default(cuid())
   name        String       @unique
   ingredients Ingredient[]
+  @@map("ingredient_category")
 }
 
 model ExpirationRule {
@@ -226,6 +237,7 @@ model ExpirationRule {
   fridgeLife  Int?
   freezerLife Int?
   ingredients Ingredient[]
+  @@map("expiration_rule")
 }
 
 model IngredientPrice {
@@ -239,6 +251,7 @@ model IngredientPrice {
   ingredientId String
   unit         MeasurementUnit @relation(fields: [unitId], references: [id])
   unitId       String
+  @@map("ingredient_price")
 }
 
 enum EntityType {
@@ -271,6 +284,9 @@ model Recipe {
   isVerified          Boolean            @default(false)
   nutritionLabel      NutritionLabel[]
   importRecords       ImportRecord[]
+  /// [NutrientMapping]
+  nutrientMapping     Json?
+  @@map("recipe")
 }
 
 // BREAKFAST, LUNCH, DINNER, SNACK
@@ -278,6 +294,7 @@ model Course {
   id      String   @id @default(cuid())
   name    String   @unique
   recipes Recipe[]
+  @@map("course")
 }
 
 // Main Dish, Side Dish, Dessert, Appetizer, Salad, Soup, Bread, Beverage, Sauce or Condiment, Seasoning or Spice, Marinade, Fingerfood, Snack, Drink
@@ -285,12 +302,14 @@ model Category {
   id      String   @id @default(cuid())
   name    String   @unique
   recipes Recipe[]
+  @@map("category")
 }
 
 model Cuisine {
   id      String   @id @default(cuid())
   name    String   @unique
   recipes Recipe[]
+  @@map("cuisine")
 }
 
 model Photo {
@@ -300,6 +319,7 @@ model Photo {
   hash      String  @unique
   recipe    Recipe? @relation(fields: [recipeId], references: [id], onDelete: SetNull)
   recipeId  String?
+  @@map("photo")
 }
 
 model NutritionLabel {
@@ -319,8 +339,10 @@ model NutritionLabel {
   servingsUsed      Float?
   importRecord      ImportRecord[]
   isPrimary         Boolean                  @default(false)
-
+  /// [NutrientMapping]
+  nutrientMapping     Json?
   @@unique([recipeId, ingredientGroupId])
+  @@map("nutrition_label")
 }
 
 model NutritionLabelNutrient {
@@ -329,8 +351,8 @@ model NutritionLabelNutrient {
   nutrient         Nutrient       @relation(fields: [nutrientId], references: [id], onDelete: Restrict)
   nutrientId       String
   value            Float
-
   @@id([nutritionLabelId, nutrientId])
+  @@map("nutrition_label_nutrient")
 }
 
 model Nutrient {
@@ -348,15 +370,18 @@ model Nutrient {
   NutritionLabelNutrients NutritionLabelNutrient[]
   unit                    MeasurementUnit          @relation(fields: [unitId], references: [id])
   unitId                  String
-  mappings                NutrientMapping[]
+  mappings                NutrientImportMapping[]
+  @@map("nutrient")
 }
 
-model NutrientMapping {
+model NutrientImportMapping {
   id         String     @id @default(cuid())
   importType ImportType
   nutrient   Nutrient   @relation(fields: [nutrientId], references: [id])
   nutrientId String
   lookupName String
+
+	@@map("nutrient_import_mapping")
 }
 
 model DailyReferenceIntake {
@@ -368,6 +393,7 @@ model DailyReferenceIntake {
   specialCondition SpecialCondition
   nutrient         Nutrient         @relation(fields: [nutrientId], references: [id])
   nutrientId       String
+  @@map("daily_reference_intake")
 }
 
 enum Gender {
@@ -395,4 +421,5 @@ model HealthProfile {
   targetCarbsGrams        Float?
   targetFatPercentage     Float?
   targetFatGrams          Float?
+  @@map("health_profile")
 }

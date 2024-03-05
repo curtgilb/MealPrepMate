@@ -8,13 +8,13 @@ import { db } from "../../db.js";
 import {
   LabelWithNutrients,
   NutrientWithUnit,
+  NutrientValue,
 } from "../../types/CustomTypes.js";
 
 type NutrientAggregatorArgs = string[] | Recipe[] | NutritionLabel[];
 
 // NutrientId: -> {value: number; perServing: number}
 type NutrientMap = Map<string, NutrientValue>;
-type NutrientValue = { value: number; valuePerServing: number };
 
 type ScalingArgs = {
   factor?: number;
@@ -63,6 +63,8 @@ class NutrientAggregator {
       }
     }
   }
+
+  aggregateNutrientsFromGraphql() {}
 
   getNutrientMap(args: NutrientMapArgs[]): NutrientMap {
     const mappings = args.map((arg) => {

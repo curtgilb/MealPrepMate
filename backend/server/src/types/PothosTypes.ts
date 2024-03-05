@@ -1,5 +1,5 @@
 /* eslint-disable */
-import type { Prisma, ShoppingDay, MealPlan, MealPlanServing, MealPlanRecipe, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, NutrientMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
+import type { Prisma, ShoppingDay, MealPlan, MealPlanServing, MealPlanRecipe, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, NutrientImportMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
 export default interface PrismaTypes {
     ShoppingDay: {
         Name: "ShoppingDay";
@@ -574,19 +574,19 @@ export default interface PrismaTypes {
                 Name: "MeasurementUnit";
             };
             mappings: {
-                Shape: NutrientMapping[];
-                Name: "NutrientMapping";
+                Shape: NutrientImportMapping[];
+                Name: "NutrientImportMapping";
             };
         };
     };
-    NutrientMapping: {
-        Name: "NutrientMapping";
-        Shape: NutrientMapping;
-        Include: Prisma.NutrientMappingInclude;
-        Select: Prisma.NutrientMappingSelect;
-        OrderBy: Prisma.NutrientMappingOrderByWithRelationInput;
-        WhereUnique: Prisma.NutrientMappingWhereUniqueInput;
-        Where: Prisma.NutrientMappingWhereInput;
+    NutrientImportMapping: {
+        Name: "NutrientImportMapping";
+        Shape: NutrientImportMapping;
+        Include: Prisma.NutrientImportMappingInclude;
+        Select: Prisma.NutrientImportMappingSelect;
+        OrderBy: Prisma.NutrientImportMappingOrderByWithRelationInput;
+        WhereUnique: Prisma.NutrientImportMappingWhereUniqueInput;
+        Where: Prisma.NutrientImportMappingWhereInput;
         Create: {};
         Update: {};
         RelationName: "nutrient";

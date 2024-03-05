@@ -1,29 +1,29 @@
-﻿Ref ID,Name,variant,Leftover Freshness,Table Days,Fridge Days,Freezer Days,Human Readable,Defrost Time,Storage Instructions
-1,Hot Dogs,unopened,7,0,14,60,2 months,1,
-2,Hot Dogs,opened,4,0,7,60,2 months,1,
-3,Luncheon Meat,,5,0,14,60,2 months,1,
-4,Bacon,,5,0,7,30,1 month,1,
-5,Sausage,,4,0,2,60, 2 months,1,
-6,Ground Meats,,4,0,2,122,4 Months,1,
-7,"Fresh beef, lamb, and pork",,4,0,5,122,4 Months,1,
-8,Ham,"uncured, uncooked",4,0,5,182,6 Months,1,
-9,Ham,"uncured, cooked",4,0,4,122,4 Months,1,
-10,Ham,"cooked, vacuum-sealed",4,0,14,60,2 Months,1,
-11,"Prosciutto, Parma, Serrano",,4,0,4,30,1 month,1,
-12,Poultry,whole,4,0,2,365,1 year,1,
-13,Poultry,pieces,4,0,2,274,9 months,1,
-14,Fish,"fatty (salmon, tuna, bluefish, mackerel, etc)",4,0,3,90,3 months,1,
-15,Fish,"(cod, flounder, haddock, halibut, sole, etc.)",4,0,3,243,8 months,1,
-16,Crab and Lobster,,4,0,4,120,4 months,1,
-17,Shrimp,,4,0,5,365,1 year,1,
-18,Eggs,shell,4,0,35,0,,1,
-19,Eggs,raw yolks/whites,4,0,4,365,1 year,1,
-20,Eggs,hard-cooked,4,0,7,0,,1,
-21,Eggs,Cooked,4,0,4,90,3 months,1,
-22,Garlic,separated from head,4,21,101,101,,1,
-23,Garlic,peeled,4,7,101,101,,1,
-24,Garlic,Head,4,180,101,101,,1,
-25,Cilantro,,4,101,14,101,,1,"Fill a mason jar or drinking glass a 1/4 the way full with water (about an inch of water). Place unwashed cilantro, stems down, in the water (like a bouquet of flowers). The base of the stems should sit in the water.
+﻿Id,Name,variant,Table Days,Fridge Days,Freezer Days,Human Readable,Defrost Time,Storage Instructions
+cltdh1ayb00009cv9h51g2vrl,Hot Dogs,unopened,0,14,60,2 months,1,
+cltdh1ayc00019cv9esf3hkcw,Hot Dogs,opened,0,7,60,2 months,1,
+cltdh1ayc00029cv9fpdzb9fq,Luncheon Meat,,0,14,60,2 months,1,
+cltdh1ayd00039cv90a0ofn3y,Bacon,,0,7,30,1 month,1,
+cltdh1ayd00049cv95nbjdqcn,Sausage,,0,2,60, 2 months,1,
+cltdh1ayd00059cv9152l5g7d,Ground Meats,,0,2,122,4 Months,1,
+cltdh1aye00069cv938k09abn,"Fresh beef, lamb, and pork",,0,5,122,4 Months,1,
+cltdh1aye00079cv960uuh4et,Ham,"uncured, uncooked",0,5,182,6 Months,1,
+cltdh1aye00089cv9fm5x5ps6,Ham,"uncured, cooked",0,4,122,4 Months,1,
+cltdh1aye00099cv99awzffaq,Ham,"cooked, vacuum-sealed",0,14,60,2 Months,1,
+cltdh1ayf000a9cv92uy77ry0,"Prosciutto, Parma, Serrano",,0,4,30,1 month,1,
+cltdh1ayf000b9cv93tgg8en4,Poultry,whole,0,2,365,1 year,1,
+cltdh1ayf000c9cv9dmvu8w5h,Poultry,pieces,0,2,274,9 months,1,
+cltdh1ayf000d9cv99hwacxje,Fish,"fatty (salmon, tuna, bluefish, mackerel, etc)",0,3,90,3 months,1,
+cltdh1ayg000e9cv9hc6tejvd,Fish,"(cod, flounder, haddock, halibut, sole, etc.)",0,3,243,8 months,1,
+cltdh1ayg000f9cv91pbo8tgt,Crab and Lobster,,0,4,120,4 months,1,
+cltdh1ayg000g9cv90yaqe05z,Shrimp,,0,5,365,1 year,1,
+cltdh1ayh000h9cv9betx6l0o,Eggs,shell,0,35,0,,1,
+cltdh1ayh000i9cv946g0cc5i,Eggs,raw yolks/whites,0,4,365,1 year,1,
+cltdh1ayh000j9cv9563m7rnv,Eggs,hard-cooked,0,7,0,,1,
+cltdh1ayh000k9cv9hvb908ly,Eggs,Cooked,0,4,90,3 months,1,
+cltdh1ayi000l9cv98ithh2pi,Garlic,separated from head,21,0,0,,1,
+cltdh1ayi000m9cv92hgd4ym5,Garlic,peeled,7,0,0,,1,
+cltdh1ayi000n9cv9a0pc3lfs,Garlic,Head,180,0,0,,1,
+cltdh1ayi000o9cv9f92e0xgj,Cilantro,,0,14,0,,1,"Fill a mason jar or drinking glass a 1/4 the way full with water (about an inch of water). Place unwashed cilantro, stems down, in the water (like a bouquet of flowers). The base of the stems should sit in the water.
 
 Place a Ziploc bag (or a reusable silicone bag) over the cilantro leaves. Secure the bag at the mouth of the glass jar with a rubber band. Store the cilantro in the refrigerator.
 
@@ -35,40 +35,47 @@ Place the rolled-up cilantro in an airtight container or Ziploc bag. Store in th
 
 Shelf Life: Cilantro will keep for about 2 weeks this way. Change the paper towel if it becomes too wet. 
 https://livesimply.me/how-to-store-cilantro/"
-26,Peppers,whole,4,101,14,101,,1,"
+cltdh1ayj000p9cv9923v3a17,Peppers,whole,0,14,0,,1,"
     First, if the whole fresh bell peppers are packaged in plastic, remove the bell peppers from the plastic bag before storage. Excess moisture can build up in the plastic, so the better option is to set those peppers free!
     Place the peppers either in a reusable cloth bag (like this or this) or store the peppers loose in the crisper drawer. The bag will keep the peppers organized.
 https://livesimply.me/how-to-store-bell-peppers/"
-27,Peppers,halved,4,101,7,101,,1,"If you only use half a bell pepper and have the other half leftover, keep the seeds and stem attached to the unused half and store the bell pepper in the crisper drawer of the fridge (either in a reusable bag or loose in the crisper drawer). "
-28,Peppers,sliced,4,101,2,101,,1,"Place the pepper slices in a glass, airtight container. The cut peppers will keep fresh for 2-3 days.
+cltdh1ayj000q9cv98pdm6ikj,Peppers,halved,0,7,0,,1,"If you only use half a bell pepper and have the other half leftover, keep the seeds and stem attached to the unused half and store the bell pepper in the crisper drawer of the fridge (either in a reusable bag or loose in the crisper drawer). "
+cltdh1ayj000r9cv93b6a79qo,Peppers,sliced,0,2,0,,1,"Place the pepper slices in a glass, airtight container. The cut peppers will keep fresh for 2-3 days.
 
 If you want the cut pepper to keep for longer (7 days), place a paper towel at the bottom of the glass container with the pepper slices on top. An alternative method is to place the sliced peppers in a bag with a paper towel. "
-29,Onions,,4,14,60,101,,1,"Ideally, onions should be stored in a cool, dark place between 45 and 55 degrees. They will last at least two to three months in the refrigerator as well — just be mindful that their texture may get somewhat soft in the fridge as onions absorb moisture very easily. 
+cltdh1ayj000s9cv9bngo8fau,Onions,,14,60,0,,1,"Ideally, onions should be stored in a cool, dark place between 45 and 55 degrees. They will last at least two to three months in the refrigerator as well — just be mindful that their texture may get somewhat soft in the fridge as onions absorb moisture very easily. 
 https://www.allrecipes.com/article/how-to-store-onions/
 
 Halved, sliced, or chopped raw onions should also be refrigerated, in an airtight container or resealable plastic bag. They will last seven to 10 days when stored this way.
 
 Cooked onions should be stored in an airtight container and refrigerated as well. Like most leftovers, cooked onions will last up to four days in the fridge. "
-30,Bread,,4,4,14,90,3 months,1,
-31,Cabbage,,4,101,14,101,,1,
-32,Leafy Greens,,4,101,7,101,,1,
-33,Citrus Fruit,,4,101,101,101,,1,
-34,Green Onions,,4,101,101,101,,1,
-35,Apples,,4,101,42,101,,1,
-36,Raspberries/Strawberries/Blackberries,,4,101,3,101,,1,
-37,Blueberries,,4,101,14,101,,1,
-38,Tomatoes,,4,101,7,101,,1,
-39,Broccoli/Cauliflower,,4,101,5,101,,1,
-40,Carrots/Parsnips,,4,101,21,101,,1,
-41,Squash,,4,101,5,101,,1,
-42,Cherries,,4,101,3,101,,1,
-43,Grapes,,4,101,7,101,,1,
-44,Mangos,,4,101,7,101,,1,
-45,Peaches,,4,101,5,101,,1,
-46,Pineapple,,4,101,5,101,,1,
-47,Watermelon,,4,101,3,101,,1,
-48,Asparagus,,4,101,4,101,,1,
-49,Brussel Sprouts,,4,101,5,101,,1,
-50,Cucumbers,,4,101,6,101,,1,
-51,Mushrooms,,4,101,7,101,,1,
-52,Tomatoes,,4,101,101,101,,1,
+cltdh1ayk000t9cv95z4m0yq2,Bread,,4,14,90,3 months,1,
+cltdh1ayk000u9cv951fa8i6q,Cabbage,,0,14,0,,1,
+cltdh1ayk000v9cv9biqf8sf5,Leafy Greens,,0,7,0,,1,
+cltdh1ayl000x9cv92zj3466g,Green Onions,,0,101,0,,1,
+cltdh1ayl000y9cv9hy1qhugb,Apples,,0,42,0,,1,
+cltdh1ayl000z9cv907hl0cb9,Raspberries/Strawberries/Blackberries,,0,3,0,,1,
+cltdh1aym00109cv91hksg7aa,Blueberries,,0,14,0,,1,
+cltdh1aym00119cv96yrzf437,Tomatoes,,0,7,0,,1,
+cltdh1aym00129cv93bsobtmk,Broccoli/Cauliflower,,0,5,0,,1,
+cltdh1aym00139cv9ck438wt8,Carrots/Parsnips,,0,21,0,,1,
+cltdh1ayn00149cv94gf572n9,Squash,,0,5,0,,1,
+cltdh1ayn00159cv96w1n87hn,Cherries,,0,3,0,,1,
+cltdh1ayn00169cv96qkd62zl,Grapes,,0,7,0,,1,
+cltdh1ayo00179cv96wz4eitj,Mangos,,0,7,0,,1,
+cltdh1ayo00189cv97chc8vuk,Peaches,,0,5,0,,1,
+cltdh1ayo00199cv9bs28b02y,Pineapple,,0,5,0,,1,
+cltdh1ayo001a9cv9b3iegcx3,Watermelon,,0,3,0,,1,
+cltdh1ayo001b9cv94v40b18b,Asparagus,,0,4,0,,1,
+cltdh1ayp001c9cv9fvm11mhq,Brussel Sprouts,,0,5,0,,1,
+cltdh1ayp001d9cv9cgx9biz3,Cucumbers,,0,6,0,,1,
+cltdh1ayp001e9cv9d5ky3zez,Mushrooms,,0,7,0,,1,
+cltdh1ayp001f9cv9bbv4bmhb,Tomatoes,,7,0,0,,1,
+cltdh1ayq001g9cv9e595a47x,Whole Spices,,1460,0,0,,1,
+cltdh1ayq001h9cv9e5q563hw,Ground Spices,,730,0,0,,1,
+cltdh1ayq001i9cv9d78t32cy,Citrus Fruit,,2,31,0,,1,
+cltdh1ayq001j9cv9gu0i3qzq,Greek Yogurt,,0,21,0,,1,
+cltdh1ayr001k9cv9f8bc75v1,Olive Oil,,540,0,0,,1,
+cltdh1ayr001l9cv9a03k9sbn,Fresh Herbs,,0,7,0,,1,
+cltdh1ayr001m9cv9as3p8aa6,Vinegars,,1095,0,0,,1,
+cltdh1ayr001n9cv9euq46y0u,Sour Cream,,0,14,0,,1,

@@ -4,8 +4,11 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace PrismaJson {
     type ImageMapping = { [key: string]: string };
+    type NutrientMapping = { [key: string]: NutrientValue };
   }
 }
+
+type NutrientValue = { value: number; valuePerServing: number };
 
 type Match = {
   recipeMatchId?: string | undefined;
@@ -172,4 +175,5 @@ export {
   ImportQuery,
   Match,
   NutrientWithUnit,
+  NutrientValue,
 };

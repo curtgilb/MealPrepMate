@@ -41,9 +41,9 @@ AggregateLabel.implement({
     carbPercentage: t.exposeFloat("carbPercentage"),
     proteinPercentage: t.exposeFloat("proteinPercentage"),
     fatPercentage: t.exposeFloat("fatPercentage"),
-    general: t.field({
+    nutrients: t.field({
       type: [AggregateNutrient],
-      resolve: (parent) => parent.general,
+      resolve: (parent) => parent.nutrients,
     }),
     carbohydrates: t.field({
       type: [AggregateNutrient],
