@@ -1,5 +1,4 @@
 import {
-  NutritionLabelsInput,
   EditNutritionLabelInput,
   CreateNutritionLabelInput,
 } from "../types/gql.js";
@@ -120,27 +119,14 @@ export const nutritionExtension = Prisma.defineExtension((client) => {
     model: {
       nutritionLabel: {
         async createNutritionLabel(
-          args: NutritionLabelsInput,
+          args: CreateNutritionLabelInput,
           query?: NutritionLabelQuery
-        ): Promise<NutritionLabel[]> {
+        ): Promise<NutritionLabel> {
           // Create base label
           const baseLabel = await client.nutritionLabel.create({
-            data: createNutritionLabelStmt(args.baseLabel, true),
+            data: createNutritionLabelStmt(args, true),
             ...query,
           });
-
-          const subLabels: NutritionLabel[] = [];
-          if (args.ingredientGroupLabels) {
-            for (const label of args.ingredientGroupLabels) {
-              subLabels.push(
-                await client.nutritionLabel.create({
-                  data: createNutritionLabelStmt(label, false),
-                  ...query,
-                })
-              );
-            }
-          }
-          return [baseLabel, ...subLabels];
         },
 
         async editNutritionLabels(

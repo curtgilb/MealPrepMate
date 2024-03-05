@@ -64,8 +64,6 @@ class NutrientAggregator {
     }
   }
 
-  aggregateNutrientsFromGraphql() {}
-
   getNutrientMap(args: NutrientMapArgs[]): NutrientMap {
     const mappings = args.map((arg) => {
       const label = this.aggregatedNutrients.get(arg.id);
@@ -235,7 +233,7 @@ class LabelMaker {
             gender: profile.gender,
             ageMin: { lte: age },
             ageMax: { gte: age },
-            specialCondition: profile.specialCondition,
+            specialCondition: "NONE",
           },
         },
       },
@@ -345,10 +343,4 @@ class LabelMaker {
   }
 }
 
-export {
-  NutrientAggregator,
-  LabelMaker,
-  FullNutrient,
-  FullNutritionLabel,
-  NutrientTarget,
-};
+export { NutrientAggregator, LabelMaker, FullNutrient, FullNutritionLabel };

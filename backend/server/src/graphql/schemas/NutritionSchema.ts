@@ -114,6 +114,7 @@ const createNutritionLabel = builder.inputType("CreateNutritionLabelInput", {
   fields: (t) => ({
     name: t.string(),
     connectingId: t.string(),
+    recipeGroupId: t.string({ required: false }),
     servings: t.float(),
     servingSize: t.float(),
     servingSizeUnitId: t.string(),
