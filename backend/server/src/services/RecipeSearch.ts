@@ -16,28 +16,18 @@ type ExtendedRecipe = Recipe & {
   aggregateLabel?: FullNutritionLabel;
 };
 
-const RecipeInclude =
-  Prisma.validator<Prisma.RecipeDefaultArgs>()({
-    include: {
-      ingredients: {
-        include: { ingredient: { include: { expirationRule: true } } },
-      },
-    }
+const RecipeInclude = Prisma.validator<Prisma.RecipeDefaultArgs>()({
+  include: {
+    ingredients: {
+      include: { ingredient: { include: { expirationRule: true } } },
+    },
+  },
+});
 
-  });
-
-type RecipeWithRule = Prisma.RecipeGetPayload<
-  typeof RecipeInclude
->;
-
-class RecipeSearch {
-  searchRecipesAndLabels(query: RecipeQuery, filter: RecipeFilter) {}
-  searchRecipes(query: RecipeQuery, filter: RecipeFilter) {}
-  matchRecipe() {}
-}
+type RecipeWithRule = Prisma.RecipeGetPayload<typeof RecipeInclude>;
 
 async function searchRecipes(query: RecipeQuery, filter: RecipeFilter) {
-  const recipes = await db.recipe.findMany({
+  const recipes = (await db.recipe.findMany({
     include: {
       ...query.include,
       ingredients: {
@@ -108,15 +98,29 @@ async function searchRecipes(query: RecipeQuery, filter: RecipeFilter) {
       },
       isFavorite: filter.isFavorite ?? undefined,
     },
-  });
+  })) as unknown as RecipeWithRule[];
 
   recipes.filter((recipe) => {
     try {
       // Ingredient Freshness
-      for (const ingredient of recipe.ingredients) {
-        ingredient.
-      }
+      if (filter.ingredientFreshDays) {
+        const maxIngredientLife = recipe.ingredients
+          .map((ingredient) => {
+            const tableLife =
+              ingredient.ingredient?.expirationRule?.tableLife ?? 0;
+            const fridgeLife =
+              ingredient.ingredient?.expirationRule?.fridgeLife ?? 0;
+            const freezerLife =
+              ingredient.ingredient?.expirationRule?.freezerLife ?? 0;
+            return Math.max(tableLife, fridgeLife, freezerLife);
+          })
+          .reduce((acc, cur) => {
+            if (cur < acc) return cur;
+            return acc;
+          }, Infinity);
 
+        passFilter(maxIngredientLife, filter.ingredientFreshDays);
+      }
 
       // Nutrient filters
       if (filter.nutrientFilters && filter.nutrientFilters.length > 0) {
