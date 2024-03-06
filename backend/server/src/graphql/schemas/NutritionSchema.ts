@@ -38,7 +38,7 @@ AggregateNutrient.implement({
     target: t.field({
       type: nutrientTarget,
       nullable: true,
-      resolve: (parent) => parent.target,
+      resolve: (parent) => parent?.target,
     }),
     children: t.field({
       type: [AggregateNutrient],
@@ -114,7 +114,6 @@ const createNutritionLabel = builder.inputType("CreateNutritionLabelInput", {
   fields: (t) => ({
     name: t.string(),
     connectingId: t.string(),
-    recipeGroupId: t.string({ required: false }),
     servings: t.float(),
     servingSize: t.float(),
     servingSizeUnitId: t.string(),

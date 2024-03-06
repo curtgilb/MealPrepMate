@@ -16,6 +16,20 @@ type ExtendedRecipe = Recipe & {
   aggregateLabel?: FullNutritionLabel;
 };
 
+const RecipeInclude =
+  Prisma.validator<Prisma.RecipeDefaultArgs>()({
+    include: {
+      ingredients: {
+        include: { ingredient: { include: { expirationRule: true } } },
+      },
+    }
+
+  });
+
+type RecipeWithRule = Prisma.RecipeGetPayload<
+  typeof RecipeInclude
+>;
+
 class RecipeSearch {
   searchRecipesAndLabels(query: RecipeQuery, filter: RecipeFilter) {}
   searchRecipes(query: RecipeQuery, filter: RecipeFilter) {}
@@ -26,6 +40,9 @@ async function searchRecipes(query: RecipeQuery, filter: RecipeFilter) {
   const recipes = await db.recipe.findMany({
     include: {
       ...query.include,
+      ingredients: {
+        include: { ingredient: { include: { expirationRule: true } } },
+      },
     },
     select: {
       ...query.select,
@@ -95,13 +112,18 @@ async function searchRecipes(query: RecipeQuery, filter: RecipeFilter) {
 
   recipes.filter((recipe) => {
     try {
+      // Ingredient Freshness
+      for (const ingredient of recipe.ingredients) {
+        ingredient.
+      }
+
+
       // Nutrient filters
       if (filter.nutrientFilters && filter.nutrientFilters.length > 0) {
         for (const nutrientFilter of filter.nutrientFilters) {
           passFilter(1, nutrientFilter.target);
         }
       }
-      // Ingredient Freshness
     } catch (err) {
       if (err instanceof FilterError) {
         return false;

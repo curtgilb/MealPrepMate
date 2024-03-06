@@ -52,23 +52,21 @@ function createNutritionLabelStmt(
     servingsUsed: input.servingsUsed,
     isPrimary: isBaseLabel,
     verifed,
+    servingSizeUnit: input.servingSizeUnitId
+      ? { connect: { id: input.servingSizeUnitId } }
+      : undefined,
+    nutrients:
+      input.nutrients && input.nutrients.length > 0
+        ? {
+            createMany: {
+              data: input.nutrients.map((nutrient) => ({
+                nutrientId: nutrient.nutrientId,
+                value: nutrient.value,
+              })),
+            },
+          }
+        : undefined,
   };
-
-  if (input.servingSizeUnitId) {
-    stmt.servingSizeUnit = { connect: { id: input.servingSizeUnitId } };
-  }
-
-  //   Add nutrients
-  if (input.nutrients) {
-    stmt.nutrients = {
-      createMany: {
-        data: input.nutrients.map((nutrient) => ({
-          nutrientId: nutrient.nutrientId,
-          value: nutrient.value,
-        })),
-      },
-    };
-  }
 
   if (input.connectingId) {
     if (isBaseLabel) {
@@ -122,8 +120,7 @@ export const nutritionExtension = Prisma.defineExtension((client) => {
           args: CreateNutritionLabelInput,
           query?: NutritionLabelQuery
         ): Promise<NutritionLabel> {
-          // Create base label
-          const baseLabel = await client.nutritionLabel.create({
+          return await client.nutritionLabel.create({
             data: createNutritionLabelStmt(args, true),
             ...query,
           });
