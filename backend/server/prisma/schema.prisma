@@ -153,8 +153,6 @@ model RecipeIngredient {
   sentence          String
   quantity          Float?
   name              String?
-  comment           String?
-  other             String?
   order             Int
   unit              MeasurementUnit?       @relation(fields: [measurementUnitId], references: [id])
   measurementUnitId String?
@@ -185,8 +183,8 @@ model MeasurementUnit {
 model RecipeIngredientGroup {
   id               String             @id @default(cuid())
   name             String
-  servings         Int?
-  servingsInRecipe Int?
+  recipe           Recipe             @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId         String
   ingredients      RecipeIngredient[]
   nutritionLabel   NutritionLabel?
   @@map("recipe_ingredient_group")
@@ -284,6 +282,7 @@ model Recipe {
   isVerified          Boolean            @default(false)
   nutritionLabel      NutritionLabel[]
   importRecords       ImportRecord[]
+  ingredientGroups    RecipeIngredientGroup[]
   @@map("recipe")
 }
 
@@ -323,8 +322,8 @@ model Photo {
 model NutritionLabel {
   id                String                   @id @default(cuid())
   type                EntityType          @default(LABEL)
-  recipe            Recipe?                  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  recipeId          String?
+  recipe            Recipe                 @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId          String
   ingredientGroup   RecipeIngredientGroup?   @relation(fields: [ingredientGroupId], references: [id], onDelete: Cascade)
   ingredientGroupId String?                  @unique
   nutrients         NutritionLabelNutrient[]
@@ -405,12 +404,12 @@ enum SpecialCondition {
 
 model HealthProfile {
   id                      String @id @default(cuid())
-  weight                  Float
+  weight                  Float?
   gender                  Gender
-  bodyFatPercentage       Float
-  height                  Float
+  bodyFatPercentage       Float?
+  height                  Float?
   yearBorn                Int
-  activityLevel           Float
+  activityLevel           Float?
   specialCondition        SpecialCondition
   targetProteinPercentage Float?
   targetProteinGrams      Float?

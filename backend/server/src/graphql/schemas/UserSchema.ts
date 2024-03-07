@@ -1,4 +1,4 @@
-import { Gender } from "@prisma/client";
+import { Gender, SpecialCondition } from "@prisma/client";
 import { builder } from "../builder.js";
 import { db } from "../../db.js";
 // ============================================ Types ===================================
@@ -6,15 +6,19 @@ builder.prismaObject("HealthProfile", {
   name: "HealthProfile",
   fields: (t) => ({
     id: t.exposeString("id"),
-    weight: t.exposeFloat("weight"),
+    weight: t.exposeFloat("weight", { nullable: true }),
     gender: t.exposeString("gender"),
-    bodyFatPercentage: t.exposeFloat("bodyFatPercentage"),
-    height: t.exposeFloat("height"),
+    bodyFatPercentage: t.exposeFloat("bodyFatPercentage", { nullable: true }),
+    height: t.exposeFloat("height", { nullable: true }),
+    specialCondition: t.field({
+      type: SpecialCondition,
+      resolve: (parent) => parent.specialCondition,
+    }),
     age: t.field({
       type: "Int",
       resolve: (profile) => new Date().getFullYear() - profile.yearBorn,
     }),
-    activityLevel: t.exposeFloat("activityLevel"),
+    activityLevel: t.exposeFloat("activityLevel", { nullable: true }),
     targetProteinPecentage: t.exposeFloat("targetProteinPercentage", {
       nullable: true,
     }),
@@ -32,11 +36,12 @@ builder.prismaObject("HealthProfile", {
 // ============================================ Inputs ==================================
 const profileInput = builder.inputType("ProfileInput", {
   fields: (t) => ({
-    weight: t.float({ required: true }),
+    weight: t.float({ required: false }),
     gender: t.field({ type: Gender, required: true }),
     bodyFatPercentage: t.float({ required: true }),
     height: t.float({ required: true }),
     birthYear: t.int({ required: true }),
+    specialCondition: t.field({ type: SpecialCondition, required: true }),
     activityLevel: t.float({ required: true }),
     targetProteinPecentage: t.float({ required: false }),
     targetProteinGrams: t.float({ required: false }),
@@ -74,6 +79,7 @@ builder.mutationFields((t) => ({
           bodyFatPercentage: args.profile.bodyFatPercentage,
           height: args.profile.height,
           yearBorn: args.profile.birthYear,
+          specialCondition: args.profile.specialCondition,
           activityLevel: args.profile.activityLevel,
           targetCarbsGrams: args.profile.targetCarbsGrams,
           targetCarbsPercentage: args.profile.targetCarbsPercentage,
@@ -109,6 +115,7 @@ builder.mutationFields((t) => ({
           targetProteinGrams: args.profile.targetProteinGrams,
           targetProteinPercentage: args.profile.targetProteinGrams,
         },
+        ...query,
       });
     },
   }),

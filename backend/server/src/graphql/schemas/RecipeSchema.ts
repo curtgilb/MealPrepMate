@@ -5,9 +5,11 @@ import { AggregateLabel } from "./NutritionSchema.js";
 import { ExtendedRecipe } from "../../services/RecipeSearch.js";
 import { getIngredientMaxFreshness } from "../../services/ingredient/IngredientService.js";
 import {
+  LabelMaker,
   NutrientAggregator,
   NutrientMap,
 } from "../../services/nutrition/NutritionAggregator.js";
+import { getAggregatedLabel } from "../../services/recipe/RecipeService.js";
 
 // ============================================ Types ===================================
 const recipe = builder.prismaObject("Recipe", {
@@ -26,29 +28,31 @@ const recipe = builder.prismaObject("Recipe", {
     course: t.relation("course"),
     ingredients: t.relation("ingredients"),
     photos: t.relation("photos"),
-    // aggregateLabel: t.field({
-    //   type: AggregateLabel,
-    //   resolve: async (parent, args, context, info) => {
-    //     let nutrientMap: NutrientMap;
-    //     if (Object.prototype.hasOwnProperty.call(parent, "nutrientMap")) {
-    //       nutrientMap = (parent as ExtendedRecipe).nutrientMap;
-    //     } else {
-    //       const aggregator = new NutrientAggregator([parent.id]);
-    //       aggregator.getNutrientMap();
-    //     }
-    //   },
-    // }),
-    // ingredientFreshness: t.int({
-    //   nullable: true,
-    //   resolve: async (recipe, args, context, info) => {
-    //     if (
-    //       Object.prototype.hasOwnProperty.call(recipe, "ingredientFreshness")
-    //     ) {
-    //       return (recipe as ExtendedRecipe).ingredientFreshness;
-    //     }
-    //     return await getIngredientMaxFreshness(recipe.id);
-    //   },
-    // }),
+    aggregateLabel: t.field({
+      type: AggregateLabel,
+      nullable: true,
+      args: {
+        advanced: t.arg.boolean(),
+      },
+      resolve: async (parent, args) => {
+        if (Object.prototype.hasOwnProperty.call(parent, "nutrientMap")) {
+          return (parent as ExtendedRecipe).aggregateLabel;
+        } else {
+          return await getAggregatedLabel(parent.id, args.advanced ?? false);
+        }
+      },
+    }),
+    ingredientFreshness: t.int({
+      nullable: true,
+      resolve: async (recipe) => {
+        if (
+          Object.prototype.hasOwnProperty.call(recipe, "ingredientFreshness")
+        ) {
+          return (recipe as ExtendedRecipe).ingredientFreshness;
+        }
+        return await getIngredientMaxFreshness(recipe.id);
+      },
+    }),
   }),
 });
 
@@ -68,9 +72,8 @@ builder.prismaObject("RecipeIngredient", {
 builder.prismaObject("RecipeIngredientGroup", {
   name: "RecipeIngredientGroup",
   fields: (t) => ({
+    id: t.exposeString("id"),
     name: t.exposeString("name"),
-    servings: t.exposeInt("servings", { nullable: true }),
-    servingsInRecipe: t.exposeInt("servingsInRecipe", { nullable: true }),
     nutritionLabel: t.relation("nutritionLabel", { nullable: true }),
   }),
 });
@@ -103,8 +106,6 @@ const recipeIngredientInput = builder.inputType("RecipeIngredientInput", {
     quantity: t.int(),
     unitId: t.string(),
     name: t.string(),
-    comment: t.string(),
-    other: t.string(),
     ingredientId: t.string(),
     groupName: t.string(),
     groupId: t.id(),
@@ -224,12 +225,18 @@ builder.mutationFields((t) => ({
       return await db.recipeIngredient.findMany({ ...query });
     },
   }),
-  // deleteRecipe: t.prismaField({
-  //   type: ,
-  //   args: {
-  //     recipeId: t.id({ required: true }),
-  //   },
-  // }),
+  deleteRecipe: t.prismaField({
+    type: "Recipe",
+    args: {
+      recipeId: t.arg.string({ required: true }),
+    },
+    resolve: async (query, root, args) => {
+      return await db.recipe.delete({
+        where: { id: args.recipeId },
+        ...query,
+      });
+    },
+  }),
 }));
 
 export { recipe };

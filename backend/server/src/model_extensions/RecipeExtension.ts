@@ -5,7 +5,11 @@ import {
   Recipe,
   RecipeIngredient,
 } from "@prisma/client";
-import { CreateNutritionLabelInput, RecipeInput } from "../types/gql.js";
+import {
+  CreateNutritionLabelInput,
+  RecipeIngredientUpdateInput,
+  RecipeInput,
+} from "../types/gql.js";
 import { toTitleCase } from "../util/utils.js";
 import { db } from "../db.js";
 import { UnitSearch } from "../services/search/UnitSearch.js";
@@ -50,16 +54,14 @@ async function tagIngredients(
   return (await response.json()) as RecipeNlpResponse[];
 }
 
-async function createRecipeCreateStmt(
-  input: {
-    recipe: RecipeInput;
-    nutritionLabel?: CreateNutritionLabelInput;
-    matchingRecipeId?: string;
-  },
-  units: MeasurementUnit[],
-  ingredients: Ingredient[],
-  verifed: boolean = false
-) {
+async function createRecipeCreateStmt(input: {
+  recipe: RecipeInput;
+  nutritionLabel?: CreateNutritionLabelInput;
+  matchingRecipeId?: string;
+  units?: MeasurementUnit[];
+  ingredients?: Ingredient[];
+  verifed: boolean;
+}) {
   const { recipe, nutritionLabel, matchingRecipeId } = input;
   return {
     title: recipe.title,
@@ -104,6 +106,7 @@ async function createRecipeCreateStmt(
   };
 }
 
+// sentence => ingredient
 async function getMatchingRecipeIngredients(existingRecipeId: string) {
   const ingredients = await db.recipeIngredient.findMany({
     where: { recipeId: existingRecipeId },
@@ -120,6 +123,8 @@ type RecipeIngredientInput = {
   ingredients?: Ingredient[];
   matchingRecipeId?: string;
 };
+
+g;
 
 async function createRecipeIngredientsStmt(
   input: RecipeIngredientInput | undefined
@@ -182,39 +187,10 @@ export const recipeExtensions = Prisma.defineExtension((client) => {
       recipe: {
         async createRecipe(recipe: RecipeInput, query?: RecipeQuery) {
           return await client.recipe.create({
-            data: {
-              title: recipe.title,
-              source: recipe.source,
-              preparationTime: recipe.prepTime,
-              cookingTime: recipe.cookTime,
-              marinadeTime: recipe.marinadeTime,
-              directions: recipe.directions,
-              notes: recipe.notes,
-              photos: {
-                connect: recipe.photoIds?.map((photoId) => ({ id: photoId })),
-              },
-              isFavorite: recipe.isFavorite || false,
-              course: {
-                connect: recipe.courseIds?.map((id) => ({ id })),
-              },
-              category: {
-                connect: recipe.categoryIds?.map((id) => ({ id })),
-              },
-              cuisine: {
-                connect: recipe.cuisineId
-                  ? { id: recipe.cuisineId }
-                  : undefined,
-              },
-              ingredients: await createRecipeIngredientsStmt({
-                ingredientTxt: recipe.ingredients,
-              }),
-              leftoverFreezerLife: recipe.leftoverFreezerLife,
-              leftoverFridgeLife: recipe.leftoverFridgeLife,
-            },
+            data: await createRecipeCreateStmt({ recipe, verifed: true }),
             ...query,
           });
         },
-
         async updateRecipe(
           recipeId: string,
           recipe: RecipeInput,
@@ -225,7 +201,7 @@ export const recipeExtensions = Prisma.defineExtension((client) => {
               id: recipeId,
             },
             data: {
-              title: recipe.title ? toTitleCase(recipe.title) : undefined,
+              title: recipe.title,
               source: recipe.source,
               preparationTime: recipe.prepTime,
               cookingTime: recipe.cookTime,
@@ -249,6 +225,97 @@ export const recipeExtensions = Prisma.defineExtension((client) => {
               leftoverFridgeLife: recipe.leftoverFridgeLife,
             },
             ...query,
+          });
+        },
+        async updateRecipeIngredients(
+          recipe: RecipeIngredientUpdateInput,
+          query?: RecipeQuery
+        ): Promise<Recipe> {
+          // Add, update, then delete
+          await client.$transaction(async (tx) => {
+            const groupNameToId = new Map<string, string>();
+
+            // Add New Groups
+            if (recipe.groupsToAdd && recipe.groupsToAdd.length > 0) {
+              await tx.recipeIngredientGroup.createMany({
+                data: recipe.groupsToAdd.map((newGroup) => ({
+                  name: newGroup,
+                  recipeId: recipe.recipeId,
+                })),
+              });
+            }
+
+            //  Delete groups
+            if (recipe.groupsToDelete && recipe.groupsToDelete.length > 0) {
+              await tx.recipeIngredientGroup.deleteMany({
+                where: { id: { in: recipe.groupsToDelete } },
+              });
+            }
+
+            (
+              await tx.recipeIngredientGroup.findMany({
+                where: { recipeId: recipe.recipeId },
+              })
+            ).forEach((group) => {
+              groupNameToId.set(group.name, group.id);
+            });
+
+            // Add ingredients
+            if (recipe.ingredientsToAdd && recipe.ingredientsToAdd.length > 0) {
+              for (const ingredient of recipe.ingredientsToAdd) {
+                const groupId = ingredient.groupId
+                  ? ingredient.groupId
+                  : groupNameToId.get(ingredient.groupName ?? "");
+                await tx.recipeIngredient.create({
+                  data: {
+                    recipe: { connect: { id: recipe.recipeId } },
+                    order: ingredient.order,
+                    sentence: ingredient.sentence,
+                    quantity: ingredient.quantity,
+                    ingredient: { connect: { id: ingredient.ingredientId } },
+                    unit: { connect: { id: ingredient.ingredientId } },
+                    name: ingredient.name,
+                    group: groupId ? { connect: groupId } : undefined,
+                  },
+                });
+              }
+            }
+
+            if (
+              recipe.ingredientsToUpdate &&
+              recipe.ingredientsToUpdate.length > 0
+            ) {
+              for (const ingredient of recipe.ingredientsToUpdate) {
+                const groupId = ingredient.groupId
+                  ? ingredient.groupId
+                  : groupNameToId.get(ingredient.groupName ?? "");
+                await tx.recipeIngredient.update({
+                  where: { id: ingredient.id },
+                  data: {
+                    order: ingredient.order,
+                    sentence: ingredient.sentence,
+                    quantity: ingredient.quantity,
+                    unit: ingredient.unitId
+                      ? { connect: { id: ingredient.unitId } }
+                      : undefined,
+                    name: ingredient.name,
+                    ingredient: ingredient.ingredientId
+                      ? { connect: { id: ingredient.ingredientId } }
+                      : undefined,
+                    group: groupId ? { connect: { id: groupId } } : undefined,
+                  },
+                });
+              }
+            }
+
+            if (
+              recipe.ingredientsToDelete &&
+              recipe.ingredientsToDelete.length > 0
+            ) {
+              await tx.ingredient.deleteMany({
+                where: { id: { in: recipe.ingredientsToDelete } },
+              });
+            }
           });
         },
       },

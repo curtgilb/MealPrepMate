@@ -223,9 +223,13 @@ export default interface PrismaTypes {
         Where: Prisma.RecipeIngredientGroupWhereInput;
         Create: {};
         Update: {};
-        RelationName: "ingredients" | "nutritionLabel";
+        RelationName: "recipe" | "ingredients" | "nutritionLabel";
         ListRelations: "ingredients";
         Relations: {
+            recipe: {
+                Shape: Recipe;
+                Name: "Recipe";
+            };
             ingredients: {
                 Shape: RecipeIngredient[];
                 Name: "RecipeIngredient";
@@ -369,8 +373,8 @@ export default interface PrismaTypes {
         Where: Prisma.RecipeWhereInput;
         Create: {};
         Update: {};
-        RelationName: "photos" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabel" | "importRecords";
-        ListRelations: "photos" | "course" | "category" | "ingredients" | "mealPlans" | "nutritionLabel" | "importRecords";
+        RelationName: "photos" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabel" | "importRecords" | "ingredientGroups";
+        ListRelations: "photos" | "course" | "category" | "ingredients" | "mealPlans" | "nutritionLabel" | "importRecords" | "ingredientGroups";
         Relations: {
             photos: {
                 Shape: Photo[];
@@ -403,6 +407,10 @@ export default interface PrismaTypes {
             importRecords: {
                 Shape: ImportRecord[];
                 Name: "ImportRecord";
+            };
+            ingredientGroups: {
+                Shape: RecipeIngredientGroup[];
+                Name: "RecipeIngredientGroup";
             };
         };
     };
@@ -496,7 +504,7 @@ export default interface PrismaTypes {
         ListRelations: "nutrients" | "importRecord";
         Relations: {
             recipe: {
-                Shape: Recipe | null;
+                Shape: Recipe;
                 Name: "Recipe";
             };
             ingredientGroup: {

@@ -35,10 +35,7 @@ class NutrientAggregator {
       return await db.nutritionLabel.findMany({
         where: {
           verifed: true,
-          OR: [
-            { recipeId: { in: args as string[] } },
-            { id: { in: args as string[] } },
-          ],
+          recipeId: { in: args as string[] },
         },
         include: { nutrients: true, servingSizeUnit: true },
       });
@@ -50,7 +47,7 @@ class NutrientAggregator {
   async addLabels(args: string[] | LabelWithNutrients[]) {
     const labels = await this.getLabels(args);
     for (const label of labels) {
-      const id = label.recipeId ?? label.id;
+      const id = label.recipeId;
       const existing = this.aggregatedNutrients.get(id);
       if (!existing) {
         const agg = new LabelAggregator();
@@ -374,4 +371,5 @@ export {
   FullNutritionLabel,
   NutrientMap,
   ServingInfo,
+  NutrientTarget,
 };
