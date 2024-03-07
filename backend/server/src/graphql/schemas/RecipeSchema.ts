@@ -1,6 +1,13 @@
 import { db } from "../../db.js";
 import { builder } from "../builder.js";
 import { numericalComparison } from "./UtilitySchema.js";
+import { AggregateLabel } from "./NutritionSchema.js";
+import { ExtendedRecipe } from "../../services/RecipeSearch.js";
+import { getIngredientMaxFreshness } from "../../services/ingredient/IngredientService.js";
+import {
+  NutrientAggregator,
+  NutrientMap,
+} from "../../services/nutrition/NutritionAggregator.js";
 
 // ============================================ Types ===================================
 const recipe = builder.prismaObject("Recipe", {
@@ -14,32 +21,32 @@ const recipe = builder.prismaObject("Recipe", {
     isFavorite: t.exposeBoolean("isFavorite"),
     leftoverFridgeLife: t.exposeInt("leftoverFridgeLife", { nullable: true }),
     directions: t.exposeString("directions", { nullable: true }),
-    isVerified: t.exposeBoolean("isVerified", { nullable: true }),
     cuisine: t.relation("cuisine"),
     category: t.relation("category"),
     course: t.relation("course"),
     ingredients: t.relation("ingredients"),
     photos: t.relation("photos"),
     // aggregateLabel: t.field({
-    //   type: LabelObject,
+    //   type: AggregateLabel,
     //   resolve: async (parent, args, context, info) => {
-    //     if (Object.prototype.hasOwnProperty.call(parent, "aggregateLabel")) {
-    //       return (parent as ExtendedRecipe).aggregateLabel;
+    //     let nutrientMap: NutrientMap;
+    //     if (Object.prototype.hasOwnProperty.call(parent, "nutrientMap")) {
+    //       nutrientMap = (parent as ExtendedRecipe).nutrientMap;
+    //     } else {
+    //       const aggregator = new NutrientAggregator([parent.id]);
+    //       aggregator.getNutrientMap();
     //     }
-    //     return await getAggregateLabel({
-    //       recipes: [{ recipeId: parent.id }],
-    //       advanced: false,
-    //     });
     //   },
     // }),
     // ingredientFreshness: t.int({
-    //   resolve: (recipe, args, context, info) => {
+    //   nullable: true,
+    //   resolve: async (recipe, args, context, info) => {
     //     if (
     //       Object.prototype.hasOwnProperty.call(recipe, "ingredientFreshness")
     //     ) {
     //       return (recipe as ExtendedRecipe).ingredientFreshness;
     //     }
-    //     return 2;
+    //     return await getIngredientMaxFreshness(recipe.id);
     //   },
     // }),
   }),
@@ -53,8 +60,6 @@ builder.prismaObject("RecipeIngredient", {
     quantity: t.exposeFloat("quantity", { nullable: true }),
     unit: t.relation("unit"),
     name: t.exposeString("name", { nullable: true }),
-    comment: t.exposeString("comment", { nullable: true }),
-    other: t.exposeString("other", { nullable: true }),
     recipe: t.relation("recipe"),
     baseIngredient: t.relation("ingredient", { nullable: true }),
   }),

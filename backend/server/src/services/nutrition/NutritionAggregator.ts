@@ -11,8 +11,6 @@ import {
   NutrientValue,
 } from "../../types/CustomTypes.js";
 
-type NutrientAggregatorArgs = string[] | Recipe[] | NutritionLabel[];
-
 // NutrientId: -> {value: number; perServing: number}
 type NutrientMap = Map<string, NutrientValue>;
 
@@ -27,30 +25,30 @@ type NutrientMapArgs = {
 } & ScalingArgs;
 
 class NutrientAggregator {
-  private args: NutrientAggregatorArgs;
   //   Recipe ID/Standalone label id -> nutrient map
   private aggregatedNutrients = new Map<string, LabelAggregator>();
 
-  constructor(args: NutrientAggregatorArgs) {
-    this.args = args;
+  private async getLabels(
+    args: string[] | LabelWithNutrients[]
+  ): Promise<LabelWithNutrients[]> {
+    if (typeof args[0] === "string") {
+      return await db.nutritionLabel.findMany({
+        where: {
+          verifed: true,
+          OR: [
+            { recipeId: { in: args as string[] } },
+            { id: { in: args as string[] } },
+          ],
+        },
+        include: { nutrients: true, servingSizeUnit: true },
+      });
+    } else {
+      return args as LabelWithNutrients[];
+    }
   }
 
-  private async getLabels(): Promise<LabelWithNutrients[]> {
-    const ids: string[] = this.args.map((item) =>
-      typeof item === "string" ? item : item.id
-    );
-
-    return await db.nutritionLabel.findMany({
-      where: {
-        verifed: true,
-        OR: [{ recipeId: { in: ids } }, { id: { in: ids } }],
-      },
-      include: { nutrients: true, servingSizeUnit: true },
-    });
-  }
-
-  async aggregateNutrients() {
-    const labels = await this.getLabels();
+  async addLabels(args: string[] | LabelWithNutrients[]) {
+    const labels = await this.getLabels(args);
     for (const label of labels) {
       const id = label.recipeId ?? label.id;
       const existing = this.aggregatedNutrients.get(id);
@@ -62,6 +60,11 @@ class NutrientAggregator {
         existing.addLabel(label);
       }
     }
+  }
+
+  getServingInfo(recipeId: string): ServingInfo {
+    const recipeLabel = this.aggregatedNutrients.get(recipeId);
+    return recipeLabel?.servings ?? {};
   }
 
   getNutrientMap(args: NutrientMapArgs[]): NutrientMap {
@@ -93,12 +96,33 @@ class LabelAggregator {
   labels: LabelWithNutrients[] = [];
   mapping: NutrientMap = new Map<string, NutrientValue>();
   aggregateMap: NutrientMap = new Map<string, NutrientValue>();
+  servings: ServingInfo | undefined;
 
   addLabel(label: LabelWithNutrients) {
     this.labels.push(label);
     if (label.isPrimary) {
       this.primaryLabel = label;
     }
+  }
+
+  addNutrientMap(mapping: NutrientMap) {
+    for (const [id, nutrient] of mapping.entries()) {
+      const existing = this.aggregateMap.get(id);
+      if (!existing) {
+        this.aggregateMap.set(id, {
+          value: nutrient.value,
+          valuePerServing: nutrient.valuePerServing,
+        });
+      } else {
+        existing.value = existing.value + nutrient.value;
+        existing.valuePerServing =
+          existing.valuePerServing + nutrient.valuePerServing;
+      }
+    }
+  }
+
+  getAggreagteNutrientMap() {
+    return this.aggregateMap;
   }
 
   private getUsageRatio(label: LabelWithNutrients) {
@@ -139,28 +163,7 @@ class LabelAggregator {
     }
   }
 
-  addNutrientMap(mapping: NutrientMap) {
-    for (const [id, nutrient] of mapping.entries()) {
-      const existing = this.aggregateMap.get(id);
-      if (!existing) {
-        this.aggregateMap.set(id, {
-          value: nutrient.value,
-          valuePerServing: nutrient.valuePerServing,
-        });
-      } else {
-        existing.value = existing.value + nutrient.value;
-        existing.valuePerServing =
-          existing.valuePerServing + nutrient.valuePerServing;
-      }
-    }
-  }
-
-  getAggreagteNutrientMap() {
-    return this.aggregateMap;
-  }
-
-  getLabelNutrientMap(args: ScalingArgs) {
-    const mapping = new Map<string, NutrientValue>();
+  calculateServings(args: ScalingArgs): ScalingArgs {
     let totalServings = [
       args.totalServings,
       this.primaryLabel?.servings,
@@ -169,9 +172,30 @@ class LabelAggregator {
     totalServings = totalServings ?? 1;
     const globalScaleFactor = args.factor ?? 1;
     const servingsUsed = args.servingsUsed ?? totalServings;
+    this.servings = {
+      servings: totalServings,
+      servingsUsed,
+      servingSize: this.primaryLabel?.servingSize,
+      servingUnit: this.primaryLabel?.servingSizeUnit,
+    };
+    return {
+      totalServings,
+      factor: globalScaleFactor,
+      servingsUsed,
+    };
+  }
 
-    this.sumNutrients(mapping, globalScaleFactor, totalServings, servingsUsed);
-    this.scaleNutrients(mapping, totalServings);
+  getLabelNutrientMap(args: ScalingArgs) {
+    const mapping = new Map<string, NutrientValue>();
+    const scaleArgs = this.calculateServings(args);
+
+    this.sumNutrients(
+      mapping,
+      scaleArgs.factor,
+      scaleArgs.totalServings,
+      scaleArgs.servingsUsed
+    );
+    this.scaleNutrients(mapping, scaleArgs.totalServings ?? 1);
     this.mapping = mapping;
     return mapping;
   }
@@ -202,10 +226,10 @@ type PrettyNutritionLabel = {
 };
 
 type ServingInfo = {
-  servings?: number;
-  servingsUsed?: number;
-  servingUnit?: string;
-  servingSize?: number;
+  servings?: number | null;
+  servingsUsed?: number | null;
+  servingUnit?: MeasurementUnit | null;
+  servingSize?: number | null;
 };
 
 type CreateLabelArgs = {
@@ -343,4 +367,11 @@ class LabelMaker {
   }
 }
 
-export { NutrientAggregator, LabelMaker, FullNutrient, FullNutritionLabel };
+export {
+  NutrientAggregator,
+  LabelMaker,
+  FullNutrient,
+  FullNutritionLabel,
+  NutrientMap,
+  ServingInfo,
+};

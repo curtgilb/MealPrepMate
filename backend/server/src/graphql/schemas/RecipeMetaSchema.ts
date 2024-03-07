@@ -295,41 +295,6 @@ builder.mutationFields((t) => ({
       return db.photo.uploadPhoto(buffer, args.photo.name, query);
     },
   }),
-  // markPrimaryRecipePhoto: t.prismaField({
-  //   type: "Recipe",
-  //   args: {
-  //     recipeId: t.arg.string({ required: true }),
-  //     primaryPhotoId: t.arg.string({ required: true }),
-  //   },
-  //   resolve: async (query, root, args) => {
-  //     const [_, primary] = await db.$transaction([
-  //       db.recipe.update({
-  //         where: { id: args.recipeId },
-  //         data: {
-  //           photos: {
-  //             updateMany: {
-  //               where: { isPrimary: true },
-  //               data: { isPrimary: false },
-  //             },
-  //           },
-  //         },
-  //       }),
-  //       db.recipe.update({
-  //         where: { id: args.recipeId },
-  //         data: {
-  //           photos: {
-  //             update: {
-  //               where: { id: args.primaryPhotoId },
-  //               data: { isPrimary: true },
-  //             },
-  //           },
-  //         },
-  //         ...query,
-  //       }),
-  //     ]);
-  //     return primary;
-  //   },
-  // }),
   addRecipePhotos: t.prismaField({
     type: "Recipe",
     args: {

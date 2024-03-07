@@ -284,8 +284,6 @@ model Recipe {
   isVerified          Boolean            @default(false)
   nutritionLabel      NutritionLabel[]
   importRecords       ImportRecord[]
-  /// [NutrientMapping]
-  nutrientMapping     Json?
   @@map("recipe")
 }
 
@@ -339,8 +337,6 @@ model NutritionLabel {
   servingsUsed      Float?
   importRecord      ImportRecord[]
   isPrimary         Boolean                  @default(false)
-  /// [NutrientMapping]
-  nutrientMapping     Json?
   @@unique([recipeId, ingredientGroupId])
   @@map("nutrition_label")
 }
