@@ -156,7 +156,7 @@ model RecipeIngredient {
   order             Int
   unit              MeasurementUnit?       @relation(fields: [measurementUnitId], references: [id])
   measurementUnitId String?
-  recipe            Recipe                 @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipes            Recipe                 @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId          String // relation scalar field (used in the `@relation` attribute above)
   ingredient        Ingredient?            @relation(fields: [ingredientId], references: [id])
   ingredientId      String? // relation scalar field (used in the `@relation` attribute above)
@@ -260,7 +260,7 @@ enum EntityType {
 model Recipe {
   id                  String             @id @default(cuid())
   type                EntityType          @default(RECIPE)
-  title               String
+  name               String
   source              String?
   preparationTime     Int?
   cookingTime         Int?
@@ -272,15 +272,14 @@ model Recipe {
   isFavorite          Boolean            @default(false)
   course              Course[]
   category            Category[]
-  cuisine             Cuisine?           @relation(fields: [cuisineId], references: [id], onDelete: SetNull)
-  cuisineId           String?
+  cuisine             Cuisine[]
   ingredients         RecipeIngredient[]
   mealPlans           MealPlanRecipe[]
   importId            String?
   leftoverFridgeLife  Int?
   leftoverFreezerLife Int?
   isVerified          Boolean            @default(false)
-  nutritionLabel      NutritionLabel[]
+  nutritionLabels      NutritionLabel[]
   importRecords       ImportRecord[]
   ingredientGroups    RecipeIngredientGroup[]
   @@map("recipe")

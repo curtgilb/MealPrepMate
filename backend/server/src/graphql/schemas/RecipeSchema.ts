@@ -91,7 +91,7 @@ const recipeInput = builder.inputType("RecipeInput", {
     isFavorite: t.boolean(),
     courseIds: t.stringList(),
     categoryIds: t.stringList(),
-    cuisineId: t.string(),
+    cuisineIds: t.stringList(),
     ingredients: t.string(),
     leftoverFridgeLife: t.int(),
     leftoverFreezerLife: t.int(),

@@ -153,14 +153,14 @@ export default interface PrismaTypes {
         Where: Prisma.RecipeIngredientWhereInput;
         Create: {};
         Update: {};
-        RelationName: "unit" | "recipe" | "ingredient" | "group";
+        RelationName: "unit" | "recipes" | "ingredient" | "group";
         ListRelations: never;
         Relations: {
             unit: {
                 Shape: MeasurementUnit | null;
                 Name: "MeasurementUnit";
             };
-            recipe: {
+            recipes: {
                 Shape: Recipe;
                 Name: "Recipe";
             };
@@ -373,8 +373,8 @@ export default interface PrismaTypes {
         Where: Prisma.RecipeWhereInput;
         Create: {};
         Update: {};
-        RelationName: "photos" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabel" | "importRecords" | "ingredientGroups";
-        ListRelations: "photos" | "course" | "category" | "ingredients" | "mealPlans" | "nutritionLabel" | "importRecords" | "ingredientGroups";
+        RelationName: "photos" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabels" | "importRecords" | "ingredientGroups";
+        ListRelations: "photos" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabels" | "importRecords" | "ingredientGroups";
         Relations: {
             photos: {
                 Shape: Photo[];
@@ -389,7 +389,7 @@ export default interface PrismaTypes {
                 Name: "Category";
             };
             cuisine: {
-                Shape: Cuisine | null;
+                Shape: Cuisine[];
                 Name: "Cuisine";
             };
             ingredients: {
@@ -400,7 +400,7 @@ export default interface PrismaTypes {
                 Shape: MealPlanRecipe[];
                 Name: "MealPlanRecipe";
             };
-            nutritionLabel: {
+            nutritionLabels: {
                 Shape: NutritionLabel[];
                 Name: "NutritionLabel";
             };

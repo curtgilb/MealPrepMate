@@ -10,7 +10,6 @@ import {
   RecipeIngredientUpdateInput,
   RecipeInput,
 } from "../types/gql.js";
-import { toTitleCase } from "../util/utils.js";
 import { db } from "../db.js";
 import { UnitSearch } from "../services/search/UnitSearch.js";
 import { z } from "zod";
@@ -64,7 +63,7 @@ async function createRecipeCreateStmt(input: {
 }) {
   const { recipe, nutritionLabel, matchingRecipeId } = input;
   return {
-    title: recipe.title,
+    name: recipe.title,
     source: recipe.source,
     preparationTime: recipe.prepTime,
     cookingTime: recipe.cookTime,
@@ -89,8 +88,8 @@ async function createRecipeCreateStmt(input: {
     ingredients: await createRecipeIngredientsStmt({
       ingredientTxt: recipe.ingredients,
       matchingRecipeId,
-      units,
-      ingredients,
+      input.units,
+      input.ingredients,
     }),
     nutritionLabel: {
       create: nutritionLabel
@@ -102,7 +101,7 @@ async function createRecipeCreateStmt(input: {
     },
     leftoverFreezerLife: recipe.leftoverFreezerLife,
     leftoverFridgeLife: recipe.leftoverFridgeLife,
-    isVerified: verifed,
+    isVerified: input.verifed,
   };
 }
 
@@ -124,7 +123,6 @@ type RecipeIngredientInput = {
   matchingRecipeId?: string;
 };
 
-g;
 
 async function createRecipeIngredientsStmt(
   input: RecipeIngredientInput | undefined
@@ -169,8 +167,6 @@ async function createRecipeIngredientsStmt(
       quantity: z
         .preprocess(coerceNumeric, z.number().nullish())
         .parse(ingredient.quantity),
-      comment: z.coerce.string().parse(ingredient.comment),
-      other: z.coerce.string().parse(ingredient.other),
       ingredient: matchingIngredient
         ? { connect: { id: matchingIngredient } }
         : {},
@@ -201,7 +197,7 @@ export const recipeExtensions = Prisma.defineExtension((client) => {
               id: recipeId,
             },
             data: {
-              title: recipe.title,
+              name: recipe.title,
               source: recipe.source,
               preparationTime: recipe.prepTime,
               cookingTime: recipe.cookTime,
