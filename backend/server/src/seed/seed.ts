@@ -100,6 +100,7 @@ async function loadHealthProfile() {
       height: 72,
       yearBorn: 1994,
       activityLevel: 1.2,
+      specialCondition: "NONE",
       // targ: 0.25,
       // targetCarbs: 0.5,
       // targetFat: 0.5,

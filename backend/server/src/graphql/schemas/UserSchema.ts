@@ -54,14 +54,14 @@ const profileInput = builder.inputType("ProfileInput", {
 
 // ============================================ Queries =================================
 
-builder.queryField("profile", (t) =>
-  t.prismaField({
+builder.queryFields((t) => ({
+  healthProfile: t.prismaField({
     type: "HealthProfile",
     resolve: async (query) => {
       return await db.healthProfile.findFirstOrThrow({ ...query });
     },
-  })
-);
+  }),
+}));
 
 // ============================================ Mutations ===============================
 

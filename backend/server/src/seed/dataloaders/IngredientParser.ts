@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 import { readCSV } from "../../services/io/Readers.js";
 import { toTitleCase } from "../../util/utils.js";
 import { z } from "zod";
-import { cleanedStringSchema } from "../../validations/graphqlValidation.js";
+import { cleanedStringSchema } from "../../validations/graphql/RecipeValidation.js";
 import {
   nullableString,
   stringArray,

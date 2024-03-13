@@ -1,7 +1,7 @@
 import { builder } from "../builder.js";
 import { db } from "../../db.js";
 import { PrismaImportType, importStatus, recordStatus } from "./EnumSchema.js";
-import { offsetPagination } from "./UtilitySchema.js";
+import { nextPageInfo, offsetPagination } from "./UtilitySchema.js";
 import { Import, ImportRecord, ImportType } from "@prisma/client";
 import { queryFromInfo } from "@pothos/plugin-prisma";
 import {
@@ -10,25 +10,15 @@ import {
   updateMatches,
   uploadImportFile,
 } from "../../services/import/ImportService.js";
-import { AggregateLabel } from "./NutritionSchema.js";
+import { nutritionLabel } from "./NutritionSchema.js";
 import { recipe } from "./RecipeSchema.js";
-
-function nextPageInfo(dataLength: number, offset: number, totalCount: number) {
-  let nextOffset: number | null = dataLength + offset;
-  if (nextOffset >= totalCount) nextOffset = null;
-  const itemsRemaining = totalCount - (offset + dataLength);
-  return {
-    nextOffset,
-    itemsRemaining,
-  };
-}
 
 // ============================================ Types ===================================
 const Draft = builder.unionType("Draft", {
-  types: [recipe, AggregateLabel],
+  types: [recipe, nutritionLabel],
   resolveType: (draft) => {
-    if ("calories" in draft) {
-      return AggregateLabel;
+    if (draft.type === "LABEL") {
+      return nutritionLabel;
     } else {
       return recipe;
     }
@@ -52,25 +42,25 @@ const ImportJobRecord = builder.prismaObject("ImportRecord", {
     id: t.exposeString("id"),
     name: t.exposeString("name"),
     status: t.field({ type: recordStatus, resolve: (parent) => parent.status }),
-    recipe: t.relation("recipe", { nullable: true }),
+    matchingRecipe: t.relation("recipe", { nullable: true }),
     verifed: t.exposeBoolean("verifed"),
-    nutritionLabel: t.relation("nutritionLabel", { nullable: true }),
-    // draft: t.field({
-    //   type: Draft,
-    //   nullable: true,
-    //   resolve: async (importRecord) => {
-    //     if (importRecord.draftId) {
-    //       const [recipe, label] = await db.$transaction([
-    //         db.recipe.findUnique({ where: { id: importRecord.draftId } }),
-    //         db.nutritionLabel.findUnique({
-    //           where: { id: importRecord.draftId },
-    //         }),
-    //       ]);
-    //       return recipe ?? label;
-    //     }
-    //     return null;
-    //   },
-    // }),
+    matchingLabel: t.relation("nutritionLabel", { nullable: true }),
+    draft: t.field({
+      type: Draft,
+      nullable: true,
+      resolve: async (importRecord) => {
+        if (importRecord.draftId) {
+          const [recipe, label] = await db.$transaction([
+            db.recipe.findUnique({ where: { id: importRecord.draftId } }),
+            db.nutritionLabel.findUnique({
+              where: { id: importRecord.draftId },
+            }),
+          ]);
+          return recipe ?? label;
+        }
+        return null;
+      },
+    }),
   }),
 });
 

@@ -9,57 +9,44 @@ type NutritionLabelQuery = {
   select?: Prisma.NutritionLabelSelect | undefined;
 };
 
-type LabelWithNutrients = Prisma.NutritionLabelGetPayload<{
-  include: { nutrients: true };
-}>;
-
-function getCorrectServings(
-  args: EditNutritionLabelInput,
-  original: LabelWithNutrients
-): number {
-  if (
-    !Number.isNaN(args.servingsUsed) &&
-    original.servingsUsed !== args.servingsUsed
-  ) {
-    return original.servingsUsed as number;
-  } else if (
-    !Number.isNaN(args.servings) &&
-    original.servings !== args.servings
-  ) {
-    return original.servings as number;
-  } else if (!Number.isNaN(original.servingsUsed)) {
-    return original.servingsUsed as number;
-  } else if (!Number.isNaN(original.servings)) {
-    return original.servings as number;
-  } else {
-    return 1;
-  }
+interface LabelInput {
+  label: CreateNutritionLabelInput;
+  recipeId?: string | undefined;
+  verifed: boolean;
+  createRecipe: boolean;
 }
 
+function createNutritionLabelStmt<B extends boolean>(
+  input: LabelInput,
+  nested: B
+): B extends true
+  ? Prisma.NutritionLabelCreateWithoutRecipeInput
+  : Prisma.NutritionLabelCreateInput;
+
 function createNutritionLabelStmt(
-  input: CreateNutritionLabelInput,
-  isBaseLabel: boolean,
-  verifed: boolean = false
+  input: LabelInput,
+  nested: boolean
 ):
   | Prisma.NutritionLabelCreateInput
   | Prisma.NutritionLabelCreateWithoutRecipeInput {
+  const { label, recipeId, verifed, createRecipe } = input;
   const stmt:
     | Prisma.NutritionLabelCreateInput
     | Prisma.NutritionLabelCreateWithoutRecipeInput = {
-    name: input.name,
-    servings: input.servings,
-    servingSize: input.servingSize,
-    servingsUsed: input.servingsUsed,
-    isPrimary: isBaseLabel,
+    name: label.name,
+    servings: label.servings,
+    servingSize: label.servingSize,
+    servingsUsed: label.servingsUsed,
+    isPrimary: label.isPrimary ?? false,
     verifed,
-    servingSizeUnit: input.servingSizeUnitId
-      ? { connect: { id: input.servingSizeUnitId } }
+    servingSizeUnit: label.servingSizeUnitId
+      ? { connect: { id: label.servingSizeUnitId } }
       : undefined,
     nutrients:
-      input.nutrients && input.nutrients.length > 0
+      label.nutrients && label.nutrients.length > 0
         ? {
             createMany: {
-              data: input.nutrients.map((nutrient) => ({
+              data: label.nutrients.map((nutrient) => ({
                 nutrientId: nutrient.nutrientId,
                 value: nutrient.value,
               })),
@@ -68,48 +55,22 @@ function createNutritionLabelStmt(
         : undefined,
   };
 
-  if (input.connectingId) {
-    if (isBaseLabel) {
-      (stmt as Prisma.NutritionLabelCreateInput).recipe = {
-        connect: { id: input.connectingId },
-      };
-    } else {
-      stmt.ingredientGroup = { connect: { id: input.connectingId } };
-    }
+  if (label.ingredientGroupId) {
+    stmt.ingredientGroup = { connect: { id: label.ingredientGroupId } };
   }
-
-  return stmt;
-}
-
-function createEditLabelStatment(
-  input: EditNutritionLabelInput,
-  servings: number
-): Prisma.NutritionLabelUpdateInput {
-  const stmt: Prisma.NutritionLabelUpdateInput = {
-    name: input.name,
-    servings: input.servings,
-    servingSize: input.servingSize,
-    servingsUsed: input.servingSize,
-  };
-
-  if (input.nutrientsToAdd) {
-    stmt.nutrients = {
-      createMany: {
-        data: input.nutrientsToAdd?.map((nutrient) => ({
-          nutrientId: nutrient.nutrientId,
-          value: nutrient.value,
-          valuePerServing: nutrient.value / servings,
-        })),
-      },
+  if (recipeId && !nested) {
+    (stmt as Prisma.NutritionLabelCreateInput).recipe = {
+      connect: { id: recipeId },
     };
   }
 
-  if (input.servingSizeUnitId) {
-    stmt.servingSizeUnit = {
-      connect: { id: input.servingSizeUnitId },
+  if (createRecipe) {
+    (stmt as Prisma.NutritionLabelCreateInput).recipe = {
+      create: { name: label.name ?? "" },
     };
   }
-  return stmt;
+
+  return nested ? stmt : (stmt as Prisma.NutritionLabelCreateInput);
 }
 
 export const nutritionExtension = Prisma.defineExtension((client) => {
@@ -118,30 +79,44 @@ export const nutritionExtension = Prisma.defineExtension((client) => {
       nutritionLabel: {
         async createNutritionLabel(
           args: CreateNutritionLabelInput,
+          recipeId: string,
           query?: NutritionLabelQuery
         ): Promise<NutritionLabel> {
           return await client.nutritionLabel.create({
-            data: createNutritionLabelStmt(args, true),
+            data: createNutritionLabelStmt(
+              {
+                label: args,
+                recipeId,
+                verifed: true,
+                createRecipe: false,
+              },
+              false
+            ),
             ...query,
           });
         },
 
-        async editNutritionLabels(
+        async editNutritionLabel(
           args: EditNutritionLabelInput,
           query: NutritionLabelQuery
         ) {
           return await client.$transaction(async (tx) => {
-            // Get original to see what the original
-            const original = await tx.nutritionLabel.findUniqueOrThrow({
-              where: { id: args.id },
-              include: { nutrients: true },
-            });
-            const servings = getCorrectServings(args, original);
-
             // Create statement for updating the base label and creating the new nutrients
             await tx.nutritionLabel.update({
               where: { id: args.id },
-              data: createEditLabelStatment(args, servings),
+              data: {
+                name: args.name,
+                servings: args.servings,
+                servingSize: args.servingSize,
+                servingSizeUnit: args.servingSizeUnitId
+                  ? { connect: { id: args.servingSizeUnitId } }
+                  : undefined,
+                servingsUsed: args.servingsUsed,
+                isPrimary: args.isPrimary ?? undefined,
+                ingredientGroup: args.ingredientGroupId
+                  ? { connect: { id: args.ingredientGroupId } }
+                  : undefined,
+              },
             });
 
             // create statement for updating nutrients
@@ -149,7 +124,7 @@ export const nutritionExtension = Prisma.defineExtension((client) => {
               for (const nutrient of args.nutrientsToEdit) {
                 await tx.nutritionLabelNutrient.update({
                   where: {
-                    nutritionLabelId_nutrientId: {
+                    compoundId: {
                       nutrientId: nutrient.nutrientId,
                       nutritionLabelId: args.id,
                     },
@@ -161,8 +136,8 @@ export const nutritionExtension = Prisma.defineExtension((client) => {
               }
             }
             // Create statement to delete nutrients
-            if (args.nutrientsToDeleteIds) {
-              for (const id of args.nutrientsToDeleteIds) {
+            if (args.nutrientsToDelete) {
+              for (const id of args.nutrientsToDelete) {
                 await tx.nutritionLabelNutrient.deleteMany({
                   where: { nutritionLabelId: args.id, nutrientId: id },
                 });

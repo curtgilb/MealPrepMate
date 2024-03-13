@@ -2,21 +2,6 @@ import { Prisma } from "@prisma/client";
 import { db } from "../../src/db.js";
 import cuid from "cuid";
 
-export const ingredientGroups: Prisma.RecipeIngredientGroupCreateInput[] = [
-  {
-    id: "clt6irl0900054wv97g0e9w7v",
-    name: "Marinade",
-  },
-  {
-    id: "clt6irl0900064wv9e0rb6kp2",
-    name: "Cucumber Salad",
-  },
-  {
-    id: "clt6irl0a00074wv95kwkeih7",
-    name: "Infused Oil",
-  },
-];
-
 const nutritionLabels: Prisma.NutritionLabelCreateWithoutRecipeInput[] = [
   {
     name: "Chicken Gyro with Tzatziki Sauce (Marinade)",
@@ -360,7 +345,7 @@ const nutritionLabels: Prisma.NutritionLabelCreateWithoutRecipeInput[] = [
 ];
 
 export const recipe: Prisma.RecipeCreateInput = {
-  title: "Chicken Gyro with Tzatziki Sauce",
+  name: "Chicken Gyro with Tzatziki Sauce",
   source: "https://howtofeedaloon.com/chicken-gyro-with-tzatziki-sauce/",
   preparationTime: 20,
   cookingTime: 35,
@@ -391,7 +376,7 @@ export const recipe: Prisma.RecipeCreateInput = {
   The tzatziki sauce will keep in the fridge for up to 2 weeks, the cooked chicken and cucumber salad will keep for several days.`,
   isFavorite: true,
   isVerified: true,
-  nutritionLabel: {
+  nutritionLabels: {
     create: nutritionLabels,
   },
   ingredients: {

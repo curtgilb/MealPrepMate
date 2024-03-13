@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { RecipeInput } from "../types/gql.js";
-import { toTitleCase } from "../util/utils.js";
-import { nullableString } from "./utilValidations.js";
+import { RecipeInput } from "../../types/gql.js";
+import { toTitleCase } from "../../util/utils.js";
+import { nullableString } from "../utilValidations.js";
 
 function cleanedStringSchema(max: number, formatter?: (val: string) => string) {
   return z
@@ -28,16 +28,37 @@ const RecipeInputValidation = z.object({
   prepTime: z.coerce.number().nullable().optional(),
   cookTime: z.coerce.number().nullable().optional(),
   marinadeTime: z.coerce.number().nullable().optional(),
-  directions: nullableString,
-  notes: nullableString,
+  directions: z.string().nullish(),
+  notes: z.string().nullish(),
   isFavorite: z.coerce.boolean().optional(),
   leftoverFridgeLife: z.coerce.number().int().positive().nullable().optional(),
   leftoverFreezerLife: z.coerce.number().int().positive().nullable().optional(),
-  ingredients: nullableString,
-  cuisineId: z.coerce.string().cuid().nullable().optional(),
+  ingredients: z.string().nullish(),
+  cuisineId: z.coerce.string().cuid().array().nullable().optional(),
   categoryIds: z.coerce.string().cuid().array().nullable().optional(),
   courseIds: z.coerce.string().cuid().array().nullable().optional(),
   photoIds: z.coerce.string().cuid().array().nullable().optional(),
+});
+
+const RecipeIngredientValidation = z.object({
+  id: z.string().cuid().nullable().optional(),
+  order: z.number().nullable().optional(),
+  sentence: z.string().nullable().optional(),
+  quantity: z.number().nullable().optional(),
+  unitId: z.string().cuid(),
+  name: z.string().nullable().optional(),
+  ingredientId: z.string().cuid().nullable().optional(),
+  groupName: z.string().nullable().optional(),
+  groupId: z.string().cuid().nullable().optional(),
+});
+
+const RecipeIngredientUpdateValidation = z.object({
+  recipeId: z.string().cuid(),
+  ingredientsToAdd: RecipeIngredientValidation.array().optional().nullish(),
+  ingredientsToDelete: z.string().array().optional(),
+  ingredientsToUpdate: RecipeIngredientValidation.array().optional(),
+  groupsToAdd: z.string().array().optional(),
+  groupsToDelete: z.string().array().optional(),
 });
 
 const NutritionLabelValidation = z.object({
@@ -101,4 +122,6 @@ export {
   RecipeFilterValidation,
   RecipeInputValidation,
   NutritionLabelValidation,
+  RecipeIngredientValidation,
+  RecipeIngredientUpdateValidation,
 };

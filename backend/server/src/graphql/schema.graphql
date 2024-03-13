@@ -6,7 +6,7 @@ type AggregateLabel {
   nutrients: [AggregateNutrient!]!
   proteinPercentage: Float!
   servingSize: Float
-  servingUnit: String
+  servingUnit: MeasurementUnit
   servings: Int
   servingsUsed: Int
 }
@@ -17,7 +17,7 @@ type AggregateNutrient {
   name: String!
   perServing: Float
   target: NutrientTarget
-  unit: Unit!
+  unit: MeasurementUnit!
   value: Float!
 }
 
@@ -56,7 +56,7 @@ input CreateNutrientInput {
 }
 
 input CreateNutritionLabelInput {
-  connectingId: String
+  ingredientGroupId: String
   isPrimary: Boolean
   name: String
   nutrients: [CreateNutrientInput!]
@@ -98,20 +98,16 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTime
 
-union Draft = AggregateLabel | Recipe
-
-input EditNutrientInput {
-  nutrientId: String!
-  nutritionLabelId: String!
-  value: Float!
-}
+union Draft = NutritionLabel | Recipe
 
 input EditNutritionLabelInput {
   id: String!
+  ingredientGroupId: String
+  isPrimary: Boolean
   name: String
   nutrientsToAdd: [CreateNutrientInput!]
-  nutrientsToDeleteIds: [String!]
-  nutrientsToEdit: [EditNutrientInput!]
+  nutrientsToDelete: [String!]
+  nutrientsToEdit: [CreateNutrientInput!]
   servingSize: Float
   servingSizeUnitId: String
   servings: Float
@@ -145,22 +141,6 @@ enum Gender {
   MALE
 }
 
-type HealthProfile {
-  activityLevel: Float!
-  age: Int!
-  bodyFatPercentage: Float!
-  gender: String!
-  height: Float!
-  id: String!
-  targetCarbsGrams: Float
-  targetCarbsPercentage: Float
-  targetFatGrams: Float
-  targetFatPercentage: Float
-  targetProteinGrams: Float
-  targetProteinPecentage: Float
-  weight: Float!
-}
-
 type Import {
   createdAt: DateTime!
   fileName: String
@@ -172,10 +152,11 @@ type Import {
 }
 
 type ImportRecord {
+  draft: Draft
   id: String!
+  matchingLabel: NutritionLabel
+  matchingRecipe: Recipe
   name: String!
-  nutritionLabel: NutritionLabel
-  recipe: Recipe
   status: RecordStatus!
   verifed: Boolean!
 }
@@ -225,7 +206,7 @@ type IngredientPrice {
   pricePerUnit: Float!
   quantity: Float!
   retailer: String!
-  unit: Unit!
+  unit: MeasurementUnit!
 }
 
 enum Meal {
@@ -235,22 +216,28 @@ enum Meal {
   SNACK
 }
 
+type MeasurementUnit {
+  abbreviations: [String!]!
+  id: String!
+  name: String!
+  symbol: String
+  type: SpecialCondition
+}
+
 type Mutation {
   addCategoryToRecipe(category: String!, recipeId: String!): Recipe!
   addPriceHistory(price: CreatePriceHistoryInput!): IngredientPrice!
   addRecipeCourse(course: String!, recipeId: String!): Recipe!
   addRecipePhotos(photoId: [String!]!, recipeId: String!): Recipe!
-  changeRecipeCuisine(cuisineId: String!, recipeId: String!): Recipe!
+  changeRecipeCuisine(cuisineId: [String!]!, recipeId: String!): Recipe!
   changeRecordStatus(id: String!, status: RecordStatus!): ImportRecord!
   connectExpirationRule(expirationRuleId: String!, ingredientId: String!): Ingredient!
-  connectNutritionLabelToIngredientGroup(groupId: String!, labelId: String!, recipeId: String!): RecipeIngredientGroup!
-  connectNutritionLabeltoRecipe(labelId: String!, recipeId: String!): Recipe!
   createCategory(name: String!): [Category!]!
   createCourse(name: String!): [Course!]!
   createCuisine(name: String!): [Cuisine!]!
   createExpirationRule(ingredientId: String, rule: CreateExpirationRule!): ExpirationRule!
   createIngredient(ingredient: CreateIngredientInput!): Ingredient!
-  createProfile(profile: ProfileInput!): HealthProfile!
+  createNutritionLabels(nutritionLabel: CreateNutritionLabelInput!, recipeId: String!): NutritionLabel!
   createRecipe(recipe: RecipeInput!): Recipe!
   deleteCategory(categoryId: String!): [Category!]!
   deleteCourse(courseId: String!): [Course!]!
@@ -259,12 +246,11 @@ type Mutation {
   deleteIngredient(ingredientToDeleteId: String!): [Ingredient!]!
   deleteNutritionLabel(id: String!): [NutritionLabel!]!
   deletePriceHistory(ingredientId: String!, ingredientPriceId: [String!]!): [IngredientPrice!]!
-  disconnectNutritionLabelFromIngredientGroup(deleteLabel: Boolean!, groupId: String!, labelId: String!, recipeId: String!): RecipeIngredientGroup!
-  disconnectNutritionLabelFromRecipe(labelId: String!, recipeId: String!): Recipe!
+  deleteRecipe(recipeId: String!): Recipe!
   editExpirationRule(expirationRule: CreateExpirationRule!, expirationRuleId: String!): ExpirationRule!
   editIngredient(ingredient: CreateIngredientInput!, ingredientId: String!): Ingredient!
+  editNutritionLabel(label: EditNutritionLabelInput!): NutritionLabel!
   editPriceHistory(price: EditPriceHistoryInput!, priceId: String!): IngredientPrice!
-  editProfile(id: String!, profile: ProfileInput!): HealthProfile!
   finalize(recordId: String!): ImportRecord!
   mergeIngredients(ingredientIdToDelete: String!, ingredientIdToKeep: String!): Ingredient!
   removeCategoryFromRecipe(categoryId: String!, recipeId: String!): Recipe!
@@ -292,7 +278,7 @@ type Nutrient {
   name: String!
   subNutrients: [Nutrient!]!
   type: String!
-  unit: Unit!
+  unit: MeasurementUnit!
 }
 
 type NutrientTarget {
@@ -318,6 +304,7 @@ input NutritionFilter {
 }
 
 type NutritionLabel {
+  aggregateLabel(advanced: Boolean): AggregateLabel
   id: ID!
   importRecord: [ImportRecord!]
   ingredientGroup: RecipeIngredientGroup!
@@ -346,21 +333,6 @@ enum PrismaImportType {
   RECIPE_KEEPER
 }
 
-input ProfileInput {
-  activityLevel: Float!
-  birthYear: Int!
-  bodyFatPercentage: Float!
-  gender: Gender!
-  height: Float!
-  targetCarbsGrams: Float
-  targetCarbsPercentage: Float
-  targetFatGrams: Float
-  targetFatPercentage: Float
-  targetProteinGrams: Float
-  targetProteinPecentage: Float
-  weight: Float!
-}
-
 type Query {
   categories(searchString: String): [Category!]!
   courses(searchString: String): [Course!]!
@@ -374,21 +346,23 @@ type Query {
   ingredient(ingredientId: String!): Ingredient!
   ingredientPrice(ingredientPriceId: String!): IngredientPrice!
   ingredients(limit: Int, searchString: String, start: Int): [Ingredient!]!
+  nutritionLabel(labelId: String!): NutritionLabel!
   priceHistory(ingredientId: String!, retailer: String): [IngredientPrice!]!
-  profile: HealthProfile!
   recipe(recipeId: String!): Recipe!
+  recipes(filter: RecipeFilter, pagination: OffsetPagination!): RecipesQuery!
 }
 
 type Recipe {
+  aggregateLabel(advanced: Boolean): AggregateLabel
   category: [Category!]!
   cookTime: Int
   course: [Course!]!
-  cuisine: Cuisine!
+  cuisine: [Cuisine!]!
   directions: String
   id: ID!
+  ingredientFreshness: Int
   ingredients: [RecipeIngredients!]!
   isFavorite: Boolean!
-  isVerified: Boolean
   leftoverFridgeLife: Int
   marinadeTime: Int
   name: String!
@@ -416,21 +390,18 @@ input RecipeFilter {
 }
 
 type RecipeIngredientGroup {
+  id: String!
   name: String!
   nutritionLabel: NutritionLabel
-  servings: Int
-  servingsInRecipe: Int
 }
 
 input RecipeIngredientInput {
-  comment: String
   groupId: ID
   groupName: String
   id: ID
   ingredientId: String
   name: String
   order: Int
-  other: String
   quantity: Int
   sentence: String
   unitId: String
@@ -447,21 +418,19 @@ input RecipeIngredientUpdateInput {
 
 type RecipeIngredients {
   baseIngredient: Ingredient
-  comment: String
   name: String
   order: Int!
-  other: String
   quantity: Float
   recipe: Recipe!
   sentence: String!
-  unit: Unit!
+  unit: MeasurementUnit!
 }
 
 input RecipeInput {
   categoryIds: [String!]
   cookTime: Int
   courseIds: [String!]
-  cuisineId: String
+  cuisineIds: [String!]
   directions: String
   ingredients: String
   isFavorite: Boolean
@@ -475,6 +444,12 @@ input RecipeInput {
   title: String!
 }
 
+type RecipesQuery {
+  itemsRemaining: Int!
+  nextOffset: Int
+  records: [Recipe!]!
+}
+
 enum RecordStatus {
   DUPLICATE
   IGNORED
@@ -483,14 +458,8 @@ enum RecordStatus {
 }
 
 enum SpecialCondition {
-  LACTATING
-  NONE
-  PREGNANT
-}
-
-type Unit {
-  abbreviations: [String!]!
-  id: String!
-  name: String!
-  symbol: String
+  COUNT
+  ENERGY
+  VOLUME
+  WEIGHT
 }

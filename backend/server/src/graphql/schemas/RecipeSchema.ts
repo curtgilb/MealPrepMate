@@ -1,21 +1,29 @@
 import { db } from "../../db.js";
 import { builder } from "../builder.js";
-import { numericalComparison } from "./UtilitySchema.js";
-import { AggregateLabel } from "./NutritionSchema.js";
-import { ExtendedRecipe } from "../../services/RecipeSearch.js";
-import { getIngredientMaxFreshness } from "../../services/ingredient/IngredientService.js";
 import {
-  LabelMaker,
-  NutrientAggregator,
-  NutrientMap,
-} from "../../services/nutrition/NutritionAggregator.js";
+  checkIfFieldRequested,
+  nextPageInfo,
+  numericalComparison,
+  offsetPagination,
+} from "./UtilitySchema.js";
+import { AggregateLabel } from "./NutritionSchema.js";
+import { ExtendedRecipe, searchRecipes } from "../../services/RecipeSearch.js";
+import { getIngredientMaxFreshness } from "../../services/ingredient/IngredientService.js";
 import { getAggregatedLabel } from "../../services/recipe/RecipeService.js";
+import {
+  RecipeFilterValidation,
+  RecipeIngredientUpdateValidation,
+  RecipeInputValidation,
+} from "../../validations/graphql/RecipeValidation.js";
+import { z } from "zod";
+import { queryFromInfo } from "@pothos/plugin-prisma";
+import { OffsetPaginationValidation } from "../../validations/graphql/UtilityValidation.js";
 
 // ============================================ Types ===================================
 const recipe = builder.prismaObject("Recipe", {
   fields: (t) => ({
     id: t.exposeID("id"),
-    name: t.exposeString("title"),
+    name: t.exposeString("name"),
     prepTime: t.exposeInt("preparationTime", { nullable: true }),
     cookTime: t.exposeInt("cookingTime", { nullable: true }),
     marinadeTime: t.exposeInt("marinadeTime", { nullable: true }),
@@ -38,7 +46,11 @@ const recipe = builder.prismaObject("Recipe", {
         if (Object.prototype.hasOwnProperty.call(parent, "nutrientMap")) {
           return (parent as ExtendedRecipe).aggregateLabel;
         } else {
-          return await getAggregatedLabel(parent.id, args.advanced ?? false);
+          return await getAggregatedLabel(
+            parent.id,
+            args.advanced ?? false,
+            false
+          );
         }
       },
     }),
@@ -169,6 +181,23 @@ const recipeFilter = builder.inputType("RecipeFilter", {
   }),
 });
 
+const RecipesQuery = builder
+  .objectRef<{
+    nextOffset: number | null;
+    itemsRemaining: number;
+    recipes: ExtendedRecipe[];
+  }>("RecipesQuery")
+  .implement({
+    fields: (t) => ({
+      nextOffset: t.exposeInt("nextOffset", { nullable: true }),
+      itemsRemaining: t.exposeInt("itemsRemaining"),
+      recipes: t.field({
+        type: [recipe],
+        resolve: (result) => result.recipes,
+      }),
+    }),
+  });
+
 // ============================================ Queries =================================
 builder.queryFields((t) => ({
   recipe: t.prismaField({
@@ -176,11 +205,51 @@ builder.queryFields((t) => ({
     args: {
       recipeId: t.arg.string({ required: true }),
     },
+    validate: {
+      schema: z.object({ recipeId: z.string().cuid() }),
+    },
     resolve: async (query, root, args) => {
       return await db.recipe.findUniqueOrThrow({
         where: { id: args.recipeId },
         ...query,
       });
+    },
+  }),
+  recipes: t.field({
+    type: RecipesQuery,
+    args: {
+      filter: t.arg({ type: recipeFilter }),
+      pagination: t.arg({
+        type: offsetPagination,
+        required: true,
+      }),
+    },
+    validate: {
+      schema: z.object({
+        filter: RecipeFilterValidation.optional(),
+        pagination: OffsetPaginationValidation,
+      }),
+    },
+    resolve: async (root, args, context, info) => {
+      const query = queryFromInfo({ context, info, path: ["recipes"] });
+
+      const result = await searchRecipes({
+        query,
+        filter: args?.filter,
+        take: args.pagination.take,
+        offset: args.pagination.offset,
+        aggregatedLabel: true,
+      });
+      const { itemsRemaining, nextOffset } = nextPageInfo(
+        result.recipes.length,
+        args.pagination.offset,
+        result.totalCount
+      );
+      return {
+        nextOffset,
+        itemsRemaining,
+        recipes: result.recipes,
+      };
     },
   }),
 }));
@@ -196,6 +265,11 @@ builder.mutationFields((t) => ({
         required: true,
       }),
     },
+    validate: {
+      schema: z.object({
+        recipe: RecipeInputValidation,
+      }),
+    },
     resolve: async (query, root, args) => {
       return await db.recipe.createRecipe(args.recipe, query);
     },
@@ -207,6 +281,12 @@ builder.mutationFields((t) => ({
       recipe: t.arg({
         type: recipeInput,
         required: true,
+      }),
+    },
+    validate: {
+      schema: z.object({
+        recipe: RecipeInputValidation,
+        recipeId: z.string().cuid(),
       }),
     },
     resolve: async (query, root, args) => {
@@ -221,6 +301,11 @@ builder.mutationFields((t) => ({
         required: true,
       }),
     },
+    validate: {
+      schema: z.object({
+        ingredient: RecipeIngredientUpdateValidation,
+      }),
+    },
     resolve: async (query, root, args) => {
       return await db.recipeIngredient.findMany({ ...query });
     },
@@ -229,6 +314,11 @@ builder.mutationFields((t) => ({
     type: "Recipe",
     args: {
       recipeId: t.arg.string({ required: true }),
+    },
+    validate: {
+      schema: z.object({
+        recipeId: z.string().cuid(),
+      }),
     },
     resolve: async (query, root, args) => {
       return await db.recipe.delete({

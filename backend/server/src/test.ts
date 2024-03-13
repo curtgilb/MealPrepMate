@@ -7,50 +7,54 @@
 import { db } from "./db.js";
 import {
   recipe,
+  nutritionLabels,
   ingredientGroups,
-} from "../data/test_data/ChickenGyroRecipe.js";
+  ingredients,
+} from "../data/test_data/HalalChickenRecipe.js";
 
 import { seedDb } from "./seed/seed.js";
-import cuid from "cuid";
 
-// await seedDb();
-// import {
-//   recipe as halalChickenRecipe,
-//   ingredientGroups as halalIngredientGroups,
-// } from "../data/test_data/HalalChickenRecipe.js";
+await seedDb();
+const recipe1 = await db.recipe.create({ data: recipe });
 
-// await seedDb();
-// await db.recipeIngredientGroup.createMany({ data: ingredientGroups });
-// const recipe1 = await db.recipe.create({ data: recipe });
+for (const group of ingredientGroups) {
+  await db.recipeIngredientGroup.create({ data: group });
+}
 
-type RecipeIngredientLife = {
-  id: string;
-  tableLife: number;
-  fridgeLife: number;
-  freezerLife: number;
-};
+for (const label of nutritionLabels) {
+  await db.nutritionLabel.create({ data: label });
+}
 
-const recipeId = "cltdjusyd00sq105upxl2jgt9";
+await db.recipeIngredient.createMany({ data: ingredients });
 
-const rules = await db.$queryRaw<
-  RecipeIngredientLife[]
->`SELECT recipe_ingredient.id, recipe_ingredient.sentence , expiration_rule."tableLife", expiration_rule."fridgeLife", expiration_rule."freezerLife" 
-FROM recipe_ingredient
-INNER JOIN ingredient on recipe_ingredient."ingredientId" = ingredient.id
-INNER JOIN expiration_rule on ingredient."expirationRuleId" = expiration_rule.id
-WHERE recipe_ingredient."recipeId"=${recipeId};`;
+// type RecipeIngredientLife = {
+//   id: string;
+//   tableLife: number;
+//   fridgeLife: number;
+//   freezerLife: number;
+// };
 
-const maxIngredientLife = rules
-  .map((rule) => Math.max(rule.tableLife, rule.freezerLife, rule.fridgeLife))
-  .reduce((min, cur) => {
-    if (cur < min) {
-      return cur;
-    } else {
-      return min;
-    }
-  }, Infinity);
+// const recipeId = "cltdjusyd00sq105upxl2jgt9";
 
-console.log(rules);
+// const rules = await db.$queryRaw<
+//   RecipeIngredientLife[]
+// >`SELECT recipe_ingredient.id, recipe_ingredient.sentence , expiration_rule."tableLife", expiration_rule."fridgeLife", expiration_rule."freezerLife"
+// FROM recipe_ingredient
+// INNER JOIN ingredient on recipe_ingredient."ingredientId" = ingredient.id
+// INNER JOIN expiration_rule on ingredient."expirationRuleId" = expiration_rule.id
+// WHERE recipe_ingredient."recipeId"=${recipeId};`;
+
+// const maxIngredientLife = rules
+//   .map((rule) => Math.max(rule.tableLife, rule.freezerLife, rule.fridgeLife))
+//   .reduce((min, cur) => {
+//     if (cur < min) {
+//       return cur;
+//     } else {
+//       return min;
+//     }
+//   }, Infinity);
+
+// console.log(rules);
 
 // // await db.recipeIngredientGroup.createMany({ data: halalIngredientGroups });
 // // await db.recipe.create({ data: halalChickenRecipe });

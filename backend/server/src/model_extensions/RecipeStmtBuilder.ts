@@ -1,23 +1,26 @@
 import { Prisma } from "@prisma/client";
 import { RecipeIngredientInput, RecipeInput } from "../types/gql.js";
+import { MatchedNlpResponse } from "./IngredientTagger.js";
 
 interface RecipeArgs {
   recipe: RecipeInput;
-  verifed: boolean;
+  verifed: boolean | undefined;
+  nutritionLabel?: Prisma.NutritionLabelCreateWithoutRecipeInput;
+  ingredients?: Prisma.RecipeIngredientCreateNestedManyWithoutRecipeInput;
 }
 
-interface CreateRecipeArgs extends RecipeArgs {
-  nutritionLabels?: Prisma.NutritionLabelCreateNestedManyWithoutRecipeInput;
-  ingredients?: Prisma.RecipeIngredientCreateNestedManyWithoutRecipesInput;
-}
+function buildRecipeStmt<B extends boolean>(
+  args: RecipeArgs,
+  update: B
+): B extends true ? Prisma.RecipeUpdateInput : Prisma.RecipeCreateInput;
 
-Prisma.RecipeUpdateInput;
+function buildRecipeStmt(
+  args: RecipeArgs,
+  update: boolean
+): Prisma.RecipeUpdateInput | Prisma.RecipeCreateInput {
+  const { recipe, nutritionLabel, ingredients, verifed } = args;
 
-function buildCreateRecipeStmt(
-  input: CreateRecipeArgs
-): Prisma.RecipeCreateInput {
-  const { recipe, nutritionLabels, ingredients, verifed } = input;
-  return {
+  const stmt: Prisma.RecipeUpdateInput | Prisma.RecipeCreateInput = {
     name: recipe.title,
     source: recipe.source,
     preparationTime: recipe.prepTime,
@@ -25,103 +28,141 @@ function buildCreateRecipeStmt(
     marinadeTime: recipe.marinadeTime,
     directions: recipe.directions,
     notes: recipe.notes,
-    photos: createConnectManyStmt(recipe.photoIds),
+    photos: createConnectManyStmt(recipe.photoIds, update),
     isFavorite: recipe.isFavorite ?? false,
-    course: createConnectManyStmt(recipe.courseIds),
-    category: createConnectManyStmt(recipe.categoryIds),
-    cuisine: createConnectManyStmt(recipe.cuisineId),
-    ingredients,
-    nutritionLabels,
+    course: createConnectManyStmt(recipe.courseIds, update),
+    category: createConnectManyStmt(recipe.categoryIds, update),
+    cuisine: createConnectManyStmt(recipe.cuisineIds, update),
     leftoverFreezerLife: recipe.leftoverFreezerLife,
     leftoverFridgeLife: recipe.leftoverFridgeLife,
     isVerified: verifed,
   };
+
+  if (update) {
+    return stmt;
+  } else {
+    stmt.ingredients = ingredients ? ingredients : undefined;
+    stmt.nutritionLabels = nutritionLabel
+      ? { create: nutritionLabel }
+      : undefined;
+    return stmt as Prisma.RecipeCreateInput;
+  }
 }
 
-type ConnectStmt = {
-  connect: { id: string }[];
-};
+type ConnectManyStmt =
+  | {
+      connect: { id: string }[];
+    }
+  | undefined;
+
+type SetManyStmt =
+  | {
+      set: { id: string }[];
+    }
+  | undefined;
+
+function createConnectManyStmt<B extends boolean>(
+  ids: string[] | undefined | null,
+  update: B
+): B extends true ? SetManyStmt : ConnectManyStmt;
 
 function createConnectManyStmt(
-  ids: string[] | undefined | null
-): ConnectStmt | undefined {
+  ids: string[] | undefined | null,
+  update: boolean
+): ConnectManyStmt | undefined {
   if (!ids || ids.length > 0) return undefined;
+  const idObjs = ids.map((id) => ({ id: id }));
+  if (update) {
+    return { connect: idObjs };
+  }
   return {
-    connect: ids.map((id) => ({ id: id })),
+    connect: idObjs,
   };
 }
 
-type SetStmt = {
-  set: { id: string }[];
+function buildRecipeIngredientNestedCreateMany(
+  input: MatchedNlpResponse[]
+): Prisma.RecipeIngredientCreateNestedManyWithoutRecipeInput {
+  return {
+    createMany: {
+      data: input.map((ingredient) => ({
+        sentence: ingredient.sentence,
+        quantity: ingredient.quantity,
+        name: ingredient.name,
+        order: ingredient.order,
+        measurementUnitId: ingredient.unitId ?? undefined,
+        ingredientId: ingredient.unitId ?? undefined,
+      })),
+    },
+  };
+}
+
+function getRecipeIngredientGroupUniqueInput(
+  input: RecipeIngredientInput,
+  recipeId: string
+):
+  | Prisma.RecipeIngredientGroupCreateNestedOneWithoutIngredientsInput
+  | undefined {
+  if (!input.groupId || !input.groupName) return undefined;
+
+  let connectCriteria: Prisma.RecipeIngredientGroupWhereUniqueInput;
+  if (input.groupId) {
+    connectCriteria = { id: input.groupId };
+  } else {
+    connectCriteria = {
+      ingredientGroup: { recipeId: recipeId, name: input.groupName },
+    };
+  }
+  return {
+    connectOrCreate: {
+      where: connectCriteria,
+      create: {
+        recipeId: recipeId,
+        name: input.groupName,
+      },
+    },
+  };
+}
+
+function buildRecipeIngredientStmt<B extends boolean>(
+  args: RecipeIngredientInput,
+  recipeId: string,
+  update: B
+): B extends true
+  ? Prisma.RecipeIngredientUpdateInput
+  : Prisma.RecipeIngredientCreateInput;
+
+function buildRecipeIngredientStmt(
+  args: RecipeIngredientInput,
+  recipeId: string,
+  update: boolean
+): Prisma.RecipeIngredientUpdateInput | Prisma.RecipeIngredientCreateInput {
+  const data: Prisma.RecipeIngredientUpdateInput = {
+    order: args.order ?? undefined,
+    sentence: args.sentence ?? undefined,
+    quantity: args.quantity,
+    name: args.name,
+    unit: args.unitId ? { connect: { id: args.unitId } } : undefined,
+    ingredient: args.ingredientId
+      ? { connect: { id: args.ingredientId } }
+      : undefined,
+    group: getRecipeIngredientGroupUniqueInput(args, recipeId),
+  };
+
+  if (update) {
+    return data;
+  } else {
+    if (data.order === undefined || args.sentence === undefined) {
+      throw new Error(
+        "Order and sentence are required for creating a recipe ingredient"
+      );
+    }
+    return data as Prisma.RecipeIngredientCreateInput;
+  }
+}
+
+export {
+  buildRecipeStmt,
+  buildRecipeIngredientNestedCreateMany,
+  buildRecipeIngredientStmt,
 };
-
-function createSetManyStmt(
-  ids: string[] | undefined | null
-): SetStmt | undefined {
-  if (!ids || ids.length > 0) return undefined;
-  return {
-    set: ids.map((id) => ({ id: id })),
-  };
-}
-
-function buildUpdateRecipeStmt(input: RecipeArgs): Prisma.RecipeUpdateInput {
-  const { recipe, verifed } = input;
-  return {
-    name: recipe.title,
-    source: recipe.source,
-    preparationTime: recipe.prepTime,
-    cookingTime: recipe.cookTime,
-    marinadeTime: recipe.marinadeTime,
-    directions: recipe.directions,
-    notes: recipe.notes,
-    photos: createSetManyStmt(recipe.photoIds),
-    isFavorite: recipe.isFavorite ?? false,
-    course: createSetManyStmt(recipe.courseIds),
-    category: createSetManyStmt(recipe.categoryIds),
-    cuisine: createSetManyStmt(recipe.cuisineId),
-    leftoverFreezerLife: recipe.leftoverFreezerLife,
-    leftoverFridgeLife: recipe.leftoverFridgeLife,
-    isVerified: verifed,
-  };
-}
-
-function buildCreateRecipeIngredientStmt(
-  ingredient: RecipeIngredientInput,
-  update = false
-) {
-  if (!ingredient.order || !ingredient.sentence)
-    throw "Must have order and sentence";
-  return {
-    order: ingredient.order,
-    sentence: ingredient.sentence,
-    quantity: ingredient.quantity,
-    unitId: ingredient.unitId
-      ? { connect: { id: ingredient.unitId } }
-      : undefined,
-    ingredientId: ingredient.ingredientId
-      ? { connect: { id: ingredient.ingredientId } }
-      : undefined,
-    groupId: ingredient.groupId
-      ? { connect: { id: ingredient.groupId } }
-      : undefined,
-  };
-}
-
-function buildUpdateRecipeIngredientStmt(
-  ingredient: RecipeIngredientInput
-): Prisma.RecipeIngredientUpdateInput {
-  return {
-    order: ingredient.order,
-    sentence: ingredient.sentence,
-    quantity: ingredient.quantity,
-    unit: ingredient.unitId
-      ? { connect: { id: ingredient.unitId } }
-      : undefined,
-    ingredient: ingredient.ingredientId
-      ? { connect: { id: ingredient.ingredientId } }
-      : undefined,
-    group: ingredient.groupId
-      ? { connect: { id: ingredient.groupId } }
-      : undefined,
-  };
-}

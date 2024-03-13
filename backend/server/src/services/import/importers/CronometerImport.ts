@@ -4,7 +4,7 @@ import {
   CronometerParser,
   CronometerRecord,
 } from "../parsers/CronometerParser.js";
-import { NutritionLabelValidation } from "../../../validations/graphqlValidation.js";
+import { NutritionLabelValidation } from "../../../validations/graphql/RecipeValidation.js";
 import {
   Importer,
   ImportServiceInput,
@@ -39,7 +39,14 @@ class CronometerImport extends Importer {
     const rehydrated = new CronometerRecord(JSON.stringify(label));
     const input = await rehydrated.transform(NutritionLabelValidation);
     const newLabel = await dbClient.nutritionLabel.create({
-      data: createNutritionLabelStmt(input, true),
+      data: createNutritionLabelStmt(
+        {
+          label: input,
+          verifed: false,
+          createRecipe: false,
+        },
+        false
+      ),
     });
     return newLabel.id;
   }
@@ -61,20 +68,23 @@ class CronometerImport extends Importer {
         (record.status === RecordStatus.IMPORTED ||
           record.status === RecordStatus.UPDATED)
       ) {
-        // Replace it with the existing
-        await tx.importRecord.update({
-          where: { id: record.id },
-          data: {
-            nutritionLabel: { connect: { id: record.draftId } },
-            draftId: null,
-          },
+        const draftLabel = await tx.nutritionLabel.findUniqueOrThrow({
+          where: { id: record.draftId },
         });
+
+        const recipeId = draftLabel.recipeId
+          ? draftLabel.recipeId
+          : (
+              await tx.recipe.create({
+                data: { name: draftLabel.name ?? "", isVerified: true },
+              })
+            ).id;
 
         // Update the newly verified label
         await tx.nutritionLabel.update({
           where: { id: record.draftId },
           data: {
-            recipe: record.recipeId ? { connect: { id: record.recipeId } } : {},
+            recipe: { connect: { id: recipeId } },
             importRecord: { connect: { id: record.id } },
             verifed: true,
           },
@@ -86,12 +96,18 @@ class CronometerImport extends Importer {
             where: { id: record.nutritionLabelId },
           });
         }
-      }
 
-      await tx.importRecord.update({
-        where: { id: record.id },
-        data: { verifed: true },
-      });
+        // Replace it with the existing
+        await tx.importRecord.update({
+          where: { id: record.id },
+          data: {
+            recipe: { connect: { id: recipeId } },
+            nutritionLabel: { connect: { id: record.draftId } },
+            draftId: null,
+            verifed: true,
+          },
+        });
+      }
     });
   }
 
@@ -111,18 +127,23 @@ class CronometerImport extends Importer {
     type MatchedData = {
       record: CronometerRecord;
       match: Match;
-      dbStmt?: Prisma.RecipeCreateInput;
+      dbStmt?: Prisma.NutritionLabelCreateInput;
     };
 
     const preparedRecords = await Promise.all(
       output.records.map(async (record) => {
         const match = await this.findCronometerLabelMatches(record);
-        let dbStmt;
+        let dbStmt: Prisma.NutritionLabelCreateInput | undefined = undefined;
         if (match.status === "IMPORTED" || match.status === "UPDATED") {
           const nutritionLabel = await record.transform(
             NutritionLabelValidation
           );
-          dbStmt = createNutritionLabelStmt(nutritionLabel, true);
+          nutritionLabel.connectingId = match.recipeMatchId;
+
+          dbStmt = createNutritionLabelStmt(
+            { label: nutritionLabel, verifed: false, createRecipe: false },
+            false
+          );
         }
         return { record, match, dbStmt } as MatchedData;
       })
@@ -158,15 +179,14 @@ class CronometerImport extends Importer {
             draftId: draftId,
           },
         });
-
-        await this.updateImport(
-          {
-            fileHash: output.hash,
-            status: "REVIEW",
-          },
-          tx
-        );
       }
+      await this.updateImport(
+        {
+          fileHash: output.hash,
+          status: "REVIEW",
+        },
+        tx
+      );
     });
   }
 
@@ -189,7 +209,7 @@ class CronometerImport extends Importer {
         }),
         db.recipe.findFirst({
           where: {
-            title: {
+            name: {
               contains: label.getParsedData().name,
               mode: "insensitive",
             },

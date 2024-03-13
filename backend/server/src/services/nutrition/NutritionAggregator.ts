@@ -1,9 +1,4 @@
-import {
-  NutritionLabel,
-  Recipe,
-  NutrientType,
-  MeasurementUnit,
-} from "@prisma/client";
+import { NutrientType, MeasurementUnit } from "@prisma/client";
 import { db } from "../../db.js";
 import {
   LabelWithNutrients,
@@ -44,10 +39,13 @@ class NutrientAggregator {
     }
   }
 
-  async addLabels(args: string[] | LabelWithNutrients[]) {
+  async addLabels(
+    args: string[] | LabelWithNutrients[],
+    useLabelId: boolean = false
+  ) {
     const labels = await this.getLabels(args);
     for (const label of labels) {
-      const id = label.recipeId;
+      const id = useLabelId ? label.id : label.recipeId;
       const existing = this.aggregatedNutrients.get(id);
       if (!existing) {
         const agg = new LabelAggregator();

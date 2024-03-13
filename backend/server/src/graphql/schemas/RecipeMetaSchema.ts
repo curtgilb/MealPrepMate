@@ -167,13 +167,13 @@ builder.mutationFields((t) => ({
     type: "Recipe",
     args: {
       recipeId: t.arg.string({ required: true }),
-      cuisineId: t.arg.string({ required: true }),
+      cuisineId: t.arg.stringList({ required: true }),
     },
     resolve: async (query, root, args) => {
       return await db.recipe.update({
         where: { id: args.recipeId },
         data: {
-          cuisineId: args.cuisineId,
+          cuisine: { set: args.cuisineId.map((id) => ({ id })) },
         },
         ...query,
       });

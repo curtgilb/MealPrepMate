@@ -153,14 +153,14 @@ export default interface PrismaTypes {
         Where: Prisma.RecipeIngredientWhereInput;
         Create: {};
         Update: {};
-        RelationName: "unit" | "recipes" | "ingredient" | "group";
+        RelationName: "unit" | "recipe" | "ingredient" | "group";
         ListRelations: never;
         Relations: {
             unit: {
                 Shape: MeasurementUnit | null;
                 Name: "MeasurementUnit";
             };
-            recipes: {
+            recipe: {
                 Shape: Recipe;
                 Name: "Recipe";
             };

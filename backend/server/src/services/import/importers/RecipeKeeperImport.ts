@@ -8,9 +8,10 @@ import { Match, RecipeKeeperRecipe } from "../../../types/CustomTypes.js";
 import {
   NutritionLabelValidation,
   RecipeInputValidation,
-} from "../../../validations/graphqlValidation.js";
+} from "../../../validations/graphql/RecipeValidation.js";
 import { createRecipeCreateStmt } from "../../../model_extensions/RecipeExtension.js";
 import { Importer, ImportServiceInput, MatchUpdate } from "./Import.js";
+import { IngredientMatcher } from "../../../model_extensions/IngredientMatcher.js";
 
 class RecipeKeeperImport extends Importer {
   constructor(input: ImportServiceInput | Import) {
@@ -37,8 +38,7 @@ class RecipeKeeperImport extends Importer {
       dbStmt?: Prisma.RecipeCreateInput;
     };
     const preparedData: MatchedData[] = [];
-    const units = await db.measurementUnit.findMany({});
-    const ingredients = await db.ingredient.findMany({});
+    const ingredientMatcher = new IngredientMatcher();
     for (const record of output.records) {
       const match = await this.findRecipeMatches(record);
       const recipeInput = await record.transform(
@@ -53,15 +53,14 @@ class RecipeKeeperImport extends Importer {
         match.status === RecordStatus.UPDATED ||
         match.status === RecordStatus.IMPORTED
       ) {
-        const stmt = await createRecipeCreateStmt(
-          {
-            recipe: recipeInput,
-            nutritionLabel: labelInput,
-            matchingRecipeId: match.recipeMatchId,
-          },
-          units,
-          ingredients
-        );
+        const stmt = await createRecipeCreateStmt({
+          recipe: recipeInput,
+          nutritionLabel: labelInput,
+          matchingRecipeId: match.recipeMatchId,
+          update: false,
+          verifed: false,
+          ingredientMatcher,
+        });
         item.dbStmt = stmt;
       }
       preparedData.push(item);
@@ -189,16 +188,15 @@ class RecipeKeeperImport extends Importer {
     const validatedNutritionLabel = await rehydrated.toNutritionLabel(
       NutritionLabelValidation
     );
-
-    const stmt = await createRecipeCreateStmt(
-      {
-        recipe: validatedRecipe,
-        nutritionLabel: validatedNutritionLabel,
-        matchingRecipeId: record.recipeId ?? undefined,
-      },
-      await dbClient.measurementUnit.findMany({}),
-      await dbClient.ingredient.findMany({})
-    );
+    const ingredientMatcher = new IngredientMatcher();
+    const stmt = await createRecipeCreateStmt({
+      recipe: validatedRecipe,
+      nutritionLabel: validatedNutritionLabel,
+      matchingRecipeId: record.recipeId ?? undefined,
+      ingredientMatcher,
+      update: false,
+      verifed: false,
+    });
 
     const { id } = await dbClient.recipe.create({ data: stmt });
 
