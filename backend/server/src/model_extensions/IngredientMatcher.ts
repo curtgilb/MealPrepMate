@@ -80,11 +80,13 @@ class IngredientMatcher {
     if (!this.units)
       this.units = new UnitSearch(await db.measurementUnit.findMany({}));
 
+    const ingredientId = ingredientName
+      ? this.ingredients.search(ingredientName)?.id
+      : null;
+    const unitId = unit ? this.units.search(unit)?.id : null;
     return {
-      ingredientId: ingredientName
-        ? this.ingredients.search(ingredientName)?.id
-        : null,
-      unitId: unit ? this.units.search(unit)?.id : null,
+      ingredientId,
+      unitId,
     };
   }
 }

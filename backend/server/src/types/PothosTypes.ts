@@ -1,19 +1,42 @@
 /* eslint-disable */
-import type { Prisma, ShoppingDay, MealPlan, MealPlanServing, MealPlanRecipe, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, NutrientImportMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
+import type { Prisma, Notification, ScheduledPlan, MealPlan, NotificationSetting, MealPlanServing, MealPlanRecipe, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, NutrientImportMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
 export default interface PrismaTypes {
-    ShoppingDay: {
-        Name: "ShoppingDay";
-        Shape: ShoppingDay;
-        Include: Prisma.ShoppingDayInclude;
-        Select: Prisma.ShoppingDaySelect;
-        OrderBy: Prisma.ShoppingDayOrderByWithRelationInput;
-        WhereUnique: Prisma.ShoppingDayWhereUniqueInput;
-        Where: Prisma.ShoppingDayWhereInput;
+    Notification: {
+        Name: "Notification";
+        Shape: Notification;
+        Include: Prisma.NotificationInclude;
+        Select: Prisma.NotificationSelect;
+        OrderBy: Prisma.NotificationOrderByWithRelationInput;
+        WhereUnique: Prisma.NotificationWhereUniqueInput;
+        Where: Prisma.NotificationWhereInput;
         Create: {};
         Update: {};
-        RelationName: "mealPlan";
+        RelationName: "schedule";
         ListRelations: never;
         Relations: {
+            schedule: {
+                Shape: ScheduledPlan;
+                Name: "ScheduledPlan";
+            };
+        };
+    };
+    ScheduledPlan: {
+        Name: "ScheduledPlan";
+        Shape: ScheduledPlan;
+        Include: Prisma.ScheduledPlanInclude;
+        Select: Prisma.ScheduledPlanSelect;
+        OrderBy: Prisma.ScheduledPlanOrderByWithRelationInput;
+        WhereUnique: Prisma.ScheduledPlanWhereUniqueInput;
+        Where: Prisma.ScheduledPlanWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "notifications" | "mealPlan";
+        ListRelations: "notifications";
+        Relations: {
+            notifications: {
+                Shape: Notification[];
+                Name: "Notification";
+            };
             mealPlan: {
                 Shape: MealPlan;
                 Name: "MealPlan";
@@ -30,8 +53,8 @@ export default interface PrismaTypes {
         Where: Prisma.MealPlanWhereInput;
         Create: {};
         Update: {};
-        RelationName: "planRecipes" | "mealPlanServings" | "shoppingDays";
-        ListRelations: "planRecipes" | "mealPlanServings" | "shoppingDays";
+        RelationName: "planRecipes" | "mealPlanServings" | "schedules";
+        ListRelations: "planRecipes" | "mealPlanServings" | "schedules";
         Relations: {
             planRecipes: {
                 Shape: MealPlanRecipe[];
@@ -41,11 +64,25 @@ export default interface PrismaTypes {
                 Shape: MealPlanServing[];
                 Name: "MealPlanServing";
             };
-            shoppingDays: {
-                Shape: ShoppingDay[];
-                Name: "ShoppingDay";
+            schedules: {
+                Shape: ScheduledPlan[];
+                Name: "ScheduledPlan";
             };
         };
+    };
+    NotificationSetting: {
+        Name: "NotificationSetting";
+        Shape: NotificationSetting;
+        Include: never;
+        Select: Prisma.NotificationSettingSelect;
+        OrderBy: Prisma.NotificationSettingOrderByWithRelationInput;
+        WhereUnique: Prisma.NotificationSettingWhereUniqueInput;
+        Where: Prisma.NotificationSettingWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: never;
+        ListRelations: never;
+        Relations: {};
     };
     MealPlanServing: {
         Name: "MealPlanServing";

@@ -149,7 +149,7 @@ class RecipeKeeperImport extends Importer {
         await tx.recipe.update({
           where: { id: record.draftId },
           data: {
-            nutritionLabel: record.nutritionLabelId
+            nutritionLabels: record.nutritionLabelId
               ? { connect: { id: record.nutritionLabelId } }
               : {},
             importRecords: { connect: { id: record.id } },
@@ -268,7 +268,7 @@ class RecipeKeeperImport extends Importer {
     }
     // 3. Check for updateable match by comparing title : UPDATE
     const recipeMatch = await db.recipe.findFirst({
-      where: { title: { contains: recipe.getTitle(), mode: "insensitive" } },
+      where: { name: { contains: recipe.getTitle(), mode: "insensitive" } },
       select: { id: true },
     });
 

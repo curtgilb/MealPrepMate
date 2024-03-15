@@ -63,17 +63,20 @@ class NutrientAggregator {
   }
 
   getNutrientMap(args: NutrientMapArgs[]): NutrientMap {
-    const mappings = args.map((arg) => {
-      const label = this.aggregatedNutrients.get(arg.id);
-      if (!label) throw new Error("ID does not match any in aggregation");
-
-      return label.getLabelNutrientMap({
-        factor: arg.factor,
-        totalServings: arg.totalServings,
-        servingsUsed: arg.servingsUsed,
+    const mappings = args
+      .filter((arg) => this.aggregatedNutrients.has(arg.id))
+      .map((arg) => {
+        const label = this.aggregatedNutrients.get(arg.id) as LabelAggregator;
+        return label.getLabelNutrientMap({
+          factor: arg.factor,
+          totalServings: arg.totalServings,
+          servingsUsed: arg.servingsUsed,
+        });
       });
-    });
 
+    if (mappings.length === 0) {
+      return new Map<string, NutrientValue>();
+    }
     if (mappings.length > 1) {
       const agg = mappings.reduce((acc, cur) => {
         acc.addNutrientMap(cur);
@@ -204,7 +207,6 @@ type FullNutrient = {
   unit: MeasurementUnit;
   perServing?: number;
   target?: NutrientTarget;
-  children: FullNutrient[];
 };
 
 type NutrientTarget = {
@@ -237,14 +239,13 @@ type FullNutritionLabel = PrettyNutritionLabel &
   ServingInfo & { nutrients: FullNutrient[] };
 
 class LabelMaker {
-  private parentNutrients: NutrientWithUnit[] = [];
-  private childNutrients = new Map<string, NutrientWithUnit[]>();
+  private existingNutrients = new Map<string, NutrientWithUnit>();
 
   private async initializeExistingNutrients() {
     const profile = await db.healthProfile.findFirstOrThrow({});
     const age = new Date().getFullYear() - profile.yearBorn;
     // Get nutrients in order
-    this.parentNutrients = await db.nutrient.findMany({
+    const nutrients = await db.nutrient.findMany({
       include: {
         unit: true,
         dri: {
@@ -259,21 +260,10 @@ class LabelMaker {
       orderBy: { order: "asc" },
     });
 
-    this.childNutrients = this.parentNutrients
-      .filter((nutrient) => nutrient.parentNutrientId)
-      .reduce((acc, curr) => {
-        let childList = acc.get(curr.parentNutrientId as string);
-        if (!childList) {
-          childList = [];
-          acc.set(curr.parentNutrientId as string, childList);
-        }
-        childList.push(curr);
-        return acc;
-      }, new Map<string, NutrientWithUnit[]>());
-
-    this.parentNutrients = this.parentNutrients.filter(
-      (nutrient) => !nutrient.parentNutrientId
-    );
+    this.existingNutrients = nutrients.reduce((acc, curr) => {
+      acc.set(curr.id, curr);
+      return acc;
+    }, new Map<string, NutrientWithUnit>());
   }
 
   private getMacroDistribution(nutrients: NutrientMap, servings: number) {
@@ -301,58 +291,38 @@ class LabelMaker {
     };
   }
 
-  private populateNutrients(
-    parentNutrients: NutrientWithUnit[],
-    nutrientMap: NutrientMap,
-    outputList: FullNutrient[],
-    advanced: boolean
-  ): FullNutrient[] {
-    // Find all nutrients that have the baseNutrientId as their parent
-    for (const parentNutrient of parentNutrients) {
-      const matchingLabelNutrient = nutrientMap.get(parentNutrient.id);
-      if (matchingLabelNutrient && (advanced || !parentNutrient.advancedView)) {
-        const childNutrients = this.childNutrients.get(parentNutrient.id);
-
-        outputList.push({
-          id: parentNutrient.id,
-          name: parentNutrient.name,
-          value: matchingLabelNutrient?.value,
-          category: parentNutrient.type,
-          unit: parentNutrient.unit,
-          perServing: matchingLabelNutrient?.valuePerServing,
-          target: {
-            dri:
-              parentNutrient.dri.length > 0
-                ? parentNutrient.dri[0].value
-                : undefined,
-            customTarget: parentNutrient.customTarget ?? undefined,
-          },
-          children: childNutrients
-            ? this.populateNutrients(childNutrients, nutrientMap, [], advanced)
-            : [],
-        });
-      }
-    }
-    return outputList;
-  }
-
   async createLabel({
     nutrients,
     servings,
     advanced,
   }: CreateLabelArgs): Promise<FullNutritionLabel> {
-    if (this.parentNutrients.length == 0) {
+    if (this.existingNutrients.size == 0) {
       await this.initializeExistingNutrients();
     }
 
     const macros = this.getMacroDistribution(nutrients, servings.servings ?? 1);
 
-    const fullNutrients = this.populateNutrients(
-      this.parentNutrients.filter((nutrient) => !nutrient.parentNutrientId),
-      nutrients,
-      [],
-      advanced
-    );
+    const fullNutrients: FullNutrient[] = [];
+    nutrients.forEach((labelValue, id) => {
+      const nutrientInfo = this.existingNutrients.get(id);
+      if (nutrientInfo && (advanced || !nutrientInfo.advancedView)) {
+        fullNutrients.push({
+          id: nutrientInfo.id,
+          name: nutrientInfo.name,
+          value: labelValue?.value,
+          category: nutrientInfo.type,
+          unit: nutrientInfo.unit,
+          perServing: labelValue?.valuePerServing,
+          target: {
+            dri:
+              nutrientInfo.dri.length > 0
+                ? nutrientInfo.dri[0].value
+                : undefined,
+            customTarget: nutrientInfo.customTarget ?? undefined,
+          },
+        });
+      }
+    });
 
     return {
       ...macros,

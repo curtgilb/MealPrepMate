@@ -36,7 +36,6 @@ export type AggregateLabel = {
 
 export type AggregateNutrient = {
   __typename?: 'AggregateNutrient';
-  children: Array<AggregateNutrient>;
   id: Scalars['String']['output'];
   name: Scalars['String']['output'];
   perServing?: Maybe<Scalars['Float']['output']>;
@@ -276,7 +275,7 @@ export type Mutation = {
   deleteIngredient: Array<Ingredient>;
   deleteNutritionLabel: Array<NutritionLabel>;
   deletePriceHistory: Array<IngredientPrice>;
-  deleteRecipe: Recipe;
+  deleteRecipes: Array<Recipe>;
   editExpirationRule: ExpirationRule;
   editIngredient: Ingredient;
   editNutritionLabel: NutritionLabel;
@@ -409,8 +408,8 @@ export type MutationDeletePriceHistoryArgs = {
 };
 
 
-export type MutationDeleteRecipeArgs = {
-  recipeId: Scalars['String']['input'];
+export type MutationDeleteRecipesArgs = {
+  recipeIds: Array<Scalars['String']['input']>;
 };
 
 
@@ -729,9 +728,9 @@ export type RecipeIngredientGroup = {
 };
 
 export type RecipeIngredientInput = {
-  groupId?: InputMaybe<Scalars['ID']['input']>;
+  groupId?: InputMaybe<Scalars['String']['input']>;
   groupName?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['ID']['input']>;
+  id?: InputMaybe<Scalars['String']['input']>;
   ingredientId?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   order?: InputMaybe<Scalars['Int']['input']>;
@@ -742,11 +741,11 @@ export type RecipeIngredientInput = {
 
 export type RecipeIngredientUpdateInput = {
   groupsToAdd?: InputMaybe<Array<Scalars['String']['input']>>;
-  groupsToDelete?: InputMaybe<Array<Scalars['ID']['input']>>;
+  groupsToDelete?: InputMaybe<Array<Scalars['String']['input']>>;
   ingredientsToAdd?: InputMaybe<Array<RecipeIngredientInput>>;
-  ingredientsToDelete?: InputMaybe<Array<Scalars['ID']['input']>>;
+  ingredientsToDelete?: InputMaybe<Array<Scalars['String']['input']>>;
   ingredientsToUpdate?: InputMaybe<Array<RecipeIngredientInput>>;
-  recipeId: Scalars['ID']['input'];
+  recipeId: Scalars['String']['input'];
 };
 
 export type RecipeIngredients = {
@@ -782,7 +781,7 @@ export type RecipesQuery = {
   __typename?: 'RecipesQuery';
   itemsRemaining: Scalars['Int']['output'];
   nextOffset?: Maybe<Scalars['Int']['output']>;
-  records: Array<Recipe>;
+  recipes: Array<Recipe>;
 };
 
 export enum RecordStatus {
@@ -999,7 +998,6 @@ export type AggregateLabelResolvers<ContextType = any, ParentType extends Resolv
 };
 
 export type AggregateNutrientResolvers<ContextType = any, ParentType extends ResolversParentTypes['AggregateNutrient'] = ResolversParentTypes['AggregateNutrient']> = {
-  children?: Resolver<Array<ResolversTypes['AggregateNutrient']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   perServing?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
@@ -1147,7 +1145,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   deleteIngredient?: Resolver<Array<ResolversTypes['Ingredient']>, ParentType, ContextType, RequireFields<MutationDeleteIngredientArgs, 'ingredientToDeleteId'>>;
   deleteNutritionLabel?: Resolver<Array<ResolversTypes['NutritionLabel']>, ParentType, ContextType, RequireFields<MutationDeleteNutritionLabelArgs, 'id'>>;
   deletePriceHistory?: Resolver<Array<ResolversTypes['IngredientPrice']>, ParentType, ContextType, RequireFields<MutationDeletePriceHistoryArgs, 'ingredientId' | 'ingredientPriceId'>>;
-  deleteRecipe?: Resolver<ResolversTypes['Recipe'], ParentType, ContextType, RequireFields<MutationDeleteRecipeArgs, 'recipeId'>>;
+  deleteRecipes?: Resolver<Array<ResolversTypes['Recipe']>, ParentType, ContextType, RequireFields<MutationDeleteRecipesArgs, 'recipeIds'>>;
   editExpirationRule?: Resolver<ResolversTypes['ExpirationRule'], ParentType, ContextType, RequireFields<MutationEditExpirationRuleArgs, 'expirationRule' | 'expirationRuleId'>>;
   editIngredient?: Resolver<ResolversTypes['Ingredient'], ParentType, ContextType, RequireFields<MutationEditIngredientArgs, 'ingredient' | 'ingredientId'>>;
   editNutritionLabel?: Resolver<ResolversTypes['NutritionLabel'], ParentType, ContextType, RequireFields<MutationEditNutritionLabelArgs, 'label'>>;
@@ -1263,7 +1261,7 @@ export type RecipeIngredientsResolvers<ContextType = any, ParentType extends Res
 export type RecipesQueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['RecipesQuery'] = ResolversParentTypes['RecipesQuery']> = {
   itemsRemaining?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   nextOffset?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  records?: Resolver<Array<ResolversTypes['Recipe']>, ParentType, ContextType>;
+  recipes?: Resolver<Array<ResolversTypes['Recipe']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

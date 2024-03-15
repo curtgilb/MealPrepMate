@@ -25,7 +25,7 @@ abstract class ParsedRecord<O> {
   protected static nutrientMapping = new Map<string, string>();
 
   protected static async initializeMapping(importType: ImportType) {
-    const nutrients = await db.nutrientMapping.findMany({
+    const nutrients = await db.nutrientImportMapping.findMany({
       where: { importType: importType },
       select: { lookupName: true, nutrientId: true },
     });

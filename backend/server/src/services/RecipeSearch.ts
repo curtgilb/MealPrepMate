@@ -12,7 +12,7 @@ import {
 } from "./nutrition/NutritionAggregator.js";
 
 import { FullNutritionLabel } from "./nutrition/NutritionAggregator.js";
-import { merge } from "lodash-es";
+import { buildRecipeSearchStmt } from "./RecipeSearchStmtBuilder.js";
 
 type RecipeQuery = {
   include?: Prisma.RecipeInclude | undefined;
@@ -43,15 +43,12 @@ type RecipeSearchArgs = {
   aggregatedLabel: boolean;
 };
 
-const ALWAYS_INCLUDE: Prisma.RecipeInclude = {
-  ingredients: {
-    include: { ingredient: { include: { expirationRule: true } } },
-  },
-  nutritionLabels: { include: { nutrients: true, servingSizeUnit: true } },
-};
-
 async function searchRecipes(args: RecipeSearchArgs) {
-  const recipes = await getRecipes(args.query, args?.filter);
+  const searchStmt = buildRecipeSearchStmt(args.filter, args.query);
+  const recipes = (await db.recipe.findMany(
+    searchStmt
+  )) as unknown as RecipeWithRule[];
+
   const filteredRecipes: ExtendedRecipe[] = [];
   const totalLength = args.take + args.offset;
   let i = 0;
@@ -108,90 +105,6 @@ async function searchRecipes(args: RecipeSearchArgs) {
     );
   }
   return { recipes: recipePage, totalCount };
-}
-
-async function getRecipes(
-  query: RecipeQuery,
-  filter?: RecipeFilter | null
-): Promise<ExtendedRecipe[]> {
-  const includeStmt = merge(query.include, ALWAYS_INCLUDE);
-
-  if (!filter) {
-    return (await db.recipe.findMany({
-      where: { isVerified: true },
-      orderBy: { name: "desc" },
-      include: includeStmt,
-      ...query.select,
-    })) as unknown as RecipeWithRule[];
-  }
-  return (await db.recipe.findMany({
-    include: includeStmt,
-    ...query.select,
-    where: {
-      OR: [
-        {
-          name: {
-            contains: filter.searchString ?? undefined,
-            mode: "insensitive",
-          },
-        },
-        {
-          source: {
-            contains: filter.searchString ?? undefined,
-            mode: "insensitive",
-          },
-        },
-      ],
-      isVerified: true,
-      nutritionLabels: {
-        some: {
-          isPrimary: true,
-          servings: {
-            lte: filter.numOfServings?.lte ?? undefined,
-            gte: filter.numOfServings?.lte ?? undefined,
-            equals: filter.numOfServings?.lte ?? undefined,
-          },
-        },
-      },
-      course: {
-        every: {
-          id: { in: filter.courseIds ?? undefined },
-        },
-      },
-      cuisine: {
-        every: {
-          id: { in: filter.cuisineId ?? [] },
-        },
-      },
-      category: {
-        every: {
-          id: { in: filter.categoryIds ?? undefined },
-        },
-      },
-      preparationTime: {
-        lte: filter.prepTime?.lte ?? undefined,
-        gte: filter.prepTime?.gte ?? undefined,
-        equals: filter.prepTime?.eq ?? undefined,
-      },
-      cookingTime: {
-        lte: filter.cookTime?.lte ?? undefined,
-        gte: filter.cookTime?.gte ?? undefined,
-        equals: filter.cookTime?.eq ?? undefined,
-      },
-      marinadeTime: {
-        lte: filter.marinadeTime?.lte ?? undefined,
-        gte: filter.marinadeTime?.gte ?? undefined,
-        equals: filter.marinadeTime?.eq ?? undefined,
-      },
-      totalTime: {
-        lte: filter.totalPrepTime?.lte ?? undefined,
-        gte: filter.totalPrepTime?.gte ?? undefined,
-        equals: filter.totalPrepTime?.eq ?? undefined,
-      },
-      isFavorite: filter.isFavorite ?? undefined,
-    },
-    orderBy: { name: "desc" },
-  })) as unknown as RecipeWithRule[];
 }
 
 function filterNutrients(
@@ -265,4 +178,4 @@ class FilterError extends Error {
   }
 }
 
-export { ExtendedRecipe, searchRecipes };
+export { ExtendedRecipe, searchRecipes, FilterError, passFilter, RecipeQuery };

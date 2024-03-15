@@ -1,7 +1,6 @@
 import { db } from "../../db.js";
 import { builder } from "../builder.js";
 import {
-  checkIfFieldRequested,
   nextPageInfo,
   numericalComparison,
   offsetPagination,
@@ -18,6 +17,8 @@ import {
 import { z } from "zod";
 import { queryFromInfo } from "@pothos/plugin-prisma";
 import { OffsetPaginationValidation } from "../../validations/graphql/UtilityValidation.js";
+import { IngredientMatcher } from "../../model_extensions/IngredientMatcher.js";
+import { createRecipeCreateStmt } from "../../model_extensions/RecipeExtension.js";
 
 // ============================================ Types ===================================
 const recipe = builder.prismaObject("Recipe", {
@@ -43,7 +44,7 @@ const recipe = builder.prismaObject("Recipe", {
         advanced: t.arg.boolean(),
       },
       resolve: async (parent, args) => {
-        if (Object.prototype.hasOwnProperty.call(parent, "nutrientMap")) {
+        if (Object.prototype.hasOwnProperty.call(parent, "aggregateLabel")) {
           return (parent as ExtendedRecipe).aggregateLabel;
         } else {
           return await getAggregatedLabel(
@@ -112,7 +113,7 @@ const recipeInput = builder.inputType("RecipeInput", {
 
 const recipeIngredientInput = builder.inputType("RecipeIngredientInput", {
   fields: (t) => ({
-    id: t.id(),
+    id: t.string(),
     order: t.int(),
     sentence: t.string(),
     quantity: t.int(),
@@ -120,7 +121,7 @@ const recipeIngredientInput = builder.inputType("RecipeIngredientInput", {
     name: t.string(),
     ingredientId: t.string(),
     groupName: t.string(),
-    groupId: t.id(),
+    groupId: t.string(),
   }),
 });
 
@@ -128,12 +129,12 @@ const recipeIngredientUpdateInput = builder.inputType(
   "RecipeIngredientUpdateInput",
   {
     fields: (t) => ({
-      recipeId: t.id({ required: true }),
+      recipeId: t.string({ required: true }),
       ingredientsToAdd: t.field({ type: [recipeIngredientInput] }),
-      ingredientsToDelete: t.idList(),
+      ingredientsToDelete: t.stringList(),
       ingredientsToUpdate: t.field({ type: [recipeIngredientInput] }),
       groupsToAdd: t.stringList(),
-      groupsToDelete: t.idList(),
+      groupsToDelete: t.stringList(),
     }),
   }
 );
@@ -271,7 +272,17 @@ builder.mutationFields((t) => ({
       }),
     },
     resolve: async (query, root, args) => {
-      return await db.recipe.createRecipe(args.recipe, query);
+      const matcher = new IngredientMatcher();
+      const stmt = await createRecipeCreateStmt({
+        recipe: args.recipe,
+        verifed: true,
+        ingredientMatcher: matcher,
+        update: false,
+      });
+      return await db.recipe.create({
+        data: stmt,
+        ...query,
+      });
     },
   }),
   updateRecipe: t.prismaField({
@@ -307,24 +318,24 @@ builder.mutationFields((t) => ({
       }),
     },
     resolve: async (query, root, args) => {
-      return await db.recipeIngredient.findMany({ ...query });
+      return await db.recipe.updateRecipeIngredients(args.ingredient, query);
     },
   }),
-  deleteRecipe: t.prismaField({
-    type: "Recipe",
+  deleteRecipes: t.prismaField({
+    type: ["Recipe"],
     args: {
-      recipeId: t.arg.string({ required: true }),
+      recipeIds: t.arg.stringList({ required: true }),
     },
     validate: {
       schema: z.object({
-        recipeId: z.string().cuid(),
+        recipeIds: z.string().cuid().array(),
       }),
     },
     resolve: async (query, root, args) => {
-      return await db.recipe.delete({
-        where: { id: args.recipeId },
-        ...query,
+      await db.recipe.deleteMany({
+        where: { id: { in: args.recipeIds } },
       });
+      return db.recipe.findMany({});
     },
   }),
 }));

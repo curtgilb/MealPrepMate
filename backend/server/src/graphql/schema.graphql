@@ -12,7 +12,6 @@ type AggregateLabel {
 }
 
 type AggregateNutrient {
-  children: [AggregateNutrient!]!
   id: String!
   name: String!
   perServing: Float
@@ -246,7 +245,7 @@ type Mutation {
   deleteIngredient(ingredientToDeleteId: String!): [Ingredient!]!
   deleteNutritionLabel(id: String!): [NutritionLabel!]!
   deletePriceHistory(ingredientId: String!, ingredientPriceId: [String!]!): [IngredientPrice!]!
-  deleteRecipe(recipeId: String!): Recipe!
+  deleteRecipes(recipeIds: [String!]!): [Recipe!]!
   editExpirationRule(expirationRule: CreateExpirationRule!, expirationRuleId: String!): ExpirationRule!
   editIngredient(ingredient: CreateIngredientInput!, ingredientId: String!): Ingredient!
   editNutritionLabel(label: EditNutritionLabelInput!): NutritionLabel!
@@ -396,9 +395,9 @@ type RecipeIngredientGroup {
 }
 
 input RecipeIngredientInput {
-  groupId: ID
+  groupId: String
   groupName: String
-  id: ID
+  id: String
   ingredientId: String
   name: String
   order: Int
@@ -409,11 +408,11 @@ input RecipeIngredientInput {
 
 input RecipeIngredientUpdateInput {
   groupsToAdd: [String!]
-  groupsToDelete: [ID!]
+  groupsToDelete: [String!]
   ingredientsToAdd: [RecipeIngredientInput!]
-  ingredientsToDelete: [ID!]
+  ingredientsToDelete: [String!]
   ingredientsToUpdate: [RecipeIngredientInput!]
-  recipeId: ID!
+  recipeId: String!
 }
 
 type RecipeIngredients {
@@ -447,7 +446,7 @@ input RecipeInput {
 type RecipesQuery {
   itemsRemaining: Int!
   nextOffset: Int
-  records: [Recipe!]!
+  recipes: [Recipe!]!
 }
 
 enum RecordStatus {

@@ -32,10 +32,6 @@ AggregateNutrient.implement({
       nullable: true,
       resolve: (parent) => parent?.target,
     }),
-    children: t.field({
-      type: [AggregateNutrient],
-      resolve: (parent) => parent.children,
-    }),
   }),
 });
 
@@ -189,7 +185,7 @@ builder.queryFields((t) => ({
   }),
   dailyReferenceIntake: t.prismaField({
     type: ["Nutrient"],
-    resolve: async (query, root, args) => {
+    resolve: async (query) => {
       const profile = await db.healthProfile.findFirstOrThrow({});
       const age = new Date().getFullYear() - profile.yearBorn;
       return await db.nutrient.findMany({
@@ -233,7 +229,7 @@ builder.mutationFields((t) => ({
       label: t.arg({ type: editNutritionLabelInput, required: true }),
     },
     resolve: async (query, root, args) => {
-      return await db.nutritionLabel.editNutritionLabel(args, query);
+      return await db.nutritionLabel.editNutritionLabel(args.label, query);
     },
   }),
   deleteNutritionLabel: t.prismaField({

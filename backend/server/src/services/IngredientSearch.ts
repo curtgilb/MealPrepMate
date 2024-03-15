@@ -1,7 +1,7 @@
 import { db } from "../db.js";
 import { Prisma } from "@prisma/client";
 import { IngredientFilter, NumericalComparison } from "../types/gql.js";
-import { FilterError, passFilter } from "./nutrition/NutritionAggregator.js";
+import { FilterError, passFilter } from "./RecipeSearch.js";
 
 const ingredientsWithExpirationRules =
   Prisma.validator<Prisma.RecipeIngredientDefaultArgs>()({
@@ -63,9 +63,7 @@ function validateMaxFreshness(
   filter: NumericalComparison | undefined | null
 ) {
   const maxFreshness = getMaxFreshDays(ingredients);
-  if (filter && !passFilter(maxFreshness, filter)) {
-    throw new FilterError("Did not pass max freshness filter");
-  }
+  passFilter(maxFreshness, filter);
 }
 
 function validateIngredients(
@@ -78,11 +76,8 @@ function validateIngredients(
       if (!matchingIngredient) {
         throw new FilterError("Doesn't pass ingredient filter");
       } else {
-        if (
-          filter.amount &&
-          !passFilter(matchingIngredient.quantity ?? 1, filter.amount)
-        )
-          throw new FilterError("Did not pass ingredient qty filter");
+        passFilter(matchingIngredient.quantity ?? 1, filter.amount);
+
         if (
           filter.unitId &&
           filter.unitId !== matchingIngredient.measurementUnitId

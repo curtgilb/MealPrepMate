@@ -19,10 +19,8 @@ type MatchedNlpResponse = RecipeNlpResponse & {
 };
 
 async function tagIngredients(
-  ingredients: string,
-  matcher: IngredientMatcher,
-  matchingRecipeId?: string
-): Promise<MatchedNlpResponse[]> {
+  ingredients: string
+): Promise<RecipeNlpResponse[]> {
   const ingredientsByLine = ingredients
     .split("\n")
     .filter((sentence) => sentence);
@@ -37,33 +35,43 @@ async function tagIngredients(
     headers: { "Content-Type": "application/json" },
   });
 
-  const data = (await response.json()) as RecipeNlpResponse[];
+  const data = (await response
+    .json()
+    .catch((err) => console.log(err))) as RecipeNlpResponse[];
 
-  return await Promise.all(
-    data.map(async (ingredient, index) => {
-      const cleanedSentence = z.coerce.string().parse(ingredient.sentence);
-      const matches = await matcher.match({
-        ingredientName: ingredient.name,
-        unit: ingredient.unit,
-        matchingRecipeSearch: {
-          matchingRecipeId: matchingRecipeId,
-          fullIngredientLine: cleanedSentence,
-        },
-      });
-
-      return {
-        ...ingredient,
-        sentence: cleanedSentence,
-        name: z.coerce.string().parse(ingredient.name),
-        quantity: z
-          .preprocess(coerceNumeric, z.number().nullish())
-          .parse(ingredient.quantity),
-        order: index,
-        ingredientId: matches.ingredientId,
-        unitId: matches.unitId,
-      };
-    })
-  );
+  return data;
 }
 
-export { tagIngredients, MatchedNlpResponse };
+async function matchIngredients(
+  ingredients: RecipeNlpResponse[],
+  matcher: IngredientMatcher,
+  matchingRecipeId?: string
+) {
+  const matchedIngredients: MatchedNlpResponse[] = [];
+  for (const [index, ingredient] of ingredients.entries()) {
+    const cleanedSentence = z.coerce.string().parse(ingredient.sentence);
+    const matches = await matcher.match({
+      ingredientName: ingredient.name,
+      unit: ingredient.unit,
+      matchingRecipeSearch: {
+        matchingRecipeId: matchingRecipeId,
+        fullIngredientLine: cleanedSentence,
+      },
+    });
+
+    matchedIngredients.push({
+      ...ingredient,
+      sentence: cleanedSentence,
+      name: z.coerce.string().parse(ingredient.name),
+      quantity: z
+        .preprocess(coerceNumeric, z.number().nullish())
+        .parse(ingredient.quantity),
+      order: index,
+      ingredientId: matches.ingredientId,
+      unitId: matches.unitId,
+    });
+  }
+  return matchedIngredients;
+}
+
+export { tagIngredients, matchIngredients, MatchedNlpResponse };

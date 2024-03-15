@@ -5,13 +5,14 @@ import {
   RecipeInput,
 } from "../types/gql.js";
 import { createNutritionLabelStmt } from "./NutritionExtension.js";
-import { tagIngredients } from "./IngredientTagger.js";
+import { matchIngredients, tagIngredients } from "./IngredientTagger.js";
 import { IngredientMatcher } from "./IngredientMatcher.js";
 import {
   buildRecipeIngredientNestedCreateMany,
   buildRecipeIngredientStmt,
   buildRecipeStmt,
 } from "./RecipeStmtBuilder.js";
+import { nutritionLabel } from "../graphql/schemas/NutritionSchema.js";
 
 type RecipeQuery = {
   include?: Prisma.RecipeInclude | undefined;
@@ -40,7 +41,14 @@ async function createRecipeCreateStmt(input: {
 
   // Create nutrition label stmt
   const nutritionLabel = input.nutritionLabel
-    ? createNutritionLabelStmt(input.nutritionLabel, true, input.verifed)
+    ? createNutritionLabelStmt(
+        {
+          label: input.nutritionLabel,
+          verifed: input.verifed,
+          createRecipe: false,
+        },
+        true
+      )
     : undefined;
 
   // Create final statement
@@ -70,27 +78,29 @@ async function createRecipeIngredientsStmt(
     return undefined;
   }
   const { ingredientTxt, ingredientMatcher, matchingRecipeId } = input;
-  const taggedIngredients = await tagIngredients(
-    ingredientTxt,
+  const taggedIngredients = await tagIngredients(ingredientTxt);
+  const matchedIngredients = await matchIngredients(
+    taggedIngredients,
     ingredientMatcher,
     matchingRecipeId
   );
-  return buildRecipeIngredientNestedCreateMany(taggedIngredients);
+  return buildRecipeIngredientNestedCreateMany(matchedIngredients);
 }
 
-export const recipeExtensions = Prisma.defineExtension((client) => {
+const recipeExtensions = Prisma.defineExtension((client) => {
   return client.$extends({
     model: {
       recipe: {
         async createRecipe(recipe: RecipeInput, query?: RecipeQuery) {
           const matcher = new IngredientMatcher();
+          const stmt = await createRecipeCreateStmt({
+            recipe,
+            verifed: true,
+            ingredientMatcher: matcher,
+            update: false,
+          });
           return await client.recipe.create({
-            data: await createRecipeCreateStmt({
-              recipe,
-              verifed: true,
-              ingredientMatcher: matcher,
-              update: false,
-            }),
+            data: stmt,
             ...query,
           });
         },
@@ -181,4 +191,4 @@ export const recipeExtensions = Prisma.defineExtension((client) => {
   });
 });
 
-export { createRecipeCreateStmt };
+export { createRecipeCreateStmt, recipeExtensions };

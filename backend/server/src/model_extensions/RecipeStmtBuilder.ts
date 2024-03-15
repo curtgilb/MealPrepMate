@@ -91,7 +91,7 @@ function buildRecipeIngredientNestedCreateMany(
         name: ingredient.name,
         order: ingredient.order,
         measurementUnitId: ingredient.unitId ?? undefined,
-        ingredientId: ingredient.unitId ?? undefined,
+        ingredientId: ingredient.ingredientId ?? undefined,
       })),
     },
   };

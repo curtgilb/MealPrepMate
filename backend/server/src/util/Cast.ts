@@ -2,7 +2,6 @@ import {
   Gender,
   SpecialCondition,
   UnitType,
-  DayOfWeek,
   NutrientType,
 } from "@prisma/client";
 
@@ -122,20 +121,20 @@ function toSpecialConditionEnum(value: string): SpecialCondition {
   return "NONE";
 }
 
-function toDayOfWeekEnum(value: string): DayOfWeek {
-  let dayOfWeek = cast(value) as string;
-  if (dayOfWeek) {
-    dayOfWeek = dayOfWeek.toUpperCase();
-    if (["MONDAY", "MON"].includes(dayOfWeek)) return "MONDAY";
-    else if (["TUESDAY", "TUES"].includes(dayOfWeek)) return "TUESDAY";
-    else if (["WEDNESDAY", "WED"].includes(dayOfWeek)) return "WEDNESDAY";
-    else if (["THURSDAY", "THURS"].includes(dayOfWeek)) return "THURSDAY";
-    else if (["FRIDAY", "FRI"].includes(dayOfWeek)) return "FRIDAY";
-    else if (["SATURDAY", "SAT"].includes(dayOfWeek)) return "SATURDAY";
-    else if (["SUNDAY", "SUN"].includes(dayOfWeek)) return "SUNDAY";
-  }
-  throw new Error(`Unable to convert ${value} to a day of week`);
-}
+// function toDayOfWeekEnum(value: string): DayOfWeek {
+//   let dayOfWeek = cast(value) as string;
+//   if (dayOfWeek) {
+//     dayOfWeek = dayOfWeek.toUpperCase();
+//     if (["MONDAY", "MON"].includes(dayOfWeek)) return "MONDAY";
+//     else if (["TUESDAY", "TUES"].includes(dayOfWeek)) return "TUESDAY";
+//     else if (["WEDNESDAY", "WED"].includes(dayOfWeek)) return "WEDNESDAY";
+//     else if (["THURSDAY", "THURS"].includes(dayOfWeek)) return "THURSDAY";
+//     else if (["FRIDAY", "FRI"].includes(dayOfWeek)) return "FRIDAY";
+//     else if (["SATURDAY", "SAT"].includes(dayOfWeek)) return "SATURDAY";
+//     else if (["SUNDAY", "SUN"].includes(dayOfWeek)) return "SUNDAY";
+//   }
+//   throw new Error(`Unable to convert ${value} to a day of week`);
+// }
 
 function toMeasurementUnitTypeEnum(value: string): UnitType {
   switch (value.toUpperCase()) {
@@ -159,6 +158,5 @@ export {
   toNutrientTypeEnum,
   toGenderEnum,
   toSpecialConditionEnum,
-  toDayOfWeekEnum,
   toMeasurementUnitTypeEnum,
 };
