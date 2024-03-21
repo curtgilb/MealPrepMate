@@ -5,12 +5,16 @@ import { RecipeKeeperImport } from "../importers/RecipeKeeperImport.js";
 import { Importer } from "../importers/Import.js";
 import { db } from "../../../db.js";
 
+type MatchUpdate = {
+  recipeId?: string | null;
+  labelId?: string | null;
+  groupId?: string | null;
+};
+
 interface Operations {
-  toImport(): Promise<void>;
-  toIgnore(): Promise<void>;
-  toDuplicate(): Promise<void>;
-  toUpdate(): Promise<void>;
-  updateMatches(recipeId?: string, labelId?: string): Promise<void>;
+  toActiveState(status: RecordStatus): Promise<void>;
+  toInactiveState(status: RecordStatus): Promise<void>;
+  updateMatches(matches: MatchUpdate): Promise<void>;
 }
 
 function importServiceFactory(importRecord: Import) {
@@ -35,52 +39,29 @@ class ImportRecordManager {
     this.importRecord = record;
     this.importService = importServiceFactory(record.import);
 
-    switch (this.importRecord.status) {
-      case RecordStatus.IMPORTED:
-        this.state = new ImportedState(this);
-        break;
-      case RecordStatus.DUPLICATE:
-        this.state = new DuplicateState(this);
-        break;
-      case RecordStatus.IGNORED:
-        this.state = new IgnoredState(this);
-        break;
-      case RecordStatus.UPDATED:
-        this.state = new UpdateState(this);
-        break;
-      default:
-        throw new Error("Record not in an acceptable state");
+    if (record.status === "DUPLICATE" || record.status === "IGNORED") {
+      this.state = new InactiveDraftState(this);
+    } else if (record.status === "IMPORTED" || record.status === "UPDATED") {
+      this.state = new ActiveDraftState(this);
+    } else {
+      throw new Error("Record is not in an acceptable state");
     }
   }
 
   public async transitionTo(action: RecordStatus): Promise<void> {
-    switch (action) {
-      case RecordStatus.IMPORTED:
-        await this.state.toImport();
-        this.state = new ImportedState(this);
-        break;
-      case RecordStatus.DUPLICATE:
-        await this.state.toDuplicate();
-        this.state = new DuplicateState(this);
-        break;
-      case RecordStatus.IGNORED:
-        await this.state.toIgnore();
-        this.state = new IgnoredState(this);
-        break;
-      case RecordStatus.UPDATED:
-        await this.state.toUpdate();
-        this.state = new UpdateState(this);
-        break;
-      default:
-        throw new Error("Record not in an acceptable state");
+    if (action === "DUPLICATE" || action === "IGNORED") {
+      await this.state.toInactiveState(action);
+      this.state = new InactiveDraftState(this);
+    } else if (action === "IMPORTED" || action === "UPDATED") {
+      await this.state.toActiveState(action);
+      this.state = new ActiveDraftState(this);
+    } else {
+      throw new Error("Record is not in an acceptable state");
     }
   }
 
-  public async updateMatches(
-    recipeId: string | undefined,
-    labelId: string | undefined
-  ) {
-    await this.state.updateMatches(recipeId, labelId);
+  public async updateMatches(matches: MatchUpdate) {
+    await this.state.updateMatches(matches);
   }
 
   public async finalize() {
@@ -88,6 +69,7 @@ class ImportRecordManager {
   }
 }
 
+// Base class for states
 abstract class RecordImportState implements Operations {
   protected context: ImportRecordManager;
 
@@ -95,183 +77,62 @@ abstract class RecordImportState implements Operations {
     this.context = context;
   }
 
-  public toImport(): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  toActiveState(status: RecordStatus): Promise<void> {
     return new Promise((resolve) => {
       console.log("Import transition not supported");
       resolve();
     });
   }
-  public toIgnore(): Promise<void> {
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  toInactiveState(status: RecordStatus): Promise<void> {
     return new Promise((resolve) => {
-      console.log("Ignore transition not supported");
+      console.log("Import transition not supported");
       resolve();
     });
   }
-  public toDuplicate(): Promise<void> {
-    return new Promise((resolve) => {
-      console.log("Duplicate transition not supported");
-      resolve();
-    });
-  }
-  public toUpdate(): Promise<void> {
-    return new Promise((resolve) => {
-      console.log("Update transition not supported");
-      resolve();
-    });
-  }
-  async updateMatches(
-    recipeId?: string | undefined,
-    labelId?: string | undefined
-  ) {
-    await db.$transaction(async (tx) => {
-      const importRecord = await this.context.importService.updateMatch({
-        record: this.context.importRecord,
-        matchingRecipeId: recipeId,
-        matchingLabelId: labelId,
-        createDraft: true,
-        tx,
-      });
-      this.context.importRecord = importRecord;
+
+  async updateMatches(matches: MatchUpdate) {
+    await db.importRecord.update({
+      where: { id: this.context.importRecord.id },
+      data: {
+        recipeId: matches.recipeId,
+        nutritionLabelId: matches.labelId,
+        ingredientGroupId: matches.groupId,
+      },
     });
   }
 }
 
-class ImportedState extends RecordImportState {
-  async toDuplicate() {
-    // Delete Draft
-    await db.$transaction(async (tx) => {
-      const record = this.context.importRecord;
-      await this.context.importService.deleteDraft(record.draftId, tx);
-      this.context.importRecord = await tx.importRecord.update({
-        where: { id: record.id },
-        data: { status: "DUPLICATE", draftId: null },
-      });
+// For import and update states
+class ActiveDraftState extends RecordImportState {
+  async toActiveState(status: RecordStatus): Promise<void> {
+    await db.importRecord.update({
+      where: { id: this.context.importRecord.id },
+      data: { status },
     });
   }
-  async toIgnore() {
-    await db.$transaction(async (tx) => {
-      const record = this.context.importRecord;
-      await this.context.importService.deleteDraft(record.draftId, tx);
-      this.context.importRecord = await tx.importRecord.update({
-        where: { id: record.id },
-        data: { status: "IGNORED", draftId: null },
-      });
-    });
-  }
-  async toUpdate() {
-    await db.$transaction(async (tx) => {
-      const record = this.context.importRecord;
-      await this.context.importService.updateMatch({
-        createDraft: true,
-        matchingLabelId: record.nutritionLabelId ?? undefined,
-        matchingRecipeId: record.recipeId ?? undefined,
-        record,
-      });
-      this.context.importRecord = await tx.importRecord.update({
-        where: { id: record.id },
-        data: { status: "UPDATED" },
-      });
-    });
+
+  async toInactiveState(status: RecordStatus): Promise<void> {
+    const draftId = this.context.importRecord.draftId;
+    await this.context.importService.deleteDraft(draftId, status);
   }
 }
 
-class DuplicateState extends RecordImportState {
-  async toImport() {
-    // Create draft
-    await db.$transaction(async (tx) => {
-      const record = this.context.importRecord;
-      const draftId = await this.context.importService.createDraft(record, tx);
-      this.context.importRecord = await tx.importRecord.update({
-        where: { id: record.id },
-        data: { status: "IMPORTED", draftId },
-      });
-    });
+// For duplicate and ignored
+class InactiveDraftState extends RecordImportState {
+  async toActiveState(status: RecordStatus): Promise<void> {
+    await this.context.importService.createDraft(
+      this.context.importRecord,
+      status
+    );
   }
 
-  async toIgnore() {
-    await db.$transaction(async (tx) => {
-      const record = this.context.importRecord;
-      await this.context.importService.deleteDraft(record.draftId, tx);
-      this.context.importRecord = await tx.importRecord.update({
-        where: { id: record.id },
-        data: { status: "IGNORED", draftId: null },
-      });
-    });
-  }
-
-  async toUpdate() {
-    await db.$transaction(async (tx) => {
-      const record = this.context.importRecord;
-      const draftId = await this.context.importService.createDraft(record, tx);
-      this.context.importRecord = await tx.importRecord.update({
-        where: { id: record.id },
-        data: { status: "UPDATED", draftId },
-      });
-    });
-  }
-}
-
-class IgnoredState extends RecordImportState {
-  async toDuplicate() {
-    await db.$transaction(async (tx) => {
-      const record = this.context.importRecord;
-      await this.context.importService.deleteDraft(record.draftId, tx);
-      this.context.importRecord = await tx.importRecord.update({
-        where: { id: record.id },
-        data: { status: "DUPLICATE", draftId: null },
-      });
-    });
-  }
-  async toImport() {
-    await db.$transaction(async (tx) => {
-      const record = this.context.importRecord;
-      const draftId = await this.context.importService.createDraft(record, tx);
-      this.context.importRecord = await tx.importRecord.update({
-        where: { id: record.id },
-        data: { status: "IMPORTED", draftId },
-      });
-    });
-  }
-  async toUpdate() {
-    await db.$transaction(async (tx) => {
-      const record = this.context.importRecord;
-      const draftId = await this.context.importService.createDraft(record, tx);
-      this.context.importRecord = await tx.importRecord.update({
-        where: { id: record.id },
-        data: { status: "UPDATED", draftId },
-      });
-    });
-  }
-}
-
-class UpdateState extends RecordImportState {
-  async toDuplicate() {
-    await db.$transaction(async (tx) => {
-      const record = this.context.importRecord;
-      await this.context.importService.deleteDraft(record.draftId, tx);
-      this.context.importRecord = await tx.importRecord.update({
-        where: { id: record.id },
-        data: { status: "DUPLICATE", draftId: null },
-      });
-    });
-  }
-  async toImport() {
-    await db.$transaction(async (tx) => {
-      const record = this.context.importRecord;
-      this.context.importRecord = await tx.importRecord.update({
-        where: { id: record.id },
-        data: { status: "IMPORTED" },
-      });
-    });
-  }
-  async toIgnore() {
-    await db.$transaction(async (tx) => {
-      const record = this.context.importRecord;
-      await this.context.importService.deleteDraft(record.draftId, tx);
-      this.context.importRecord = await tx.importRecord.update({
-        where: { id: record.id },
-        data: { status: "IGNORED", draftId: null },
-      });
+  async toInactiveState(status: RecordStatus): Promise<void> {
+    await db.importRecord.update({
+      where: { id: this.context.importRecord.id },
+      data: { status },
     });
   }
 }

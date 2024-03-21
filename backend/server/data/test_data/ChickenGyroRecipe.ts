@@ -1,13 +1,33 @@
 import { Prisma } from "@prisma/client";
 import { db } from "../../src/db.js";
-import cuid from "cuid";
 
-const nutritionLabels: Prisma.NutritionLabelCreateWithoutRecipeInput[] = [
+const RECIPE_ID = "cltus93fj000008jq4rh9fnod";
+
+const ingredientGroups: Prisma.RecipeIngredientGroupCreateInput[] = [
+  {
+    id: "clt6irl0900054wv97g0e9w7v",
+    name: "Marinade",
+    recipe: { connect: { id: RECIPE_ID } },
+  },
+  {
+    id: "clt6irl0a00074wv95kwkeih7",
+    name: "Infused Oil",
+    recipe: { connect: { id: RECIPE_ID } },
+  },
+  {
+    id: "clt6irl0900064wv9e0rb6kp2",
+    name: "Cucumber Salad",
+    recipe: { connect: { id: RECIPE_ID } },
+  },
+];
+
+const nutritionLabels: Prisma.NutritionLabelCreateInput[] = [
   {
     name: "Chicken Gyro with Tzatziki Sauce (Marinade)",
     servings: 5,
     servingsUsed: 3,
     isPrimary: false,
+    recipe: { connect: { id: RECIPE_ID } },
     verifed: true,
     ingredientGroup: { connect: { id: "clt6irl0900054wv97g0e9w7v" } },
     nutrients: {
@@ -95,6 +115,7 @@ const nutritionLabels: Prisma.NutritionLabelCreateWithoutRecipeInput[] = [
   {
     name: "Chicken Gyro with Tzatziki Sauce",
     servings: 6,
+    recipe: { connect: { id: RECIPE_ID } },
     isPrimary: true,
     verifed: true,
     nutrients: {
@@ -180,6 +201,7 @@ const nutritionLabels: Prisma.NutritionLabelCreateWithoutRecipeInput[] = [
     name: "Chicken Gyro with Tzatziki Sauce (Infused Oil)",
     ingredientGroup: { connect: { id: "clt6irl0a00074wv95kwkeih7" } },
     servings: 3,
+    recipe: { connect: { id: RECIPE_ID } },
     servingsUsed: 1,
     isPrimary: false,
     verifed: true,
@@ -263,6 +285,7 @@ const nutritionLabels: Prisma.NutritionLabelCreateWithoutRecipeInput[] = [
     name: "Chicken Gyro with Tzatziki Sauce (Cucumber Salad)",
     ingredientGroup: { connect: { id: "clt6irl0900064wv9e0rb6kp2" } },
     isPrimary: false,
+    recipe: { connect: { id: RECIPE_ID } },
     verifed: true,
     nutrients: {
       createMany: {
@@ -344,7 +367,270 @@ const nutritionLabels: Prisma.NutritionLabelCreateWithoutRecipeInput[] = [
   },
 ];
 
-export const recipe: Prisma.RecipeCreateInput = {
+const ingredients: Prisma.RecipeIngredientCreateManyInput[] = [
+  {
+    sentence: "1¼ lbs chicken thighs boneless, skinless",
+    quantity: 1.25,
+    name: "chicken thighs",
+    order: 1,
+    measurementUnitId: "clt6gfaie000a8gv93iprake6",
+    ingredientId: "clt6dchcn001if4v90pqm5cgs",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "½ tsp Kosher salt plus more for seasoning chicken",
+    quantity: 0.5,
+    name: "kosher salt",
+    order: 2,
+    measurementUnitId: "clt6gfaic00018gv97hstbg6h",
+    ingredientId: "clt6irl0700004wv95x8ygszy",
+    groupId: "clt6irl0900054wv97g0e9w7v",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "¼ tsp black pepper freshly ground",
+    quantity: 0.25,
+    name: "black pepper",
+    order: 3,
+    measurementUnitId: "clt6gfaic00018gv97hstbg6h",
+    ingredientId: "clt6dchcg000qf4v9hw6k0of0",
+    groupId: "clt6irl0900054wv97g0e9w7v",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "¼ cup Greek yogurt plain, preferably whole milk",
+    quantity: 0.25,
+    name: "greek yogurt",
+    order: 4,
+    measurementUnitId: "clt6gfaic00028gv95ja6drhq",
+    ingredientId: "clt6irl0800014wv95we7ba8b",
+    groupId: "clt6irl0900054wv97g0e9w7v",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "3 cloves garlic minced",
+    quantity: 3,
+    name: "garlic",
+    order: 5,
+    measurementUnitId: "clt6gfaig000m8gv96xxg76hk",
+    ingredientId: "clt6dchcx002lf4v9hi6xfpaf",
+    groupId: "clt6irl0900054wv97g0e9w7v",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "2 tbsp lemon juice 1 lemon",
+    quantity: 2,
+    name: "lemon juice",
+    order: 6,
+    measurementUnitId: "clt6gfaib00008gv9fdsyfmgc",
+    ingredientId: "clt6irl0800024wv98vrmhghq",
+    groupId: "clt6irl0900054wv97g0e9w7v",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "2 tsp red wine vinegar",
+    quantity: 2,
+    name: "red wine vinegar",
+    order: 7,
+    measurementUnitId: "clt6gfaic00018gv97hstbg6h",
+    ingredientId: "clt6deiec002ey8v9bda855t4",
+    groupId: "clt6irl0900054wv97g0e9w7v",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "2 tbsp extra virgin olive oil",
+    quantity: 2,
+    name: "olive oil",
+    order: 8,
+    measurementUnitId: "clt6gfaib00008gv9fdsyfmgc",
+    ingredientId: "clt6deie20019y8v90bin2nam",
+    groupId: "clt6irl0900054wv97g0e9w7v",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "1 tsp smoked paprika",
+    quantity: 1,
+    name: "smoked paprika",
+    order: 9,
+    measurementUnitId: "clt6gfaic00018gv97hstbg6h",
+    ingredientId: "clt6irl0900034wv9atw01jx2",
+    groupId: "clt6irl0900054wv97g0e9w7v",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "1 tsp coriander ground",
+    quantity: 1,
+    name: "coriander",
+    order: 10,
+    measurementUnitId: "clt6gfaic00018gv97hstbg6h",
+    ingredientId: "clt6dchcr001xf4v95ih5cni9",
+    groupId: "clt6irl0900054wv97g0e9w7v",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "1 tbsp dried oregano",
+    quantity: 1,
+    name: "oregano",
+    order: 11,
+    measurementUnitId: "clt6gfaib00008gv9fdsyfmgc",
+    ingredientId: "clt6deie3001dy8v94gdyd6bn",
+    groupId: "clt6irl0900054wv97g0e9w7v",
+    recipeId: RECIPE_ID,
+  },
+  // End Group 1
+  {
+    sentence: "1 cucumber peeled, seeded, and cut into ¼-inch pieces",
+    quantity: 1,
+    name: "cucumber",
+    order: 12,
+    measurementUnitId: "clt6gfaif000f8gv973yi9mbr",
+    ingredientId: "clt6dchcu0027f4v97dxg9399",
+    groupId: "clt6irl0900064wv9e0rb6kp2",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "¾ cup tomatoes chopped",
+    quantity: 0.75,
+    name: "tomatoes",
+    order: 13,
+    measurementUnitId: "clt6gfaic00028gv95ja6drhq",
+    ingredientId: "clt6deiem003gy8v90uhf0fuh",
+    groupId: "clt6irl0900064wv9e0rb6kp2",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "1 small red onion chopped",
+    quantity: 1,
+    name: "red onion",
+    order: 14,
+    measurementUnitId: "clt6gfaif000f8gv973yi9mbr",
+    ingredientId: "clt6deiec002cy8v9fb0u10y2",
+    groupId: "clt6irl0900064wv9e0rb6kp2",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "¼ cup flat-leaf parsley chopped",
+    quantity: 0.25,
+    name: "parsley",
+    order: 15,
+    measurementUnitId: "clt6gfaic00028gv95ja6drhq",
+    ingredientId: "clt6deie4001hy8v9cmi3a5z5",
+    groupId: "clt6irl0900064wv9e0rb6kp2",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "1 tbsp red wine vinegar",
+    quantity: 1,
+    name: "red wine vinegar",
+    order: 16,
+    measurementUnitId: "clt6gfaib00008gv9fdsyfmgc",
+    ingredientId: "clt6deiec002ey8v9bda855t4",
+    groupId: "clt6irl0900064wv9e0rb6kp2",
+    recipeId: RECIPE_ID,
+  },
+
+  {
+    sentence: "¼ tsp Kosher salt",
+    quantity: 0.25,
+    name: "kosher salt",
+    order: 17,
+    measurementUnitId: "clt6gfaic00018gv97hstbg6h",
+    ingredientId: "clt6irl0700004wv95x8ygszy",
+    groupId: "clt6irl0900064wv9e0rb6kp2",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "¼ tsp black pepper freshly ground",
+    quantity: 0.25,
+    name: "black pepper",
+    order: 18,
+    measurementUnitId: "clt6gfaic00018gv97hstbg6h",
+    ingredientId: "clt6dchcg000qf4v9hw6k0of0",
+    groupId: "clt6irl0900064wv9e0rb6kp2",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "¼ cup extra-virgin olive oil",
+    quantity: 0.25,
+    name: "olive oil",
+    order: 19,
+    measurementUnitId: "clt6gfaic00028gv95ja6drhq",
+    ingredientId: "clt6deie20019y8v90bin2nam",
+    groupId: "clt6irl0a00074wv95kwkeih7",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "2 cloves garlic minced",
+    quantity: 2,
+    name: "garlic",
+    order: 20,
+    measurementUnitId: "clt6gfaig000m8gv96xxg76hk",
+    ingredientId: "clt6dchcx002lf4v9hi6xfpaf",
+    groupId: "clt6irl0a00074wv95kwkeih7",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "1 tsp oregano dried",
+    quantity: 1,
+    name: "oregano",
+    order: 21,
+    measurementUnitId: "clt6gfaic00018gv97hstbg6h",
+    ingredientId: "clt6deie3001dy8v94gdyd6bn",
+    groupId: "clt6irl0a00074wv95kwkeih7",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "1 tsp rosemary dried",
+    quantity: 1,
+    name: "rosemary",
+    order: 22,
+    measurementUnitId: "clt6gfaic00018gv97hstbg6h",
+    ingredientId: "clt6deied002jy8v97lvl8sw1",
+    groupId: "clt6irl0a00074wv95kwkeih7",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "1 pinch Kosher salt",
+    quantity: 1,
+    name: "kosher salt",
+    order: 23,
+    measurementUnitId: "clt6gfaig000i8gv9fj0kgn2x",
+    ingredientId: "clt6irl0700004wv95x8ygszy",
+    groupId: "clt6irl0a00074wv95kwkeih7",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "1 pinch black pepper freshly ground",
+    quantity: 1,
+    name: "black pepper",
+    order: 24,
+    measurementUnitId: "clt6gfaig000i8gv9fj0kgn2x",
+    ingredientId: "clt6dchcg000qf4v9hw6k0of0",
+    groupId: "clt6irl0a00074wv95kwkeih7",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "6 8-inch pita rounds preferably pocketless",
+    quantity: 6,
+    name: "pita bread",
+    order: 25,
+    measurementUnitId: "clt6gfaif000f8gv973yi9mbr",
+    ingredientId: "clt6deie7001uy8v9cf2rahtq",
+    recipeId: RECIPE_ID,
+  },
+  {
+    sentence: "18 tbsp tzatziki sauce",
+    quantity: 18,
+    name: "tzatziki sauce",
+    order: 26,
+    measurementUnitId: "clt6gfaib00008gv9fdsyfmgc",
+    ingredientId: "clt6irl0900044wv96j9306zj",
+    recipeId: RECIPE_ID,
+  },
+];
+
+const recipe: Prisma.RecipeCreateInput = {
+  id: RECIPE_ID,
   name: "Chicken Gyro with Tzatziki Sauce",
   source: "https://howtofeedaloon.com/chicken-gyro-with-tzatziki-sauce/",
   preparationTime: 20,
@@ -376,267 +662,29 @@ export const recipe: Prisma.RecipeCreateInput = {
   The tzatziki sauce will keep in the fridge for up to 2 weeks, the cooked chicken and cucumber salad will keep for several days.`,
   isFavorite: true,
   isVerified: true,
-  nutritionLabels: {
-    create: nutritionLabels,
-  },
-  ingredients: {
-    createMany: {
-      data: [
-        {
-          sentence: "1¼ lbs chicken thighs boneless, skinless",
-          quantity: 1.25,
-          name: "chicken thighs",
-          order: 1,
-          measurementUnitId: "clt6gfaie000a8gv93iprake6",
-          ingredientId: "clt6dchcn001if4v90pqm5cgs",
-        },
-        {
-          sentence: "½ tsp Kosher salt plus more for seasoning chicken",
-          quantity: 0.5,
-          name: "kosher salt",
-          order: 2,
-          measurementUnitId: "clt6gfaic00018gv97hstbg6h",
-          ingredientId: "clt6irl0700004wv95x8ygszy",
-          groupId: "clt6irl0900054wv97g0e9w7v",
-        },
-        {
-          sentence: "¼ tsp black pepper freshly ground",
-          quantity: 0.25,
-          name: "black pepper",
-          order: 3,
-          measurementUnitId: "clt6gfaic00018gv97hstbg6h",
-          ingredientId: "clt6dchcg000qf4v9hw6k0of0",
-          groupId: "clt6irl0900054wv97g0e9w7v",
-        },
-        {
-          sentence: "¼ cup Greek yogurt plain, preferably whole milk",
-          quantity: 0.25,
-          name: "greek yogurt",
-          order: 4,
-          measurementUnitId: "clt6gfaic00028gv95ja6drhq",
-          ingredientId: "clt6irl0800014wv95we7ba8b",
-          groupId: "clt6irl0900054wv97g0e9w7v",
-        },
-        {
-          sentence: "3 cloves garlic minced",
-          quantity: 3,
-          name: "garlic",
-          order: 5,
-          measurementUnitId: "clt6gfaig000m8gv96xxg76hk",
-          ingredientId: "clt6dchcx002lf4v9hi6xfpaf",
-          groupId: "clt6irl0900054wv97g0e9w7v",
-        },
-        {
-          sentence: "2 tbsp lemon juice 1 lemon",
-          quantity: 2,
-          name: "lemon juice",
-          order: 6,
-          measurementUnitId: "clt6gfaib00008gv9fdsyfmgc",
-          ingredientId: "clt6irl0800024wv98vrmhghq",
-          groupId: "clt6irl0900054wv97g0e9w7v",
-        },
-        {
-          sentence: "2 tsp red wine vinegar",
-          quantity: 2,
-          name: "red wine vinegar",
-          order: 7,
-          measurementUnitId: "clt6gfaic00018gv97hstbg6h",
-          ingredientId: "clt6deiec002ey8v9bda855t4",
-          groupId: "clt6irl0900054wv97g0e9w7v",
-        },
-        {
-          sentence: "2 tbsp extra virgin olive oil",
-          quantity: 2,
-          name: "olive oil",
-          order: 8,
-          measurementUnitId: "clt6gfaib00008gv9fdsyfmgc",
-          ingredientId: "clt6deie20019y8v90bin2nam",
-          groupId: "clt6irl0900054wv97g0e9w7v",
-        },
-        {
-          sentence: "1 tsp smoked paprika",
-          quantity: 1,
-          name: "smoked paprika",
-          order: 9,
-          measurementUnitId: "clt6gfaic00018gv97hstbg6h",
-          ingredientId: "clt6irl0900034wv9atw01jx2",
-          groupId: "clt6irl0900054wv97g0e9w7v",
-        },
-        {
-          sentence: "1 tsp coriander ground",
-          quantity: 1,
-          name: "coriander",
-          order: 10,
-          measurementUnitId: "clt6gfaic00018gv97hstbg6h",
-          ingredientId: "clt6dchcr001xf4v95ih5cni9",
-          groupId: "clt6irl0900054wv97g0e9w7v",
-        },
-        {
-          sentence: "1 tbsp dried oregano",
-          quantity: 1,
-          name: "oregano",
-          order: 11,
-          measurementUnitId: "clt6gfaib00008gv9fdsyfmgc",
-          ingredientId: "clt6deie3001dy8v94gdyd6bn",
-          groupId: "clt6irl0900054wv97g0e9w7v",
-        },
-        // End Group 1
-        {
-          sentence: "1 cucumber peeled, seeded, and cut into ¼-inch pieces",
-          quantity: 1,
-          name: "cucumber",
-          order: 12,
-          measurementUnitId: "clt6gfaif000f8gv973yi9mbr",
-          ingredientId: "clt6dchcu0027f4v97dxg9399",
-          groupId: "clt6irl0900064wv9e0rb6kp2",
-        },
-        {
-          sentence: "¾ cup tomatoes chopped",
-          quantity: 0.75,
-          name: "tomatoes",
-          order: 13,
-          measurementUnitId: "clt6gfaic00028gv95ja6drhq",
-          ingredientId: "clt6deiem003gy8v90uhf0fuh",
-          groupId: "clt6irl0900064wv9e0rb6kp2",
-        },
-        {
-          sentence: "1 small red onion chopped",
-          quantity: 1,
-          name: "red onion",
-          order: 14,
-          measurementUnitId: "clt6gfaif000f8gv973yi9mbr",
-          ingredientId: "clt6deiec002cy8v9fb0u10y2",
-          groupId: "clt6irl0900064wv9e0rb6kp2",
-        },
-        {
-          sentence: "¼ cup flat-leaf parsley chopped",
-          quantity: 0.25,
-          name: "parsley",
-          order: 15,
-          measurementUnitId: "clt6gfaic00028gv95ja6drhq",
-          ingredientId: "clt6deie4001hy8v9cmi3a5z5",
-          groupId: "clt6irl0900064wv9e0rb6kp2",
-        },
-        {
-          sentence: "1 tbsp red wine vinegar",
-          quantity: 1,
-          name: "red wine vinegar",
-          order: 16,
-          measurementUnitId: "clt6gfaib00008gv9fdsyfmgc",
-          ingredientId: "clt6deiec002ey8v9bda855t4",
-          groupId: "clt6irl0900064wv9e0rb6kp2",
-        },
-
-        {
-          sentence: "¼ tsp Kosher salt",
-          quantity: 0.25,
-          name: "kosher salt",
-          order: 17,
-          measurementUnitId: "clt6gfaic00018gv97hstbg6h",
-          ingredientId: "clt6irl0700004wv95x8ygszy",
-          groupId: "clt6irl0900064wv9e0rb6kp2",
-        },
-        {
-          sentence: "¼ tsp black pepper freshly ground",
-          quantity: 0.25,
-          name: "black pepper",
-          order: 18,
-          measurementUnitId: "clt6gfaic00018gv97hstbg6h",
-          ingredientId: "clt6dchcg000qf4v9hw6k0of0",
-          groupId: "clt6irl0900064wv9e0rb6kp2",
-        },
-        {
-          sentence: "¼ cup extra-virgin olive oil",
-          quantity: 0.25,
-          name: "olive oil",
-          order: 19,
-          measurementUnitId: "clt6gfaic00028gv95ja6drhq",
-          ingredientId: "clt6deie20019y8v90bin2nam",
-          groupId: "clt6irl0a00074wv95kwkeih7",
-        },
-        {
-          sentence: "2 cloves garlic minced",
-          quantity: 2,
-          name: "garlic",
-          order: 20,
-          measurementUnitId: "clt6gfaig000m8gv96xxg76hk",
-          ingredientId: "clt6dchcx002lf4v9hi6xfpaf",
-          groupId: "clt6irl0a00074wv95kwkeih7",
-        },
-        {
-          sentence: "1 tsp oregano dried",
-          quantity: 1,
-          name: "oregano",
-          order: 21,
-          measurementUnitId: "clt6gfaic00018gv97hstbg6h",
-          ingredientId: "clt6deie3001dy8v94gdyd6bn",
-          groupId: "clt6irl0a00074wv95kwkeih7",
-        },
-        {
-          sentence: "1 tsp rosemary dried",
-          quantity: 1,
-          name: "rosemary",
-          order: 22,
-          measurementUnitId: "clt6gfaic00018gv97hstbg6h",
-          ingredientId: "clt6deied002jy8v97lvl8sw1",
-          groupId: "clt6irl0a00074wv95kwkeih7",
-        },
-        {
-          sentence: "1 pinch Kosher salt",
-          quantity: 1,
-          name: "kosher salt",
-          order: 23,
-          measurementUnitId: "clt6gfaig000i8gv9fj0kgn2x",
-          ingredientId: "clt6irl0700004wv95x8ygszy",
-          groupId: "clt6irl0a00074wv95kwkeih7",
-        },
-        {
-          sentence: "1 pinch black pepper freshly ground",
-          quantity: 1,
-          name: "black pepper",
-          order: 24,
-          measurementUnitId: "clt6gfaig000i8gv9fj0kgn2x",
-          ingredientId: "clt6dchcg000qf4v9hw6k0of0",
-          groupId: "clt6irl0a00074wv95kwkeih7",
-        },
-        {
-          sentence: "6 8-inch pita rounds preferably pocketless",
-          quantity: 6,
-          name: "pita bread",
-          order: 25,
-          measurementUnitId: "clt6gfaif000f8gv973yi9mbr",
-          ingredientId: "clt6deie7001uy8v9cf2rahtq",
-        },
-        {
-          sentence: "18 tbsp tzatziki sauce",
-          quantity: 18,
-          name: "tzatziki sauce",
-          order: 26,
-          measurementUnitId: "clt6gfaib00008gv9fdsyfmgc",
-          ingredientId: "clt6irl0900044wv96j9306zj",
-        },
-      ],
-    },
-  },
 };
 
-// await db.recipeIngredientGroup.createMany({ data: ingredientGroups });
-// const result = await db.recipe.create({
-//   data: recipe,
-//   include: {
-//     nutritionLabel: { include: { nutrients: true } },
-//     ingredients: { include: { ingredient: true } },
-//   },
-// });
+async function createChickenGyro() {
+  return await db.$transaction(async (tx) => {
+    const existingRecipe = await tx.recipe.findUnique({
+      where: { id: RECIPE_ID },
+    });
+    if (!existingRecipe) {
+      await tx.recipe.create({ data: recipe });
 
-// const result = await db.recipe.findFirst({
-//   include: {
-//     nutritionLabel: { include: { nutrients: { include: { nutrient: true } } } },
-//     ingredients: { include: { ingredient: true } },
-//   },
-// });
-// console.log(result);
+      for (const group of ingredientGroups) {
+        await tx.recipeIngredientGroup.create({ data: group });
+      }
 
-// for (let i = 0; i < 200; i++) {
-//   console.log(cuid());
-// }
+      for (const label of nutritionLabels) {
+        await tx.nutritionLabel.create({ data: label });
+      }
+
+      await tx.recipeIngredient.createMany({ data: ingredients });
+
+      return await tx.recipe.findUniqueOrThrow({ where: { id: RECIPE_ID } });
+    }
+    return existingRecipe;
+  });
+}
+export { createChickenGyro, RECIPE_ID };

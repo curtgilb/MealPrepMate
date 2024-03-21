@@ -16,7 +16,7 @@ import {
 } from "../../validations/graphql/RecipeValidation.js";
 import { z } from "zod";
 import { queryFromInfo } from "@pothos/plugin-prisma";
-import { OffsetPaginationValidation } from "../../validations/graphql/UtilityValidation.js";
+import { offsetPaginationValidation } from "../../validations/graphql/UtilityValidation.js";
 import { IngredientMatcher } from "../../model_extensions/IngredientMatcher.js";
 import { createRecipeCreateStmt } from "../../model_extensions/RecipeExtension.js";
 
@@ -48,7 +48,7 @@ const recipe = builder.prismaObject("Recipe", {
           return (parent as ExtendedRecipe).aggregateLabel;
         } else {
           return await getAggregatedLabel(
-            parent.id,
+            [{ id: parent.id }],
             args.advanced ?? false,
             false
           );
@@ -63,13 +63,13 @@ const recipe = builder.prismaObject("Recipe", {
         ) {
           return (recipe as ExtendedRecipe).ingredientFreshness;
         }
-        return await getIngredientMaxFreshness(recipe.id);
+        return (await getIngredientMaxFreshness(recipe.id)).maxLife;
       },
     }),
   }),
 });
 
-builder.prismaObject("RecipeIngredient", {
+const recipeIngredient = builder.prismaObject("RecipeIngredient", {
   name: "RecipeIngredients",
   fields: (t) => ({
     order: t.exposeInt("order"),
@@ -228,7 +228,7 @@ builder.queryFields((t) => ({
     validate: {
       schema: z.object({
         filter: RecipeFilterValidation.optional(),
-        pagination: OffsetPaginationValidation,
+        pagination: offsetPaginationValidation,
       }),
     },
     resolve: async (root, args, context, info) => {
@@ -340,4 +340,4 @@ builder.mutationFields((t) => ({
   }),
 }));
 
-export { recipe };
+export { recipe, recipeIngredient };

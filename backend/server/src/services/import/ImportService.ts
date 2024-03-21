@@ -90,8 +90,9 @@ async function changeRecordStatus(
 
 type UpdateMatchesArgs = {
   id: string;
-  recipeId?: string;
-  labelId?: string;
+  recipeId?: string | null;
+  labelId?: string | null;
+  groupId?: string | null;
   query?: ImportRecordQuery;
 };
 
@@ -99,6 +100,7 @@ async function updateMatches({
   id,
   recipeId,
   labelId,
+  groupId,
   query,
 }: UpdateMatchesArgs) {
   const importRecord = await db.importRecord.findUniqueOrThrow({
@@ -106,10 +108,7 @@ async function updateMatches({
     include: { import: true },
   });
   const recordManager = new ImportRecordManager(importRecord);
-  await recordManager.updateMatches(
-    recipeId ?? undefined,
-    labelId ?? undefined
-  );
+  await recordManager.updateMatches({ recipeId, labelId, groupId });
   return await db.importRecord.findUniqueOrThrow({
     where: { id: id },
     ...query,

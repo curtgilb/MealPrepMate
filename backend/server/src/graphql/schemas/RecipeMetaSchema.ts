@@ -2,6 +2,8 @@ import { builder } from "../builder.js";
 import { Prisma } from "@prisma/client";
 import { db } from "../../db.js";
 import { toTitleCase } from "../../util/utils.js";
+import { z } from "zod";
+import { cleanedStringSchema } from "../../validations/utilValidations.js";
 
 // ============================================ Types ===================================
 
@@ -50,8 +52,14 @@ builder.queryFields((t) => ({
     args: {
       searchString: t.arg.string(),
     },
+    validate: {
+      schema: z.object({ searchString: z.string().optional() }),
+    },
     resolve: async (query, root, args) => {
-      const search: Prisma.CuisineFindManyArgs = { ...query };
+      const search: Prisma.CuisineFindManyArgs = {
+        ...query,
+        orderBy: { name: "asc" },
+      };
       if (args.searchString) {
         search.where = {
           name: {
@@ -68,12 +76,18 @@ builder.queryFields((t) => ({
     args: {
       searchString: t.arg.string(),
     },
+    validate: {
+      schema: z.object({ searchString: z.string().optional() }),
+    },
     resolve: async (query, root, args) => {
       return await db.category.findMany({
         where: {
           name: args.searchString
             ? { contains: args.searchString, mode: "insensitive" }
             : undefined,
+        },
+        orderBy: {
+          name: "asc",
         },
       });
     },
@@ -83,8 +97,14 @@ builder.queryFields((t) => ({
     args: {
       searchString: t.arg.string(),
     },
+    validate: {
+      schema: z.object({ searchString: z.string().optional() }),
+    },
     resolve: async (query, root, args) => {
-      const search: Prisma.CourseFindManyArgs = { ...query };
+      const search: Prisma.CourseFindManyArgs = {
+        ...query,
+        orderBy: { name: "asc" },
+      };
       if (args.searchString) {
         search.where = {
           name: {
@@ -106,9 +126,12 @@ builder.mutationFields((t) => ({
     args: {
       name: t.arg.string({ required: true }),
     },
+    validate: {
+      schema: z.object({ name: cleanedStringSchema(30, toTitleCase) }),
+    },
     resolve: async (query, root, args) => {
       await db.cuisine.create({ data: { name: args.name } });
-      return db.cuisine.findMany({ ...query });
+      return db.cuisine.findMany({ ...query, orderBy: { name: "asc" } });
     },
   }),
   deleteCuisine: t.prismaField({
@@ -116,9 +139,12 @@ builder.mutationFields((t) => ({
     args: {
       cuisineId: t.arg.string({ required: true }),
     },
+    validate: {
+      schema: z.object({ cuisineId: z.string().cuid() }),
+    },
     resolve: async (query, root, args) => {
       await db.cuisine.delete({ where: { id: args.cuisineId } });
-      return await db.cuisine.findMany({ ...query });
+      return await db.cuisine.findMany({ ...query, orderBy: { name: "asc" } });
     },
   }),
   createCategory: t.prismaField({
@@ -128,9 +154,12 @@ builder.mutationFields((t) => ({
         required: true,
       }),
     },
+    validate: {
+      schema: z.object({ name: cleanedStringSchema(30, toTitleCase) }),
+    },
     resolve: async (query, root, args) => {
       await db.category.create({ data: { name: args.name } });
-      return await db.category.findMany({ ...query });
+      return await db.category.findMany({ ...query, orderBy: { name: "asc" } });
     },
   }),
   deleteCategory: t.prismaField({
@@ -138,9 +167,12 @@ builder.mutationFields((t) => ({
     args: {
       categoryId: t.arg.string({ required: true }),
     },
+    validate: {
+      schema: z.object({ categoryId: z.string().cuid() }),
+    },
     resolve: async (query, root, args) => {
       await db.category.delete({ where: { id: args.categoryId } });
-      return await db.category.findMany({ ...query });
+      return await db.category.findMany({ ...query, orderBy: { name: "asc" } });
     },
   }),
   createCourse: t.prismaField({
@@ -148,9 +180,12 @@ builder.mutationFields((t) => ({
     args: {
       name: t.arg.string({ required: true }),
     },
+    validate: {
+      schema: z.object({ name: cleanedStringSchema(30, toTitleCase) }),
+    },
     resolve: async (query, root, args) => {
       await db.category.create({ data: { name: args.name } });
-      return await db.category.findMany({ ...query });
+      return await db.category.findMany({ ...query, orderBy: { name: "asc" } });
     },
   }),
   deleteCourse: t.prismaField({
@@ -158,9 +193,12 @@ builder.mutationFields((t) => ({
     args: {
       courseId: t.arg.string({ required: true }),
     },
+    validate: {
+      schema: z.object({ courseId: z.string().cuid() }),
+    },
     resolve: async (query, root, args) => {
       await db.course.delete({ where: { id: args.courseId } });
-      return await db.course.findMany({ ...query });
+      return await db.course.findMany({ ...query, orderBy: { name: "asc" } });
     },
   }),
   changeRecipeCuisine: t.prismaField({
@@ -168,6 +206,12 @@ builder.mutationFields((t) => ({
     args: {
       recipeId: t.arg.string({ required: true }),
       cuisineId: t.arg.stringList({ required: true }),
+    },
+    validate: {
+      schema: z.object({
+        recipeId: z.string().cuid(),
+        cuisineId: z.string().cuid().array(),
+      }),
     },
     resolve: async (query, root, args) => {
       return await db.recipe.update({
@@ -184,6 +228,12 @@ builder.mutationFields((t) => ({
     args: {
       recipeId: t.arg.string({ required: true }),
       cuisineId: t.arg.string({ required: true }),
+    },
+    validate: {
+      schema: z.object({
+        recipeId: z.string().cuid(),
+        cuisineId: z.string().cuid(),
+      }),
     },
     resolve: async (query, root, args) => {
       return await db.recipe.update({
@@ -202,6 +252,12 @@ builder.mutationFields((t) => ({
     args: {
       recipeId: t.arg.string({ required: true }),
       category: t.arg.string({ required: true }),
+    },
+    validate: {
+      schema: z.object({
+        recipeId: z.string().cuid(),
+        category: cleanedStringSchema(30, toTitleCase),
+      }),
     },
     resolve: async (query, root, args) => {
       const categoryName = toTitleCase(args.category);
@@ -229,6 +285,12 @@ builder.mutationFields((t) => ({
       recipeId: t.arg.string({ required: true }),
       categoryId: t.arg.string({ required: true }),
     },
+    validate: {
+      schema: z.object({
+        recipeId: z.string().cuid(),
+        categoryId: z.string().cuid(),
+      }),
+    },
     resolve: async (query, root, args) => {
       return await db.recipe.update({
         where: { id: args.recipeId },
@@ -246,6 +308,12 @@ builder.mutationFields((t) => ({
     args: {
       recipeId: t.arg.string({ required: true }),
       course: t.arg.string({ required: true }),
+    },
+    validate: {
+      schema: z.object({
+        recipeId: z.string().cuid(),
+        course: cleanedStringSchema(30, toTitleCase),
+      }),
     },
     resolve: async (query, root, args) => {
       const courseName = toTitleCase(args.course);
@@ -272,6 +340,12 @@ builder.mutationFields((t) => ({
     args: {
       recipeId: t.arg.string({ required: true }),
       courseId: t.arg.string({ required: true }),
+    },
+    validate: {
+      schema: z.object({
+        recipeId: z.string().cuid(),
+        courseId: z.string().cuid(),
+      }),
     },
     resolve: async (query, root, args) => {
       return await db.recipe.update({
@@ -301,6 +375,12 @@ builder.mutationFields((t) => ({
       recipeId: t.arg.string({ required: true }),
       photoId: t.arg.stringList({ required: true }),
     },
+    validate: {
+      schema: z.object({
+        recipeId: z.string().cuid(),
+        photoId: z.string().cuid().array(),
+      }),
+    },
     resolve: async (query, root, args) => {
       return await db.recipe.update({
         where: { id: args.recipeId },
@@ -318,6 +398,12 @@ builder.mutationFields((t) => ({
     args: {
       recipeId: t.arg.string({ required: true }),
       photoIds: t.arg.stringList({ required: true }),
+    },
+    validate: {
+      schema: z.object({
+        recipeId: z.string().cuid(),
+        photoIds: z.string().cuid().array(),
+      }),
     },
     resolve: async (query, root, args) => {
       return await db.recipe.update({

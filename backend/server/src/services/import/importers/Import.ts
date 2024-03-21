@@ -1,11 +1,11 @@
 import {
   Import as PrismaImport,
   ImportRecord,
-  ImportStatus,
   Prisma,
+  RecordStatus,
 } from "@prisma/client";
 import { DbTransactionClient, db } from "../../../db.js";
-import { Match } from "../../../types/CustomTypes.js";
+import { Match, MatchArgs } from "../../../types/CustomTypes.js";
 
 type ImportServiceInput = {
   source: string | File;
@@ -20,17 +20,11 @@ type MatchUpdate = {
   tx?: DbTransactionClient;
 };
 
-type UpdateImportInput = {
-  fileName?: string;
-  fileHash?: string;
-  status?: ImportStatus;
-  imageMapping?: Prisma.JsonObject;
-  recordIds?: string[];
-};
-
 abstract class Importer {
   input: ImportServiceInput;
 
+  // Import service input just has an extra  field for source (like a file path), this allows for local file import
+  // Import record is already made by message queue, this class is instantiated to process that import
   constructor(input: ImportServiceInput | PrismaImport) {
     if (Object.hasOwn(input, "id"))
       this.input = { source: "", import: input as PrismaImport };
@@ -39,18 +33,30 @@ abstract class Importer {
     }
   }
 
-  abstract updateMatch(update: MatchUpdate): Promise<ImportRecord>;
+  async isDuplicateImport(newHash: string | undefined) {
+    const lastImport = await this.getLastImport();
+    // Check to see if this is a duplicate upload
+    if (lastImport?.fileHash === newHash) {
+      await this.updateImport({
+        fileHash: newHash,
+        status: "DUPLICATE",
+      });
+      return true;
+    }
+    return false;
+  }
 
   abstract createDraft(
     record: ImportRecord,
-    tx?: DbTransactionClient
-  ): Promise<string>;
+    newStatus: RecordStatus
+  ): Promise<void>;
 
   abstract finalize(record: ImportRecord): Promise<void>;
 
   abstract deleteDraft(
+    recordId: string,
     draftId: string | null,
-    tx?: DbTransactionClient
+    newStatus: RecordStatus
   ): Promise<void>;
 
   abstract processImport(): Promise<void>;
@@ -72,7 +78,7 @@ abstract class Importer {
   }
 
   protected async updateImport(
-    update: UpdateImportInput,
+    update: Prisma.ImportUpdateInput,
     tx?: DbTransactionClient
   ) {
     const dbClient = tx ? tx : db;
@@ -80,17 +86,7 @@ abstract class Importer {
       where: {
         id: this.input.import.id,
       },
-      data: {
-        fileName: update.fileName,
-        fileHash: update.fileHash,
-        status: update.status,
-        imageMapping: update.imageMapping,
-        importRecords: {
-          set: update.recordIds?.map((id) => ({
-            id,
-          })),
-        },
-      },
+      data: update,
     });
     this.input.import = updatedImport;
   }
@@ -102,13 +98,13 @@ class MatchManager {
     this.match = match;
   }
 
-  setMatch(match: Match) {
+  setMatch(match: MatchArgs) {
     this.match = {
       ...this.match,
       ...match,
     };
   }
-  getMatch() {
+  getMatch(): Match {
     return this.match;
   }
 }

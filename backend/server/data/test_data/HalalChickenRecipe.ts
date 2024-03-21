@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { db } from "../../src/db.js";
 
 const RECIPE_ID = "cltp0k2yi000008la6ybr3shp";
 
@@ -761,5 +762,28 @@ const ingredients: Prisma.RecipeIngredientCreateManyInput[] = [
     recipeId: RECIPE_ID,
   },
 ];
+async function createHalalChicken() {
+  return await db.$transaction(async (tx) => {
+    const existingRecipe = await tx.recipe.findUnique({
+      where: { id: RECIPE_ID },
+    });
+    if (!existingRecipe) {
+      await tx.recipe.create({ data: recipe });
 
-export { recipe, nutritionLabels, ingredientGroups, ingredients };
+      for (const group of ingredientGroups) {
+        await tx.recipeIngredientGroup.create({ data: group });
+      }
+
+      for (const label of nutritionLabels) {
+        await tx.nutritionLabel.create({ data: label });
+      }
+
+      await tx.recipeIngredient.createMany({ data: ingredients });
+
+      return await tx.recipe.findUniqueOrThrow({ where: { id: RECIPE_ID } });
+    }
+    return existingRecipe;
+  });
+}
+
+export { createHalalChicken, RECIPE_ID };

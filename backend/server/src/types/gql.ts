@@ -20,6 +20,22 @@ export type Scalars = {
   File: { input: File; output: File; }
 };
 
+export type AddRecipeInput = {
+  cookDay?: InputMaybe<Scalars['Int']['input']>;
+  mealPlanId: Scalars['String']['input'];
+  recipeId: Scalars['String']['input'];
+  scaleFactor: Scalars['Float']['input'];
+  servings: Scalars['Int']['input'];
+};
+
+export type AddRecipeServingInput = {
+  day: Scalars['Int']['input'];
+  meal: Meal;
+  mealPlanId: Scalars['String']['input'];
+  mealPlanRecipeId: Scalars['String']['input'];
+  servings: Scalars['Int']['input'];
+};
+
 export type AggregateLabel = {
   __typename?: 'AggregateLabel';
   calories: Scalars['Float']['output'];
@@ -60,12 +76,12 @@ export type Course = {
 
 export type CreateExpirationRule = {
   defrostTime?: InputMaybe<Scalars['Float']['input']>;
-  freezerLife?: InputMaybe<Scalars['Int']['input']>;
-  fridgeLife?: InputMaybe<Scalars['Int']['input']>;
+  freezerLife: Scalars['Int']['input'];
+  fridgeLife: Scalars['Int']['input'];
   ingredientId?: InputMaybe<Scalars['ID']['input']>;
   name: Scalars['String']['input'];
   perishable?: InputMaybe<Scalars['Boolean']['input']>;
-  tableLife?: InputMaybe<Scalars['Int']['input']>;
+  tableLife: Scalars['Int']['input'];
   variation?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -87,7 +103,7 @@ export type CreateNutritionLabelInput = {
   nutrients?: InputMaybe<Array<CreateNutrientInput>>;
   servingSize?: InputMaybe<Scalars['Float']['input']>;
   servingSizeUnitId?: InputMaybe<Scalars['String']['input']>;
-  servings?: InputMaybe<Scalars['Float']['input']>;
+  servings: Scalars['Float']['input'];
   servingsUsed?: InputMaybe<Scalars['Float']['input']>;
 };
 
@@ -122,6 +138,17 @@ export type DailyReferenceIntake = {
 
 export type Draft = NutritionLabel | Recipe;
 
+export type EditMealPlanInput = {
+  id: Scalars['String']['input'];
+  mealPrepInstructions?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type EditMealPlanRecipeInput = {
+  factor?: InputMaybe<Scalars['Float']['input']>;
+  servings?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type EditNutritionLabelInput = {
   id: Scalars['String']['input'];
   ingredientGroupId?: InputMaybe<Scalars['String']['input']>;
@@ -145,6 +172,13 @@ export type EditPriceHistoryInput = {
   unitId?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type EditRecipeServingInput = {
+  day: Scalars['Int']['input'];
+  id: Scalars['String']['input'];
+  meal: Meal;
+  servings: Scalars['Int']['input'];
+};
+
 export type ExpirationRule = {
   __typename?: 'ExpirationRule';
   defrostTime?: Maybe<Scalars['Int']['output']>;
@@ -157,10 +191,24 @@ export type ExpirationRule = {
   variation?: Maybe<Scalars['String']['output']>;
 };
 
+export type ExpirationRulesQuery = {
+  __typename?: 'ExpirationRulesQuery';
+  ingredients: Array<ExpirationRule>;
+  itemsRemaining: Scalars['Int']['output'];
+  nextOffset?: Maybe<Scalars['Int']['output']>;
+};
+
 export enum Gender {
   Female = 'FEMALE',
   Male = 'MALE'
 }
+
+export type GroupedRecipeIngredient = {
+  __typename?: 'GroupedRecipeIngredient';
+  ingredientId?: Maybe<Scalars['String']['output']>;
+  ingredientName?: Maybe<Scalars['String']['output']>;
+  recipeIngredients: Array<RecipeIngredients>;
+};
 
 export type Import = {
   __typename?: 'Import';
@@ -236,12 +284,68 @@ export type IngredientPrice = {
   unit: MeasurementUnit;
 };
 
+export type IngredientsQuery = {
+  __typename?: 'IngredientsQuery';
+  ingredients: Array<Ingredient>;
+  itemsRemaining: Scalars['Int']['output'];
+  nextOffset?: Maybe<Scalars['Int']['output']>;
+};
+
 export enum Meal {
   Breakfast = 'BREAKFAST',
   Dinner = 'DINNER',
   Lunch = 'LUNCH',
   Snack = 'SNACK'
 }
+
+export type MealPlan = {
+  __typename?: 'MealPlan';
+  id: Scalars['ID']['output'];
+  mealPlanServings: Array<MealPlanServing>;
+  mealPrepInstructions?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  planRecipes: Array<MealPlanRecipe>;
+  schedules: Array<ScheduledPlan>;
+  shopppingDays: Array<Scalars['Int']['output']>;
+};
+
+export type MealPlanRecipe = {
+  __typename?: 'MealPlanRecipe';
+  factor: Scalars['Float']['output'];
+  id: Scalars['ID']['output'];
+  mealPlan: MealPlan;
+  mealPlanServings: Array<MealPlanServing>;
+  nutritionLabel?: Maybe<AggregateLabel>;
+  recipe: Recipe;
+  servingsUsed: Scalars['Int']['output'];
+  totalServings: Scalars['Int']['output'];
+};
+
+
+export type MealPlanRecipeNutritionLabelArgs = {
+  advanced?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+export type MealPlanRecipeServingsUsedArgs = {
+  mealId: Scalars['String']['input'];
+};
+
+export type MealPlanServing = {
+  __typename?: 'MealPlanServing';
+  day: Scalars['Int']['output'];
+  id: Scalars['ID']['output'];
+  meal: Scalars['String']['output'];
+  mealPlan: MealPlan;
+  numberOfServings: Scalars['Int']['output'];
+  nutritionLabel?: Maybe<AggregateLabel>;
+  recipe: MealPlanRecipe;
+};
+
+
+export type MealPlanServingNutritionLabelArgs = {
+  advanced?: InputMaybe<Scalars['Boolean']['input']>;
+};
 
 export type MeasurementUnit = {
   __typename?: 'MeasurementUnit';
@@ -258,6 +362,8 @@ export type Mutation = {
   addPriceHistory: IngredientPrice;
   addRecipeCourse: Recipe;
   addRecipePhotos: Recipe;
+  addRecipeServing: Array<MealPlanServing>;
+  addRecipeToMealPlan: Array<MealPlanRecipe>;
   changeRecipeCuisine: Recipe;
   changeRecordStatus: ImportRecord;
   connectExpirationRule: Ingredient;
@@ -266,6 +372,7 @@ export type Mutation = {
   createCuisine: Array<Cuisine>;
   createExpirationRule: ExpirationRule;
   createIngredient: Ingredient;
+  createMealPlan: MealPlan;
   createNutritionLabels: NutritionLabel;
   createRecipe: Recipe;
   deleteCategory: Array<Category>;
@@ -273,22 +380,29 @@ export type Mutation = {
   deleteCuisine: Array<Cuisine>;
   deleteExpirationRule: Array<ExpirationRule>;
   deleteIngredient: Array<Ingredient>;
+  deleteMealPlan: Array<MealPlan>;
   deleteNutritionLabel: Array<NutritionLabel>;
   deletePriceHistory: Array<IngredientPrice>;
+  deleteRecipeServing: Array<MealPlanServing>;
   deleteRecipes: Array<Recipe>;
   editExpirationRule: ExpirationRule;
   editIngredient: Ingredient;
+  editMealPlan: MealPlan;
   editNutritionLabel: NutritionLabel;
   editPriceHistory: IngredientPrice;
+  editRecipeServing: Array<MealPlanServing>;
   finalize: ImportRecord;
   mergeIngredients: Ingredient;
   removeCategoryFromRecipe: Recipe;
   removeCourseFromRecipe: Recipe;
+  removeMealPlanRecipe: Array<MealPlanRecipe>;
   removeRecipeCuisine: Recipe;
   removeRecipePhotos: Recipe;
+  scheduleMealPlan: ScheduledPlan;
   updateMatches: ImportRecord;
   updateRecipe: Recipe;
   updateRecipeIngredients: Array<RecipeIngredients>;
+  updateShoppingDays: Array<Scalars['Int']['output']>;
   uploadImport: Import;
   uploadPhoto: Photo;
 };
@@ -314,6 +428,16 @@ export type MutationAddRecipeCourseArgs = {
 export type MutationAddRecipePhotosArgs = {
   photoId: Array<Scalars['String']['input']>;
   recipeId: Scalars['String']['input'];
+};
+
+
+export type MutationAddRecipeServingArgs = {
+  serving: AddRecipeServingInput;
+};
+
+
+export type MutationAddRecipeToMealPlanArgs = {
+  recipe: AddRecipeInput;
 };
 
 
@@ -351,13 +475,18 @@ export type MutationCreateCuisineArgs = {
 
 
 export type MutationCreateExpirationRuleArgs = {
-  ingredientId?: InputMaybe<Scalars['String']['input']>;
+  ingredientId: Scalars['String']['input'];
   rule: CreateExpirationRule;
 };
 
 
 export type MutationCreateIngredientArgs = {
   ingredient: CreateIngredientInput;
+};
+
+
+export type MutationCreateMealPlanArgs = {
+  name: Scalars['String']['input'];
 };
 
 
@@ -397,6 +526,11 @@ export type MutationDeleteIngredientArgs = {
 };
 
 
+export type MutationDeleteMealPlanArgs = {
+  id: Scalars['String']['input'];
+};
+
+
 export type MutationDeleteNutritionLabelArgs = {
   id: Scalars['String']['input'];
 };
@@ -404,7 +538,12 @@ export type MutationDeleteNutritionLabelArgs = {
 
 export type MutationDeletePriceHistoryArgs = {
   ingredientId: Scalars['String']['input'];
-  ingredientPriceId: Array<Scalars['String']['input']>;
+  ingredientPriceId: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteRecipeServingArgs = {
+  id: Scalars['String']['input'];
 };
 
 
@@ -425,6 +564,11 @@ export type MutationEditIngredientArgs = {
 };
 
 
+export type MutationEditMealPlanArgs = {
+  mealPlan: EditMealPlanInput;
+};
+
+
 export type MutationEditNutritionLabelArgs = {
   label: EditNutritionLabelInput;
 };
@@ -433,6 +577,11 @@ export type MutationEditNutritionLabelArgs = {
 export type MutationEditPriceHistoryArgs = {
   price: EditPriceHistoryInput;
   priceId: Scalars['String']['input'];
+};
+
+
+export type MutationEditRecipeServingArgs = {
+  serving: EditRecipeServingInput;
 };
 
 
@@ -459,6 +608,11 @@ export type MutationRemoveCourseFromRecipeArgs = {
 };
 
 
+export type MutationRemoveMealPlanRecipeArgs = {
+  id: Scalars['String']['input'];
+};
+
+
 export type MutationRemoveRecipeCuisineArgs = {
   cuisineId: Scalars['String']['input'];
   recipeId: Scalars['String']['input'];
@@ -468,6 +622,12 @@ export type MutationRemoveRecipeCuisineArgs = {
 export type MutationRemoveRecipePhotosArgs = {
   photoIds: Array<Scalars['String']['input']>;
   recipeId: Scalars['String']['input'];
+};
+
+
+export type MutationScheduleMealPlanArgs = {
+  mealPlanId: Scalars['String']['input'];
+  startDate: Scalars['DateTime']['input'];
 };
 
 
@@ -486,6 +646,12 @@ export type MutationUpdateRecipeArgs = {
 
 export type MutationUpdateRecipeIngredientsArgs = {
   ingredient: RecipeIngredientUpdateInput;
+};
+
+
+export type MutationUpdateShoppingDaysArgs = {
+  days: Array<Scalars['Int']['input']>;
+  mealPlanId: Scalars['String']['input'];
 };
 
 
@@ -584,13 +750,17 @@ export type Query = {
   cuisines: Array<Cuisine>;
   dailyReferenceIntake: Array<Nutrient>;
   expirationRule: ExpirationRule;
+  expirationRules: ExpirationRulesQuery;
+  groupedRecipeIngredients: Array<GroupedRecipeIngredient>;
   import: Import;
   importRecord: ImportRecord;
   importRecords: ImportRecordsQuery;
   imports: ImportsQuery;
   ingredient: Ingredient;
   ingredientPrice: IngredientPrice;
-  ingredients: Array<Ingredient>;
+  ingredients: IngredientsQuery;
+  mealPlan: MealPlan;
+  mealPlans: Array<MealPlan>;
   nutritionLabel: NutritionLabel;
   priceHistory: Array<IngredientPrice>;
   recipe: Recipe;
@@ -615,6 +785,17 @@ export type QueryCuisinesArgs = {
 
 export type QueryExpirationRuleArgs = {
   expirationRuleId: Scalars['String']['input'];
+};
+
+
+export type QueryExpirationRulesArgs = {
+  pagination: OffsetPagination;
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryGroupedRecipeIngredientsArgs = {
+  recipeIds: Array<Scalars['String']['input']>;
 };
 
 
@@ -650,9 +831,13 @@ export type QueryIngredientPriceArgs = {
 
 
 export type QueryIngredientsArgs = {
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  searchString?: InputMaybe<Scalars['String']['input']>;
-  start?: InputMaybe<Scalars['Int']['input']>;
+  pagination: OffsetPagination;
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryMealPlanArgs = {
+  id: Scalars['String']['input'];
 };
 
 
@@ -791,6 +976,14 @@ export enum RecordStatus {
   Updated = 'UPDATED'
 }
 
+export type ScheduledPlan = {
+  __typename?: 'ScheduledPlan';
+  duration: Scalars['Int']['output'];
+  id: Scalars['String']['output'];
+  mealPlan: MealPlan;
+  startDate: Scalars['DateTime']['output'];
+};
+
 export enum SpecialCondition {
   Count = 'COUNT',
   Energy = 'ENERGY',
@@ -873,6 +1066,8 @@ export type ResolversUnionTypes<RefType extends Record<string, unknown>> = {
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
+  AddRecipeInput: AddRecipeInput;
+  AddRecipeServingInput: AddRecipeServingInput;
   AggregateLabel: ResolverTypeWrapper<AggregateLabel>;
   AggregateNutrient: ResolverTypeWrapper<AggregateNutrient>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
@@ -888,12 +1083,17 @@ export type ResolversTypes = {
   DailyReferenceIntake: ResolverTypeWrapper<DailyReferenceIntake>;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
   Draft: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['Draft']>;
+  EditMealPlanInput: EditMealPlanInput;
+  EditMealPlanRecipeInput: EditMealPlanRecipeInput;
   EditNutritionLabelInput: EditNutritionLabelInput;
   EditPriceHistoryInput: EditPriceHistoryInput;
+  EditRecipeServingInput: EditRecipeServingInput;
   ExpirationRule: ResolverTypeWrapper<ExpirationRule>;
+  ExpirationRulesQuery: ResolverTypeWrapper<ExpirationRulesQuery>;
   File: ResolverTypeWrapper<Scalars['File']['output']>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   Gender: Gender;
+  GroupedRecipeIngredient: ResolverTypeWrapper<GroupedRecipeIngredient>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Import: ResolverTypeWrapper<Import>;
   ImportRecord: ResolverTypeWrapper<Omit<ImportRecord, 'draft'> & { draft?: Maybe<ResolversTypes['Draft']> }>;
@@ -904,8 +1104,12 @@ export type ResolversTypes = {
   Ingredient: ResolverTypeWrapper<Ingredient>;
   IngredientFilter: IngredientFilter;
   IngredientPrice: ResolverTypeWrapper<IngredientPrice>;
+  IngredientsQuery: ResolverTypeWrapper<IngredientsQuery>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Meal: Meal;
+  MealPlan: ResolverTypeWrapper<MealPlan>;
+  MealPlanRecipe: ResolverTypeWrapper<MealPlanRecipe>;
+  MealPlanServing: ResolverTypeWrapper<MealPlanServing>;
   MeasurementUnit: ResolverTypeWrapper<MeasurementUnit>;
   Mutation: ResolverTypeWrapper<{}>;
   NumericalComparison: NumericalComparison;
@@ -927,12 +1131,15 @@ export type ResolversTypes = {
   RecipeInput: RecipeInput;
   RecipesQuery: ResolverTypeWrapper<RecipesQuery>;
   RecordStatus: RecordStatus;
+  ScheduledPlan: ResolverTypeWrapper<ScheduledPlan>;
   SpecialCondition: SpecialCondition;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
+  AddRecipeInput: AddRecipeInput;
+  AddRecipeServingInput: AddRecipeServingInput;
   AggregateLabel: AggregateLabel;
   AggregateNutrient: AggregateNutrient;
   Boolean: Scalars['Boolean']['output'];
@@ -948,11 +1155,16 @@ export type ResolversParentTypes = {
   DailyReferenceIntake: DailyReferenceIntake;
   DateTime: Scalars['DateTime']['output'];
   Draft: ResolversUnionTypes<ResolversParentTypes>['Draft'];
+  EditMealPlanInput: EditMealPlanInput;
+  EditMealPlanRecipeInput: EditMealPlanRecipeInput;
   EditNutritionLabelInput: EditNutritionLabelInput;
   EditPriceHistoryInput: EditPriceHistoryInput;
+  EditRecipeServingInput: EditRecipeServingInput;
   ExpirationRule: ExpirationRule;
+  ExpirationRulesQuery: ExpirationRulesQuery;
   File: Scalars['File']['output'];
   Float: Scalars['Float']['output'];
+  GroupedRecipeIngredient: GroupedRecipeIngredient;
   ID: Scalars['ID']['output'];
   Import: Import;
   ImportRecord: Omit<ImportRecord, 'draft'> & { draft?: Maybe<ResolversParentTypes['Draft']> };
@@ -961,7 +1173,11 @@ export type ResolversParentTypes = {
   Ingredient: Ingredient;
   IngredientFilter: IngredientFilter;
   IngredientPrice: IngredientPrice;
+  IngredientsQuery: IngredientsQuery;
   Int: Scalars['Int']['output'];
+  MealPlan: MealPlan;
+  MealPlanRecipe: MealPlanRecipe;
+  MealPlanServing: MealPlanServing;
   MeasurementUnit: MeasurementUnit;
   Mutation: {};
   NumericalComparison: NumericalComparison;
@@ -980,6 +1196,7 @@ export type ResolversParentTypes = {
   RecipeIngredients: RecipeIngredients;
   RecipeInput: RecipeInput;
   RecipesQuery: RecipesQuery;
+  ScheduledPlan: ScheduledPlan;
   String: Scalars['String']['output'];
 };
 
@@ -1055,9 +1272,23 @@ export type ExpirationRuleResolvers<ContextType = any, ParentType extends Resolv
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type ExpirationRulesQueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExpirationRulesQuery'] = ResolversParentTypes['ExpirationRulesQuery']> = {
+  ingredients?: Resolver<Array<ResolversTypes['ExpirationRule']>, ParentType, ContextType>;
+  itemsRemaining?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  nextOffset?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export interface FileScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['File'], any> {
   name: 'File';
 }
+
+export type GroupedRecipeIngredientResolvers<ContextType = any, ParentType extends ResolversParentTypes['GroupedRecipeIngredient'] = ResolversParentTypes['GroupedRecipeIngredient']> = {
+  ingredientId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  ingredientName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  recipeIngredients?: Resolver<Array<ResolversTypes['RecipeIngredients']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
 
 export type ImportResolvers<ContextType = any, ParentType extends ResolversParentTypes['Import'] = ResolversParentTypes['Import']> = {
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -1114,6 +1345,47 @@ export type IngredientPriceResolvers<ContextType = any, ParentType extends Resol
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type IngredientsQueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['IngredientsQuery'] = ResolversParentTypes['IngredientsQuery']> = {
+  ingredients?: Resolver<Array<ResolversTypes['Ingredient']>, ParentType, ContextType>;
+  itemsRemaining?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  nextOffset?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MealPlanResolvers<ContextType = any, ParentType extends ResolversParentTypes['MealPlan'] = ResolversParentTypes['MealPlan']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  mealPlanServings?: Resolver<Array<ResolversTypes['MealPlanServing']>, ParentType, ContextType>;
+  mealPrepInstructions?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  planRecipes?: Resolver<Array<ResolversTypes['MealPlanRecipe']>, ParentType, ContextType>;
+  schedules?: Resolver<Array<ResolversTypes['ScheduledPlan']>, ParentType, ContextType>;
+  shopppingDays?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MealPlanRecipeResolvers<ContextType = any, ParentType extends ResolversParentTypes['MealPlanRecipe'] = ResolversParentTypes['MealPlanRecipe']> = {
+  factor?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  mealPlan?: Resolver<ResolversTypes['MealPlan'], ParentType, ContextType>;
+  mealPlanServings?: Resolver<Array<ResolversTypes['MealPlanServing']>, ParentType, ContextType>;
+  nutritionLabel?: Resolver<Maybe<ResolversTypes['AggregateLabel']>, ParentType, ContextType, Partial<MealPlanRecipeNutritionLabelArgs>>;
+  recipe?: Resolver<ResolversTypes['Recipe'], ParentType, ContextType>;
+  servingsUsed?: Resolver<ResolversTypes['Int'], ParentType, ContextType, RequireFields<MealPlanRecipeServingsUsedArgs, 'mealId'>>;
+  totalServings?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MealPlanServingResolvers<ContextType = any, ParentType extends ResolversParentTypes['MealPlanServing'] = ResolversParentTypes['MealPlanServing']> = {
+  day?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  meal?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  mealPlan?: Resolver<ResolversTypes['MealPlan'], ParentType, ContextType>;
+  numberOfServings?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  nutritionLabel?: Resolver<Maybe<ResolversTypes['AggregateLabel']>, ParentType, ContextType, Partial<MealPlanServingNutritionLabelArgs>>;
+  recipe?: Resolver<ResolversTypes['MealPlanRecipe'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type MeasurementUnitResolvers<ContextType = any, ParentType extends ResolversParentTypes['MeasurementUnit'] = ResolversParentTypes['MeasurementUnit']> = {
   abbreviations?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1128,14 +1400,17 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   addPriceHistory?: Resolver<ResolversTypes['IngredientPrice'], ParentType, ContextType, RequireFields<MutationAddPriceHistoryArgs, 'price'>>;
   addRecipeCourse?: Resolver<ResolversTypes['Recipe'], ParentType, ContextType, RequireFields<MutationAddRecipeCourseArgs, 'course' | 'recipeId'>>;
   addRecipePhotos?: Resolver<ResolversTypes['Recipe'], ParentType, ContextType, RequireFields<MutationAddRecipePhotosArgs, 'photoId' | 'recipeId'>>;
+  addRecipeServing?: Resolver<Array<ResolversTypes['MealPlanServing']>, ParentType, ContextType, RequireFields<MutationAddRecipeServingArgs, 'serving'>>;
+  addRecipeToMealPlan?: Resolver<Array<ResolversTypes['MealPlanRecipe']>, ParentType, ContextType, RequireFields<MutationAddRecipeToMealPlanArgs, 'recipe'>>;
   changeRecipeCuisine?: Resolver<ResolversTypes['Recipe'], ParentType, ContextType, RequireFields<MutationChangeRecipeCuisineArgs, 'cuisineId' | 'recipeId'>>;
   changeRecordStatus?: Resolver<ResolversTypes['ImportRecord'], ParentType, ContextType, RequireFields<MutationChangeRecordStatusArgs, 'id' | 'status'>>;
   connectExpirationRule?: Resolver<ResolversTypes['Ingredient'], ParentType, ContextType, RequireFields<MutationConnectExpirationRuleArgs, 'expirationRuleId' | 'ingredientId'>>;
   createCategory?: Resolver<Array<ResolversTypes['Category']>, ParentType, ContextType, RequireFields<MutationCreateCategoryArgs, 'name'>>;
   createCourse?: Resolver<Array<ResolversTypes['Course']>, ParentType, ContextType, RequireFields<MutationCreateCourseArgs, 'name'>>;
   createCuisine?: Resolver<Array<ResolversTypes['Cuisine']>, ParentType, ContextType, RequireFields<MutationCreateCuisineArgs, 'name'>>;
-  createExpirationRule?: Resolver<ResolversTypes['ExpirationRule'], ParentType, ContextType, RequireFields<MutationCreateExpirationRuleArgs, 'rule'>>;
+  createExpirationRule?: Resolver<ResolversTypes['ExpirationRule'], ParentType, ContextType, RequireFields<MutationCreateExpirationRuleArgs, 'ingredientId' | 'rule'>>;
   createIngredient?: Resolver<ResolversTypes['Ingredient'], ParentType, ContextType, RequireFields<MutationCreateIngredientArgs, 'ingredient'>>;
+  createMealPlan?: Resolver<ResolversTypes['MealPlan'], ParentType, ContextType, RequireFields<MutationCreateMealPlanArgs, 'name'>>;
   createNutritionLabels?: Resolver<ResolversTypes['NutritionLabel'], ParentType, ContextType, RequireFields<MutationCreateNutritionLabelsArgs, 'nutritionLabel' | 'recipeId'>>;
   createRecipe?: Resolver<ResolversTypes['Recipe'], ParentType, ContextType, RequireFields<MutationCreateRecipeArgs, 'recipe'>>;
   deleteCategory?: Resolver<Array<ResolversTypes['Category']>, ParentType, ContextType, RequireFields<MutationDeleteCategoryArgs, 'categoryId'>>;
@@ -1143,22 +1418,29 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   deleteCuisine?: Resolver<Array<ResolversTypes['Cuisine']>, ParentType, ContextType, RequireFields<MutationDeleteCuisineArgs, 'cuisineId'>>;
   deleteExpirationRule?: Resolver<Array<ResolversTypes['ExpirationRule']>, ParentType, ContextType, RequireFields<MutationDeleteExpirationRuleArgs, 'expirationRuleId'>>;
   deleteIngredient?: Resolver<Array<ResolversTypes['Ingredient']>, ParentType, ContextType, RequireFields<MutationDeleteIngredientArgs, 'ingredientToDeleteId'>>;
+  deleteMealPlan?: Resolver<Array<ResolversTypes['MealPlan']>, ParentType, ContextType, RequireFields<MutationDeleteMealPlanArgs, 'id'>>;
   deleteNutritionLabel?: Resolver<Array<ResolversTypes['NutritionLabel']>, ParentType, ContextType, RequireFields<MutationDeleteNutritionLabelArgs, 'id'>>;
   deletePriceHistory?: Resolver<Array<ResolversTypes['IngredientPrice']>, ParentType, ContextType, RequireFields<MutationDeletePriceHistoryArgs, 'ingredientId' | 'ingredientPriceId'>>;
+  deleteRecipeServing?: Resolver<Array<ResolversTypes['MealPlanServing']>, ParentType, ContextType, RequireFields<MutationDeleteRecipeServingArgs, 'id'>>;
   deleteRecipes?: Resolver<Array<ResolversTypes['Recipe']>, ParentType, ContextType, RequireFields<MutationDeleteRecipesArgs, 'recipeIds'>>;
   editExpirationRule?: Resolver<ResolversTypes['ExpirationRule'], ParentType, ContextType, RequireFields<MutationEditExpirationRuleArgs, 'expirationRule' | 'expirationRuleId'>>;
   editIngredient?: Resolver<ResolversTypes['Ingredient'], ParentType, ContextType, RequireFields<MutationEditIngredientArgs, 'ingredient' | 'ingredientId'>>;
+  editMealPlan?: Resolver<ResolversTypes['MealPlan'], ParentType, ContextType, RequireFields<MutationEditMealPlanArgs, 'mealPlan'>>;
   editNutritionLabel?: Resolver<ResolversTypes['NutritionLabel'], ParentType, ContextType, RequireFields<MutationEditNutritionLabelArgs, 'label'>>;
   editPriceHistory?: Resolver<ResolversTypes['IngredientPrice'], ParentType, ContextType, RequireFields<MutationEditPriceHistoryArgs, 'price' | 'priceId'>>;
+  editRecipeServing?: Resolver<Array<ResolversTypes['MealPlanServing']>, ParentType, ContextType, RequireFields<MutationEditRecipeServingArgs, 'serving'>>;
   finalize?: Resolver<ResolversTypes['ImportRecord'], ParentType, ContextType, RequireFields<MutationFinalizeArgs, 'recordId'>>;
   mergeIngredients?: Resolver<ResolversTypes['Ingredient'], ParentType, ContextType, RequireFields<MutationMergeIngredientsArgs, 'ingredientIdToDelete' | 'ingredientIdToKeep'>>;
   removeCategoryFromRecipe?: Resolver<ResolversTypes['Recipe'], ParentType, ContextType, RequireFields<MutationRemoveCategoryFromRecipeArgs, 'categoryId' | 'recipeId'>>;
   removeCourseFromRecipe?: Resolver<ResolversTypes['Recipe'], ParentType, ContextType, RequireFields<MutationRemoveCourseFromRecipeArgs, 'courseId' | 'recipeId'>>;
+  removeMealPlanRecipe?: Resolver<Array<ResolversTypes['MealPlanRecipe']>, ParentType, ContextType, RequireFields<MutationRemoveMealPlanRecipeArgs, 'id'>>;
   removeRecipeCuisine?: Resolver<ResolversTypes['Recipe'], ParentType, ContextType, RequireFields<MutationRemoveRecipeCuisineArgs, 'cuisineId' | 'recipeId'>>;
   removeRecipePhotos?: Resolver<ResolversTypes['Recipe'], ParentType, ContextType, RequireFields<MutationRemoveRecipePhotosArgs, 'photoIds' | 'recipeId'>>;
+  scheduleMealPlan?: Resolver<ResolversTypes['ScheduledPlan'], ParentType, ContextType, RequireFields<MutationScheduleMealPlanArgs, 'mealPlanId' | 'startDate'>>;
   updateMatches?: Resolver<ResolversTypes['ImportRecord'], ParentType, ContextType, RequireFields<MutationUpdateMatchesArgs, 'recordId'>>;
   updateRecipe?: Resolver<ResolversTypes['Recipe'], ParentType, ContextType, RequireFields<MutationUpdateRecipeArgs, 'recipe' | 'recipeId'>>;
   updateRecipeIngredients?: Resolver<Array<ResolversTypes['RecipeIngredients']>, ParentType, ContextType, RequireFields<MutationUpdateRecipeIngredientsArgs, 'ingredient'>>;
+  updateShoppingDays?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType, RequireFields<MutationUpdateShoppingDaysArgs, 'days' | 'mealPlanId'>>;
   uploadImport?: Resolver<ResolversTypes['Import'], ParentType, ContextType, RequireFields<MutationUploadImportArgs, 'file' | 'type'>>;
   uploadPhoto?: Resolver<ResolversTypes['Photo'], ParentType, ContextType, RequireFields<MutationUploadPhotoArgs, 'photo'>>;
 };
@@ -1207,13 +1489,17 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   cuisines?: Resolver<Array<ResolversTypes['Cuisine']>, ParentType, ContextType, Partial<QueryCuisinesArgs>>;
   dailyReferenceIntake?: Resolver<Array<ResolversTypes['Nutrient']>, ParentType, ContextType>;
   expirationRule?: Resolver<ResolversTypes['ExpirationRule'], ParentType, ContextType, RequireFields<QueryExpirationRuleArgs, 'expirationRuleId'>>;
+  expirationRules?: Resolver<ResolversTypes['ExpirationRulesQuery'], ParentType, ContextType, RequireFields<QueryExpirationRulesArgs, 'pagination'>>;
+  groupedRecipeIngredients?: Resolver<Array<ResolversTypes['GroupedRecipeIngredient']>, ParentType, ContextType, RequireFields<QueryGroupedRecipeIngredientsArgs, 'recipeIds'>>;
   import?: Resolver<ResolversTypes['Import'], ParentType, ContextType, RequireFields<QueryImportArgs, 'importId'>>;
   importRecord?: Resolver<ResolversTypes['ImportRecord'], ParentType, ContextType, RequireFields<QueryImportRecordArgs, 'id'>>;
   importRecords?: Resolver<ResolversTypes['ImportRecordsQuery'], ParentType, ContextType, RequireFields<QueryImportRecordsArgs, 'importId' | 'pagination'>>;
   imports?: Resolver<ResolversTypes['ImportsQuery'], ParentType, ContextType, RequireFields<QueryImportsArgs, 'pagination'>>;
   ingredient?: Resolver<ResolversTypes['Ingredient'], ParentType, ContextType, RequireFields<QueryIngredientArgs, 'ingredientId'>>;
   ingredientPrice?: Resolver<ResolversTypes['IngredientPrice'], ParentType, ContextType, RequireFields<QueryIngredientPriceArgs, 'ingredientPriceId'>>;
-  ingredients?: Resolver<Array<ResolversTypes['Ingredient']>, ParentType, ContextType, Partial<QueryIngredientsArgs>>;
+  ingredients?: Resolver<ResolversTypes['IngredientsQuery'], ParentType, ContextType, RequireFields<QueryIngredientsArgs, 'pagination'>>;
+  mealPlan?: Resolver<ResolversTypes['MealPlan'], ParentType, ContextType, RequireFields<QueryMealPlanArgs, 'id'>>;
+  mealPlans?: Resolver<Array<ResolversTypes['MealPlan']>, ParentType, ContextType>;
   nutritionLabel?: Resolver<ResolversTypes['NutritionLabel'], ParentType, ContextType, RequireFields<QueryNutritionLabelArgs, 'labelId'>>;
   priceHistory?: Resolver<Array<ResolversTypes['IngredientPrice']>, ParentType, ContextType, RequireFields<QueryPriceHistoryArgs, 'ingredientId'>>;
   recipe?: Resolver<ResolversTypes['Recipe'], ParentType, ContextType, RequireFields<QueryRecipeArgs, 'recipeId'>>;
@@ -1265,6 +1551,14 @@ export type RecipesQueryResolvers<ContextType = any, ParentType extends Resolver
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type ScheduledPlanResolvers<ContextType = any, ParentType extends ResolversParentTypes['ScheduledPlan'] = ResolversParentTypes['ScheduledPlan']> = {
+  duration?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  mealPlan?: Resolver<ResolversTypes['MealPlan'], ParentType, ContextType>;
+  startDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type Resolvers<ContextType = any> = {
   AggregateLabel?: AggregateLabelResolvers<ContextType>;
   AggregateNutrient?: AggregateNutrientResolvers<ContextType>;
@@ -1275,13 +1569,19 @@ export type Resolvers<ContextType = any> = {
   DateTime?: GraphQLScalarType;
   Draft?: DraftResolvers<ContextType>;
   ExpirationRule?: ExpirationRuleResolvers<ContextType>;
+  ExpirationRulesQuery?: ExpirationRulesQueryResolvers<ContextType>;
   File?: GraphQLScalarType;
+  GroupedRecipeIngredient?: GroupedRecipeIngredientResolvers<ContextType>;
   Import?: ImportResolvers<ContextType>;
   ImportRecord?: ImportRecordResolvers<ContextType>;
   ImportRecordsQuery?: ImportRecordsQueryResolvers<ContextType>;
   ImportsQuery?: ImportsQueryResolvers<ContextType>;
   Ingredient?: IngredientResolvers<ContextType>;
   IngredientPrice?: IngredientPriceResolvers<ContextType>;
+  IngredientsQuery?: IngredientsQueryResolvers<ContextType>;
+  MealPlan?: MealPlanResolvers<ContextType>;
+  MealPlanRecipe?: MealPlanRecipeResolvers<ContextType>;
+  MealPlanServing?: MealPlanServingResolvers<ContextType>;
   MeasurementUnit?: MeasurementUnitResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Nutrient?: NutrientResolvers<ContextType>;
@@ -1293,5 +1593,6 @@ export type Resolvers<ContextType = any> = {
   RecipeIngredientGroup?: RecipeIngredientGroupResolvers<ContextType>;
   RecipeIngredients?: RecipeIngredientsResolvers<ContextType>;
   RecipesQuery?: RecipesQueryResolvers<ContextType>;
+  ScheduledPlan?: ScheduledPlanResolvers<ContextType>;
 };
 

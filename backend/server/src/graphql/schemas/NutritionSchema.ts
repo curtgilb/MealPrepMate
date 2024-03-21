@@ -7,6 +7,12 @@ import {
 } from "../../services/nutrition/NutritionAggregator.js";
 import { getAggregatedLabel } from "../../services/recipe/RecipeService.js";
 import { UnitType } from "@prisma/client";
+import { z } from "zod";
+import {
+  createNutrientValidation,
+  createNutritionLabelValidation,
+  editNutritionLabelValidation,
+} from "../../validations/graphql/NutritionValidation.js";
 
 // ============================================ Types ===================================
 const AggregateNutrient = builder.objectRef<FullNutrient>("AggregateNutrient");
@@ -93,7 +99,7 @@ const nutritionLabel = builder.prismaObject("NutritionLabel", {
       },
       resolve: async (parent, args) => {
         return await getAggregatedLabel(
-          parent.id,
+          [{ id: parent.id }],
           args.advanced ?? false,
           true
         );
@@ -130,7 +136,7 @@ const createNutritionLabel = builder.inputType("CreateNutritionLabelInput", {
   fields: (t) => ({
     name: t.string(),
     ingredientGroupId: t.string(),
-    servings: t.float(),
+    servings: t.float({ required: true }),
     servingSize: t.float(),
     servingSizeUnitId: t.string(),
     servingsUsed: t.float(),
@@ -176,6 +182,9 @@ builder.queryFields((t) => ({
     args: {
       labelId: t.arg.string({ required: true }),
     },
+    validate: {
+      schema: z.object({ labelId: z.string().cuid() }),
+    },
     resolve: async (query, root, args) => {
       return await db.nutritionLabel.findUniqueOrThrow({
         where: { id: args.labelId },
@@ -215,6 +224,12 @@ builder.mutationFields((t) => ({
       recipeId: t.arg.string({ required: true }),
       nutritionLabel: t.arg({ type: createNutritionLabel, required: true }),
     },
+    validate: {
+      schema: z.object({
+        recipeId: z.string().cuid(),
+        nutritionLabel: createNutritionLabelValidation,
+      }),
+    },
     resolve: async (query, root, args) => {
       return await db.nutritionLabel.createNutritionLabel(
         args.nutritionLabel,
@@ -228,6 +243,9 @@ builder.mutationFields((t) => ({
     args: {
       label: t.arg({ type: editNutritionLabelInput, required: true }),
     },
+    validate: {
+      schema: z.object({ label: editNutritionLabelValidation }),
+    },
     resolve: async (query, root, args) => {
       return await db.nutritionLabel.editNutritionLabel(args.label, query);
     },
@@ -237,102 +255,12 @@ builder.mutationFields((t) => ({
     args: {
       id: t.arg.string({ required: true }),
     },
+    validate: { schema: z.object({ id: z.string().cuid() }) },
     resolve: async (query, root, args) => {
       await db.nutritionLabel.delete({ where: { id: args.id } });
       return db.nutritionLabel.findMany({ ...query });
     },
   }),
-  // disconnectNutritionLabelFromRecipe: t.prismaField({
-  //   type: "Recipe",
-  //   args: {
-  //     recipeId: t.arg.string({ required: true }),
-  //     labelId: t.arg.string({ required: true }),
-  //   },
-  //   resolve: async (query, root, args) => {
-  //     return await db.recipe.update({
-  //       where: { id: args.recipeId },
-  //       data: {
-  //         nutritionLabel: {
-  //           disconnect: { id: args.labelId },
-  //         },
-  //       },
-  //       ...query,
-  //     });
-  //   },
-  // }),
-  // connectNutritionLabeltoRecipe: t.prismaField({
-  //   type: "Recipe",
-  //   args: {
-  //     recipeId: t.arg.string({ required: true }),
-  //     labelId: t.arg.string({ required: true }),
-  //   },
-  //   resolve: async (query, root, args) => {
-  //     return await db.recipe.update({
-  //       ...query,
-  //       where: { id: args.recipeId },
-  //       data: {
-  //         nutritionLabel: {
-  //           connect: { id: args.labelId },
-  //         },
-  //       },
-  //     });
-  //   },
-  // }),
-  // connectNutritionLabelToIngredientGroup: t.prismaField({
-  //   type: "RecipeIngredientGroup",
-  //   args: {
-  //     recipeId: t.arg.string({ required: true }),
-  //     groupId: t.arg.string({ required: true }),
-  //     labelId: t.arg.string({ required: true }),
-  //   },
-  //   resolve: async (query, root, args) => {
-  //     await db.nutritionLabel.update({
-  //       where: { id: args.labelId },
-  //       data: {
-  //         recipe: { connect: { id: args.recipeId } },
-  //         ingredientGroup: { connect: { id: args.groupId } },
-  //       },
-  //     });
-  //     return await db.recipeIngredientGroup.findUniqueOrThrow({
-  //       where: { id: args.groupId },
-  //       ...query,
-  //     });
-  //   },
-  // }),
-  // disconnectNutritionLabelFromIngredientGroup: t.prismaField({
-  //   type: "RecipeIngredientGroup",
-  //   args: {
-  //     recipeId: t.arg.string({ required: true }),
-  //     groupId: t.arg.string({ required: true }),
-  //     labelId: t.arg.string({ required: true }),
-  //     deleteLabel: t.arg.boolean({ required: true }),
-  //   },
-  //   resolve: async (query, root, args) => {
-  //     if (args.deleteLabel) {
-  //       return await db.recipeIngredientGroup.update({
-  //         where: { id: args.groupId },
-  //         data: {
-  //           nutritionLabel: {
-  //             delete: true,
-  //           },
-  //         },
-  //         ...query,
-  //       });
-  //     } else {
-  //       const [recipe, recipeGroup] = await db.$transaction([
-  //         db.recipe.update({
-  //           where: { id: args.recipeId },
-  //           data: { nutritionLabel: { disconnect: { id: args.labelId } } },
-  //         }),
-  //         db.recipeIngredientGroup.update({
-  //           where: { id: args.groupId },
-  //           data: { nutritionLabel: { disconnect: { id: args.labelId } } },
-  //         }),
-  //       ]);
-  //       return recipeGroup;
-  //     }
-  //   },
-  // }),
 }));
 
 export { AggregateLabel, AggregateNutrient, nutritionLabel };

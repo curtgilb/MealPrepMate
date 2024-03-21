@@ -1,18 +1,28 @@
 import { Prisma, RecordStatus } from "@prisma/client";
+import { MealPlanRecipeWithServing } from "../../data/test_data/MealPlan.js";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace PrismaJson {
     type ImageMapping = { [key: string]: string };
     type NutrientMapping = { [key: string]: NutrientValue };
+    type MealPlanRecipesCopy = MealPlanRecipeWithServing[];
   }
 }
 
 type NutrientValue = { value: number; valuePerServing: number };
 
+type MatchArgs = {
+  recipeMatchId?: string | undefined;
+  labelMatchId?: string | undefined;
+  ingredientGroupId?: string | undefined;
+  status?: RecordStatus;
+};
+
 type Match = {
   recipeMatchId?: string | undefined;
   labelMatchId?: string | undefined;
+  ingredientGroupId?: string | undefined;
   status: RecordStatus;
 };
 
@@ -176,4 +186,5 @@ export {
   Match,
   NutrientWithUnit,
   NutrientValue,
+  MatchArgs,
 };

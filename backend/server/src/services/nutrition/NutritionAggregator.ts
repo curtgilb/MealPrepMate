@@ -11,13 +11,14 @@ type NutrientMap = Map<string, NutrientValue>;
 
 type ScalingArgs = {
   factor?: number;
-  totalServings?: number;
+  servings?: number;
   servingsUsed?: number;
 };
 
 type NutrientMapArgs = {
   id: string;
-} & ScalingArgs;
+  scale?: ScalingArgs;
+};
 
 class NutrientAggregator {
   //   Recipe ID/Standalone label id -> nutrient map
@@ -340,4 +341,6 @@ export {
   NutrientMap,
   ServingInfo,
   NutrientTarget,
+  NutrientMapArgs,
+  ScalingArgs,
 };

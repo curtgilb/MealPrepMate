@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-const OffsetPaginationValidation = z.object({
+const offsetPaginationValidation = z.object({
   offset: z.number().nonnegative(),
   take: z.number().nonnegative(),
 });
 
-export { OffsetPaginationValidation };
+export { offsetPaginationValidation };

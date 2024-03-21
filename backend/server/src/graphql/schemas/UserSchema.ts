@@ -1,6 +1,8 @@
 import { Gender, SpecialCondition } from "@prisma/client";
 import { builder } from "../builder.js";
 import { db } from "../../db.js";
+import { profileInputValidation } from "../../validations/graphql/UserValidation.js";
+import { z } from "zod";
 // ============================================ Types ===================================
 builder.prismaObject("HealthProfile", {
   name: "HealthProfile",
@@ -71,6 +73,9 @@ builder.mutationFields((t) => ({
     args: {
       profile: t.arg({ type: profileInput, required: true }),
     },
+    validate: {
+      schema: z.object({ profile: profileInputValidation }),
+    },
     resolve: async (query, root, args) => {
       return await db.healthProfile.create({
         data: {
@@ -97,6 +102,12 @@ builder.mutationFields((t) => ({
     args: {
       id: t.arg.string({ required: true }),
       profile: t.arg({ type: profileInput, required: true }),
+    },
+    validate: {
+      schema: z.object({
+        id: z.string().cuid(),
+        profile: profileInputValidation,
+      }),
     },
     resolve: async (query, root, args) => {
       return await db.healthProfile.update({

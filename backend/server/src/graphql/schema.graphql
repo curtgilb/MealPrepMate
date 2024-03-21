@@ -1,3 +1,19 @@
+input AddRecipeInput {
+  cookDay: Int
+  mealPlanId: String!
+  recipeId: String!
+  scaleFactor: Float!
+  servings: Int!
+}
+
+input AddRecipeServingInput {
+  day: Int!
+  meal: Meal!
+  mealPlanId: String!
+  mealPlanRecipeId: String!
+  servings: Int!
+}
+
 type AggregateLabel {
   calories: Float!
   caloriesPerServing: Float
@@ -34,12 +50,12 @@ type Course {
 
 input CreateExpirationRule {
   defrostTime: Float
-  freezerLife: Int
-  fridgeLife: Int
+  freezerLife: Int!
+  fridgeLife: Int!
   ingredientId: ID
   name: String!
   perishable: Boolean
-  tableLife: Int
+  tableLife: Int!
   variation: String
 }
 
@@ -61,7 +77,7 @@ input CreateNutritionLabelInput {
   nutrients: [CreateNutrientInput!]
   servingSize: Float
   servingSizeUnitId: String
-  servings: Float
+  servings: Float!
   servingsUsed: Float
 }
 
@@ -99,6 +115,17 @@ scalar DateTime
 
 union Draft = NutritionLabel | Recipe
 
+input EditMealPlanInput {
+  id: String!
+  mealPrepInstructions: String
+  name: String
+}
+
+input EditMealPlanRecipeInput {
+  factor: Float
+  servings: Int
+}
+
 input EditNutritionLabelInput {
   id: String!
   ingredientGroupId: String
@@ -122,6 +149,13 @@ input EditPriceHistoryInput {
   unitId: String
 }
 
+input EditRecipeServingInput {
+  day: Int!
+  id: String!
+  meal: Meal!
+  servings: Int!
+}
+
 type ExpirationRule {
   defrostTime: Int
   freezerLife: Int
@@ -133,11 +167,23 @@ type ExpirationRule {
   variation: String
 }
 
+type ExpirationRulesQuery {
+  ingredients: [ExpirationRule!]!
+  itemsRemaining: Int!
+  nextOffset: Int
+}
+
 scalar File
 
 enum Gender {
   FEMALE
   MALE
+}
+
+type GroupedRecipeIngredient {
+  ingredientId: String
+  ingredientName: String
+  recipeIngredients: [RecipeIngredients!]!
 }
 
 type Import {
@@ -208,11 +254,48 @@ type IngredientPrice {
   unit: MeasurementUnit!
 }
 
+type IngredientsQuery {
+  ingredients: [Ingredient!]!
+  itemsRemaining: Int!
+  nextOffset: Int
+}
+
 enum Meal {
   BREAKFAST
   DINNER
   LUNCH
   SNACK
+}
+
+type MealPlan {
+  id: ID!
+  mealPlanServings: [MealPlanServing!]!
+  mealPrepInstructions: String
+  name: String
+  planRecipes: [MealPlanRecipe!]!
+  schedules: [ScheduledPlan!]!
+  shopppingDays: [Int!]!
+}
+
+type MealPlanRecipe {
+  factor: Float!
+  id: ID!
+  mealPlan: MealPlan!
+  mealPlanServings: [MealPlanServing!]!
+  nutritionLabel(advanced: Boolean): AggregateLabel
+  recipe: Recipe!
+  servingsUsed(mealId: String!): Int!
+  totalServings: Int!
+}
+
+type MealPlanServing {
+  day: Int!
+  id: ID!
+  meal: String!
+  mealPlan: MealPlan!
+  numberOfServings: Int!
+  nutritionLabel(advanced: Boolean): AggregateLabel
+  recipe: MealPlanRecipe!
 }
 
 type MeasurementUnit {
@@ -228,14 +311,17 @@ type Mutation {
   addPriceHistory(price: CreatePriceHistoryInput!): IngredientPrice!
   addRecipeCourse(course: String!, recipeId: String!): Recipe!
   addRecipePhotos(photoId: [String!]!, recipeId: String!): Recipe!
+  addRecipeServing(serving: AddRecipeServingInput!): [MealPlanServing!]!
+  addRecipeToMealPlan(recipe: AddRecipeInput!): [MealPlanRecipe!]!
   changeRecipeCuisine(cuisineId: [String!]!, recipeId: String!): Recipe!
   changeRecordStatus(id: String!, status: RecordStatus!): ImportRecord!
   connectExpirationRule(expirationRuleId: String!, ingredientId: String!): Ingredient!
   createCategory(name: String!): [Category!]!
   createCourse(name: String!): [Course!]!
   createCuisine(name: String!): [Cuisine!]!
-  createExpirationRule(ingredientId: String, rule: CreateExpirationRule!): ExpirationRule!
+  createExpirationRule(ingredientId: String!, rule: CreateExpirationRule!): ExpirationRule!
   createIngredient(ingredient: CreateIngredientInput!): Ingredient!
+  createMealPlan(name: String!): MealPlan!
   createNutritionLabels(nutritionLabel: CreateNutritionLabelInput!, recipeId: String!): NutritionLabel!
   createRecipe(recipe: RecipeInput!): Recipe!
   deleteCategory(categoryId: String!): [Category!]!
@@ -243,22 +329,29 @@ type Mutation {
   deleteCuisine(cuisineId: String!): [Cuisine!]!
   deleteExpirationRule(expirationRuleId: String!): [ExpirationRule!]!
   deleteIngredient(ingredientToDeleteId: String!): [Ingredient!]!
+  deleteMealPlan(id: String!): [MealPlan!]!
   deleteNutritionLabel(id: String!): [NutritionLabel!]!
-  deletePriceHistory(ingredientId: String!, ingredientPriceId: [String!]!): [IngredientPrice!]!
+  deletePriceHistory(ingredientId: String!, ingredientPriceId: String!): [IngredientPrice!]!
+  deleteRecipeServing(id: String!): [MealPlanServing!]!
   deleteRecipes(recipeIds: [String!]!): [Recipe!]!
   editExpirationRule(expirationRule: CreateExpirationRule!, expirationRuleId: String!): ExpirationRule!
   editIngredient(ingredient: CreateIngredientInput!, ingredientId: String!): Ingredient!
+  editMealPlan(mealPlan: EditMealPlanInput!): MealPlan!
   editNutritionLabel(label: EditNutritionLabelInput!): NutritionLabel!
   editPriceHistory(price: EditPriceHistoryInput!, priceId: String!): IngredientPrice!
+  editRecipeServing(serving: EditRecipeServingInput!): [MealPlanServing!]!
   finalize(recordId: String!): ImportRecord!
   mergeIngredients(ingredientIdToDelete: String!, ingredientIdToKeep: String!): Ingredient!
   removeCategoryFromRecipe(categoryId: String!, recipeId: String!): Recipe!
   removeCourseFromRecipe(courseId: String!, recipeId: String!): Recipe!
+  removeMealPlanRecipe(id: String!): [MealPlanRecipe!]!
   removeRecipeCuisine(cuisineId: String!, recipeId: String!): Recipe!
   removeRecipePhotos(photoIds: [String!]!, recipeId: String!): Recipe!
+  scheduleMealPlan(mealPlanId: String!, startDate: DateTime!): ScheduledPlan!
   updateMatches(labelId: String, recipeId: String, recordId: String!): ImportRecord!
   updateRecipe(recipe: RecipeInput!, recipeId: String!): Recipe!
   updateRecipeIngredients(ingredient: RecipeIngredientUpdateInput!): [RecipeIngredients!]!
+  updateShoppingDays(days: [Int!]!, mealPlanId: String!): [Int!]!
   uploadImport(file: File!, type: PrismaImportType!): Import!
   uploadPhoto(photo: File!): Photo!
 }
@@ -338,13 +431,17 @@ type Query {
   cuisines(searchString: String): [Cuisine!]!
   dailyReferenceIntake: [Nutrient!]!
   expirationRule(expirationRuleId: String!): ExpirationRule!
+  expirationRules(pagination: OffsetPagination!, search: String): ExpirationRulesQuery!
+  groupedRecipeIngredients(recipeIds: [String!]!): [GroupedRecipeIngredient!]!
   import(importId: String!): Import!
   importRecord(id: String!): ImportRecord!
   importRecords(importId: String!, pagination: OffsetPagination!): ImportRecordsQuery!
   imports(pagination: OffsetPagination!): ImportsQuery!
   ingredient(ingredientId: String!): Ingredient!
   ingredientPrice(ingredientPriceId: String!): IngredientPrice!
-  ingredients(limit: Int, searchString: String, start: Int): [Ingredient!]!
+  ingredients(pagination: OffsetPagination!, search: String): IngredientsQuery!
+  mealPlan(id: String!): MealPlan!
+  mealPlans: [MealPlan!]!
   nutritionLabel(labelId: String!): NutritionLabel!
   priceHistory(ingredientId: String!, retailer: String): [IngredientPrice!]!
   recipe(recipeId: String!): Recipe!
@@ -454,6 +551,13 @@ enum RecordStatus {
   IGNORED
   IMPORTED
   UPDATED
+}
+
+type ScheduledPlan {
+  duration: Int!
+  id: String!
+  mealPlan: MealPlan!
+  startDate: DateTime!
 }
 
 enum SpecialCondition {

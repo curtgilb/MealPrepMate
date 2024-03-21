@@ -6,6 +6,13 @@ const prisma = new PrismaClient();
 import { NutrientLoader } from "./dataloaders/NutrientParser.js";
 import { IngredientLoader } from "./dataloaders/IngredientParser.js";
 import { db } from "../db.js";
+import { createHalalChicken } from "../../data/test_data/HalalChickenRecipe.js";
+import { createChickenGyro } from "../../data/test_data/ChickenGyroRecipe.js";
+import {
+  createScheduledInstance,
+  mealPlanCreateStmt,
+} from "../../data/test_data/MealPlan.js";
+import { DateTime } from "luxon";
 const bucketPolicy = `{
     "Version": "2012-10-17",
     "Statement": [
@@ -37,8 +44,41 @@ async function seedDb() {
   await loadNutrients();
   await loadIngredients();
   await loadHealthProfile();
+  await loadNotificationSettings();
+  await loadRecipes();
+  await loadMealPlan();
+
   console.log("Seeding complete");
   await prisma.$disconnect();
+}
+
+async function loadMealPlan() {
+  const today = DateTime.now();
+  const nextMonday = today.plus({ days: 1 }).startOf("week").plus({ days: 1 });
+  const mealPlan = await db.mealPlan.create({
+    data: mealPlanCreateStmt,
+    include: { planRecipes: { include: { recipe: true, servings: true } } },
+  });
+  await db.scheduledPlan.create({
+    data: createScheduledInstance(
+      nextMonday,
+      mealPlan.shoppingDays,
+      mealPlan.planRecipes
+    ),
+  });
+}
+
+async function loadRecipes() {
+  await createHalalChicken();
+  await createChickenGyro();
+}
+
+async function loadNotificationSettings() {
+  await db.notificationSetting.create({
+    data: {
+      timeZone: "America/Denver",
+    },
+  });
 }
 
 async function deleteBuckets() {

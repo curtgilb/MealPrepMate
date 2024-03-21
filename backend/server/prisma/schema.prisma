@@ -53,6 +53,7 @@ enum Meal {
 }
 
 enum NotificationStatus {
+  CREATED
   DELIVERED
   SCHEDULED
   CANCELED
@@ -64,7 +65,6 @@ model Notification {
   deliveryDate DateTime
   message      String
   status       NotificationStatus
-  jobId        String
   schedule     ScheduledPlan      @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
   scheduleId   String
 }
@@ -76,8 +76,9 @@ model ScheduledPlan {
   notifications Notification[]
   mealPlan      MealPlan       @relation(fields: [mealPlanId], references: [id])
   mealPlanId    String
-  servings      Json
-  recipes       Json
+  /// [MealPlanRecipesCopy]
+  recipes      Json
+  shoppingDays  Int[]
 }
 
 model MealPlan {
@@ -94,14 +95,15 @@ model MealPlan {
 
 model NotificationSetting {
   id                 String   @id @default(cuid())
+  timeZone           String   
   defrostWarning     Boolean  @default(true)
-  defrostWarningTime DateTime? @db.Time()
+  defrostWarningTime Int     @default(19)
   leftoverExpiration Boolean  @default(true)
-  leftoverTime       DateTime? @db.Time()
+  leftoverTime       Int     @default(8)
   mealReminder       Boolean  @default(true)
-  mealTime           DateTime? @db.Time()
+  mealTime           Int     @default(8)
   shoppingReminder   Boolean  @default(true)
-  shoppingTime       DateTime? @db.Time()
+  shoppingTime       Int     @default(9)
 }
 
 model MealPlanServing {
@@ -155,10 +157,9 @@ model ImportRecord {
   parsedFormat     Json
   status           RecordStatus
   verifed          Boolean         @default(false)
-  recipe           Recipe?         @relation(fields: [recipeId], references: [id])
   recipeId         String?
-  nutritionLabel   NutritionLabel? @relation(fields: [nutritionLabelId], references: [id])
   nutritionLabelId String?
+  ingredientGroupId String?
   draftId          String?
   createdAt        DateTime        @default(now())
   // @@map("import_record")
@@ -315,7 +316,6 @@ model Recipe {
   leftoverFreezerLife Int?
   isVerified          Boolean                 @default(false)
   nutritionLabels     NutritionLabel[]
-  importRecords       ImportRecord[]
   ingredientGroups    RecipeIngredientGroup[]
   // @@map("recipe")
 }
@@ -368,7 +368,6 @@ model NutritionLabel {
   servingSizeUnit   MeasurementUnit?         @relation(fields: [unitId], references: [id])
   unitId            String?
   servingsUsed      Float?
-  importRecord      ImportRecord[]
   isPrimary         Boolean                  @default(false)
   // @@map("nutrition_label")
 

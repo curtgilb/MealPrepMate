@@ -1,6 +1,18 @@
+import { z } from "zod";
 import { db } from "../../db.js";
+import { scheduleMealPlan } from "../../services/mealplan/MealPlanService.js";
+import { getAggregatedLabel } from "../../services/recipe/RecipeService.js";
 import { builder } from "../builder.js";
 import { meal } from "./EnumSchema.js";
+import { AggregateLabel } from "./NutritionSchema.js";
+import { cleanedStringSchema } from "../../validations/utilValidations.js";
+import { toTitleCase } from "../../util/utils.js";
+import {
+  addRecipeServingValidation,
+  addRecipeToMealPlanValidation,
+  editMealPlanValidation,
+  editRecipeServingValidation,
+} from "../../validations/graphql/MealPlanValidation.js";
 // ============================================ Types ===================================
 builder.prismaObject("MealPlan", {
   fields: (t) => ({
@@ -16,8 +28,22 @@ builder.prismaObject("MealPlan", {
   }),
 });
 
-// TODO add aggreagte label
+builder.prismaObject("ScheduledPlan", {
+  fields: (t) => ({
+    id: t.exposeString("id"),
+    startDate: t.field({
+      type: "DateTime",
+      resolve: (parent) => parent.startDate,
+    }),
+    duration: t.exposeInt("duration"),
+    mealPlan: t.relation("mealPlan"),
+  }),
+});
+
 builder.prismaObject("MealPlanServing", {
+  include: {
+    recipe: true,
+  },
   fields: (t) => ({
     id: t.exposeID("id"),
     day: t.exposeInt("day"),
@@ -25,10 +51,32 @@ builder.prismaObject("MealPlanServing", {
     mealPlan: t.relation("mealPlan"),
     recipe: t.relation("recipe"),
     numberOfServings: t.exposeInt("numberOfServings"),
+    nutritionLabel: t.field({
+      type: AggregateLabel,
+      nullable: true,
+      args: {
+        advanced: t.arg.boolean(),
+      },
+      resolve: async (parent, args) => {
+        return await getAggregatedLabel(
+          [
+            {
+              id: parent.recipe.recipeId,
+              scale: {
+                factor: parent.recipe.factor,
+                servings: parent.recipe.totalServings,
+                servingsUsed: parent.numberOfServings,
+              },
+            },
+          ],
+          args.advanced ?? false,
+          false
+        );
+      },
+    }),
   }),
 });
 
-// TODO add aggregate label
 builder.prismaObject("MealPlanRecipe", {
   fields: (t) => ({
     id: t.exposeID("id"),
@@ -44,6 +92,25 @@ builder.prismaObject("MealPlanRecipe", {
       where: (args) => ({
         mealPlanId: args.mealId,
       }),
+    }),
+    nutritionLabel: t.field({
+      type: AggregateLabel,
+      nullable: true,
+      args: {
+        advanced: t.arg.boolean(),
+      },
+      resolve: async (parent, args) => {
+        return await getAggregatedLabel(
+          [
+            {
+              id: parent.recipeId,
+              scale: { factor: parent.factor, servings: parent.totalServings },
+            },
+          ],
+          args.advanced ?? false,
+          false
+        );
+      },
     }),
   }),
 });
@@ -62,6 +129,16 @@ const editMealPlanRecipeInput = builder.inputType("EditMealPlanRecipeInput", {
   fields: (t) => ({
     factor: t.float(),
     servings: t.int(),
+  }),
+});
+
+const addRecipeToMealPlanInput = builder.inputType("AddRecipeInput", {
+  fields: (t) => ({
+    mealPlanId: t.string({ required: true }),
+    recipeId: t.string({ required: true }),
+    scaleFactor: t.float({ required: true }),
+    servings: t.int({ required: true }),
+    cookDay: t.int(),
   }),
 });
 
@@ -90,8 +167,14 @@ builder.queryFields((t) => ({
     args: {
       id: t.arg.string({ required: true }),
     },
+    validate: {
+      schema: z.object({ id: z.string().cuid() }),
+    },
     resolve: async (query, root, args) => {
-      return await db.mealPlan.findUniqueOrThrow({ where: { id: args.id } });
+      return await db.mealPlan.findUniqueOrThrow({
+        where: { id: args.id },
+        ...query,
+      });
     },
   }),
   mealPlans: t.prismaField({
@@ -108,6 +191,9 @@ builder.mutationFields((t) => ({
     args: {
       name: t.arg.string({ required: true }),
     },
+    validate: {
+      schema: z.object({ name: cleanedStringSchema(20, toTitleCase) }),
+    },
     resolve: async (query, root, args) => {
       return await db.mealPlan.create({ data: { name: args.name } });
     },
@@ -115,15 +201,17 @@ builder.mutationFields((t) => ({
   editMealPlan: t.prismaField({
     type: "MealPlan",
     args: {
-      id: t.arg.string({ required: true }),
       mealPlan: t.arg({
         type: editMealPlanInput,
         required: true,
       }),
     },
+    validate: {
+      schema: z.object({ mealPlan: editMealPlanValidation }),
+    },
     resolve: async (query, root, args) => {
       return await db.mealPlan.update({
-        where: { id: args.id },
+        where: { id: args.mealPlan.id },
         data: {
           name: args.mealPlan.name ?? undefined,
           mealPrepInstructions: args.mealPlan.mealPrepInstructions,
@@ -136,6 +224,7 @@ builder.mutationFields((t) => ({
     args: {
       id: t.arg.string({ required: true }),
     },
+    validate: { schema: z.object({ id: z.string().cuid() }) },
     resolve: async (query, root, args) => {
       await db.mealPlan.delete({
         where: { id: args.id },
@@ -146,20 +235,20 @@ builder.mutationFields((t) => ({
   addRecipeToMealPlan: t.prismaField({
     type: ["MealPlanRecipe"],
     args: {
-      mealPlanId: t.arg.string({ required: true }),
-      recipeId: t.arg.string({ required: true }),
-      scaleFactor: t.arg.float({ required: true }),
-      servings: t.arg.int({ required: true }),
-      cookDay: t.arg.int(),
+      recipe: t.arg({
+        type: addRecipeToMealPlanInput,
+        required: true,
+      }),
     },
+    validate: { schema: z.object({ recipe: addRecipeToMealPlanValidation }) },
     resolve: async (query, root, args) => {
       await db.mealPlanRecipe.create({
         data: {
-          mealPlan: { connect: { id: args.mealPlanId } },
-          recipe: { connect: { id: args.recipeId } },
-          factor: args.scaleFactor,
-          totalServings: args.servings,
-          cookDay: args.cookDay,
+          mealPlan: { connect: { id: args.recipe.mealPlanId } },
+          recipe: { connect: { id: args.recipe.recipeId } },
+          factor: args.recipe.scaleFactor,
+          totalServings: args.recipe.servings,
+          cookDay: args.recipe.cookDay,
         },
       });
       return await db.mealPlanRecipe.findMany({});
@@ -170,6 +259,7 @@ builder.mutationFields((t) => ({
     args: {
       id: t.arg.string({ required: true }),
     },
+    validate: { schema: z.object({ id: z.string().cuid() }) },
     resolve: async (query, root, args) => {
       await db.mealPlanRecipe.delete({
         where: { id: args.id },
@@ -185,6 +275,7 @@ builder.mutationFields((t) => ({
         required: true,
       }),
     },
+    validate: { schema: z.object({ serving: addRecipeServingValidation }) },
     resolve: async (query, root, args) => {
       await canChangeServings(
         {
@@ -214,6 +305,7 @@ builder.mutationFields((t) => ({
     args: {
       id: t.arg.string({ required: true }),
     },
+    validate: { schema: z.object({ id: z.string().cuid() }) },
     resolve: async (query, root, args) => {
       await db.mealPlanServing.delete({
         where: { id: args.id },
@@ -226,6 +318,7 @@ builder.mutationFields((t) => ({
     args: {
       serving: t.arg({ type: editRecipeServingInput, required: true }),
     },
+    validate: { schema: z.object({ serving: editRecipeServingValidation }) },
     resolve: async (query, root, args) => {
       await canChangeServings(args.serving.id, args.serving.servings);
       await db.mealPlanServing.update({
@@ -245,12 +338,31 @@ builder.mutationFields((t) => ({
       mealPlanId: t.arg.string({ required: true }),
       days: t.arg.intList({ required: true }),
     },
+    validate: {
+      schema: z.object({
+        mealPlanId: z.string().cuid(),
+        days: z.number().gte(1).array(),
+      }),
+    },
     resolve: async (root, args) => {
       const updatedMealPlan = await db.mealPlan.update({
         where: { id: args.mealPlanId },
         data: { shoppingDays: args.days },
       });
       return updatedMealPlan.shoppingDays;
+    },
+  }),
+  scheduleMealPlan: t.prismaField({
+    type: "ScheduledPlan",
+    args: {
+      mealPlanId: t.arg.string({ required: true }),
+      startDate: t.arg({ type: "DateTime", required: true }),
+    },
+    validate: {
+      schema: z.object({ mealPlanId: z.string().cuid(), startDate: z.date() }),
+    },
+    resolve: async (query, root, args) => {
+      return await scheduleMealPlan(args.mealPlanId, args.startDate, query);
     },
   }),
 }));

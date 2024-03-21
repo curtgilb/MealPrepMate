@@ -1,24 +1,33 @@
 import {
   FullNutritionLabel,
-  ServingInfo,
+  NutrientMapArgs,
 } from "../nutrition/NutritionAggregator.js";
 import {
   LabelMaker,
   NutrientAggregator,
-  NutrientMap,
 } from "../../services/nutrition/NutritionAggregator.js";
 
 async function getAggregatedLabel(
-  id: string,
+  recipes: NutrientMapArgs[], // Recipe ID
   advanced: boolean,
   groupByLabel: boolean
 ): Promise<FullNutritionLabel> {
   const aggregator = new NutrientAggregator();
-  await aggregator.addLabels([id], groupByLabel);
-  const nutrients = aggregator.getNutrientMap([{ id: id }]);
-  const servings = aggregator.getServingInfo(id);
+  await aggregator.addLabels(
+    recipes.map((recipe) => recipe.id),
+    groupByLabel
+  );
+
+  const nutrients = aggregator.getNutrientMap(recipes);
+  const servingInfo =
+    recipes.length === 1
+      ? {
+          ...aggregator.getServingInfo(recipes[0].id),
+          ...recipes[0]?.scale,
+        }
+      : {};
   const labelMaker = new LabelMaker();
-  return labelMaker.createLabel({ nutrients, servings, advanced });
+  return labelMaker.createLabel({ nutrients, servings: servingInfo, advanced });
 }
 
 export { getAggregatedLabel };

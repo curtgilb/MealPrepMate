@@ -1,0 +1,31 @@
+meta {
+  name: mealplan
+  type: graphql
+  seq: 1
+}
+
+post {
+  url: http://localhost:3025/graphql
+  body: graphql
+  auth: none
+}
+
+body:graphql {
+  query mealPlan {
+    mealPlan(id: "cltuw2iyg000008l53viu2w53") {
+      id
+      mealPlanServings {
+        day
+        meal
+        numberOfServings
+        nutritionLabel(advanced:true) {
+          calories
+          nutrients
+        }
+      }
+      mealPrepInstructions
+      shopppingDays
+    
+    }
+  }
+}

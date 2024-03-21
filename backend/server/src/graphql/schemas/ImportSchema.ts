@@ -2,7 +2,7 @@ import { builder } from "../builder.js";
 import { db } from "../../db.js";
 import { PrismaImportType, importStatus, recordStatus } from "./EnumSchema.js";
 import { nextPageInfo, offsetPagination } from "./UtilitySchema.js";
-import { Import, ImportRecord, ImportType } from "@prisma/client";
+import { Import, ImportRecord, ImportType, RecordStatus } from "@prisma/client";
 import { queryFromInfo } from "@pothos/plugin-prisma";
 import {
   changeRecordStatus,
@@ -11,7 +11,9 @@ import {
   uploadImportFile,
 } from "../../services/import/ImportService.js";
 import { nutritionLabel } from "./NutritionSchema.js";
-import { recipe } from "./RecipeSchema.js";
+import { recipe, recipeIngredient } from "./RecipeSchema.js";
+import { z } from "zod";
+import { offsetPaginationValidation } from "../../validations/graphql/UtilityValidation.js";
 
 // ============================================ Types ===================================
 const Draft = builder.unionType("Draft", {
@@ -42,9 +44,7 @@ const ImportJobRecord = builder.prismaObject("ImportRecord", {
     id: t.exposeString("id"),
     name: t.exposeString("name"),
     status: t.field({ type: recordStatus, resolve: (parent) => parent.status }),
-    matchingRecipe: t.relation("recipe", { nullable: true }),
     verifed: t.exposeBoolean("verifed"),
-    matchingLabel: t.relation("nutritionLabel", { nullable: true }),
     draft: t.field({
       type: Draft,
       nullable: true,
@@ -106,6 +106,9 @@ builder.queryFields((t) => ({
     args: {
       importId: t.arg.string({ required: true }),
     },
+    validate: {
+      schema: z.object({ importId: z.string().cuid() }),
+    },
     resolve: async (query, root, args) => {
       return await db.import.findUniqueOrThrow({
         where: { id: args.importId },
@@ -120,6 +123,9 @@ builder.queryFields((t) => ({
         type: offsetPagination,
         required: true,
       }),
+    },
+    validate: {
+      schema: z.object({ pagination: offsetPaginationValidation }),
     },
     resolve: async (parent, args, context, info) => {
       const [data, count] = await db.$transaction([
@@ -145,6 +151,9 @@ builder.queryFields((t) => ({
     args: {
       id: t.arg.string({ required: true }),
     },
+    validate: {
+      schema: z.object({ id: z.string().cuid() }),
+    },
     resolve: async (query, root, args) => {
       return await db.importRecord.findUniqueOrThrow({
         where: { id: args.id },
@@ -158,6 +167,12 @@ builder.queryFields((t) => ({
       pagination: t.arg({
         type: offsetPagination,
         required: true,
+      }),
+    },
+    validate: {
+      schema: z.object({
+        importId: z.string().cuid(),
+        pagination: offsetPaginationValidation,
       }),
     },
     resolve: async (root, args, context, info) => {
@@ -209,6 +224,12 @@ builder.mutationFields((t) => ({
       id: t.arg.string({ required: true }),
       status: t.arg({ type: recordStatus, required: true }),
     },
+    validate: {
+      schema: z.object({
+        id: z.string().cuid(),
+        status: z.nativeEnum(RecordStatus),
+      }),
+    },
     resolve: async (query, root, args) => {
       return await changeRecordStatus(args.id, args.status, query);
     },
@@ -219,12 +240,22 @@ builder.mutationFields((t) => ({
       recordId: t.arg.string({ required: true }),
       recipeId: t.arg.string(),
       labelId: t.arg.string(),
+      groupId: t.arg.string(),
+    },
+    validate: {
+      schema: z.object({
+        recordId: z.string().cuid(),
+        recipeId: z.string().cuid().optional(),
+        labelId: z.string().cuid().optional(),
+        groupId: z.string().cuid().optional(),
+      }),
     },
     resolve: async (query, root, args) => {
       return await updateMatches({
         id: args.recordId,
-        labelId: args.labelId ?? undefined,
-        recipeId: args.recipeId ?? undefined,
+        labelId: args.labelId,
+        recipeId: args.recipeId,
+        groupId: args.groupId,
         query,
       });
     },
@@ -233,6 +264,11 @@ builder.mutationFields((t) => ({
     type: "ImportRecord",
     args: {
       recordId: t.arg.string({ required: true }),
+    },
+    validate: {
+      schema: z.object({
+        recordId: z.string().cuid(),
+      }),
     },
     resolve: async (query, root, args) => {
       return await finalizeImportRecord(args.recordId, query);
