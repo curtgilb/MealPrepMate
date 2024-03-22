@@ -3,9 +3,13 @@ import { builder } from "../builder.js";
 import { db } from "../../db.js";
 import { profileInputValidation } from "../../validations/graphql/UserValidation.js";
 import { z } from "zod";
+
+const specialCondition = builder.enumType(SpecialCondition, {
+  name: "SpecialCondition",
+});
+
 // ============================================ Types ===================================
 builder.prismaObject("HealthProfile", {
-  name: "HealthProfile",
   fields: (t) => ({
     id: t.exposeString("id"),
     weight: t.exposeFloat("weight", { nullable: true }),
@@ -13,7 +17,7 @@ builder.prismaObject("HealthProfile", {
     bodyFatPercentage: t.exposeFloat("bodyFatPercentage", { nullable: true }),
     height: t.exposeFloat("height", { nullable: true }),
     specialCondition: t.field({
-      type: SpecialCondition,
+      type: specialCondition,
       resolve: (parent) => parent.specialCondition,
     }),
     age: t.field({

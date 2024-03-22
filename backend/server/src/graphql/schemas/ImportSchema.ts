@@ -11,7 +11,7 @@ import {
   uploadImportFile,
 } from "../../services/import/ImportService.js";
 import { nutritionLabel } from "./NutritionSchema.js";
-import { recipe, recipeIngredient } from "./RecipeSchema.js";
+import { recipe } from "./RecipeSchema.js";
 import { z } from "zod";
 import { offsetPaginationValidation } from "../../validations/graphql/UtilityValidation.js";
 
@@ -45,6 +45,9 @@ const ImportJobRecord = builder.prismaObject("ImportRecord", {
     name: t.exposeString("name"),
     status: t.field({ type: recordStatus, resolve: (parent) => parent.status }),
     verifed: t.exposeBoolean("verifed"),
+    recipe: t.relation("recipe"),
+    label: t.relation("nutritionLabel"),
+    ingredientGroup: t.relation("ingredientGroup"),
     draft: t.field({
       type: Draft,
       nullable: true,

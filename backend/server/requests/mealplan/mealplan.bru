@@ -18,9 +18,12 @@ body:graphql {
         day
         meal
         numberOfServings
+        
         nutritionLabel(advanced:true) {
           calories
-          nutrients
+          nutrients {
+            value
+          }
         }
       }
       mealPrepInstructions

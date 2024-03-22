@@ -172,9 +172,15 @@ class CronometerImport extends Importer {
             parsedFormat: record.getParsedData() as Prisma.JsonObject,
             status: match.status,
             verifed: false,
-            recipeId: match.recipeMatchId,
-            nutritionLabelId: match.labelMatchId,
-            ingredientGroupId: match.ingredientGroupId,
+            recipe: match.recipeMatchId
+              ? { connect: { id: match.recipeMatchId } }
+              : undefined,
+            nutritionLabel: match.labelMatchId
+              ? { connect: { id: match.labelMatchId } }
+              : undefined,
+            ingredientGroup: match.ingredientGroupId
+              ? { connect: { id: match.ingredientGroupId } }
+              : undefined,
             draftId: draftId,
           },
         });

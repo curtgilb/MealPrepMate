@@ -98,14 +98,12 @@ class RecipeKeeperRecord extends ParsedRecord<RecipeInput> {
       )
     );
 
-    let cuisine =
-      recipe.recipeCollection.length > 0
-        ? recipe.recipeCollection[0]
-        : undefined;
-    cuisine = cuisine
-      ? (await db.cuisine.findOrCreate(cuisine))?.id
-      : undefined;
-    console.log(recipe.recipeIsFavourite);
+    const cuisines = await Promise.all(
+      recipe.recipeCollection.map(
+        async (cuisine) => (await db.cuisine.findOrCreate(cuisine))?.id
+      )
+    );
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return schema.parse({
       title: recipe.name,
@@ -118,7 +116,7 @@ class RecipeKeeperRecord extends ParsedRecord<RecipeInput> {
       isFavorite: recipe.recipeIsFavourite,
       courseIds: courses,
       categoryIds: categories,
-      cuisineId: cuisine,
+      cuisineIds: cuisines,
       ingredients: recipe.recipeIngredients,
     }) as z.infer<T>;
   }

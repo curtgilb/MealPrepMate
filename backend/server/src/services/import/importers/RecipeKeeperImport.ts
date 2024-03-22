@@ -60,8 +60,12 @@ class RecipeKeeperImport extends Importer {
               status: item.match.status || "IMPORTED",
               parsedFormat: item.record.getParsedObject() as Prisma.JsonObject,
               externalId: item.record.getExternalId(),
-              recipeId: item.match.recipeMatchId,
-              nutritionLabelId: item.match.labelMatchId,
+              recipe: item.match.recipeMatchId
+                ? { connect: { id: item.match.recipeMatchId } }
+                : undefined,
+              nutritionLabel: item.match.labelMatchId
+                ? { connect: { id: item.match.labelMatchId } }
+                : undefined,
               draftId: draftId,
             },
             select: { id: true },
@@ -131,10 +135,10 @@ class RecipeKeeperImport extends Importer {
   ): Promise<void> {
     await db.$transaction(async (tx) => {
       if (draftId) {
-        await db.recipe.delete({ where: { id: draftId } });
+        await tx.recipe.delete({ where: { id: draftId } });
       }
 
-      await db.importRecord.update({
+      await tx.importRecord.update({
         where: { id: recordId },
         data: { status: newStatus, draftId: null },
       });

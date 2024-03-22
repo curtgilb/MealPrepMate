@@ -5,7 +5,6 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SideNav } from "@/components/SideNav";
 import { navigationLinks } from "@/data/NavigationLinks";
-import { useState } from "react";
 
 export const fontSans = FontSans({
   subsets: ["latin"],
@@ -17,7 +16,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [collapsed, setCollapsed] = useState(false);
   return (
     <html lang="en">
       <body
@@ -33,7 +31,7 @@ export default function RootLayout({
           <p className="text-2xl font-bold ml-2">Meal Planner</p>
         </header>
         <div className="flex">
-          <SideNav links={navigationLinks} isCollapsed={collapsed} />
+          <SideNav links={navigationLinks} isCollapsed={false} />
           <main>{children}</main>
         </div>
       </body>

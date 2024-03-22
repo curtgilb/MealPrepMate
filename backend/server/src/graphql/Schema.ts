@@ -7,6 +7,6 @@ import "./schemas/NutritionSchema.js";
 import "./schemas/RecipeMetaSchema.js";
 import "./schemas/RecipeSchema.js";
 import "./schemas/UtilitySchema.js";
-// import "./schemas/UserSchema.js";
+import "./schemas/UserSchema.js";
 
 export const schema = builder.toSchema();

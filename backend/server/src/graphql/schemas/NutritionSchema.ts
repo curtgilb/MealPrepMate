@@ -9,7 +9,6 @@ import { getAggregatedLabel } from "../../services/recipe/RecipeService.js";
 import { UnitType } from "@prisma/client";
 import { z } from "zod";
 import {
-  createNutrientValidation,
   createNutritionLabelValidation,
   editNutritionLabelValidation,
 } from "../../validations/graphql/NutritionValidation.js";
@@ -63,7 +62,7 @@ AggregateLabel.implement({
   }),
 });
 
-const unitType = builder.enumType(UnitType, { name: "SpecialCondition" });
+const unitType = builder.enumType(UnitType, { name: "UnitType" });
 
 const measurementUnit = builder.prismaObject("MeasurementUnit", {
   name: "MeasurementUnit",
@@ -90,7 +89,6 @@ const nutritionLabel = builder.prismaObject("NutritionLabel", {
     servings: t.exposeFloat("servings", { nullable: true }),
     servingSize: t.exposeFloat("servingSize", { nullable: true }),
     servingsUsed: t.exposeFloat("servingsUsed", { nullable: true }),
-    importRecord: t.relation("importRecord", { nullable: true }),
     aggregateLabel: t.field({
       type: AggregateLabel,
       nullable: true,

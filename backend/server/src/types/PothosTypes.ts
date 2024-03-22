@@ -163,12 +163,24 @@ export default interface PrismaTypes {
         Where: Prisma.ImportRecordWhereInput;
         Create: {};
         Update: {};
-        RelationName: "import";
+        RelationName: "import" | "recipe" | "nutritionLabel" | "ingredientGroup";
         ListRelations: never;
         Relations: {
             import: {
                 Shape: Import;
                 Name: "Import";
+            };
+            recipe: {
+                Shape: Recipe | null;
+                Name: "Recipe";
+            };
+            nutritionLabel: {
+                Shape: NutritionLabel | null;
+                Name: "NutritionLabel";
+            };
+            ingredientGroup: {
+                Shape: RecipeIngredientGroup | null;
+                Name: "RecipeIngredientGroup";
             };
         };
     };
@@ -252,8 +264,8 @@ export default interface PrismaTypes {
         Where: Prisma.RecipeIngredientGroupWhereInput;
         Create: {};
         Update: {};
-        RelationName: "recipe" | "ingredients" | "nutritionLabel";
-        ListRelations: "ingredients";
+        RelationName: "recipe" | "ingredients" | "nutritionLabel" | "importRecords";
+        ListRelations: "ingredients" | "importRecords";
         Relations: {
             recipe: {
                 Shape: Recipe;
@@ -266,6 +278,10 @@ export default interface PrismaTypes {
             nutritionLabel: {
                 Shape: NutritionLabel | null;
                 Name: "NutritionLabel";
+            };
+            importRecords: {
+                Shape: ImportRecord[];
+                Name: "ImportRecord";
             };
         };
     };
@@ -402,8 +418,8 @@ export default interface PrismaTypes {
         Where: Prisma.RecipeWhereInput;
         Create: {};
         Update: {};
-        RelationName: "photos" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabels" | "ingredientGroups";
-        ListRelations: "photos" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabels" | "ingredientGroups";
+        RelationName: "photos" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabels" | "ingredientGroups" | "importRecord";
+        ListRelations: "photos" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabels" | "ingredientGroups" | "importRecord";
         Relations: {
             photos: {
                 Shape: Photo[];
@@ -436,6 +452,10 @@ export default interface PrismaTypes {
             ingredientGroups: {
                 Shape: RecipeIngredientGroup[];
                 Name: "RecipeIngredientGroup";
+            };
+            importRecord: {
+                Shape: ImportRecord[];
+                Name: "ImportRecord";
             };
         };
     };
@@ -525,8 +545,8 @@ export default interface PrismaTypes {
         Where: Prisma.NutritionLabelWhereInput;
         Create: {};
         Update: {};
-        RelationName: "recipe" | "ingredientGroup" | "nutrients" | "servingSizeUnit";
-        ListRelations: "nutrients";
+        RelationName: "recipe" | "ingredientGroup" | "nutrients" | "servingSizeUnit" | "importRecords";
+        ListRelations: "nutrients" | "importRecords";
         Relations: {
             recipe: {
                 Shape: Recipe;
@@ -543,6 +563,10 @@ export default interface PrismaTypes {
             servingSizeUnit: {
                 Shape: MeasurementUnit | null;
                 Name: "MeasurementUnit";
+            };
+            importRecords: {
+                Shape: ImportRecord[];
+                Name: "ImportRecord";
             };
         };
     };

@@ -13,6 +13,8 @@ import {
   mealPlanCreateStmt,
 } from "../../data/test_data/MealPlan.js";
 import { DateTime } from "luxon";
+import { CronometerImport } from "../services/import/importers/CronometerImport.js";
+import { RecipeKeeperImport } from "../services/import/importers/RecipeKeeperImport.js";
 const bucketPolicy = `{
     "Version": "2012-10-17",
     "Statement": [
@@ -47,9 +49,26 @@ async function seedDb() {
   await loadNotificationSettings();
   await loadRecipes();
   await loadMealPlan();
+  await loadImport();
 
   console.log("Seeding complete");
   await prisma.$disconnect();
+}
+
+async function loadImport() {
+  const recipeKeeperImport = await db.import.create({
+    data: {
+      fileName: "RecipeKeeper.zip",
+      type: "RECIPE_KEEPER",
+      status: "PENDING",
+      storagePath: "somewhere",
+    },
+  });
+  const importer = new RecipeKeeperImport({
+    source: "../../../../data/RecipeKeeper.zip",
+    import: recipeKeeperImport,
+  });
+  await importer.processImport();
 }
 
 async function loadMealPlan() {
@@ -92,7 +111,6 @@ async function deleteBuckets() {
         const stream = storage.listObjectsV2(bucket.name, "", true);
         stream.on("data", function (obj) {
           if (obj.name) bucketObjects.push(obj.name);
-          console.log(obj);
         });
         stream.on("end", () => {
           resolve(bucketObjects);

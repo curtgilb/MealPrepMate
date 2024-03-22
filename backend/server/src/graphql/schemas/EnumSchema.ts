@@ -1,6 +1,5 @@
 import {
   Gender,
-  SpecialCondition,
   ImportStatus,
   RecordStatus,
   Meal,
@@ -15,7 +14,6 @@ enum ExternalImportType {
 }
 
 builder.enumType(Gender, { name: "Gender" });
-// builder.enumType(SpecialCondition, { name: "SpecialCondition" });
 const importStatus = builder.enumType(ImportStatus, { name: "ImportStatus" });
 const recordStatus = builder.enumType(RecordStatus, { name: "RecordStatus" });
 const meal = builder.enumType(Meal, { name: "Meal" });

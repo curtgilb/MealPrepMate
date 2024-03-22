@@ -1,0 +1,52 @@
+meta {
+  name: editProfile
+  type: graphql
+  seq: 2
+}
+
+post {
+  url: http://localhost:3025/graphql
+  body: graphql
+  auth: none
+}
+
+body:graphql {
+  mutation editProfile($id: String!, $input:ProfileInput! ) {
+    editProfile(id:$id, profile:$input) {
+      activityLevel
+      age
+    	bodyFatPercentage
+      gender
+      height
+      id
+      specialCondition
+      targetCarbsGrams
+      targetCarbsPercentage
+      targetFatGrams
+      targetFatPercentage
+      targetProteinPecentage
+      targetProteinGrams
+      weight
+    }
+  }
+}
+
+body:graphql:vars {
+  {
+    "id":"clu269wsg00spebdwjoai6w3p",
+    "input": {
+        "targetCarbsGrams": 150,
+        "targetCarbsPercentage": 0.33,
+        "targetFatGrams": 150,
+        "targetFatPercentage": 0.33,
+        "targetProteinGrams": 150,
+        "targetProteinPercentage": 0.33,
+        "activityLevel": 1.2,
+        "age": 30,
+        "bodyFatPercentage": 0.25,
+        "gender": "MALE",
+        "height": 72,
+        "weight": 179
+    }
+  }
+}

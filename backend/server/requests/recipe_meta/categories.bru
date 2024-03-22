@@ -11,8 +11,10 @@ post {
 }
 
 body:graphql {
-  {
-    categories {
+  
+  
+  mutation createCategory {
+    createCategory(name: "Pizza") {
       name
     }
   }

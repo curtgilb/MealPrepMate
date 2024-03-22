@@ -34,7 +34,7 @@ const RecipeInputValidation = z.object({
   leftoverFridgeLife: z.coerce.number().int().positive().nullable().optional(),
   leftoverFreezerLife: z.coerce.number().int().positive().nullable().optional(),
   ingredients: z.string().nullish(),
-  cuisineId: z.coerce.string().cuid().array().nullable().optional(),
+  cuisineIds: z.coerce.string().cuid().array().nullable().optional(),
   categoryIds: z.coerce.string().cuid().array().nullable().optional(),
   courseIds: z.coerce.string().cuid().array().nullable().optional(),
   photoIds: z.coerce.string().cuid().array().nullable().optional(),

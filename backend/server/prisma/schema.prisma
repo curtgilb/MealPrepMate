@@ -59,7 +59,6 @@ enum NotificationStatus {
   CANCELED
 }
 
-
 model Notification {
   id           String             @id @default(cuid())
   deliveryDate DateTime
@@ -76,8 +75,8 @@ model ScheduledPlan {
   notifications Notification[]
   mealPlan      MealPlan       @relation(fields: [mealPlanId], references: [id])
   mealPlanId    String
-  /// [MealPlanRecipesCopy]
-  recipes      Json
+  /// [MealPlanRecipesxCopy]
+  recipes       Json
   shoppingDays  Int[]
 }
 
@@ -94,15 +93,15 @@ model MealPlan {
 }
 
 model NotificationSetting {
-  id                 String   @id @default(cuid())
-  timeZone           String   
-  defrostWarning     Boolean  @default(true)
+  id                 String  @id @default(cuid())
+  timeZone           String
+  defrostWarning     Boolean @default(true)
   defrostWarningTime Int     @default(19)
-  leftoverExpiration Boolean  @default(true)
+  leftoverExpiration Boolean @default(true)
   leftoverTime       Int     @default(8)
-  mealReminder       Boolean  @default(true)
+  mealReminder       Boolean @default(true)
   mealTime           Int     @default(8)
-  shoppingReminder   Boolean  @default(true)
+  shoppingReminder   Boolean @default(true)
   shoppingTime       Int     @default(9)
 }
 
@@ -148,20 +147,23 @@ model Import {
 }
 
 model ImportRecord {
-  id               String          @id @default(cuid())
-  import           Import          @relation(fields: [importId], references: [id])
-  importId         String
-  hash             String?
-  externalId       String?
-  name             String
-  parsedFormat     Json
-  status           RecordStatus
-  verifed          Boolean         @default(false)
-  recipeId         String?
-  nutritionLabelId String?
+  id                String                 @id @default(cuid())
+  import            Import                 @relation(fields: [importId], references: [id])
+  importId          String
+  hash              String?
+  externalId        String?
+  name              String
+  parsedFormat      Json
+  status            RecordStatus
+  verifed           Boolean                @default(false)
+  recipe            Recipe?                @relation(fields: [recipeId], references: [id])
+  recipeId          String?
+  nutritionLabel    NutritionLabel?        @relation(fields: [nutritionLabelId], references: [id])
+  nutritionLabelId  String?
+  ingredientGroup   RecipeIngredientGroup? @relation(fields: [ingredientGroupId], references: [id])
   ingredientGroupId String?
-  draftId          String?
-  createdAt        DateTime        @default(now())
+  draftId           String?
+  createdAt         DateTime               @default(now())
   // @@map("import_record")
 }
 
@@ -221,6 +223,7 @@ model RecipeIngredientGroup {
   recipeId       String
   ingredients    RecipeIngredient[]
   nutritionLabel NutritionLabel?
+  importRecords  ImportRecord[]
   // @@map("recipe_ingredient_group")
 
   @@unique(name: "ingredientGroup", [recipeId, name])
@@ -317,6 +320,7 @@ model Recipe {
   isVerified          Boolean                 @default(false)
   nutritionLabels     NutritionLabel[]
   ingredientGroups    RecipeIngredientGroup[]
+  importRecord        ImportRecord[]
   // @@map("recipe")
 }
 
@@ -369,6 +373,7 @@ model NutritionLabel {
   unitId            String?
   servingsUsed      Float?
   isPrimary         Boolean                  @default(false)
+  importRecords     ImportRecord[]
   // @@map("nutrition_label")
 
   @@unique([recipeId, ingredientGroupId])

@@ -95,4 +95,3 @@ const recipeInput: Prisma.RecipeFindManyArgs = {
 };
 
 const result = await db.recipe.findMany(recipeInput);
-console.log("Done");
