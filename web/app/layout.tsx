@@ -1,12 +1,12 @@
 import "@/styles/globals.css";
-import { Inter as FontSans } from "next/font/google";
+import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SideNav } from "@/components/SideNav";
 import { navigationLinks } from "@/data/NavigationLinks";
 
-export const fontSans = FontSans({
+const fontSans = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
 });
@@ -32,7 +32,7 @@ export default function RootLayout({
         </header>
         <div className="flex">
           <SideNav links={navigationLinks} isCollapsed={false} />
-          <main>{children}</main>
+          <main className="w-full">{children}</main>
         </div>
       </body>
     </html>

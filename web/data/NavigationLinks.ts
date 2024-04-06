@@ -1,48 +1,34 @@
-import {
-  UtensilsCrossed,
-  Library,
-  CalendarDays,
-  Apple,
-  Target,
-  FolderInput,
-} from "lucide-react";
 import { NavLink } from "@/components/SideNav";
 
 export const navigationLinks: NavLink[] = [
   {
     title: "Meal Plans",
-    icon: UtensilsCrossed,
-    variant: "default",
+    icon: "utensils-crossed",
     link: "/mealplans",
   },
   {
     title: "Recipes",
-    icon: Library,
+    icon: "library",
     link: "/recipes",
-    variant: "ghost",
   },
   {
     title: "Calendar",
-    icon: CalendarDays,
+    icon: "calendar-days",
     link: "/calendar",
-    variant: "ghost",
   },
   {
     title: "Ingredients",
-    icon: Apple,
+    icon: "apple",
     link: "/ingredients",
-    variant: "ghost",
   },
   {
     title: "Nutrition Targets",
-    icon: Target,
+    icon: "target",
     link: "/nutrition",
-    variant: "ghost",
   },
   {
     title: "Imports",
-    icon: FolderInput,
+    icon: "folder-input",
     link: "/imports",
-    variant: "ghost",
   },
 ];
