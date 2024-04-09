@@ -1,4 +1,5 @@
 /* eslint-disable */
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -983,6 +984,8 @@ export type RecipeIngredientUpdateInput = {
 export type RecipeIngredients = {
   __typename?: 'RecipeIngredients';
   baseIngredient?: Maybe<Ingredient>;
+  group: RecipeIngredientGroup;
+  id: Scalars['String']['output'];
   name?: Maybe<Scalars['String']['output']>;
   order: Scalars['Int']['output'];
   quantity?: Maybe<Scalars['Float']['output']>;
@@ -1043,3 +1046,13 @@ export enum UnitType {
   Volume = 'VOLUME',
   Weight = 'WEIGHT'
 }
+
+export type GetRecipeQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type GetRecipeQuery = { __typename?: 'Query', recipe: { __typename?: 'Recipe', prepTime?: number | null, name: string, marinadeTime?: number | null, leftoverFridgeLife?: number | null, isFavorite: boolean, ingredientFreshness?: number | null, id: string, directions?: string | null, cookTime?: number | null, ingredients: Array<{ __typename?: 'RecipeIngredients', sentence: string }>, cuisine: Array<{ __typename?: 'Cuisine', name: string }>, course: Array<{ __typename?: 'Course', name: string }>, category: Array<{ __typename?: 'Category', name: string }> } };
+
+
+export const GetRecipeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getRecipe"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"recipe"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"recipeId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"prepTime"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"marinadeTime"}},{"kind":"Field","name":{"kind":"Name","value":"leftoverFridgeLife"}},{"kind":"Field","name":{"kind":"Name","value":"isFavorite"}},{"kind":"Field","name":{"kind":"Name","value":"ingredients"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sentence"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ingredientFreshness"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"directions"}},{"kind":"Field","name":{"kind":"Name","value":"cuisine"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"course"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"cookTime"}},{"kind":"Field","name":{"kind":"Name","value":"category"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<GetRecipeQuery, GetRecipeQueryVariables>;

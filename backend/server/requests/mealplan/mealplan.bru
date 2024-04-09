@@ -19,10 +19,17 @@ body:graphql {
         meal
         numberOfServings
         
-        nutritionLabel(advanced:true) {
+        nutritionLabel(advanced:false) {
           calories
           nutrients {
+            id
+            name
+            unit {
+              name
+              symbol
+            }
             value
+            perServing
           }
         }
       }

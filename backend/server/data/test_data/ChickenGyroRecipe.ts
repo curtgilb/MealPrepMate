@@ -657,16 +657,40 @@ const recipe: Prisma.RecipeCreateInput = {
   notes: `Boneless, skinless chicken thighs work well for this recipe, but you could also go with thin chicken breasts.  Just make sure they are cooked through until juices run clear and internal temperature reaches 165°F. 
   We love using whole milk Greek plain yogurt, but you could certainly use low-fat, or fat-free, but the marinade won't adhere to the chicken as well. 
   The infused oil is optional, but it's really easy to make and makes a big difference in the final taste of the gyros. 
-  The tzatziki sauce, marinade, cucumber salad, and infused oil can all be made up to 12 hours before grilling the chicken.  Don't let the chicken sit in the marinade for more than 8 to 10 hours.
+  The tzatziki sauce, marinade, cucumber salad, and infused oil can all be made up to 12 hours before grilling the chicken. Don't let the chicken sit in the marinade for more than 8 to 10 hours.
   This recipe can easily be doubled or tripled for serving a crowd.  
   The tzatziki sauce will keep in the fridge for up to 2 weeks, the cooked chicken and cucumber salad will keep for several days.`,
   isFavorite: true,
   isVerified: true,
+  category: {
+    connectOrCreate: {
+      where: { name: "Main Dish" },
+      create: {
+        name: "Main Dish",
+      },
+    },
+  },
+  course: {
+    connectOrCreate: {
+      where: { name: "Dinner" },
+      create: {
+        name: "Dinner",
+      },
+    },
+  },
+  cuisine: {
+    connectOrCreate: {
+      where: { name: "Mediterranean" },
+      create: {
+        name: "Mediterranean",
+      },
+    },
+  },
 };
 
 async function createChickenGyro() {
   return await db.$transaction(async (tx) => {
-    const existingRecipe = await tx.recipe.findUnique({
+    let existingRecipe = await tx.recipe.findUnique({
       where: { id: RECIPE_ID },
     });
     if (!existingRecipe) {
@@ -682,8 +706,11 @@ async function createChickenGyro() {
 
       await tx.recipeIngredient.createMany({ data: ingredients });
 
-      return await tx.recipe.findUniqueOrThrow({ where: { id: RECIPE_ID } });
+      existingRecipe = await tx.recipe.findUniqueOrThrow({
+        where: { id: RECIPE_ID },
+      });
     }
+
     return existingRecipe;
   });
 }
