@@ -1,2 +1,2 @@
 schema: "http://localhost:3025/graphql"
-documents: "app/**/*.{graphql,gql,tsx}"
+documents: "./**/*.tsx"

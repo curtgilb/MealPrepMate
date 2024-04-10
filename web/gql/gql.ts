@@ -13,7 +13,9 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
-    "\n  query getRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      prepTime\n      name\n      marinadeTime\n      leftoverFridgeLife\n      isFavorite\n      ingredients {\n        sentence\n      }\n      ingredientFreshness\n      id\n      directions\n      cuisine {\n        name\n      }\n      course {\n        name\n      }\n      cookTime\n      category {\n        name\n      }\n    }\n  }\n": types.GetRecipeDocument,
+    "\n  query getRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      prepTime\n      source\n      name\n      marinadeTime\n      leftoverFridgeLife\n      isFavorite\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n      photos {\n        url\n        id\n        isPrimary\n      }\n      ingredientFreshness\n      id\n      directions\n      cuisine {\n        id\n        name\n      }\n      course {\n        id\n        name\n      }\n      cookTime\n      category {\n        id\n        name\n      }\n      notes\n    }\n  }\n": types.GetRecipeDocument,
+    "\n  query fetchRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n    }\n  }\n": types.FetchRecipeDocument,
+    "\n  fragment RecipeIngredientFragment on RecipeIngredients {\n    id\n    sentence\n    order\n    quantity\n    baseIngredient {\n      id\n      name\n    }\n    unit {\n      id\n      name\n      symbol\n    }\n    group {\n      id\n      name\n    }\n  }\n": types.RecipeIngredientFragmentFragmentDoc,
 };
 
 /**
@@ -33,7 +35,15 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query getRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      prepTime\n      name\n      marinadeTime\n      leftoverFridgeLife\n      isFavorite\n      ingredients {\n        sentence\n      }\n      ingredientFreshness\n      id\n      directions\n      cuisine {\n        name\n      }\n      course {\n        name\n      }\n      cookTime\n      category {\n        name\n      }\n    }\n  }\n"): (typeof documents)["\n  query getRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      prepTime\n      name\n      marinadeTime\n      leftoverFridgeLife\n      isFavorite\n      ingredients {\n        sentence\n      }\n      ingredientFreshness\n      id\n      directions\n      cuisine {\n        name\n      }\n      course {\n        name\n      }\n      cookTime\n      category {\n        name\n      }\n    }\n  }\n"];
+export function graphql(source: "\n  query getRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      prepTime\n      source\n      name\n      marinadeTime\n      leftoverFridgeLife\n      isFavorite\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n      photos {\n        url\n        id\n        isPrimary\n      }\n      ingredientFreshness\n      id\n      directions\n      cuisine {\n        id\n        name\n      }\n      course {\n        id\n        name\n      }\n      cookTime\n      category {\n        id\n        name\n      }\n      notes\n    }\n  }\n"): (typeof documents)["\n  query getRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      prepTime\n      source\n      name\n      marinadeTime\n      leftoverFridgeLife\n      isFavorite\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n      photos {\n        url\n        id\n        isPrimary\n      }\n      ingredientFreshness\n      id\n      directions\n      cuisine {\n        id\n        name\n      }\n      course {\n        id\n        name\n      }\n      cookTime\n      category {\n        id\n        name\n      }\n      notes\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query fetchRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n    }\n  }\n"): (typeof documents)["\n  query fetchRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment RecipeIngredientFragment on RecipeIngredients {\n    id\n    sentence\n    order\n    quantity\n    baseIngredient {\n      id\n      name\n    }\n    unit {\n      id\n      name\n      symbol\n    }\n    group {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  fragment RecipeIngredientFragment on RecipeIngredients {\n    id\n    sentence\n    order\n    quantity\n    baseIngredient {\n      id\n      name\n    }\n    unit {\n      id\n      name\n      symbol\n    }\n    group {\n      id\n      name\n    }\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

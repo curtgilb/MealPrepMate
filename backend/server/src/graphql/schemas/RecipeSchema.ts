@@ -25,6 +25,7 @@ const recipe = builder.prismaObject("Recipe", {
   fields: (t) => ({
     id: t.exposeID("id"),
     name: t.exposeString("name"),
+    source: t.exposeString("source", { nullable: true }),
     prepTime: t.exposeInt("preparationTime", { nullable: true }),
     cookTime: t.exposeInt("cookingTime", { nullable: true }),
     marinadeTime: t.exposeInt("marinadeTime", { nullable: true }),
@@ -80,7 +81,7 @@ const recipeIngredient = builder.prismaObject("RecipeIngredient", {
     name: t.exposeString("name", { nullable: true }),
     recipe: t.relation("recipe"),
     baseIngredient: t.relation("ingredient", { nullable: true }),
-    group: t.relation("group"),
+    group: t.relation("group", { nullable: true }),
   }),
 });
 

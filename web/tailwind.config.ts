@@ -24,6 +24,7 @@ const config = {
       },
       gridTemplateColumns: {
         "auto-fill-5": "repeat(auto-fit, 16rem)",
+        "auto-fr": "auto 1fr",
       },
       colors: {
         border: "hsl(var(--border))",

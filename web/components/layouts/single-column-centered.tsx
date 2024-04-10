@@ -5,9 +5,5 @@ export default function SingleColumnCentered({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="flex p-8 justify-center w-full">
-      <div className="max-w-screen-xl w-full">{children}</div>
-    </div>
-  );
+  return <div className="flex p-8 justify-center w-full">{children}</div>;
 }
