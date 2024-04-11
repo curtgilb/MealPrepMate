@@ -21,7 +21,7 @@ export default function RecipeEdit() {
     variables: { id: "cltus93fj000008jq4rh9fnod" },
   });
   const { data, fetching, error } = result;
-  data?.recipe.ingredients.map((ingredient) => {});
+
   if (fetching) return <p>Loading...</p>;
   if (error) return <p>Oh no... {error.message}</p>;
 
