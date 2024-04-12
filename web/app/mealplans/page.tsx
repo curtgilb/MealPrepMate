@@ -8,7 +8,7 @@ export default function MealPlans() {
         <p className="text-xl font-bold p-4 border-b">Custom Meal plan</p>
       </div>
       <div className="flex">
-        <div className="grid grid-cols-7 gap-8 w-full p-8">
+        <div className="grid grid-cols-1 4xl:grid-cols-7 gap-8 w-full p-8">
           <MealPlanDay></MealPlanDay>
           <MealPlanDay></MealPlanDay>
           <MealPlanDay></MealPlanDay>

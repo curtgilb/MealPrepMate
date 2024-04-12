@@ -45,9 +45,9 @@ const ImportJobRecord = builder.prismaObject("ImportRecord", {
     name: t.exposeString("name"),
     status: t.field({ type: recordStatus, resolve: (parent) => parent.status }),
     verifed: t.exposeBoolean("verifed"),
-    recipe: t.relation("recipe"),
-    label: t.relation("nutritionLabel"),
-    ingredientGroup: t.relation("ingredientGroup"),
+    recipe: t.relation("recipe", { nullable: true }),
+    label: t.relation("nutritionLabel", { nullable: true }),
+    ingredientGroup: t.relation("ingredientGroup", { nullable: true }),
     draft: t.field({
       type: Draft,
       nullable: true,

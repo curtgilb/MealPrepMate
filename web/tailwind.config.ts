@@ -19,6 +19,9 @@ const config = {
       },
     },
     extend: {
+      screens: {
+        "4xl": "3440px",
+      },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
       },

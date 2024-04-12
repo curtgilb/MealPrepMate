@@ -1,13 +1,11 @@
-import SingleColumnCentered from "@/components/layouts/single-column-centered";
-import React from "react";
-import { cacheExchange, createClient, fetchExchange, gql } from "@urql/core";
-import { registerUrql } from "@urql/next/rsc";
-import { graphql } from "@/gql";
-import Image from "next/image";
 import RecipeIngredients from "@/components/recipe/RecipeIngredients";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { graphql } from "@/gql";
+import { cacheExchange, createClient, fetchExchange } from "@urql/core";
+import { registerUrql } from "@urql/next/rsc";
 import { Pencil } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 const makeClient = () => {
   return createClient({

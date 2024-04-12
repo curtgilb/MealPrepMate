@@ -13,6 +13,8 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
+    "\n  query MyQuery {\n    importRecords(\n      importId: \"clurx5an200vdbrc90dns02gz\"\n      pagination: { offset: 0, take: 117 }\n    ) {\n      records {\n        id\n        __typename\n        draft {\n          ... on Recipe {\n            __typename\n            id\n            labelName: name\n          }\n          ... on NutritionLabel {\n            __typename\n            id\n            name\n          }\n        }\n        recipe {\n          name\n          id\n        }\n        label {\n          id\n          name\n        }\n        ingredientGroup {\n          id\n          name\n        }\n        name\n        status\n        verifed\n      }\n    }\n  }\n": types.MyQueryDocument,
+    "\n  query getImports {\n    imports(pagination: { offset: 0, take: 10 }) {\n      importJobs {\n        createdAt\n        fileName\n        id\n        recordsCount\n        status\n        type\n      }\n    }\n  }\n": types.GetImportsDocument,
     "\n  query fetchIngredients($pagination: OffsetPagination!, $search: String) {\n    ingredients(pagination: $pagination, search: $search) {\n      ingredients {\n        id\n        name\n      }\n      itemsRemaining\n      nextOffset\n    }\n  }\n": types.FetchIngredientsDocument,
     "\n  query getRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      prepTime\n      source\n      name\n      marinadeTime\n      leftoverFridgeLife\n      isFavorite\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n      photos {\n        url\n        id\n        isPrimary\n      }\n      ingredientFreshness\n      id\n      directions\n      cuisine {\n        id\n        name\n      }\n      course {\n        id\n        name\n      }\n      cookTime\n      category {\n        id\n        name\n      }\n      notes\n    }\n  }\n": types.GetRecipeDocument,
     "\n  query getCategories {\n    categories {\n      id\n      name\n    }\n  }\n": types.GetCategoriesDocument,
@@ -36,6 +38,14 @@ const documents = {
  */
 export function graphql(source: string): unknown;
 
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query MyQuery {\n    importRecords(\n      importId: \"clurx5an200vdbrc90dns02gz\"\n      pagination: { offset: 0, take: 117 }\n    ) {\n      records {\n        id\n        __typename\n        draft {\n          ... on Recipe {\n            __typename\n            id\n            labelName: name\n          }\n          ... on NutritionLabel {\n            __typename\n            id\n            name\n          }\n        }\n        recipe {\n          name\n          id\n        }\n        label {\n          id\n          name\n        }\n        ingredientGroup {\n          id\n          name\n        }\n        name\n        status\n        verifed\n      }\n    }\n  }\n"): (typeof documents)["\n  query MyQuery {\n    importRecords(\n      importId: \"clurx5an200vdbrc90dns02gz\"\n      pagination: { offset: 0, take: 117 }\n    ) {\n      records {\n        id\n        __typename\n        draft {\n          ... on Recipe {\n            __typename\n            id\n            labelName: name\n          }\n          ... on NutritionLabel {\n            __typename\n            id\n            name\n          }\n        }\n        recipe {\n          name\n          id\n        }\n        label {\n          id\n          name\n        }\n        ingredientGroup {\n          id\n          name\n        }\n        name\n        status\n        verifed\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query getImports {\n    imports(pagination: { offset: 0, take: 10 }) {\n      importJobs {\n        createdAt\n        fileName\n        id\n        recordsCount\n        status\n        type\n      }\n    }\n  }\n"): (typeof documents)["\n  query getImports {\n    imports(pagination: { offset: 0, take: 10 }) {\n      importJobs {\n        createdAt\n        fileName\n        id\n        recordsCount\n        status\n        type\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
