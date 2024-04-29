@@ -1,7 +1,7 @@
 import { schema } from "./graphql/Schema.js";
 import { createYoga } from "graphql-yoga";
 import { createServer } from "node:http";
-import { applyMiddleware } from "graphql-middleware";
+// import { applyMiddleware } from "graphql-middleware";
 
 const PORT = 3025;
 
@@ -12,6 +12,7 @@ const PORT = 3025;
 //     root,
 //     args,
 //     context: {
+
 //       params: { query: string };
 //       req: { socket: { remoteAddress: string } };
 //     },

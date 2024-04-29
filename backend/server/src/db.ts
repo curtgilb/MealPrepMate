@@ -1,8 +1,8 @@
 import { PrismaClient } from "@prisma/client";
-import { nutritionExtension } from "./model_extensions/NutritionExtension.js";
-import { recipeExtensions } from "./model_extensions/RecipeExtension.js";
-import { photoExtension } from "./model_extensions/PhotoExtension.js";
-import { RecipeMetaExtension } from "./model_extensions/RecipeMetaExtension.js";
+import { nutritionExtension } from "./models/NutritionExtension.js";
+import { recipeExtensions } from "./models/RecipeExtension.js";
+import { photoExtension } from "./models/PhotoExtension.js";
+import { RecipeMetaExtension } from "./models/RecipeMetaExtension.js";
 
 export const db = createDbClient();
 

@@ -1,20 +1,19 @@
 import { PrismaClient } from "@prisma/client";
-import { readCSV } from "../services/io/Readers.js";
-import { storage } from "../storage.js";
-import { toMeasurementUnitTypeEnum } from "../util/Cast.js";
-const prisma = new PrismaClient();
-import { NutrientLoader } from "./dataloaders/NutrientParser.js";
-import { IngredientLoader } from "./dataloaders/IngredientParser.js";
-import { db } from "../db.js";
-import { createHalalChicken } from "../../data/test_data/HalalChickenRecipe.js";
+import { DateTime } from "luxon";
 import { createChickenGyro } from "../../data/test_data/ChickenGyroRecipe.js";
+import { createHalalChicken } from "../../data/test_data/HalalChickenRecipe.js";
 import {
   createScheduledInstance,
   mealPlanCreateStmt,
 } from "../../data/test_data/MealPlan.js";
-import { DateTime } from "luxon";
-import { CronometerImport } from "../services/import/importers/CronometerImport.js";
+import { db } from "../db.js";
 import { RecipeKeeperImport } from "../services/import/importers/RecipeKeeperImport.js";
+import { readCSV } from "../services/io/Readers.js";
+import { storage } from "../storage.js";
+import { toMeasurementUnitTypeEnum } from "../util/Cast.js";
+import { IngredientLoader } from "./dataloaders/IngredientParser.js";
+import { NutrientLoader } from "./dataloaders/NutrientParser.js";
+const prisma = new PrismaClient();
 const bucketPolicy = `{
     "Version": "2012-10-17",
     "Statement": [
@@ -49,7 +48,8 @@ async function seedDb() {
   await loadNotificationSettings();
   await loadRecipes();
   await loadMealPlan();
-  await loadImport();
+  // await loadImport();
+  await loadGroceryStores();
 
   console.log("Seeding complete");
   await prisma.$disconnect();
@@ -65,10 +65,116 @@ async function loadImport() {
     },
   });
   const importer = new RecipeKeeperImport({
-    source: "../../../../data/RecipeKeeper.zip",
+    source: "../../../data/RecipeKeeper.zip",
     import: recipeKeeperImport,
   });
   await importer.processImport();
+}
+
+async function loadGroceryStores() {
+  await db.groceryStore.createMany({
+    data: [
+      { name: "Walmart" },
+      { name: "Kroger" },
+      { name: "Albertsons" },
+      { name: "Costco" },
+      { name: "Publix" },
+      { name: "Safeway" },
+      { name: "Whole Foods Market" },
+      { name: "Trader Joe's" },
+      { name: "H-E-B" },
+      { name: "Meijer" },
+      { name: "Target" },
+      { name: "Aldi" },
+      { name: "Sam's Club" },
+      { name: "Giant Eagle" },
+      { name: "WinCo" },
+      { name: "Hy-Vee" },
+      { name: "Wegmans" },
+      { name: "Food Lion" },
+      { name: "ShopRite" },
+      { name: "Stop & Shop" },
+      { name: "Sprouts Farmers Market" },
+      { name: "Piggly Wiggly" },
+      { name: "Ralphs" },
+      { name: "Fred Meyer" },
+      { name: "Food 4 Less" },
+      { name: "Harris Teeter" },
+      { name: "Giant Food" },
+      { name: "Bi-Lo" },
+      { name: "Jewel-Osco" },
+      { name: "Vons" },
+      { name: "Shaw's" },
+      { name: "Ingles Markets" },
+      { name: "Fry's Food Stores" },
+      { name: "Market Basket" },
+      { name: "Raley's" },
+      { name: "QFC (Quality Food Centers)" },
+      { name: "Woodman's Markets" },
+      { name: "Price Chopper" },
+      { name: "King Soopers" },
+      { name: "The Fresh Market" },
+      { name: "Acme Markets" },
+      { name: "Brookshire Grocery Company" },
+      { name: "Food City" },
+      { name: "Stater Bros. Markets" },
+      { name: "SpartanNash" },
+      { name: "Super 1 Foods" },
+      { name: "Tops Friendly Markets" },
+      { name: "Associated Food Stores" },
+      { name: "Weis Markets" },
+      { name: "Smart & Final" },
+      { name: "Coborn's" },
+      { name: "United Supermarkets" },
+      { name: "Save Mart Supermarkets" },
+      { name: "Buehler's Fresh Foods" },
+      { name: "Fareway Stores" },
+      { name: "Food Basics USA" },
+      { name: "Key Food Stores Co-Operative Inc." },
+      { name: "Food Bazaar Supermarket" },
+      { name: "Lidl" },
+      { name: "FoodMaxx" },
+      { name: "Foodtown" },
+      { name: "Marc's Stores" },
+      { name: "Shoppers Food & Pharmacy" },
+      { name: "Rouses Markets" },
+      { name: "El Super" },
+      { name: "Cardenas Markets" },
+      { name: "Vallarta Supermarkets" },
+      { name: "Northgate Market" },
+      { name: "Pueblo Supermarkets" },
+      { name: "WinCo Foods" },
+      { name: "Cash Wise Foods" },
+      { name: "Festival Foods" },
+      { name: "Supermercado Nuestra Familia" },
+      { name: "Homeland Stores" },
+      { name: "Western Beef" },
+      { name: "Foodarama" },
+      { name: "Ramey's Marketplace" },
+      { name: "Grocery Outlet Bargain Market" },
+      { name: "United Grocery Outlet" },
+      { name: "Reasor's" },
+      { name: "Lowes Foods" },
+      { name: "Dan's Supermarket" },
+      { name: "Macey's" },
+      { name: "Smith's Food and Drug" },
+      { name: "Dillons" },
+      { name: "Market 32" },
+      { name: "Bel Air Markets" },
+      { name: "Gelson's Markets" },
+      { name: "Lunds & Byerlys" },
+      { name: "Nugget Markets" },
+      { name: "Metropolitan Market" },
+      { name: "New Seasons Market" },
+      { name: "Earth Fare" },
+      { name: "Fresh Thyme Farmers Market" },
+      { name: "The Market at Wegmans" },
+      { name: "Basha's" },
+      { name: "Harmon's Grocery" },
+      { name: "Heinen's Grocery Store" },
+      { name: "Houchens Industries" },
+    ],
+  });
 }
 
 async function loadMealPlan() {
@@ -142,7 +248,7 @@ async function loadUnits() {
 }
 
 async function createBuckets() {
-  const buckets = ["imports", "images"];
+  const buckets = ["imports", "images", "receipts"];
   for (const bucket of buckets) {
     await storage.makeBucket(bucket);
     await storage.setBucketPolicy(bucket, bucketPolicy.replace("$$$", bucket));
@@ -263,4 +369,4 @@ async function deleteAllRecords() {
   }
 }
 
-export { seedDb, deleteAllRecords, deleteBuckets };
+export { deleteAllRecords, deleteBuckets, seedDb };

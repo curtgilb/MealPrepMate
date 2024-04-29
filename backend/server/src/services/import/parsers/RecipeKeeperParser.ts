@@ -1,13 +1,15 @@
-import { FileMetaData } from "../../../types/CustomTypes.js";
-import { HTMLElement } from "node-html-parser";
-import { parse as parseHTML } from "node-html-parser";
-import { db } from "../../../db.js";
-import { Parser, ParsedOutput, ParsedRecord } from "./Parser.js";
-import { RecipeInput } from "../../../types/gql.js";
-import { ImportType } from "@prisma/client";
+import { HTMLElement, parse as parseHTML } from "node-html-parser";
 import { File as ZipFile } from "unzipper";
-import { hash } from "../../../util/utils.js";
 import { z } from "zod";
+import { db } from "../../../db.js";
+import { FileMetaData } from "../../../types/CustomTypes.js";
+import { RecipeInput } from "../../../types/gql.js";
+import { hash } from "../../../util/utils.js";
+import { RecipeParsedRecord } from "../../../services/import/parsers/base/ParsedRecord.js";
+import {
+  FileParser,
+  ParsedOutputFromFile,
+} from "../../../services/import/parsers/base/Parser.js";
 
 type RecipeKeeperRecipe = {
   recipeId: string;
@@ -30,13 +32,12 @@ type RecipeKeeperRecipe = {
   recipeCategory: string[];
 };
 
-class RecipeKeeperRecord extends ParsedRecord<RecipeInput> {
+class RecipeKeeperRecord extends RecipeParsedRecord<RecipeInput> {
   externalId: string | undefined;
   parsedData: RecipeKeeperHtml;
-  importType: ImportType = "RECIPE_KEEPER";
 
   constructor(input: string, parsedHtml: HTMLElement | RecipeKeeperRecipe) {
-    super(input);
+    super(input, "RECIPE_KEEPER");
     this.parsedData = new RecipeKeeperHtml(parsedHtml);
     this.externalId = this.parsedData.recipe.recipeId;
   }
@@ -65,9 +66,9 @@ class RecipeKeeperRecord extends ParsedRecord<RecipeInput> {
         })
         .map(async (nutrient) => ({
           value: nutrient.value,
-          nutrientId: await ParsedRecord.matchNutrient(
+          nutrientId: await RecipeKeeperRecord.matchNutrient(
             nutrient.name,
-            this.importType
+            this.importSource
           ),
         }))
     );
@@ -87,22 +88,11 @@ class RecipeKeeperRecord extends ParsedRecord<RecipeInput> {
     imageMapping?: Map<string, string>
   ): Promise<z.infer<T>> {
     const recipe = this.parsedData.toObject();
-    const courses = await Promise.all(
-      recipe.recipeCourse.map(
-        async (course) => (await db.course.findOrCreate(course))?.id
-      )
-    );
-    const categories = await Promise.all(
-      recipe.recipeCategory.map(
-        async (category) => (await db.category.findOrCreate(category))?.id
-      )
-    );
-
-    const cuisines = await Promise.all(
-      recipe.recipeCollection.map(
-        async (cuisine) => (await db.cuisine.findOrCreate(cuisine))?.id
-      )
-    );
+    const collections = await this.matchCollections({
+      cuisines: recipe.recipeCollection,
+      categories: recipe.recipeCategory,
+      courses: recipe.recipeCourse,
+    });
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return schema.parse({
@@ -114,15 +104,15 @@ class RecipeKeeperRecord extends ParsedRecord<RecipeInput> {
       notes: recipe.recipeNotes,
       photos: recipe.photos.map((photoPath) => imageMapping?.get(photoPath)),
       isFavorite: recipe.recipeIsFavourite,
-      courseIds: courses,
-      categoryIds: categories,
-      cuisineIds: cuisines,
+      courseIds: collections.courseIds,
+      categoryIds: collections.categoryIds,
+      cuisineIds: collections.cuisineIds,
       ingredients: recipe.recipeIngredients,
     }) as z.infer<T>;
   }
 }
 
-class RecipeKeeperParser extends Parser<RecipeInput, RecipeKeeperRecord> {
+class RecipeKeeperParser extends FileParser<RecipeInput, RecipeKeeperRecord> {
   protected records: RecipeKeeperRecord[] = [];
   protected fileHash: string | undefined = undefined;
   protected fileName: string | undefined = undefined;
@@ -130,7 +120,9 @@ class RecipeKeeperParser extends Parser<RecipeInput, RecipeKeeperRecord> {
   constructor(source: string | File) {
     super(source);
   }
-  async parse(): Promise<ParsedOutput<RecipeInput, RecipeKeeperRecord>> {
+  async parse(): Promise<
+    ParsedOutputFromFile<RecipeInput, RecipeKeeperRecord>
+  > {
     const directory = await this.unzipFile(this.source);
     this.fileName =
       this.source instanceof File ? this.source.name : this.source;
@@ -152,11 +144,10 @@ class RecipeKeeperParser extends Parser<RecipeInput, RecipeKeeperRecord> {
         this.records.push(new RecipeKeeperRecord(recipe.toString(), recipe));
       }
     } else if (["jpg", "png", "tiff"].includes(metaData.ext)) {
-      const photo = await db.photo.uploadPhoto(
-        await file.buffer(),
-        metaData.name,
-        { select: { id: true } }
-      );
+      const isPrimary = metaData.name.includes("_0.");
+      const photo = await db.photo.uploadPhoto(await file.buffer(), isPrimary, {
+        select: { id: true },
+      });
 
       this.imageMapping.set(`images/${metaData.name}`, photo.id);
     }
@@ -291,4 +282,4 @@ class RecipeKeeperHtml {
   }
 }
 
-export { RecipeKeeperParser, RecipeKeeperRecord, RecipeKeeperHtml };
+export { RecipeKeeperHtml, RecipeKeeperParser, RecipeKeeperRecord };

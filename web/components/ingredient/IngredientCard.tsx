@@ -9,7 +9,7 @@ export default function IngredientCard({
 }) {
   return (
     <Link href={`/ingredients/${id}`}>
-      <div>
+      <div className="flex gap-4 border rounded p-6">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -17,9 +17,9 @@ export default function IngredientCard({
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
           className="lucide lucide-soup"
         >
           <path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9Z" />

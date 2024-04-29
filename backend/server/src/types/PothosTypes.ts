@@ -1,12 +1,12 @@
 /* eslint-disable */
-import type { Prisma, Notification, ScheduledPlan, MealPlan, NotificationSetting, MealPlanServing, MealPlanRecipe, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, NutrientImportMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
+import type { Prisma, Notification, ScheduledPlan, MealPlan, NotificationSetting, MealPlanServing, MealPlanRecipe, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, GroceryStore, Receipt, ReceiptLine, WebScrapedRecipe, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, NutrientImportMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
 export default interface PrismaTypes {
     Notification: {
         Name: "Notification";
         Shape: Notification;
         Include: Prisma.NotificationInclude;
         Select: Prisma.NotificationSelect;
-        OrderBy: Prisma.NotificationOrderByWithRelationInput;
+        OrderBy: Prisma.NotificationOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.NotificationWhereUniqueInput;
         Where: Prisma.NotificationWhereInput;
         Create: {};
@@ -25,7 +25,7 @@ export default interface PrismaTypes {
         Shape: ScheduledPlan;
         Include: Prisma.ScheduledPlanInclude;
         Select: Prisma.ScheduledPlanSelect;
-        OrderBy: Prisma.ScheduledPlanOrderByWithRelationInput;
+        OrderBy: Prisma.ScheduledPlanOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.ScheduledPlanWhereUniqueInput;
         Where: Prisma.ScheduledPlanWhereInput;
         Create: {};
@@ -48,7 +48,7 @@ export default interface PrismaTypes {
         Shape: MealPlan;
         Include: Prisma.MealPlanInclude;
         Select: Prisma.MealPlanSelect;
-        OrderBy: Prisma.MealPlanOrderByWithRelationInput;
+        OrderBy: Prisma.MealPlanOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.MealPlanWhereUniqueInput;
         Where: Prisma.MealPlanWhereInput;
         Create: {};
@@ -75,7 +75,7 @@ export default interface PrismaTypes {
         Shape: NotificationSetting;
         Include: never;
         Select: Prisma.NotificationSettingSelect;
-        OrderBy: Prisma.NotificationSettingOrderByWithRelationInput;
+        OrderBy: Prisma.NotificationSettingOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.NotificationSettingWhereUniqueInput;
         Where: Prisma.NotificationSettingWhereInput;
         Create: {};
@@ -89,7 +89,7 @@ export default interface PrismaTypes {
         Shape: MealPlanServing;
         Include: Prisma.MealPlanServingInclude;
         Select: Prisma.MealPlanServingSelect;
-        OrderBy: Prisma.MealPlanServingOrderByWithRelationInput;
+        OrderBy: Prisma.MealPlanServingOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.MealPlanServingWhereUniqueInput;
         Where: Prisma.MealPlanServingWhereInput;
         Create: {};
@@ -112,7 +112,7 @@ export default interface PrismaTypes {
         Shape: MealPlanRecipe;
         Include: Prisma.MealPlanRecipeInclude;
         Select: Prisma.MealPlanRecipeSelect;
-        OrderBy: Prisma.MealPlanRecipeOrderByWithRelationInput;
+        OrderBy: Prisma.MealPlanRecipeOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.MealPlanRecipeWhereUniqueInput;
         Where: Prisma.MealPlanRecipeWhereInput;
         Create: {};
@@ -139,7 +139,7 @@ export default interface PrismaTypes {
         Shape: Import;
         Include: Prisma.ImportInclude;
         Select: Prisma.ImportSelect;
-        OrderBy: Prisma.ImportOrderByWithRelationInput;
+        OrderBy: Prisma.ImportOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.ImportWhereUniqueInput;
         Where: Prisma.ImportWhereInput;
         Create: {};
@@ -158,7 +158,7 @@ export default interface PrismaTypes {
         Shape: ImportRecord;
         Include: Prisma.ImportRecordInclude;
         Select: Prisma.ImportRecordSelect;
-        OrderBy: Prisma.ImportRecordOrderByWithRelationInput;
+        OrderBy: Prisma.ImportRecordOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.ImportRecordWhereUniqueInput;
         Where: Prisma.ImportRecordWhereInput;
         Create: {};
@@ -189,7 +189,7 @@ export default interface PrismaTypes {
         Shape: RecipeIngredient;
         Include: Prisma.RecipeIngredientInclude;
         Select: Prisma.RecipeIngredientSelect;
-        OrderBy: Prisma.RecipeIngredientOrderByWithRelationInput;
+        OrderBy: Prisma.RecipeIngredientOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.RecipeIngredientWhereUniqueInput;
         Where: Prisma.RecipeIngredientWhereInput;
         Create: {};
@@ -220,13 +220,13 @@ export default interface PrismaTypes {
         Shape: MeasurementUnit;
         Include: Prisma.MeasurementUnitInclude;
         Select: Prisma.MeasurementUnitSelect;
-        OrderBy: Prisma.MeasurementUnitOrderByWithRelationInput;
+        OrderBy: Prisma.MeasurementUnitOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.MeasurementUnitWhereUniqueInput;
         Where: Prisma.MeasurementUnitWhereInput;
         Create: {};
         Update: {};
-        RelationName: "ingredients" | "nutrients" | "ingredientPrice" | "servingSizes" | "fromUnit" | "toUnit";
-        ListRelations: "ingredients" | "nutrients" | "ingredientPrice" | "servingSizes" | "fromUnit" | "toUnit";
+        RelationName: "ingredients" | "nutrients" | "ingredientPrice" | "servingSizes" | "fromUnit" | "toUnit" | "recieptItems";
+        ListRelations: "ingredients" | "nutrients" | "ingredientPrice" | "servingSizes" | "fromUnit" | "toUnit" | "recieptItems";
         Relations: {
             ingredients: {
                 Shape: RecipeIngredient[];
@@ -252,6 +252,10 @@ export default interface PrismaTypes {
                 Shape: MeasurementConversion[];
                 Name: "MeasurementConversion";
             };
+            recieptItems: {
+                Shape: ReceiptLine[];
+                Name: "ReceiptLine";
+            };
         };
     };
     RecipeIngredientGroup: {
@@ -259,7 +263,7 @@ export default interface PrismaTypes {
         Shape: RecipeIngredientGroup;
         Include: Prisma.RecipeIngredientGroupInclude;
         Select: Prisma.RecipeIngredientGroupSelect;
-        OrderBy: Prisma.RecipeIngredientGroupOrderByWithRelationInput;
+        OrderBy: Prisma.RecipeIngredientGroupOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.RecipeIngredientGroupWhereUniqueInput;
         Where: Prisma.RecipeIngredientGroupWhereInput;
         Create: {};
@@ -290,13 +294,13 @@ export default interface PrismaTypes {
         Shape: Ingredient;
         Include: Prisma.IngredientInclude;
         Select: Prisma.IngredientSelect;
-        OrderBy: Prisma.IngredientOrderByWithRelationInput;
+        OrderBy: Prisma.IngredientOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.IngredientWhereUniqueInput;
         Where: Prisma.IngredientWhereInput;
         Create: {};
         Update: {};
-        RelationName: "recipeIngredient" | "category" | "priceHistory" | "expirationRule" | "conversionRatio";
-        ListRelations: "recipeIngredient" | "priceHistory" | "conversionRatio";
+        RelationName: "recipeIngredient" | "category" | "priceHistory" | "expirationRule" | "receiptLines" | "conversionRatio";
+        ListRelations: "recipeIngredient" | "priceHistory" | "receiptLines" | "conversionRatio";
         Relations: {
             recipeIngredient: {
                 Shape: RecipeIngredient[];
@@ -314,6 +318,10 @@ export default interface PrismaTypes {
                 Shape: ExpirationRule | null;
                 Name: "ExpirationRule";
             };
+            receiptLines: {
+                Shape: ReceiptLine[];
+                Name: "ReceiptLine";
+            };
             conversionRatio: {
                 Shape: MeasurementConversion[];
                 Name: "MeasurementConversion";
@@ -325,7 +333,7 @@ export default interface PrismaTypes {
         Shape: MeasurementConversion;
         Include: Prisma.MeasurementConversionInclude;
         Select: Prisma.MeasurementConversionSelect;
-        OrderBy: Prisma.MeasurementConversionOrderByWithRelationInput;
+        OrderBy: Prisma.MeasurementConversionOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.MeasurementConversionWhereUniqueInput;
         Where: Prisma.MeasurementConversionWhereInput;
         Create: {};
@@ -352,7 +360,7 @@ export default interface PrismaTypes {
         Shape: IngredientCategory;
         Include: Prisma.IngredientCategoryInclude;
         Select: Prisma.IngredientCategorySelect;
-        OrderBy: Prisma.IngredientCategoryOrderByWithRelationInput;
+        OrderBy: Prisma.IngredientCategoryOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.IngredientCategoryWhereUniqueInput;
         Where: Prisma.IngredientCategoryWhereInput;
         Create: {};
@@ -371,7 +379,7 @@ export default interface PrismaTypes {
         Shape: ExpirationRule;
         Include: Prisma.ExpirationRuleInclude;
         Select: Prisma.ExpirationRuleSelect;
-        OrderBy: Prisma.ExpirationRuleOrderByWithRelationInput;
+        OrderBy: Prisma.ExpirationRuleOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.ExpirationRuleWhereUniqueInput;
         Where: Prisma.ExpirationRuleWhereInput;
         Create: {};
@@ -390,14 +398,18 @@ export default interface PrismaTypes {
         Shape: IngredientPrice;
         Include: Prisma.IngredientPriceInclude;
         Select: Prisma.IngredientPriceSelect;
-        OrderBy: Prisma.IngredientPriceOrderByWithRelationInput;
+        OrderBy: Prisma.IngredientPriceOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.IngredientPriceWhereUniqueInput;
         Where: Prisma.IngredientPriceWhereInput;
         Create: {};
         Update: {};
-        RelationName: "ingredient" | "unit";
+        RelationName: "groceryStore" | "ingredient" | "unit" | "receiptLine";
         ListRelations: never;
         Relations: {
+            groceryStore: {
+                Shape: GroceryStore;
+                Name: "GroceryStore";
+            };
             ingredient: {
                 Shape: Ingredient;
                 Name: "Ingredient";
@@ -406,6 +418,106 @@ export default interface PrismaTypes {
                 Shape: MeasurementUnit;
                 Name: "MeasurementUnit";
             };
+            receiptLine: {
+                Shape: ReceiptLine | null;
+                Name: "ReceiptLine";
+            };
+        };
+    };
+    GroceryStore: {
+        Name: "GroceryStore";
+        Shape: GroceryStore;
+        Include: Prisma.GroceryStoreInclude;
+        Select: Prisma.GroceryStoreSelect;
+        OrderBy: Prisma.GroceryStoreOrderByWithRelationAndSearchRelevanceInput;
+        WhereUnique: Prisma.GroceryStoreWhereUniqueInput;
+        Where: Prisma.GroceryStoreWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "receipts" | "ingredientPrices";
+        ListRelations: "receipts" | "ingredientPrices";
+        Relations: {
+            receipts: {
+                Shape: Receipt[];
+                Name: "Receipt";
+            };
+            ingredientPrices: {
+                Shape: IngredientPrice[];
+                Name: "IngredientPrice";
+            };
+        };
+    };
+    Receipt: {
+        Name: "Receipt";
+        Shape: Receipt;
+        Include: Prisma.ReceiptInclude;
+        Select: Prisma.ReceiptSelect;
+        OrderBy: Prisma.ReceiptOrderByWithRelationAndSearchRelevanceInput;
+        WhereUnique: Prisma.ReceiptWhereUniqueInput;
+        Where: Prisma.ReceiptWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "matchingStore" | "lineItems";
+        ListRelations: "lineItems";
+        Relations: {
+            matchingStore: {
+                Shape: GroceryStore | null;
+                Name: "GroceryStore";
+            };
+            lineItems: {
+                Shape: ReceiptLine[];
+                Name: "ReceiptLine";
+            };
+        };
+    };
+    ReceiptLine: {
+        Name: "ReceiptLine";
+        Shape: ReceiptLine;
+        Include: Prisma.ReceiptLineInclude;
+        Select: Prisma.ReceiptLineSelect;
+        OrderBy: Prisma.ReceiptLineOrderByWithRelationAndSearchRelevanceInput;
+        WhereUnique: Prisma.ReceiptLineWhereUniqueInput;
+        Where: Prisma.ReceiptLineWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "receipt" | "ingredientPrice" | "matchingUnit" | "matchingIngredient";
+        ListRelations: never;
+        Relations: {
+            receipt: {
+                Shape: Receipt;
+                Name: "Receipt";
+            };
+            ingredientPrice: {
+                Shape: IngredientPrice | null;
+                Name: "IngredientPrice";
+            };
+            matchingUnit: {
+                Shape: MeasurementUnit | null;
+                Name: "MeasurementUnit";
+            };
+            matchingIngredient: {
+                Shape: Ingredient | null;
+                Name: "Ingredient";
+            };
+        };
+    };
+    WebScrapedRecipe: {
+        Name: "WebScrapedRecipe";
+        Shape: WebScrapedRecipe;
+        Include: Prisma.WebScrapedRecipeInclude;
+        Select: Prisma.WebScrapedRecipeSelect;
+        OrderBy: Prisma.WebScrapedRecipeOrderByWithRelationAndSearchRelevanceInput;
+        WhereUnique: Prisma.WebScrapedRecipeWhereUniqueInput;
+        Where: Prisma.WebScrapedRecipeWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "recipe";
+        ListRelations: never;
+        Relations: {
+            recipe: {
+                Shape: Recipe | null;
+                Name: "Recipe";
+            };
         };
     };
     Recipe: {
@@ -413,12 +525,12 @@ export default interface PrismaTypes {
         Shape: Recipe;
         Include: Prisma.RecipeInclude;
         Select: Prisma.RecipeSelect;
-        OrderBy: Prisma.RecipeOrderByWithRelationInput;
+        OrderBy: Prisma.RecipeOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.RecipeWhereUniqueInput;
         Where: Prisma.RecipeWhereInput;
         Create: {};
         Update: {};
-        RelationName: "photos" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabels" | "ingredientGroups" | "importRecord";
+        RelationName: "photos" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabels" | "ingredientGroups" | "importRecord" | "bookmarkUrl";
         ListRelations: "photos" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabels" | "ingredientGroups" | "importRecord";
         Relations: {
             photos: {
@@ -457,6 +569,10 @@ export default interface PrismaTypes {
                 Shape: ImportRecord[];
                 Name: "ImportRecord";
             };
+            bookmarkUrl: {
+                Shape: WebScrapedRecipe | null;
+                Name: "WebScrapedRecipe";
+            };
         };
     };
     Course: {
@@ -464,7 +580,7 @@ export default interface PrismaTypes {
         Shape: Course;
         Include: Prisma.CourseInclude;
         Select: Prisma.CourseSelect;
-        OrderBy: Prisma.CourseOrderByWithRelationInput;
+        OrderBy: Prisma.CourseOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.CourseWhereUniqueInput;
         Where: Prisma.CourseWhereInput;
         Create: {};
@@ -483,7 +599,7 @@ export default interface PrismaTypes {
         Shape: Category;
         Include: Prisma.CategoryInclude;
         Select: Prisma.CategorySelect;
-        OrderBy: Prisma.CategoryOrderByWithRelationInput;
+        OrderBy: Prisma.CategoryOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.CategoryWhereUniqueInput;
         Where: Prisma.CategoryWhereInput;
         Create: {};
@@ -502,7 +618,7 @@ export default interface PrismaTypes {
         Shape: Cuisine;
         Include: Prisma.CuisineInclude;
         Select: Prisma.CuisineSelect;
-        OrderBy: Prisma.CuisineOrderByWithRelationInput;
+        OrderBy: Prisma.CuisineOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.CuisineWhereUniqueInput;
         Where: Prisma.CuisineWhereInput;
         Create: {};
@@ -521,7 +637,7 @@ export default interface PrismaTypes {
         Shape: Photo;
         Include: Prisma.PhotoInclude;
         Select: Prisma.PhotoSelect;
-        OrderBy: Prisma.PhotoOrderByWithRelationInput;
+        OrderBy: Prisma.PhotoOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.PhotoWhereUniqueInput;
         Where: Prisma.PhotoWhereInput;
         Create: {};
@@ -540,7 +656,7 @@ export default interface PrismaTypes {
         Shape: NutritionLabel;
         Include: Prisma.NutritionLabelInclude;
         Select: Prisma.NutritionLabelSelect;
-        OrderBy: Prisma.NutritionLabelOrderByWithRelationInput;
+        OrderBy: Prisma.NutritionLabelOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.NutritionLabelWhereUniqueInput;
         Where: Prisma.NutritionLabelWhereInput;
         Create: {};
@@ -575,7 +691,7 @@ export default interface PrismaTypes {
         Shape: NutritionLabelNutrient;
         Include: Prisma.NutritionLabelNutrientInclude;
         Select: Prisma.NutritionLabelNutrientSelect;
-        OrderBy: Prisma.NutritionLabelNutrientOrderByWithRelationInput;
+        OrderBy: Prisma.NutritionLabelNutrientOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.NutritionLabelNutrientWhereUniqueInput;
         Where: Prisma.NutritionLabelNutrientWhereInput;
         Create: {};
@@ -598,7 +714,7 @@ export default interface PrismaTypes {
         Shape: Nutrient;
         Include: Prisma.NutrientInclude;
         Select: Prisma.NutrientSelect;
-        OrderBy: Prisma.NutrientOrderByWithRelationInput;
+        OrderBy: Prisma.NutrientOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.NutrientWhereUniqueInput;
         Where: Prisma.NutrientWhereInput;
         Create: {};
@@ -637,7 +753,7 @@ export default interface PrismaTypes {
         Shape: NutrientImportMapping;
         Include: Prisma.NutrientImportMappingInclude;
         Select: Prisma.NutrientImportMappingSelect;
-        OrderBy: Prisma.NutrientImportMappingOrderByWithRelationInput;
+        OrderBy: Prisma.NutrientImportMappingOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.NutrientImportMappingWhereUniqueInput;
         Where: Prisma.NutrientImportMappingWhereInput;
         Create: {};
@@ -656,7 +772,7 @@ export default interface PrismaTypes {
         Shape: DailyReferenceIntake;
         Include: Prisma.DailyReferenceIntakeInclude;
         Select: Prisma.DailyReferenceIntakeSelect;
-        OrderBy: Prisma.DailyReferenceIntakeOrderByWithRelationInput;
+        OrderBy: Prisma.DailyReferenceIntakeOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.DailyReferenceIntakeWhereUniqueInput;
         Where: Prisma.DailyReferenceIntakeWhereInput;
         Create: {};
@@ -675,7 +791,7 @@ export default interface PrismaTypes {
         Shape: HealthProfile;
         Include: never;
         Select: Prisma.HealthProfileSelect;
-        OrderBy: Prisma.HealthProfileOrderByWithRelationInput;
+        OrderBy: Prisma.HealthProfileOrderByWithRelationAndSearchRelevanceInput;
         WhereUnique: Prisma.HealthProfileWhereUniqueInput;
         Where: Prisma.HealthProfileWhereInput;
         Create: {};

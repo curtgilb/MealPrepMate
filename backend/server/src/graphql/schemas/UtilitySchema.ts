@@ -1,4 +1,6 @@
+import { PrismaObjectRef } from "@pothos/plugin-prisma";
 import { builder } from "../builder.js";
+import { FieldRef } from "@pothos/core";
 
 // function checkIfFieldRequested(
 //   fieldName: string,
@@ -40,7 +42,13 @@ const cursorPagination = builder.inputType("CursorPagination", {
   }),
 });
 
-function nextPageInfo(dataLength: number, offset: number, totalCount: number) {
+function nextPageInfo(
+  dataLength: number,
+  take: number,
+  offset: number,
+  totalCount: number
+) {
+  if (dataLength < take) return { nextOffset: null, itemsRemaining: 0 };
   let nextOffset: number | null = dataLength + offset;
   if (nextOffset >= totalCount) nextOffset = null;
   const itemsRemaining = totalCount - (offset + dataLength);

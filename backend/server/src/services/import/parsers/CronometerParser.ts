@@ -1,10 +1,11 @@
-import { CreateNutritionLabelInput } from "../../../types/gql.js";
-import { Parser, ParsedRecord, ParsedOutput } from "./Parser.js";
 import { File as ZipFile } from "unzipper";
 import { z } from "zod";
-import { readFile } from "../../io/Readers.js";
-import { ImportType } from "@prisma/client";
+import { CreateNutritionLabelInput } from "../../../types/gql.js";
 import { hash } from "../../../util/utils.js";
+import { readFile } from "../../io/Readers.js";
+import { NutritionLabelParsedRecord } from "./base/ParsedRecord.js";
+import { ParsedOutputFromFile } from "./base/Parser.js";
+import { FileParser } from "./base/Parser.js";
 
 type CronometerJson = {
   nutrients: {
@@ -25,14 +26,52 @@ type CronometerJson = {
   id: number;
 };
 
-class CronometerRecord extends ParsedRecord<CreateNutritionLabelInput> {
-  externalId: string | undefined;
+class CronometerParser extends FileParser<
+  CreateNutritionLabelInput,
+  CronometerParsedRecord
+> {
+  records: CronometerParsedRecord[] = [];
+
+  constructor(source: string | File) {
+    super(source);
+  }
+
+  async parse(): Promise<
+    ParsedOutputFromFile<CreateNutritionLabelInput, CronometerParsedRecord>
+  > {
+    // Single JSON file path
+    if (typeof this.source === "string" && this.source.endsWith(".json")) {
+      const data = readFile(this.source);
+      this.records.push(new CronometerParsedRecord(data));
+    }
+    // Zip file
+    else {
+      const directory = await this.unzipFile(this.source);
+      await this.traverseDirectory(directory);
+    }
+    return {
+      records: this.records,
+      hash: hash(
+        this.source instanceof File
+          ? Buffer.from(await this.source.arrayBuffer())
+          : this.source
+      ),
+      imageMapping: this.imageMapping,
+    };
+  }
+
+  protected async processFile(file: ZipFile): Promise<void> {
+    const fileData = (await file.buffer()).toString();
+    this.records.push(new CronometerParsedRecord(fileData));
+  }
+}
+
+class CronometerParsedRecord extends NutritionLabelParsedRecord<CreateNutritionLabelInput> {
   parsedData: CronometerJson;
-  importType: ImportType = "CRONOMETER";
   matchingRecipeId: string | undefined = undefined;
 
   constructor(input: string) {
-    super(input);
+    super(input, "CRONOMETER");
     this.parsedData = JSON.parse(input) as CronometerJson;
     this.externalId = String(this.parsedData.id);
   }
@@ -58,9 +97,9 @@ class CronometerRecord extends ParsedRecord<CreateNutritionLabelInput> {
         .filter((nutrient) => nutrient.amount > 0)
         .map(async (nutrient) => ({
           value: nutrient.amount,
-          nutrientId: await CronometerRecord.matchNutrient(
+          nutrientId: await CronometerParsedRecord.matchNutrient(
             nutrient.id.toString(),
-            this.importType
+            this.importSource
           ),
         }))
     );
@@ -77,44 +116,4 @@ class CronometerRecord extends ParsedRecord<CreateNutritionLabelInput> {
   }
 }
 
-class CronometerParser extends Parser<
-  CreateNutritionLabelInput,
-  CronometerRecord
-> {
-  protected records: CronometerRecord[] = [];
-  protected fileHash: string | undefined;
-  constructor(source: string | File) {
-    super(source);
-  }
-
-  async parse(): Promise<
-    ParsedOutput<CreateNutritionLabelInput, CronometerRecord>
-  > {
-    // Single JSON file path
-    if (typeof this.source === "string" && this.source.endsWith(".json")) {
-      const data = readFile(this.source);
-      this.records.push(new CronometerRecord(data));
-    }
-    // Zip file
-    else {
-      const directory = await this.unzipFile(this.source);
-      await this.traverseDirectory(directory);
-    }
-    return {
-      records: this.records,
-      hash: hash(
-        this.source instanceof File
-          ? Buffer.from(await this.source.arrayBuffer())
-          : this.source
-      ),
-      imageMapping: this.imageMapping,
-    };
-  }
-
-  protected async processFile(file: ZipFile): Promise<void> {
-    const fileData = (await file.buffer()).toString();
-    this.records.push(new CronometerRecord(fileData));
-  }
-}
-
-export { CronometerParser, CronometerRecord };
+export { CronometerParser, CronometerParsedRecord };

@@ -1,4 +1,5 @@
 import MealPlanDay from "@/components/mealplan/MealPlanDay";
+import { MealPlanSideBar } from "@/components/mealplan/MealPlanSideBar";
 import RecipeFilter from "@/components/recipe/RecipeFilter";
 
 export default function MealPlans() {
@@ -18,7 +19,7 @@ export default function MealPlans() {
           <MealPlanDay></MealPlanDay>
         </div>
         <div className="border-l w-96 min-h-svh">
-          <RecipeFilter />
+          <MealPlanSideBar />
         </div>
       </div>
     </div>

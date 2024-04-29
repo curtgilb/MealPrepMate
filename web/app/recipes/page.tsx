@@ -1,7 +1,9 @@
 import SingleColumnCentered from "@/components/layouts/single-column-centered";
+import { Button } from "@/components/ui/button";
 import { InputWithIcon } from "@/components/ui/InputWithIcon";
 import RecipeCard from "@/components/ui/recipe-card";
-import { Search } from "lucide-react";
+import { Import, Plus, Search } from "lucide-react";
+import Link from "next/link";
 
 const recipes = [
   {
@@ -70,7 +72,19 @@ export default function RecipesPage() {
   return (
     <SingleColumnCentered>
       <h1 className="text-2xl font-semibold">Recipes</h1>
-      <InputWithIcon className="mt-8 mb-12 w-80" startIcon={Search} />
+      <div>
+        <InputWithIcon className="mt-8 mb-12 w-80" startIcon={Search} />
+        <Button>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Recipe
+        </Button>
+        <Link href="/recipes/create/web">
+          <Button>
+            <Import className="mr-2 h-4 w-4" />
+            Import Recipe
+          </Button>
+        </Link>
+      </div>
 
       <div className="grid grid-cols-auto-fill-5 gap-8">
         {recipes.map((recipe) => {

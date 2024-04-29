@@ -42,7 +42,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={cn(
-          "h-full bg-background font-sans antialiased",
+          "h-svh bg-background font-sans antialiased",
           fontSans.variable
         )}
       >
@@ -52,9 +52,9 @@ export default function RootLayout({
           </Button>
           <p className="text-2xl font-bold ml-2">Meal Planner</p>
         </header>
-        <div className="flex">
+        <div className="flex h-full">
           <SideNav links={navigationLinks} isCollapsed={false} />
-          <main className="w-full">
+          <main className="w-full h-full bg-muted/40">
             <UrqlProvider client={client} ssr={ssr}>
               {children}
             </UrqlProvider>

@@ -1,19 +1,19 @@
-import { builder } from "../builder.js";
-import { db } from "../../db.js";
-import { PrismaImportType, importStatus, recordStatus } from "./EnumSchema.js";
-import { nextPageInfo, offsetPagination } from "./UtilitySchema.js";
-import { Import, ImportRecord, ImportType, RecordStatus } from "@prisma/client";
 import { queryFromInfo } from "@pothos/plugin-prisma";
+import { Import, ImportRecord, ImportType, RecordStatus } from "@prisma/client";
+import { z } from "zod";
+import { db } from "../../db.js";
 import {
   changeRecordStatus,
   finalizeImportRecord,
   updateMatches,
   uploadImportFile,
 } from "../../services/import/ImportService.js";
-import { nutritionLabel } from "./NutritionSchema.js";
+import { offsetPaginationValidation } from "../../validations/UtilityValidation.js";
+import { builder } from "../builder.js";
+import { PrismaImportType, importStatus, recordStatus } from "./EnumSchema.js";
+import { nutritionLabel } from "./NutritionLabelSchema.js";
 import { recipe } from "./RecipeSchema.js";
-import { z } from "zod";
-import { offsetPaginationValidation } from "../../validations/graphql/UtilityValidation.js";
+import { nextPageInfo, offsetPagination } from "./UtilitySchema.js";
 
 // ============================================ Types ===================================
 const Draft = builder.unionType("Draft", {
@@ -143,6 +143,7 @@ builder.queryFields((t) => ({
 
       const { itemsRemaining, nextOffset } = nextPageInfo(
         data.length,
+        args.pagination.take,
         args.pagination.offset,
         count
       );
@@ -191,6 +192,7 @@ builder.queryFields((t) => ({
       ]);
       const { itemsRemaining, nextOffset } = nextPageInfo(
         data.length,
+        args.pagination.take,
         args.pagination.offset,
         count
       );

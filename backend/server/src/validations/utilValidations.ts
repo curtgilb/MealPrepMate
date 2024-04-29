@@ -46,4 +46,16 @@ const stringArray = z
   })
   .pipe(z.string().array());
 
-export { cleanedStringSchema, nullableString, stringArray, coerceNumeric };
+const schemaForType =
+  <T>() =>
+  <S extends z.ZodType<T, any, any>>(arg: S) => {
+    return arg;
+  };
+
+export {
+  cleanedStringSchema,
+  nullableString,
+  stringArray,
+  coerceNumeric,
+  schemaForType,
+};

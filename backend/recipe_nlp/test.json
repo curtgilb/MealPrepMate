@@ -1,56 +1,73 @@
 {
-    "author": "FoodieGeek",
-    "canonical_url": "https://www.allrecipes.com/recipe/158968/spinach-and-feta-turkey-burgers/",
-    "category": "Dinner",
-    "cook_time": 15,
-    "cuisine": "Mediterranean Inspired",
-    "description": "These spinach and feta turkey burgers are moist and easy to make in one bowl with simple ingredients, shaped into patties, and cooked on a hot grill.",
-    "host": "allrecipes.com",
-    "image": "https://www.allrecipes.com/thmb/cpf6Rics5oHGq1TZ1df5fEaImwM=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/1360550-582be362ee99424bb4f363c2274a9d0d.jpg",
-    "ingredient_groups": [
-        {
-            "ingredients": [
-                "cooking spray",
-                "2 pounds ground turkey",
-                "1 (10 ounce) box frozen chopped spinach, thawed and squeezed dry",
-                "4 ounces feta cheese",
-                "2 large eggs, beaten",
-                "2 cloves garlic, minced"
-            ],
-            "purpose": None
-        }
-    ],
-    "ingredients": [
-        "cooking spray",
-        "2 pounds ground turkey",
-        "1 (10 ounce) box frozen chopped spinach, thawed and squeezed dry",
-        "4 ounces feta cheese",
-        "2 large eggs, beaten",
-        "2 cloves garlic, minced"
-    ],
-    "instructions": "Preheat an outdoor grill for medium-high heat and lightly oil the grate.\nMix together turkey, spinach, feta, eggs, and garlic in a large bowl until well combined; form into 8 patties.\nCook patties on the preheated grill on both sides until no longer pink in the center, 15 to 20 minutes. An instant-read thermometer inserted into the center of patties should read at least 165 degrees F (74 degrees C).",
-    "instructions_list": [
-        "Preheat an outdoor grill for medium-high heat and lightly oil the grate.",
-        "Mix together turkey, spinach, feta, eggs, and garlic in a large bowl until well combined; form into 8 patties.",
-        "Cook patties on the preheated grill on both sides until no longer pink in the center, 15 to 20 minutes. An instant-read thermometer inserted into the center of patties should read at least 165 degrees F (74 degrees C)."
-    ],
-    "language": "en",
-    "nutrients": {
-        "calories": "233 kcal",
-        "carbohydrateContent": "2 g",
-        "cholesterolContent": "143 mg",
-        "fiberContent": "1 g",
-        "proteinContent": "27 g",
-        "saturatedFatContent": "5 g",
-        "sodiumContent": "266 mg",
-        "sugarContent": "1 g",
-        "fatContent": "13 g",
-        "unsaturatedFatContent": "0 g"
-    },
-    "prep_time": 20,
-    "ratings": 4.6,
-    "site_name": "Allrecipes",
-    "title": "Spinach and Feta Turkey Burgers",
-    "total_time": 35,
-    "yields": "8 servings"
+  "author": "Lisa Bryan",
+  "canonical_url": "https://downshiftology.com/recipes/taco-salad/",
+  "category": "Salad",
+  "equipment": ["Staub Cast Iron Fry Pan"],
+  "host": "downshiftology.com",
+  "image": "https://i2.wp.com/www.downshiftology.com/wp-content/uploads/2020/06/Taco-Salad-main.jpg",
+  "ingredient_groups": [
+    {
+      "ingredients": [
+        "1 pound ground beef",
+        "2 tablespoons taco seasoning",
+        "kosher salt and ground black pepper (to taste)",
+        "1 head romaine lettuce or iceberg lettuce (chopped)",
+        "1 cup grape tomatoes (chopped)",
+        "1 cup black beans (drained and rinsed)",
+        "1 avocado (diced)",
+        "½ cup shredded cheese",
+        "½ cup salsa",
+        "¼ cup diced red onion",
+        "¼ cup freshly chopped cilantro",
+        "1 lime",
+        "Optional: tortilla chips"
+      ],
+      "purpose": null
+    }
+  ],
+  "ingredients": [
+    "1 pound ground beef",
+    "2 tablespoons taco seasoning",
+    "kosher salt and ground black pepper (to taste)",
+    "1 head romaine lettuce or iceberg lettuce (chopped)",
+    "1 cup grape tomatoes (chopped)",
+    "1 cup black beans (drained and rinsed)",
+    "1 avocado (diced)",
+    "½ cup shredded cheese",
+    "½ cup salsa",
+    "¼ cup diced red onion",
+    "¼ cup freshly chopped cilantro",
+    "1 lime",
+    "Optional: tortilla chips"
+  ],
+  "instructions": "Cook beef\nCook the ground beef. In a pan over medium-high heat, add the ground beef and break it into small pieces with your spatula. Cook for about 8 minutes or until it starts to brown. Then drain the fat from the beef.\nAdd seasoning\nAdd taco seasoning. Add in the taco seasoning, stir everything, and cook for another minute or two.\nAssemble salad\nAssemble the salad. In a large salad bowl, layer the chopped lettuce with browned beef, black beans, tomatoes, avocado, red onion, and cheese.\nAdd toppings. Dollop some salsa, sour cream, a squeeze of lime juice, and cilantro leaves on top. If you'd like, serve with tortilla chips.",
+  "instructions_list": [
+    "Cook beef",
+    "Cook the ground beef. In a pan over medium-high heat, add the ground beef and break it into small pieces with your spatula. Cook for about 8 minutes or until it starts to brown. Then drain the fat from the beef.",
+    "Add seasoning",
+    "Add taco seasoning. Add in the taco seasoning, stir everything, and cook for another minute or two.",
+    "Assemble salad",
+    "Assemble the salad. In a large salad bowl, layer the chopped lettuce with browned beef, black beans, tomatoes, avocado, red onion, and cheese.",
+    "Add toppings. Dollop some salsa, sour cream, a squeeze of lime juice, and cilantro leaves on top. If you'd like, serve with tortilla chips."
+  ],
+  "language": "en-US",
+  "nutrients": {
+    "calories": "522 kcal",
+    "carbohydrateContent": "27 g",
+    "proteinContent": "30 g",
+    "fatContent": "34 g",
+    "saturatedFatContent": "12 g",
+    "transFatContent": "1 g",
+    "cholesterolContent": "92 mg",
+    "sodiumContent": "497 mg",
+    "fiberContent": "12 g",
+    "sugarContent": "6 g",
+    "unsaturatedFatContent": "18 g",
+    "servingSize": "1 serving"
+  },
+  "ratings": 5.0,
+  "site_name": "Downshiftology",
+  "title": "Taco Salad Recipe",
+  "total_time": 25,
+  "yields": "4 servings"
 }

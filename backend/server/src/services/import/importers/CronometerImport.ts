@@ -2,17 +2,17 @@ import { Prisma, ImportRecord, Import, RecordStatus } from "@prisma/client";
 import { db } from "../../../db.js";
 import {
   CronometerParser,
-  CronometerRecord,
+  CronometerParsedRecord,
 } from "../parsers/CronometerParser.js";
-import { NutritionLabelValidation } from "../../../validations/graphql/RecipeValidation.js";
+import { NutritionLabelValidation } from "../../../validations/RecipeValidation.js";
 import { Importer, ImportServiceInput } from "./Import.js";
-import { createNutritionLabelStmt } from "../../../model_extensions/NutritionExtension.js";
+import { createNutritionLabelStmt } from "../../../models/NutritionExtension.js";
 import { Match } from "../../../types/CustomTypes.js";
 import { LabelImportMatcher } from "../matchers/LabelMatcher.js";
 
 // Attempt to find match and create nutrition label if needed
 type MatchedData = {
-  record: CronometerRecord;
+  record: CronometerParsedRecord;
   match: Match;
   dbStmt?: Prisma.NutritionLabelCreateInput;
 };
@@ -24,7 +24,7 @@ class CronometerImport extends Importer {
 
   async createDraft(record: ImportRecord, newStatus: RecordStatus) {
     const label = record.parsedFormat as Prisma.JsonObject;
-    const rehydrated = new CronometerRecord(JSON.stringify(label));
+    const rehydrated = new CronometerParsedRecord(JSON.stringify(label));
     const matchedLabel = await this.matchLabels([rehydrated]);
 
     await db.$transaction(async (tx) => {
@@ -118,7 +118,7 @@ class CronometerImport extends Importer {
     });
   }
 
-  async matchLabels(items: CronometerRecord[]): Promise<MatchedData[]> {
+  async matchLabels(items: CronometerParsedRecord[]): Promise<MatchedData[]> {
     const matcher = new LabelImportMatcher();
     return await Promise.all(
       items.map(async (record) => {

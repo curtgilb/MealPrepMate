@@ -1,22 +1,12 @@
-import { builder } from "../builder.js";
-import {
-  ExpirationRule,
-  Ingredient,
-  Prisma,
-  RecipeIngredient,
-} from "@prisma/client";
-import { db } from "../../db.js";
-import { recipeIngredient } from "./RecipeSchema.js";
 import { queryFromInfo } from "@pothos/plugin-prisma";
+import { Ingredient, Prisma, RecipeIngredient } from "@prisma/client";
 import { z } from "zod";
+import { db } from "../../db.js";
+import { createIngredientValidation } from "../../validations/IngredientValidation.js";
+import { offsetPaginationValidation } from "../../validations/UtilityValidation.js";
+import { builder } from "../builder.js";
+import { recipeIngredient } from "./RecipeSchema.js";
 import { nextPageInfo, offsetPagination } from "./UtilitySchema.js";
-import { offsetPaginationValidation } from "../../validations/graphql/UtilityValidation.js";
-import {
-  createExpirationRuleValidation,
-  createIngredientValidation,
-  createPriceHistoryValidation,
-  editPriceHistoryValidation,
-} from "../../validations/graphql/IngredientValidation.js";
 
 // ============================================ Types ===================================
 
@@ -55,23 +45,6 @@ const ingredientsQuery = builder
     }),
   });
 
-const rulesQuery = builder
-  .objectRef<{
-    nextOffset: number | null;
-    itemsRemaining: number;
-    rules: ExpirationRule[];
-  }>("ExpirationRulesQuery")
-  .implement({
-    fields: (t) => ({
-      nextOffset: t.exposeInt("nextOffset", { nullable: true }),
-      itemsRemaining: t.exposeInt("itemsRemaining"),
-      ingredients: t.field({
-        type: [expRule],
-        resolve: (result) => result.rules,
-      }),
-    }),
-  });
-
 const ingredient = builder.prismaObject("Ingredient", {
   fields: (t) => ({
     id: t.exposeID("id"),
@@ -80,31 +53,8 @@ const ingredient = builder.prismaObject("Ingredient", {
     storageInstructions: t.exposeString("storageInstructions", {
       nullable: true,
     }),
-    priceHistory: t.relation("priceHistory"),
-    expiration: t.relation("expirationRule"),
-  }),
-});
-
-builder.prismaObject("IngredientPrice", {
-  fields: (t) => ({
-    retailer: t.exposeString("retailer"),
-    price: t.exposeFloat("price"),
-    quantity: t.exposeFloat("quantity"),
-    unit: t.relation("unit"),
-    pricePerUnit: t.exposeFloat("pricePerUnit"),
-  }),
-});
-
-const expRule = builder.prismaObject("ExpirationRule", {
-  fields: (t) => ({
-    id: t.exposeID("id"),
-    name: t.exposeString("name"),
-    variation: t.exposeString("variant", { nullable: true }),
-    defrostTime: t.exposeInt("defrostTime", { nullable: true }),
-    perishable: t.exposeBoolean("perishable", { nullable: true }),
-    tableLife: t.exposeInt("tableLife", { nullable: true }),
-    fridgeLife: t.exposeInt("fridgeLife", { nullable: true }),
-    freezerLife: t.exposeInt("freezerLife", { nullable: true }),
+    priceHistory: t.relation("priceHistory", { nullable: true }),
+    expiration: t.relation("expirationRule", { nullable: true }),
   }),
 });
 
@@ -114,42 +64,6 @@ const createIngredientInput = builder.inputType("CreateIngredientInput", {
     name: t.string({ required: true }),
     alternateNames: t.stringList(),
     storageInstructions: t.string(),
-  }),
-});
-
-const createPriceHistory = builder.inputType("CreatePriceHistoryInput", {
-  fields: (t) => ({
-    ingredientId: t.string({ required: true }),
-    date: t.field({ type: "DateTime", required: true }),
-    retailer: t.string({ required: true }),
-    price: t.float({ required: true }),
-    quantity: t.float({ required: true }),
-    unitId: t.string({ required: true }),
-    pricePerUnit: t.float({ required: true }),
-  }),
-});
-
-const editPriceHistory = builder.inputType("EditPriceHistoryInput", {
-  fields: (t) => ({
-    date: t.field({ type: "DateTime" }),
-    retailer: t.string(),
-    price: t.float(),
-    quantity: t.float(),
-    unitId: t.string(),
-    pricePerUnit: t.float(),
-  }),
-});
-
-const createExpirationRule = builder.inputType("CreateExpirationRule", {
-  fields: (t) => ({
-    name: t.string({ required: true }),
-    variation: t.string(),
-    defrostTime: t.float(),
-    perishable: t.boolean(),
-    tableLife: t.int({ required: true }),
-    fridgeLife: t.int({ required: true }),
-    freezerLife: t.int({ required: true }),
-    ingredientId: t.id(),
   }),
 });
 
@@ -207,66 +121,14 @@ builder.queryFields((t) => ({
       ]);
       const { itemsRemaining, nextOffset } = nextPageInfo(
         data.length,
+        args.pagination.take,
         args.pagination.offset,
         count
       );
       return { itemsRemaining, nextOffset, ingredients: data };
     },
   }),
-  ingredientPrice: t.prismaField({
-    type: "IngredientPrice",
-    args: {
-      ingredientPriceId: t.arg.string({ required: true }),
-    },
-    validate: {
-      schema: z.object({ ingredientPriceId: z.string().cuid() }),
-    },
-    resolve: async (query, root, args) => {
-      return await db.ingredientPrice.findUniqueOrThrow({
-        where: { id: args.ingredientPriceId },
-        ...query,
-      });
-    },
-  }),
-  priceHistory: t.prismaField({
-    type: ["IngredientPrice"],
-    args: {
-      ingredientId: t.arg.string({ required: true }),
-      retailer: t.arg.string(),
-    },
-    validate: {
-      schema: z.object({
-        ingredientId: z.string().cuid(),
-        retailer: z.string().optional(),
-      }),
-    },
-    resolve: async (query, root, args) => {
-      return await db.ingredientPrice.findMany({
-        where: args.retailer
-          ? { ingredientId: args.ingredientId, retailer: args.retailer }
-          : { ingredientId: args.ingredientId },
-        orderBy: {
-          date: "asc",
-        },
-        ...query,
-      });
-    },
-  }),
-  expirationRule: t.prismaField({
-    type: "ExpirationRule",
-    args: {
-      expirationRuleId: t.arg.string({ required: true }),
-    },
-    validate: {
-      schema: z.object({ expirationRuleId: z.string().cuid() }),
-    },
-    resolve: async (query, root, args) => {
-      return await db.expirationRule.findUniqueOrThrow({
-        where: { id: args.expirationRuleId },
-        ...query,
-      });
-    },
-  }),
+
   groupedRecipeIngredients: t.field({
     type: [groupedIngredients],
     args: {
@@ -275,7 +137,7 @@ builder.queryFields((t) => ({
     validate: {
       schema: z.object({ recipeIds: z.string().cuid().array() }),
     },
-    resolve: async (root, args, context, info) => {
+    resolve: async (root, args) => {
       const ingredients = await db.recipeIngredient.findMany({
         where: { recipeId: { in: args.recipeIds } },
         include: {
@@ -309,239 +171,11 @@ builder.queryFields((t) => ({
       return results;
     },
   }),
-  expirationRules: t.field({
-    type: rulesQuery,
-    args: {
-      search: t.arg.string(),
-      pagination: t.arg({ type: offsetPagination, required: true }),
-    },
-    validate: {
-      schema: z.object({
-        search: z.string().optional(),
-        pagination: offsetPaginationValidation,
-      }),
-    },
-    resolve: async (root, args, context, info) => {
-      const where: Prisma.ExpirationRuleWhereInput = args.search
-        ? {
-            name: { contains: args.search, mode: "insensitive" },
-          }
-        : {};
-      const [data, count] = await db.$transaction([
-        db.expirationRule.findMany({
-          where,
-          take: args.pagination.take,
-          skip: args.pagination.offset,
-          orderBy: { name: "asc" },
-          ...queryFromInfo({ context, info, path: ["ingredients"] }),
-        }),
-        db.expirationRule.count({ where }),
-      ]);
-      const { itemsRemaining, nextOffset } = nextPageInfo(
-        data.length,
-        args.pagination.offset,
-        count
-      );
-      return { itemsRemaining, nextOffset, rules: data };
-    },
-  }),
 }));
 
 // ============================================ Mutations ===================================
 
 builder.mutationFields((t) => ({
-  addPriceHistory: t.prismaField({
-    type: "IngredientPrice",
-    args: {
-      price: t.arg({ type: createPriceHistory, required: true }),
-    },
-    validate: {
-      schema: z.object({ price: createPriceHistoryValidation }),
-    },
-    resolve: async (query, root, args) => {
-      return await db.ingredientPrice.create({
-        data: {
-          date: args.price.date,
-          retailer: args.price.retailer,
-          price: args.price.price,
-          quantity: args.price.quantity,
-          unit: {
-            connect: {
-              id: args.price.unitId,
-            },
-          },
-          pricePerUnit: args.price.pricePerUnit,
-          ingredient: {
-            connect: {
-              id: args.price.ingredientId,
-            },
-          },
-        },
-        ...query,
-      });
-    },
-  }),
-  editPriceHistory: t.prismaField({
-    type: "IngredientPrice",
-    args: {
-      priceId: t.arg.string({ required: true }),
-      price: t.arg({ type: editPriceHistory, required: true }),
-    },
-    validate: {
-      schema: z.object({
-        priceId: z.string().cuid(),
-        price: editPriceHistoryValidation,
-      }),
-    },
-    resolve: async (query, root, args) => {
-      return await db.ingredientPrice.update({
-        where: {
-          id: args.priceId,
-        },
-        data: {
-          date: args.price.date ? args.price.date : undefined,
-          retailer: args.price.retailer ? args.price.retailer : undefined,
-          price: args.price.price ? args.price.price : undefined,
-          quantity: args.price.quantity ? args.price.quantity : undefined,
-          unitId: args.price.unitId ? args.price.unitId : undefined,
-          pricePerUnit: args.price.pricePerUnit
-            ? args.price.pricePerUnit
-            : undefined,
-        },
-        ...query,
-      });
-    },
-  }),
-  deletePriceHistory: t.prismaField({
-    type: ["IngredientPrice"],
-    args: {
-      ingredientId: t.arg.string({ required: true }),
-      ingredientPriceId: t.arg.string({ required: true }),
-    },
-    validate: {
-      schema: z.object({
-        ingredientId: z.string().cuid(),
-        ingredientPriceId: z.string().cuid(),
-      }),
-    },
-    resolve: async (query, root, args) => {
-      await db.ingredientPrice.deleteMany({
-        where: {
-          id: args.ingredientPriceId,
-        },
-      });
-      return await db.ingredientPrice.findMany({
-        where: { ingredientId: args.ingredientId },
-        ...query,
-      });
-    },
-  }),
-  createExpirationRule: t.prismaField({
-    type: "ExpirationRule",
-    args: {
-      ingredientId: t.arg.string({ required: true }),
-      rule: t.arg({ type: createExpirationRule, required: true }),
-    },
-    validate: {
-      schema: z.object({
-        ingredientId: z.string().cuid(),
-        rule: createExpirationRuleValidation,
-      }),
-    },
-    resolve: async (query, root, args) => {
-      return await db.expirationRule.create({
-        data: {
-          name: args.rule.name,
-          variant: args.rule.variation,
-          defrostTime: args.rule.defrostTime,
-          perishable: args.rule.perishable,
-          tableLife: args.rule.tableLife,
-          fridgeLife: args.rule.fridgeLife,
-          freezerLife: args.rule.freezerLife,
-          ingredients: args.ingredientId
-            ? {
-                connect: {
-                  id: args.ingredientId,
-                },
-              }
-            : undefined,
-        },
-        ...query,
-      });
-    },
-  }),
-  connectExpirationRule: t.prismaField({
-    type: "Ingredient",
-    args: {
-      ingredientId: t.arg.string({ required: true }),
-      expirationRuleId: t.arg.string({ required: true }),
-    },
-    validate: {
-      schema: z.object({
-        ingredientId: z.string().cuid(),
-        expirationRuleId: z.string().cuid(),
-      }),
-    },
-    resolve: async (query, root, args) => {
-      return await db.ingredient.update({
-        where: {
-          id: args.ingredientId,
-        },
-        data: {
-          expirationRule: {
-            connect: {
-              id: args.expirationRuleId,
-            },
-          },
-        },
-        ...query,
-      });
-    },
-  }),
-  editExpirationRule: t.prismaField({
-    type: "ExpirationRule",
-    args: {
-      expirationRuleId: t.arg.string({ required: true }),
-      expirationRule: t.arg({ type: createExpirationRule, required: true }),
-    },
-    validate: {
-      schema: z.object({
-        expirationRuleId: z.string().cuid(),
-        expirationRule: createExpirationRuleValidation,
-      }),
-    },
-    resolve: async (query, root, args) => {
-      return await db.expirationRule.update({
-        where: {
-          id: args.expirationRuleId,
-        },
-        data: {
-          defrostTime: args.expirationRule.defrostTime,
-          perishable: args.expirationRule.perishable,
-          tableLife: args.expirationRule.tableLife,
-          fridgeLife: args.expirationRule.fridgeLife,
-          freezerLife: args.expirationRule.freezerLife,
-        },
-      });
-    },
-  }),
-  deleteExpirationRule: t.prismaField({
-    type: ["ExpirationRule"],
-    args: {
-      expirationRuleId: t.arg.string({ required: true }),
-    },
-    validate: {
-      schema: z.object({ expirationRuleId: z.string().cuid() }),
-    },
-    resolve: async (query, root, args) => {
-      await db.expirationRule.delete({
-        where: {
-          id: args.expirationRuleId,
-        },
-      });
-      return await db.expirationRule.findMany({ ...query });
-    },
-  }),
   createIngredient: t.prismaField({
     type: "Ingredient",
     args: {

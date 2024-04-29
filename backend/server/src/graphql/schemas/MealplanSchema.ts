@@ -4,7 +4,7 @@ import { scheduleMealPlan } from "../../services/mealplan/MealPlanService.js";
 import { getAggregatedLabel } from "../../services/recipe/RecipeService.js";
 import { builder } from "../builder.js";
 import { meal } from "./EnumSchema.js";
-import { AggregateLabel } from "./NutritionSchema.js";
+import { AggregateLabel } from "./NutritionLabelSchema.js";
 import { cleanedStringSchema } from "../../validations/utilValidations.js";
 import { toTitleCase } from "../../util/utils.js";
 import {
@@ -12,7 +12,7 @@ import {
   addRecipeToMealPlanValidation,
   editMealPlanValidation,
   editRecipeServingValidation,
-} from "../../validations/graphql/MealPlanValidation.js";
+} from "../../validations/MealPlanValidation.js";
 // ============================================ Types ===================================
 builder.prismaObject("MealPlan", {
   fields: (t) => ({
@@ -180,7 +180,7 @@ builder.queryFields((t) => ({
   mealPlans: t.prismaField({
     type: ["MealPlan"],
     resolve: async (query) => {
-      return await db.mealPlan.findMany({});
+      return await db.mealPlan.findMany({ ...query });
     },
   }),
 }));

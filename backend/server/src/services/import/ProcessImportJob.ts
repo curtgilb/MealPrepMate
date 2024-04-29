@@ -1,8 +1,7 @@
-import { Queue } from "bullmq";
-import { Worker } from "bullmq";
-import { db } from "../../db.js";
 import { ImportType } from "@prisma/client";
-import { openS3File } from "../io/Readers.js";
+import { Queue, Worker } from "bullmq";
+import { db } from "../../db.js";
+import { downloadFileFromBucket } from "../io/FileStorage.js";
 import { importServiceFactory } from "./ImportService.js";
 
 const connection = {
@@ -29,7 +28,7 @@ const worker = new Worker(
       where: { id: job.data.id as string },
     });
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-    const file = await openS3File("imports", job.data.fileName);
+    const file = await downloadFileFromBucket(importJob.storagePath);
     const importService = importServiceFactory(
       { import: importJob, source: file },
       importJob.type

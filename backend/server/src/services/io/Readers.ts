@@ -1,9 +1,8 @@
-import fs from "fs";
-import { storage } from "../../storage.js";
 import { parse } from "csv-parse";
-import { getFileMetaData, toCamelCase } from "../../util/utils.js";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { toCamelCase } from "../../util/utils.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -61,45 +60,19 @@ function readFile(
   return fs.readFileSync(path.join(__dirname, filePath), encoding);
 }
 
-function openFile(source: string | File): File {
-  if (typeof source === "string") {
+function openFileBuffer(sourcePath: string): Buffer {
+  if (typeof sourcePath === "string") {
     try {
-      const newPath = path.isAbsolute(source)
-        ? source
-        : path.join(__dirname, source);
+      const newPath = path.isAbsolute(sourcePath)
+        ? sourcePath
+        : path.join(__dirname, sourcePath);
       fs.accessSync(newPath);
-      const meta = getFileMetaData(newPath);
-      const buffer = fs.readFileSync(newPath);
-      return new File([new Blob([buffer])], meta.name);
+      return fs.readFileSync(newPath);
     } catch {
-      throw Error(`File at ${source} could not be opened.`);
+      throw Error(`File at ${sourcePath} could not be opened.`);
     }
   }
-  return source;
+  throw new Error("Wrong type");
 }
 
-function openS3File(bucketFolder: string, fileName: string): Promise<File> {
-  const file = new Promise<File>((resolve, reject) => {
-    const chunks: Buffer[] = [];
-
-    storage.getObject(bucketFolder, fileName, (err, dataStream) => {
-      if (err) {
-        reject(err);
-      }
-      dataStream.on("data", (chunk) => {
-        if (chunk instanceof Buffer) chunks.push(chunk);
-      });
-      dataStream.on("end", () => {
-        const buffer = Buffer.concat(chunks);
-        const blob = new Blob([buffer]);
-        resolve(new File([blob], fileName));
-      });
-      dataStream.on("error", (err) => {
-        reject(err);
-      });
-    });
-  });
-  return file;
-}
-
-export { writeJson, readJSON, readCSV, readFile, openFile, openS3File };
+export { openFileBuffer, readCSV, readFile, readJSON, writeJson };

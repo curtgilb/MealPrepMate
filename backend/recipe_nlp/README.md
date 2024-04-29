@@ -14,3 +14,12 @@ python -m pip install ingredient_parser_nlp
 pip install fastapi
 pip install recipe-scrapers
 $ pip install uvicorn
+
+UPDATE
+pip install --upgrade "uvicorn[standard]"
+pip install --upgrade fastapi
+pip install --upgrade recipe_scrapers
+pip install --upgrade ingredient_parser_nlp
+pip freeze > requirements.txt
+
+uvicorn main:app --reload

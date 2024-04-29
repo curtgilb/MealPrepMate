@@ -35,7 +35,7 @@ export default function ImportFileUpload() {
           <Plus className="mr-2 h-4 w-4" /> Import file
         </Button>
       }
-      content={<UploadImportFile />}
+      content={<UploadImportFileDialog />}
     />
   );
 }
@@ -45,7 +45,7 @@ const formSchema = z.object({
   type: z.string(),
 });
 
-function UploadImportFile() {
+function UploadImportFileDialog() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: { filePath: "", type: "Cronometer" },

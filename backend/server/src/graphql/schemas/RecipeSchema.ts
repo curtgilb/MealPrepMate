@@ -5,7 +5,7 @@ import {
   numericalComparison,
   offsetPagination,
 } from "./UtilitySchema.js";
-import { AggregateLabel } from "./NutritionSchema.js";
+import { AggregateLabel } from "./NutritionLabelSchema.js";
 import { ExtendedRecipe, searchRecipes } from "../../services/RecipeSearch.js";
 import { getIngredientMaxFreshness } from "../../services/ingredient/IngredientService.js";
 import { getAggregatedLabel } from "../../services/recipe/RecipeService.js";
@@ -13,12 +13,12 @@ import {
   RecipeFilterValidation,
   RecipeIngredientUpdateValidation,
   RecipeInputValidation,
-} from "../../validations/graphql/RecipeValidation.js";
+} from "../../validations/RecipeValidation.js";
 import { z } from "zod";
 import { queryFromInfo } from "@pothos/plugin-prisma";
-import { offsetPaginationValidation } from "../../validations/graphql/UtilityValidation.js";
-import { IngredientMatcher } from "../../model_extensions/IngredientMatcher.js";
-import { createRecipeCreateStmt } from "../../model_extensions/RecipeExtension.js";
+import { offsetPaginationValidation } from "../../validations/UtilityValidation.js";
+import { IngredientMatcher } from "../../models/IngredientMatcher.js";
+import { createRecipeCreateStmt } from "../../models/RecipeExtension.js";
 
 // ============================================ Types ===================================
 const recipe = builder.prismaObject("Recipe", {
@@ -31,13 +31,17 @@ const recipe = builder.prismaObject("Recipe", {
     marinadeTime: t.exposeInt("marinadeTime", { nullable: true }),
     notes: t.exposeString("notes", { nullable: true }),
     isFavorite: t.exposeBoolean("isFavorite"),
+    verifed: t.exposeBoolean("isVerified"),
     leftoverFridgeLife: t.exposeInt("leftoverFridgeLife", { nullable: true }),
+    totalTime: t.exposeInt("totalTime", { nullable: true }),
+    leftoverFreezerLife: t.exposeInt("leftoverFreezerLife", { nullable: true }),
     directions: t.exposeString("directions", { nullable: true }),
     cuisine: t.relation("cuisine"),
     category: t.relation("category"),
     course: t.relation("course"),
     ingredients: t.relation("ingredients"),
     photos: t.relation("photos"),
+    nutritionLabels: t.relation("nutritionLabels", { nullable: true }),
     aggregateLabel: t.field({
       type: AggregateLabel,
       nullable: true,
@@ -93,6 +97,7 @@ builder.prismaObject("RecipeIngredientGroup", {
     nutritionLabel: t.relation("nutritionLabel", { nullable: true }),
   }),
 });
+
 // ============================================ Inputs ==================================
 const recipeInput = builder.inputType("RecipeInput", {
   fields: (t) => ({
@@ -246,6 +251,7 @@ builder.queryFields((t) => ({
       });
       const { itemsRemaining, nextOffset } = nextPageInfo(
         result.recipes.length,
+        args.pagination.take,
         args.pagination.offset,
         result.totalCount
       );

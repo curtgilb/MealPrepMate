@@ -1,7 +1,7 @@
 import { Gender, SpecialCondition } from "@prisma/client";
 import { builder } from "../builder.js";
 import { db } from "../../db.js";
-import { profileInputValidation } from "../../validations/graphql/UserValidation.js";
+import { profileInputValidation } from "../../validations/UserValidation.js";
 import { z } from "zod";
 
 const specialCondition = builder.enumType(SpecialCondition, {

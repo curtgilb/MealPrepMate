@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 import { readCSV } from "../../services/io/Readers.js";
 import { toTitleCase } from "../../util/utils.js";
 import { z } from "zod";
-import { cleanedStringSchema } from "../../validations/graphql/RecipeValidation.js";
+import { cleanedStringSchema } from "../../validations/RecipeValidation.js";
 import {
   nullableString,
   stringArray,
@@ -22,7 +22,7 @@ function neutralValuesToNull<T extends z.ZodTypeAny>(zodType: T) {
 
 const ingredientSchema = z.object({
   id: z.string().cuid(),
-  name: cleanedStringSchema(30, toTitleCase),
+  name: cleanedStringSchema(60, toTitleCase),
   category: cleanedStringSchema(30, toTitleCase),
   variant: nullableString,
   storageInstruction: nullableString,

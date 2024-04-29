@@ -7,8 +7,16 @@ declare global {
     type ImageMapping = { [key: string]: string };
     type NutrientMapping = { [key: string]: NutrientValue };
     type MealPlanRecipesCopy = MealPlanRecipeWithServing[];
+    type BoundingBoxes = BoundingBox[];
   }
 }
+
+type PolygonCoordinate = {
+  x: number;
+  y: number;
+};
+
+type BoundingBox = PolygonCoordinate[];
 
 type NutrientValue = { value: number; valuePerServing: number };
 
@@ -187,4 +195,5 @@ export {
   NutrientWithUnit,
   NutrientValue,
   MatchArgs,
+  BoundingBox,
 };

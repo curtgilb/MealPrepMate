@@ -1,16 +1,11 @@
-import { ImportType, RecordStatus } from "@prisma/client";
-import { fileTypeFromBuffer } from "file-type";
-import { v4 as uuidv4 } from "uuid";
+import { Import, ImportType, Prisma, RecordStatus } from "@prisma/client";
 import { db } from "../../db.js";
-import { storage } from "../../storage.js";
-import { openFile } from "../io/Readers.js";
-import { Prisma, Import } from "@prisma/client";
+import { uploadFileToBucket } from "../io/FileStorage.js";
 import { FileUploadQueue } from "./ProcessImportJob.js";
-import { ImportRecordManager } from "./import_records/RecordImportManger.js";
+import { ImportRecordStateManager } from "./import_records/ImportRecordStateManager.js";
 import { CronometerImport } from "./importers/CronometerImport.js";
-import { RecipeKeeperImport } from "./importers/RecipeKeeperImport.js";
 import { ImportServiceInput } from "./importers/Import.js";
-import { getFileMetaData } from "../../util/utils.js";
+import { RecipeKeeperImport } from "./importers/RecipeKeeperImport.js";
 
 type ImportQuery = {
   include?: Prisma.ImportInclude | undefined;
@@ -43,27 +38,20 @@ function importServiceFactory(
 }
 
 async function uploadImportFile({ file, type, query }: UploadImportArgs) {
-  const openedFile = openFile(file);
-  const fileBuffer = Buffer.from(await openedFile.arrayBuffer());
-  const meta = await fileTypeFromBuffer(fileBuffer);
-  const renamedFile = `${uuidv4()}.${meta?.ext ?? ".zip"}`;
-
-  await storage.putObject("imports", renamedFile, fileBuffer, {
-    "Content-Type": meta?.mime,
-  });
+  const uploadedFile = await uploadFileToBucket(file, ["zip"], "imports");
 
   const parentImport = await db.import.create({
     data: {
-      fileName: getFileMetaData(openedFile.name).name,
+      fileName: uploadedFile.newFileName,
       type: type,
       status: "PENDING",
-      storagePath: renamedFile,
+      storagePath: uploadedFile.bucketPath,
     },
     ...query,
   });
 
   await FileUploadQueue.add(parentImport.id, {
-    fileName: renamedFile,
+    fileName: uploadedFile.bucketPath,
     type: type,
     id: parentImport.id,
   });
@@ -80,7 +68,7 @@ async function changeRecordStatus(
     where: { id: id },
     include: { import: true },
   });
-  const recordManager = new ImportRecordManager(importParent);
+  const recordManager = new ImportRecordStateManager(importParent);
   await recordManager.transitionTo(status);
   return await db.importRecord.findUniqueOrThrow({
     where: { id: id },
@@ -107,7 +95,7 @@ async function updateMatches({
     where: { id: id },
     include: { import: true },
   });
-  const recordManager = new ImportRecordManager(importRecord);
+  const recordManager = new ImportRecordStateManager(importRecord);
   await recordManager.updateMatches({ recipeId, labelId, groupId });
   return await db.importRecord.findUniqueOrThrow({
     where: { id: id },
@@ -120,7 +108,7 @@ async function finalizeImportRecord(id: string, query?: ImportRecordQuery) {
     where: { id: id },
     include: { import: true },
   });
-  const recordManager = new ImportRecordManager(importRecord);
+  const recordManager = new ImportRecordStateManager(importRecord);
   await recordManager.finalize();
   return await db.importRecord.findUniqueOrThrow({
     where: { id: id },
@@ -129,9 +117,9 @@ async function finalizeImportRecord(id: string, query?: ImportRecordQuery) {
 }
 
 export {
-  updateMatches,
   changeRecordStatus,
-  uploadImportFile,
   finalizeImportRecord,
   importServiceFactory,
+  updateMatches,
+  uploadImportFile,
 };

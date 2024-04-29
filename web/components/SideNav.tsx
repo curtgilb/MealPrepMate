@@ -23,7 +23,7 @@ interface NavLink {
 function SideNav({ isCollapsed, links }: SideNavProps) {
   const pathName = usePathname();
   return (
-    <div className="space-y-4 py-4 px-4 w-56 flex flex-col border-r h-full min-h-screen">
+    <div className="space-y-4 py-4 px-4 w-56 flex flex-col border-r h-full">
       {links.map((item, index) => {
         const activeLink = pathName === item.link ? "default" : "ghost";
         return (

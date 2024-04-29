@@ -1,45 +1,47 @@
 "use client";
 import { useQuery, gql } from "@urql/next";
 import { graphql } from "@/gql";
-import { Search } from "lucide-react";
+import { Loader2, Plus, Search, Upload } from "lucide-react";
 import { InputWithIcon } from "@/components/ui/InputWithIcon";
 import IngredientCard from "@/components/ingredient/IngredientCard";
-
-const ingredientsListQuery = graphql(/* GraphQL */ `
-  query fetchIngredients($pagination: OffsetPagination!, $search: String) {
-    ingredients(pagination: $pagination, search: $search) {
-      ingredients {
-        id
-        name
-      }
-      itemsRemaining
-      nextOffset
-    }
-  }
-`);
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { useState } from "react";
+import { SearchRoot } from "@/components/ingredient/SearchRoot";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ReceiptUpload } from "@/components/receipt/ReceiptUpload";
 
 export default function IngredientsPage() {
-  const [result] = useQuery({
-    query: ingredientsListQuery,
-    variables: { pagination: { offset: 0, take: 20 } },
-  });
-
-  const { data, fetching, error } = result;
-
-  if (fetching) return <p>Loading...</p>;
-  if (error) return <p>Oh no... {error.message}</p>;
+  const [search, setSearch] = useState<string>();
 
   return (
     <div>
-      <InputWithIcon className="mt-8 mb-12 w-80" startIcon={Search} />
-      {data?.ingredients &&
-        data.ingredients.ingredients.map((ingredient) => (
-          <IngredientCard
-            key={ingredient.id}
-            id={ingredient.id}
-            name={ingredient.name}
-          />
-        ))}
+      <h1 className="text-5xl font-black">Ingredients</h1>
+      <div className="flex items-center py-8">
+        <InputWithIcon
+          onChange={(e) => {
+            setSearch(e.target.value);
+          }}
+          className="w-80"
+          startIcon={Search}
+        />
+        <div className="flex gap-2">
+          <Link href="/ingredients/create">
+            <Button variant="outline">
+              <Plus className="mr-2 h-4 w-4" />
+              Add ingredient
+            </Button>
+          </Link>
+
+          <ReceiptUpload />
+        </div>
+      </div>
+      <ScrollArea className="h-[800px]">
+        <div className="grid grid-cols-auto-fill-5 gap-8">
+          <SearchRoot />
+        </div>
+        <Loader2 className="animate-spin" />
+      </ScrollArea>
     </div>
   );
 }

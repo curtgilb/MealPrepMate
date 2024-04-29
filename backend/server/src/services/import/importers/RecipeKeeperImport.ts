@@ -8,10 +8,10 @@ import { Match, RecipeKeeperRecipe } from "../../../types/CustomTypes.js";
 import {
   NutritionLabelValidation,
   RecipeInputValidation,
-} from "../../../validations/graphql/RecipeValidation.js";
-import { createRecipeCreateStmt } from "../../../model_extensions/RecipeExtension.js";
+} from "../../../validations/RecipeValidation.js";
+import { createRecipeCreateStmt } from "../../../models/RecipeExtension.js";
 import { Importer, ImportServiceInput } from "./Import.js";
-import { IngredientMatcher } from "../../../model_extensions/IngredientMatcher.js";
+import { IngredientMatcher } from "../../../models/IngredientMatcher.js";
 import { RecipeImportMatcher } from "../matchers/RecipeImportMatcher.js";
 
 type MatchedData = {

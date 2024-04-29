@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 generator json {
@@ -25,6 +26,7 @@ enum ImportType {
   RECIPE_KEEPER
   CRONOMETER
   DRI
+  WEB
 }
 
 enum NutrientType {
@@ -213,6 +215,7 @@ model MeasurementUnit {
   servingSizes    NutritionLabel[]
   fromUnit        MeasurementConversion[] @relation("FromUnit")
   toUnit          MeasurementConversion[] @relation("ToUnit")
+  recieptItems    ReceiptLine[]
   // @@map("measurement_unit")
 }
 
@@ -241,6 +244,7 @@ model Ingredient {
   priceHistory        IngredientPrice[]
   expirationRule      ExpirationRule?         @relation(fields: [expirationRuleId], references: [id], onDelete: SetNull)
   expirationRuleId    String?
+  receiptLines        ReceiptLine[]
   conversionRatio     MeasurementConversion[]
   // @@map("ingredient")
 }
@@ -278,22 +282,84 @@ model ExpirationRule {
 }
 
 model IngredientPrice {
-  id           String          @id @default(cuid())
-  date         DateTime
-  retailer     String
-  price        Float
-  quantity     Float
-  pricePerUnit Float
-  ingredient   Ingredient      @relation(fields: [ingredientId], references: [id])
-  ingredientId String
-  unit         MeasurementUnit @relation(fields: [unitId], references: [id])
-  unitId       String
+  id             String          @id @default(cuid())
+  date           DateTime
+  groceryStore   GroceryStore    @relation(fields: [groceryStoreId], references: [id])
+  groceryStoreId String
+  price          Float
+  size       Float
+  foodType       FoodType?
+  pricePerUnit   Float
+  ingredient     Ingredient      @relation(fields: [ingredientId], references: [id])
+  ingredientId   String
+  unit           MeasurementUnit @relation(fields: [unitId], references: [id])
+  unitId         String
+  receiptLine    ReceiptLine?    @relation(fields: [receiptLineId], references: [id])
+  receiptLineId  String?         @unique
   // @@map("ingredient_price")
+}
+
+model GroceryStore {
+  id               String            @id @default(cuid())
+  name             String            @unique
+  receipts          Receipt[]
+  ingredientPrices IngredientPrice[]
+}
+
+model Receipt {
+  id              String        @id @default(cuid())
+  merchantName    String?
+  matchingStore    GroceryStore? @relation(fields: [storeId], references: [id])
+  storeId         String?
+  total           Float?
+  transactionDate DateTime?
+  hash            String
+  path            String
+  lineItems       ReceiptLine[]
+  scanned         Boolean       @default(false)
+  verifed         Boolean       @default(false)
+}
+
+model ReceiptLine {
+  id              String           @id @default(cuid())
+  totalPrice      Float?
+  description     String?
+  quantity        Float?
+  perUnitPrice    Float?
+  productCode     String?
+  unitQuantity    String?
+  receipt         Receipt          @relation(fields: [receiptId], references: [id])
+  receiptId       String
+  ingredientPrice IngredientPrice?
+  matchingUnit    MeasurementUnit?  @relation(fields:[unitId], references: [id] )
+  unitId          String?
+  matchingIngredient  Ingredient? @relation(fields: [ingredientId], references: [id])
+  foodType        FoodType?
+  ingredientId String?
+  /// [BoundingBoxes]
+  boundingBoxes   Json
+}
+
+enum FoodType {
+  FROZEN
+  CANNED
+  PACKAGED
+  FRESH
 }
 
 enum EntityType {
   RECIPE
   LABEL
+}
+
+model WebScrapedRecipe {
+  id         String   @id @default(cuid())
+  url        String
+  isBookmark Boolean  @default(false)
+  scraped    Boolean  @default(false)
+  created    DateTime @default(now())
+  recipe     Recipe?   @relation(fields: [recipeId], references: [id])
+  recipeId   String?   @unique
 }
 
 model Recipe {
@@ -321,6 +387,7 @@ model Recipe {
   nutritionLabels     NutritionLabel[]
   ingredientGroups    RecipeIngredientGroup[]
   importRecord        ImportRecord[]
+  bookmarkUrl         WebScrapedRecipe?
   // @@map("recipe")
 }
 

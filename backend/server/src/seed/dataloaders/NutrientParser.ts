@@ -39,6 +39,7 @@ const nutrientSchema = z.object({
   recipeKeeper: nullableString,
   myFitnessPal: nullableString,
   dri: nullableString,
+  web: nullableString,
 });
 
 export class NutrientLoader {
@@ -100,6 +101,10 @@ export class NutrientLoader {
               },
               {
                 importType: "DRI" as ImportType,
+                lookupName: cleanedRecord.dri,
+              },
+              {
+                importType: "WEB" as ImportType,
                 lookupName: cleanedRecord.dri,
               },
             ].filter(

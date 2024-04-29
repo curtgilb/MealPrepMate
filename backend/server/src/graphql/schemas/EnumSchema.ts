@@ -1,10 +1,11 @@
 import {
+  FoodType,
   Gender,
   ImportStatus,
-  RecordStatus,
+  ImportType,
   Meal,
   NutrientType,
-  ImportType,
+  RecordStatus,
 } from "@prisma/client";
 import { builder } from "../builder.js";
 
@@ -15,6 +16,7 @@ enum ExternalImportType {
 
 builder.enumType(Gender, { name: "Gender" });
 const importStatus = builder.enumType(ImportStatus, { name: "ImportStatus" });
+const foodTypeEnum = builder.enumType(FoodType, { name: "FoodType" });
 const recordStatus = builder.enumType(RecordStatus, { name: "RecordStatus" });
 const meal = builder.enumType(Meal, { name: "Meal" });
 const externalImportType = builder.enumType(ExternalImportType, {
@@ -26,10 +28,11 @@ const PrismaImportType = builder.enumType(ImportType, {
 builder.enumType(NutrientType, { name: "NutrientType" });
 
 export {
-  meal,
   externalImportType,
   ExternalImportType,
-  PrismaImportType,
   importStatus,
+  meal,
+  PrismaImportType,
   recordStatus,
+  foodTypeEnum,
 };

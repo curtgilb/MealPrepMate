@@ -7,7 +7,7 @@ import { ImportRecord } from "@/gql/graphql";
 const itemsImportedQuery = graphql(/* GraphQL */ `
   query MyQuery {
     importRecords(
-      importId: "clurx5an200vdbrc90dns02gz"
+      importId: "clv4vp1f800wrvybbijxixn5o"
       pagination: { offset: 0, take: 117 }
     ) {
       records {
@@ -17,12 +17,16 @@ const itemsImportedQuery = graphql(/* GraphQL */ `
           ... on Recipe {
             __typename
             id
-            labelName: name
+            name
+            photos {
+              isPrimary
+              url
+            }
           }
           ... on NutritionLabel {
             __typename
             id
-            name
+            labelName: name
           }
         }
         recipe {
