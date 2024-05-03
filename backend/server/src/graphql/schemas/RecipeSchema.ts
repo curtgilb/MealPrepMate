@@ -81,7 +81,7 @@ const recipeIngredient = builder.prismaObject("RecipeIngredient", {
     order: t.exposeInt("order"),
     sentence: t.exposeString("sentence"),
     quantity: t.exposeFloat("quantity", { nullable: true }),
-    unit: t.relation("unit"),
+    unit: t.relation("unit", { nullable: true }),
     name: t.exposeString("name", { nullable: true }),
     recipe: t.relation("recipe"),
     baseIngredient: t.relation("ingredient", { nullable: true }),

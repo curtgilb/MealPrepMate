@@ -1,7 +1,7 @@
 "use client";
-import CuisineFilter from "./CuisineFIlter";
-import CategoryFilter from "./CategoryFilter";
-import CourseFilter from "./CourseFilter";
+import CuisineFilter from "@/components/recipe/filters/CuisineFIlter";
+import CategoryFilter from "@/components/recipe/filters/CategoryFilter";
+import CourseFilter from "@/components/recipe/filters/CourseFilter";
 import {
   Accordion,
   AccordionContent,

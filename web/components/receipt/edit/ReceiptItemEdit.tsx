@@ -30,6 +30,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { toTitleCase } from "@/utils/utils";
 
 export const ReceiptItemFragment = graphql(`
   fragment ReceiptItem on ReceiptLine {
@@ -54,17 +55,6 @@ export const ReceiptItemFragment = graphql(`
 interface ReceiptItem {
   itemNumber: number;
   item: FragmentType<typeof ReceiptItemFragment>;
-}
-
-function toTitleCase(str: string | null | undefined) {
-  if (!str) return "";
-  return str
-    .toLowerCase()
-    .split(" ")
-    .map(function (word) {
-      return word.charAt(0).toUpperCase() + word.slice(1);
-    })
-    .join(" ");
 }
 
 const formSchema = z.object({

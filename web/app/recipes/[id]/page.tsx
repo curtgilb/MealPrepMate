@@ -15,59 +15,21 @@ const makeClient = () => {
   });
 };
 
-const getRecipeQuery = graphql(/* GraphQL */ `
-  query getRecipe($id: String!) {
-    recipe(recipeId: $id) {
-      prepTime
-      source
-      name
-      marinadeTime
-      leftoverFridgeLife
-      isFavorite
-      ingredients {
-        ...RecipeIngredientFragment
-      }
-      photos {
-        url
-        id
-        isPrimary
-      }
-      ingredientFreshness
-      id
-      directions
-      cuisine {
-        id
-        name
-      }
-      course {
-        id
-        name
-      }
-      cookTime
-      category {
-        id
-        name
-      }
-      notes
-    }
-  }
-`);
-
 const { getClient } = registerUrql(makeClient);
 
 export default async function Recipe({ params }: { params: { id: string } }) {
-  const result = await getClient().query(getRecipeQuery, {
-    id: "cltus93fj000008jq4rh9fnod",
-  });
-  const recipe = result.data?.recipe;
-  let primaryImage = recipe?.photos.find((photo) => {
-    photo.isPrimary;
-  });
+  // const result = await getClient().query(getRecipeQuery, {
+  //   id: "cltus93fj000008jq4rh9fnod",
+  // });
+  // const recipe = result.data?.recipe;
+  // let primaryImage = recipe?.photos.find((photo) => {
+  //   photo.isPrimary;
+  // });
 
   return (
     <div className="max-w-screen-2xl grid grid-cols-auto-fr gap-16">
       <div className="max-w-80">
-        <Image
+        {/* <Image
           src="http://localhost:9000/images/0bf7d411-0cab-4b67-b522-bb70785a706a.jpg"
           alt="recipe photo"
           style={{
@@ -122,7 +84,7 @@ export default async function Recipe({ params }: { params: { id: string } }) {
         <p>{recipe?.directions}</p>
 
         <h3 className="text-xl font-bold mt-8">Notes</h3>
-        <p>{recipe?.notes}</p>
+        <p>{recipe?.notes}</p> */}
       </div>
     </div>
   );

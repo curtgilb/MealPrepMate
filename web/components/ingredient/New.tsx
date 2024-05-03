@@ -1,3 +1,4 @@
+"use client";
 import { TypedDocumentNode, useQuery, UseQueryState } from "@urql/next";
 import { graphql } from "@/gql";
 import IngredientCard from "@/components/ingredient/IngredientCard";
@@ -152,11 +153,11 @@ function SearchPage({
         <em>Loading...</em>
       ) : null}
 
-      {!results.data?.ingredients && !results.fetching ? (
+      {/* {!results.data?.ingredients && !results.fetching ? (
         <button type="button" onClick={onLoadMore}>
           Load more
         </button>
-      ) : null}
+      ) : null} */}
     </>
   );
 }

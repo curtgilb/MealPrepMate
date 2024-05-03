@@ -2,7 +2,7 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -15,8 +15,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { EditRecipe } from "@/components/recipe/edit/EditRecipe";
+import { RecipeEditor } from "@/components/recipe/edit/RecipeEditor";
 import { graphql } from "@/gql";
+import { InputWithLabel } from "@/components/ui/InputWithLabel";
+import { CategoryPicker } from "@/components/pickers/CategoryPicker";
+import { useState } from "react";
+import { TimeNumberInput } from "@/components/ui/time-number-input";
+import { Fieldset } from "@/components/ui/fieldset";
+import { ImagePicker } from "@/components/ImagePicker";
+import { CuisinePicker } from "@/components/pickers/CuisinePicker";
+import { CoursePicker } from "@/components/pickers/CoursePicker";
 
 const scrapeRecipe = graphql(`
 mutation scrapeRecipe($url: String!) {
@@ -29,42 +37,16 @@ const validationSchema = z.object({
 });
 
 export default function CreateRecipeFromWeb() {
-  const form = useForm<z.infer<typeof validationSchema>>({
-    resolver: zodResolver(validationSchema),
-    defaultValues: {
-      url: "",
-    },
-  });
-
-  function onSubmit(values: z.infer<typeof validationSchema>) {
-    console.log(values);
-  }
+  const [scraping, setScraping] = useState<boolean>(false);
 
   return (
     <div>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <FormField
-            control={form.control}
-            name="url"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Username</FormLabel>
-                <FormControl>
-                  <Input placeholder="Website URL" {...field} />
-                </FormControl>
-                <FormDescription>
-                  This is the URL of the website with you recipe you want to
-                  import.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit">Import</Button>
-        </form>
-      </Form>
-      <iframe src={form?.getValues().url}></iframe>
-      <EditRecipe id={}></EditRecipe>
+      <Label htmlFor="url">Website URL</Label>
+      <div className="flex w-full items-center space-x-2 mb-6">
+        <Input type="url" placeholder="Website URL" />
+        <Button type="submit">Import</Button>
+      </div>
+      <RecipeEditor />
     </div>
   );
+}

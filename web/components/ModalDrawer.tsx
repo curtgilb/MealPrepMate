@@ -25,7 +25,7 @@ import { useState } from "react";
 
 interface DrawerDialogProps {
   title: string;
-  description: string;
+  description?: string;
   trigger: React.ReactNode;
   content: React.ReactNode;
 }

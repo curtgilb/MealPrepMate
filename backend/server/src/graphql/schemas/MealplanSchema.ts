@@ -80,12 +80,11 @@ builder.prismaObject("MealPlanServing", {
 builder.prismaObject("MealPlanRecipe", {
   fields: (t) => ({
     id: t.exposeID("id"),
-    recipe: t.relation("recipe"),
+    originalRecipe: t.relation("recipe"),
     factor: t.exposeFloat("factor"),
     mealPlanServings: t.relation("servings"),
     totalServings: t.exposeInt("totalServings"),
-    mealPlan: t.relation("mealPlan"),
-    servingsUsed: t.relationCount("servings", {
+    servingsOnPlan: t.relationCount("servings", {
       args: {
         mealId: t.arg.string({ required: true }),
       },

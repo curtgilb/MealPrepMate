@@ -1,3 +1,4 @@
+"use client";
 import SingleColumnCentered from "@/components/layouts/single-column-centered";
 import { Button } from "@/components/ui/button";
 import { InputWithIcon } from "@/components/ui/InputWithIcon";

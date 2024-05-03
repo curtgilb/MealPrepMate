@@ -371,6 +371,7 @@ model Recipe {
   cookingTime         Int?
   marinadeTime        Int?
   totalTime           Int?
+  ingredientsTxt      String?
   directions          String?
   notes               String?
   photos              Photo[]

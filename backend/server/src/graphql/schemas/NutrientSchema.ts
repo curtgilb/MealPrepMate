@@ -9,6 +9,7 @@ import { queryFromInfo } from "@pothos/plugin-prisma";
 // // ============================================ Types ===================================
 const nutrient = builder.prismaObject("Nutrient", {
   fields: (t) => ({
+    id: t.exposeString("id"),
     name: t.exposeString("name"),
     alternateNames: t.exposeStringList("alternateNames"),
     type: t.exposeString("type"),
@@ -71,6 +72,7 @@ builder.queryFields((t) => ({
     type: nutrientsQuery,
     args: {
       search: t.arg.string(),
+      advanced: t.arg.boolean({ required: true }),
       pagination: t.arg({
         type: offsetPagination,
         required: true,
@@ -78,6 +80,7 @@ builder.queryFields((t) => ({
     },
     validate: {
       schema: z.object({
+        advanced: z.boolean(),
         search: z.string().optional(),
         pagination: offsetPaginationValidation,
       }),
@@ -86,11 +89,12 @@ builder.queryFields((t) => ({
       const [data, count] = await db.$transaction([
         db.nutrient.findMany({
           ...queryFromInfo({ context, info, path: ["items"] }),
+          where: { advancedView: args.advanced },
           take: args.pagination.take,
           skip: args.pagination.offset,
-          orderBy: { name: "asc" },
+          orderBy: { order: "asc" },
         }),
-        db.nutrient.count(),
+        db.nutrient.count({ where: { advancedView: args.advanced } }),
       ]);
 
       const { itemsRemaining, nextOffset } = nextPageInfo(

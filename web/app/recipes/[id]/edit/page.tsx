@@ -1,4 +1,6 @@
-import RecipeEdit from "@/components/recipe/RecipeEdit";
-export default function EditRecipe() {
-  return <RecipeEdit />;
+import { RecipeEditor } from "@/components/recipe/edit/RecipeEditor";
+import { getRecipe } from "@/graphql/recipe/getRecipe.graphql";
+
+export default function EditRecipe({ params }: { params: { id: string } }) {
+  return <RecipeEditor id={params.id} />;
 }

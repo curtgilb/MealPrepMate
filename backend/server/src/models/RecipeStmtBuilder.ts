@@ -28,6 +28,7 @@ function buildRecipeStmt(
     marinadeTime: recipe.marinadeTime,
     directions: recipe.directions,
     notes: recipe.notes,
+    ingredientsTxt: recipe.ingredients,
     photos: createConnectManyStmt(recipe.photoIds, update),
     isFavorite: recipe.isFavorite ?? false,
     course: createConnectManyStmt(recipe.courseIds, update),
