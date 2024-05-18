@@ -8,13 +8,14 @@ import {
 } from "@/components/ui/select";
 import RecipeFilter from "../recipe/RecipeFilter";
 import { ReactNode, useState } from "react";
+import { RecipeSearch } from "./RecipeSearch";
 
 const menu: {
   title: string;
   value: string;
   component: ReactNode | undefined;
 }[] = [
-  { title: "Recipes", value: "recipe", component: <RecipeFilter /> },
+  { title: "Recipes", value: "recipe", component: <RecipeSearch /> },
   { title: "Meals", value: "meals", component: undefined },
   { title: "Ingredients", value: "ingredients", component: undefined },
   {
@@ -36,7 +37,7 @@ export function MealPlanSideBar() {
   const [selectedMenu, setMenu] = useState<string>("recipe");
 
   return (
-    <div className="p-4">
+    <div className="p-4 border-l w-96 min-h-svh">
       <Select value={selectedMenu} onValueChange={setMenu}>
         <SelectTrigger className="mb-4">
           <SelectValue placeholder="test" />

@@ -1,5 +1,7 @@
 import { Prisma, RecordStatus } from "@prisma/client";
 import { MealPlanRecipeWithServing } from "../../data/test_data/MealPlan.js";
+import { SummedNutrients } from "../services/nutrition/LabelAggregator.js";
+import { AggregateNutritionLabel } from "../services/nutrition/LabelMaker.js";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -8,6 +10,8 @@ declare global {
     type NutrientMapping = { [key: string]: NutrientValue };
     type MealPlanRecipesCopy = MealPlanRecipeWithServing[];
     type BoundingBoxes = BoundingBox[];
+    type SummedNutrientMapJson = SummedNutrients;
+    type AggregateLabelJson = AggregateNutritionLabel;
   }
 }
 

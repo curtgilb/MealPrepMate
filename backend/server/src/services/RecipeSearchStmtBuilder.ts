@@ -30,13 +30,13 @@ function buildRecipeSearchStmt(
       OR: [
         {
           name: {
-            contains: "curt",
+            contains: filter.searchString ?? undefined,
             mode: "insensitive",
           },
         },
         {
           source: {
-            contains: "curt",
+            contains: filter.searchString ?? undefined,
             mode: "insensitive",
           },
         },

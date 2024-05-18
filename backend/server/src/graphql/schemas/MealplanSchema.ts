@@ -1,11 +1,7 @@
 import { z } from "zod";
 import { db } from "../../db.js";
 import { scheduleMealPlan } from "../../services/mealplan/MealPlanService.js";
-import { getAggregatedLabel } from "../../services/recipe/RecipeService.js";
-import { builder } from "../builder.js";
-import { meal } from "./EnumSchema.js";
-import { AggregateLabel } from "./NutritionLabelSchema.js";
-import { cleanedStringSchema } from "../../validations/utilValidations.js";
+import { getAggregateLabel } from "../../services/nutrition/NutritionService.js";
 import { toTitleCase } from "../../util/utils.js";
 import {
   addRecipeServingValidation,
@@ -13,6 +9,10 @@ import {
   editMealPlanValidation,
   editRecipeServingValidation,
 } from "../../validations/MealPlanValidation.js";
+import { cleanedStringSchema } from "../../validations/utilValidations.js";
+import { builder } from "../builder.js";
+import { meal } from "./EnumSchema.js";
+import { Label } from "./NutritionLabelSchema.js";
 // ============================================ Types ===================================
 builder.prismaObject("MealPlan", {
   fields: (t) => ({
@@ -48,32 +48,7 @@ builder.prismaObject("MealPlanServing", {
     id: t.exposeID("id"),
     day: t.exposeInt("day"),
     meal: t.exposeString("meal"),
-    mealPlan: t.relation("mealPlan"),
-    recipe: t.relation("recipe"),
     numberOfServings: t.exposeInt("numberOfServings"),
-    nutritionLabel: t.field({
-      type: AggregateLabel,
-      nullable: true,
-      args: {
-        advanced: t.arg.boolean(),
-      },
-      resolve: async (parent, args) => {
-        return await getAggregatedLabel(
-          [
-            {
-              id: parent.recipe.recipeId,
-              scale: {
-                factor: parent.recipe.factor,
-                servings: parent.recipe.totalServings,
-                servingsUsed: parent.numberOfServings,
-              },
-            },
-          ],
-          args.advanced ?? false,
-          false
-        );
-      },
-    }),
   }),
 });
 
@@ -93,22 +68,14 @@ builder.prismaObject("MealPlanRecipe", {
       }),
     }),
     nutritionLabel: t.field({
-      type: AggregateLabel,
+      type: Label,
       nullable: true,
-      args: {
-        advanced: t.arg.boolean(),
-      },
-      resolve: async (parent, args) => {
-        return await getAggregatedLabel(
-          [
-            {
-              id: parent.recipeId,
-              scale: { factor: parent.factor, servings: parent.totalServings },
-            },
-          ],
-          args.advanced ?? false,
-          false
-        );
+      resolve: async (parent) => {
+        const scale =
+          parent.factor !== 1 || parent.totalServings
+            ? { scale: parent.factor, totalServings: parent.totalServings }
+            : undefined;
+        return await getAggregateLabel(parent.recipeId, scale);
       },
     }),
   }),
@@ -180,6 +147,23 @@ builder.queryFields((t) => ({
     type: ["MealPlan"],
     resolve: async (query) => {
       return await db.mealPlan.findMany({ ...query });
+    },
+  }),
+  mealPlanServings: t.prismaField({
+    type: ["MealPlanServing"],
+    args: {
+      mealPlanId: t.arg.string({ required: true }),
+      minDay: t.arg.int({ required: true }),
+      maxDay: t.arg.int({ required: true }),
+    },
+    resolve: async (query, root, args) => {
+      return await db.mealPlanServing.findMany({
+        where: {
+          mealPlan: { id: args.mealPlanId },
+          day: { lte: args.minDay, gte: args.maxDay },
+        },
+        ...query,
+      });
     },
   }),
 }));

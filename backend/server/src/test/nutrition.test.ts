@@ -1,24 +1,11 @@
-// import { NutrientAggregator } from "../services/nutrition/NutritionAggregator.js";
-// import { deleteAllRecords, deleteBuckets, seedDb } from "../seed/seed.js";
-// import { db } from "../db.js";
-// import { beforeAll, expect, test } from "vitest";
-// import {
-//   recipe,
-//   ingredientGroups,
-// } from "../../data/test_data/ChickenGyroRecipe.js";
-// import {
-//   recipe as halalChickenRecipe,
-//   ingredientGroups as halalIngredientGroups,
-// } from "../../data/test_data/HalalChickenRecipe.js";
+import { deleteAllRecords, deleteBuckets, seedDb } from "../seed/seed.js";
+import { db } from "../db.js";
+import { beforeAll, expect, test } from "vitest";
+import { LabelAggregator } from "../services/nutrition/LabelAggregator.js";
 
 // beforeAll(async () => {
 //   // called once before all tests run
 //   await seedDb();
-//   await db.recipeIngredientGroup.createMany({ data: ingredientGroups });
-//   await db.recipe.create({ data: recipe });
-
-//   await db.recipeIngredientGroup.createMany({ data: halalIngredientGroups });
-//   await db.recipe.create({ data: halalChickenRecipe });
 
 //   // clean up function, called once after all tests run
 //   return async () => {
@@ -26,6 +13,13 @@
 //     await deleteAllRecords();
 //   };
 // });
+
+test("Group and aggregate nutrients in recipe", async () => {
+  const halalChicken = new LabelAggregator("cltp0k2yi000008la6ybr3shp");
+  const nutrients = await halalChicken.getNutrientTotals();
+
+  expect(nutrients?.get("clt6dqtz90000awv9anfb343o")?.total).toBe(563.11);
+});
 
 // test("Nutrient Aggregator: recipe with multiple labels", async () => {
 //   const recipe = await db.recipe.findFirstOrThrow({});

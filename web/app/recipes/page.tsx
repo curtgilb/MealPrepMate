@@ -2,7 +2,7 @@
 import SingleColumnCentered from "@/components/layouts/single-column-centered";
 import { Button } from "@/components/ui/button";
 import { InputWithIcon } from "@/components/ui/InputWithIcon";
-import RecipeCard from "@/components/ui/recipe-card";
+import RecipeCard from "@/components/recipe/RecipeCard";
 import { Import, Plus, Search } from "lucide-react";
 import Link from "next/link";
 

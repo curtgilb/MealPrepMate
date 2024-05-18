@@ -16,3 +16,7 @@ export function isNumeric(str: string) {
     !isNaN(parseFloat(str))
   ); // ...and ensure strings of whitespace fail
 }
+
+export function getImageUrl(path: string) {
+  return `http://localhost:9000/${path}`;
+}

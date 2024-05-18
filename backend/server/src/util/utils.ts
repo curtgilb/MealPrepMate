@@ -94,6 +94,13 @@ function hash(input: Buffer | string): string {
   return hash.digest("hex");
 }
 
+function round(num: number): number {
+  if (typeof num === "number") {
+    return Math.round((num + Number.EPSILON) * 100) / 100;
+  }
+  return num;
+}
+
 export {
   toTitleCase,
   toCamelCase,
@@ -101,4 +108,5 @@ export {
   getFileExtension,
   getFileMetaData,
   hash,
+  round,
 };

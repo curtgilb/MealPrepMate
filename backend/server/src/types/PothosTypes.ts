@@ -1,5 +1,5 @@
 /* eslint-disable */
-import type { Prisma, Notification, ScheduledPlan, MealPlan, NotificationSetting, MealPlanServing, MealPlanRecipe, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, GroceryStore, Receipt, ReceiptLine, WebScrapedRecipe, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, NutrientImportMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
+import type { Prisma, Notification, ScheduledPlan, MealPlan, NotificationSetting, MealPlanServing, MealPlanRecipe, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, GroceryStore, Receipt, ReceiptLine, WebScrapedRecipe, Recipe, AggregateLabel, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, NutrientImportMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
 export default interface PrismaTypes {
     Notification: {
         Name: "Notification";
@@ -530,7 +530,7 @@ export default interface PrismaTypes {
         Where: Prisma.RecipeWhereInput;
         Create: {};
         Update: {};
-        RelationName: "photos" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabels" | "ingredientGroups" | "importRecord" | "bookmarkUrl";
+        RelationName: "photos" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabels" | "ingredientGroups" | "importRecord" | "bookmarkUrl" | "aggregateLabel";
         ListRelations: "photos" | "course" | "category" | "cuisine" | "ingredients" | "mealPlans" | "nutritionLabels" | "ingredientGroups" | "importRecord";
         Relations: {
             photos: {
@@ -572,6 +572,29 @@ export default interface PrismaTypes {
             bookmarkUrl: {
                 Shape: WebScrapedRecipe | null;
                 Name: "WebScrapedRecipe";
+            };
+            aggregateLabel: {
+                Shape: AggregateLabel | null;
+                Name: "AggregateLabel";
+            };
+        };
+    };
+    AggregateLabel: {
+        Name: "AggregateLabel";
+        Shape: AggregateLabel;
+        Include: Prisma.AggregateLabelInclude;
+        Select: Prisma.AggregateLabelSelect;
+        OrderBy: Prisma.AggregateLabelOrderByWithRelationAndSearchRelevanceInput;
+        WhereUnique: Prisma.AggregateLabelWhereUniqueInput;
+        Where: Prisma.AggregateLabelWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "recipe";
+        ListRelations: never;
+        Relations: {
+            recipe: {
+                Shape: Recipe;
+                Name: "Recipe";
             };
         };
     };

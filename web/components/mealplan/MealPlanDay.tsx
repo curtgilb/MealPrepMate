@@ -1,11 +1,42 @@
+"use client";
+import { graphql } from "@/gql";
+import AnimatedNumbers from "react-animated-numbers";
 import MacroDistribution from "./MacroDistribution";
 import NutrientBar from "./NutrientBar";
 
 const courses = ["Breakfast", "Lunch", "Dinner", "Snacks"];
+
+const servingFields = graphql(`
+  fragment ServingFields on MealPlanServing {
+    id
+    day
+    meal
+    numberOfServings
+    nutritionLabel(advanced: true) {
+      calories
+      caloriesPerServing
+      nutrients {
+        name
+        perServing
+        id
+        value
+      }
+    }
+  }
+`);
+
+interface MealPlanDay {
+  dayNumber: number;
+}
+
 export default function MealPlanDay() {
   return (
     <div className="border rounded-sm p-6 ">
-      <p className="text-2xl font-extrabold mb-4">Day 1</p>
+      <div className="flex items-baseline justify-between">
+        <p className="text-2xl font-extrabold mb-4">Day 1</p>
+        <p className="text-xl font-semibold mb-4">1,547 calories</p>
+      </div>
+
       <div>
         {/* <div className="flex flex-col gap-4">
           <NutrientBar

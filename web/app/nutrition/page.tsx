@@ -23,7 +23,7 @@ import { useQuery } from "urql";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { MacroPieChart } from "@/components/charts/MacroPieChart";
+import { MacroPieChart } from "@/components/nutrition/charts/MacroPieChart";
 import { Nutrition } from "@/components/nutrition/NutritionLabel";
 
 const nutritionFields = graphql(`

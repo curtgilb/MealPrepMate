@@ -34,3 +34,32 @@ export const getRecipeQuery = graphql(`
     }
   }
 `);
+
+export const recipeSearchFragment = graphql(`
+  fragment RecipeSearchFields on Recipe {
+    id
+    name
+    verifed
+    aggregateLabel {
+      caloriesPerServing
+      servings
+    }
+    photos {
+      id
+      isPrimary
+      url
+    }
+  }
+`);
+
+export const searchRecipes = graphql(`
+  query searchRecipes($filters: RecipeFilter, $pagination: OffsetPagination!) {
+    recipes(filter: $filters, pagination: $pagination) {
+      itemsRemaining
+      nextOffset
+      recipes {
+        ...RecipeSearchFields
+      }
+    }
+  }
+`);

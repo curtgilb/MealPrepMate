@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Upload } from "lucide-react";
 import { FragmentType, graphql, useFragment } from "@/gql";
-
+import { getImageUrl } from "@/utils/utils";
 import { ModalDrawer } from "./ModalDrawer";
 import { ImageUploadForm } from "./ImageUpload";
 
@@ -17,10 +17,6 @@ interface ImagePickerProps {
   images?: FragmentType<typeof photoFieldsFragment>[];
 }
 
-function getFullPath(path: string) {
-  return `http://localhost:9000/${path}`;
-}
-
 export function ImagePicker({ images }: ImagePickerProps) {
   const photos = useFragment(photoFieldsFragment, images);
 
@@ -33,7 +29,7 @@ export function ImagePicker({ images }: ImagePickerProps) {
         alt="Product image"
         className="aspect-square w-full rounded-md object-cover"
         height="300"
-        src={primaryPhoto ? getFullPath(primaryPhoto.url) : "/placeholder.jpg"}
+        src={primaryPhoto ? getImageUrl(primaryPhoto.url) : "/placeholder.jpg"}
         width="300"
       />
       <div className="grid grid-cols-3 gap-2">
@@ -48,7 +44,7 @@ export function ImagePicker({ images }: ImagePickerProps) {
                 alt="Recipe Image"
                 className="aspect-square w-full rounded-md object-cover"
                 height="84"
-                src={getFullPath(photo.url)}
+                src={getImageUrl(photo.url)}
                 width="84"
               />
             );

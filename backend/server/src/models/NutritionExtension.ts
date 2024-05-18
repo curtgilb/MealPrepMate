@@ -1,3 +1,5 @@
+import { recipe } from "../graphql/schemas/RecipeSchema.js";
+import { LabelAggregator } from "../services/nutrition/LabelAggregator.js";
 import {
   EditNutritionLabelInput,
   CreateNutritionLabelInput,
@@ -74,6 +76,23 @@ function createNutritionLabelStmt(
 }
 
 export const nutritionExtension = Prisma.defineExtension((client) => {
+  async function updateAggregateLabel(recipeId: string) {
+    const aggregator = new LabelAggregator(recipeId);
+    const agg = await aggregator.createNutrientTotals();
+    await client.aggregateLabel.upsert({
+      where: { recipeId: recipeId },
+      update: {
+        label: agg.label,
+        nutrients: agg.nutrients,
+      },
+      create: {
+        label: agg.label,
+        nutrients: agg.nutrients,
+        recipe: { connect: { id: recipeId } },
+      },
+    });
+  }
+
   return client.$extends({
     model: {
       nutritionLabel: {
@@ -82,7 +101,7 @@ export const nutritionExtension = Prisma.defineExtension((client) => {
           recipeId: string,
           query?: NutritionLabelQuery
         ): Promise<NutritionLabel> {
-          return await client.nutritionLabel.create({
+          const newLabel = await client.nutritionLabel.create({
             data: createNutritionLabelStmt(
               {
                 label: args,
@@ -94,6 +113,11 @@ export const nutritionExtension = Prisma.defineExtension((client) => {
             ),
             ...query,
           });
+          await updateAggregateLabel(recipeId);
+          return client.nutritionLabel.findUniqueOrThrow({
+            where: { id: newLabel.id },
+            ...query,
+          });
         },
 
         async editNutritionLabel(
@@ -102,7 +126,7 @@ export const nutritionExtension = Prisma.defineExtension((client) => {
         ) {
           return await client.$transaction(async (tx) => {
             // Create statement for updating the base label and creating the new nutrients
-            await tx.nutritionLabel.update({
+            const newLabel = await tx.nutritionLabel.update({
               where: { id: args.id },
               data: {
                 name: args.name,
@@ -143,6 +167,8 @@ export const nutritionExtension = Prisma.defineExtension((client) => {
                 });
               }
             }
+
+            await updateAggregateLabel(newLabel.recipeId);
             return tx.nutritionLabel.findUniqueOrThrow({
               where: { id: args.id },
               ...query,

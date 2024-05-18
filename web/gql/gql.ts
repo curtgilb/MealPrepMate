@@ -23,6 +23,7 @@ const documents = {
     "\n  mutation uploadPhoto($file: File!) {\n    uploadPhoto(photo: $file, isPrimary: false) {\n      id\n      url\n      isPrimary\n    }\n  }\n": types.UploadPhotoDocument,
     "\n  fragment ExpirationRuleFields on ExpirationRule {\n    id\n    name\n    variation\n    perishable\n    tableLife\n    freezerLife\n    fridgeLife\n    defrostTime\n  }\n": types.ExpirationRuleFieldsFragmentDoc,
     "\n  query fetchIngredients($pagination: OffsetPagination!, $search: String) {\n    ingredients(pagination: $pagination, search: $search) {\n      ingredients {\n        id\n        name\n      }\n      itemsRemaining\n      nextOffset\n    }\n  }\n": types.FetchIngredientsDocument,
+    "\n  fragment ServingFields on MealPlanServing {\n    id\n    day\n    meal\n    numberOfServings\n    nutritionLabel(advanced: true) {\n      calories\n      caloriesPerServing\n      nutrients {\n        name\n        perServing\n        id\n        value\n      }\n    }\n  }\n": types.ServingFieldsFragmentDoc,
     "\n  query fetchCategories($search: String) {\n    categories(searchString: $search) {\n      id\n      name\n    }\n  }\n": types.FetchCategoriesDocument,
     "\n  mutation createCategory($name: String!) {\n    createCategory(name: $name) {\n      id\n      name\n    }\n  }\n": types.CreateCategoryDocument,
     "\n  query fetchCourses($search: String) {\n    courses(searchString: $search) {\n      id\n      name\n    }\n  }\n": types.FetchCoursesDocument,
@@ -42,6 +43,8 @@ const documents = {
     "\n  query getCourses {\n    courses {\n      id\n      name\n    }\n  }\n": types.GetCoursesDocument,
     "\n  query getCuisines {\n    cuisines {\n      id\n      name\n    }\n  }\n": types.GetCuisinesDocument,
     "\n  query getRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      name\n      category {\n        id\n        name\n      }\n      cookTime\n      course {\n        id\n        name\n      }\n      directions\n      leftoverFridgeLife\n      leftoverFreezerLife\n      marinadeTime\n      totalTime\n      verifed\n      notes\n      photos {\n        id\n        isPrimary\n        url\n      }\n      prepTime\n      source\n      ingredients {\n        ...RecipeIngredientFields\n      }\n    }\n  }\n": types.GetRecipeDocument,
+    "\n  fragment RecipeSearchFields on Recipe {\n    id\n    name\n    verifed\n    aggregateLabel {\n      caloriesPerServing\n      servings\n    }\n    photos {\n      id\n      isPrimary\n      url\n    }\n  }\n": types.RecipeSearchFieldsFragmentDoc,
+    "\n  query searchRecipes($filters: RecipeFilter, $pagination: OffsetPagination!) {\n    recipes(filter: $filters, pagination: $pagination) {\n      itemsRemaining\n      nextOffset\n      recipes {\n        ...RecipeSearchFields\n      }\n    }\n  }\n": types.SearchRecipesDocument,
 };
 
 /**
@@ -98,6 +101,10 @@ export function graphql(source: "\n  fragment ExpirationRuleFields on Expiration
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query fetchIngredients($pagination: OffsetPagination!, $search: String) {\n    ingredients(pagination: $pagination, search: $search) {\n      ingredients {\n        id\n        name\n      }\n      itemsRemaining\n      nextOffset\n    }\n  }\n"): (typeof documents)["\n  query fetchIngredients($pagination: OffsetPagination!, $search: String) {\n    ingredients(pagination: $pagination, search: $search) {\n      ingredients {\n        id\n        name\n      }\n      itemsRemaining\n      nextOffset\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment ServingFields on MealPlanServing {\n    id\n    day\n    meal\n    numberOfServings\n    nutritionLabel(advanced: true) {\n      calories\n      caloriesPerServing\n      nutrients {\n        name\n        perServing\n        id\n        value\n      }\n    }\n  }\n"): (typeof documents)["\n  fragment ServingFields on MealPlanServing {\n    id\n    day\n    meal\n    numberOfServings\n    nutritionLabel(advanced: true) {\n      calories\n      caloriesPerServing\n      nutrients {\n        name\n        perServing\n        id\n        value\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -174,6 +181,14 @@ export function graphql(source: "\n  query getCuisines {\n    cuisines {\n      
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query getRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      name\n      category {\n        id\n        name\n      }\n      cookTime\n      course {\n        id\n        name\n      }\n      directions\n      leftoverFridgeLife\n      leftoverFreezerLife\n      marinadeTime\n      totalTime\n      verifed\n      notes\n      photos {\n        id\n        isPrimary\n        url\n      }\n      prepTime\n      source\n      ingredients {\n        ...RecipeIngredientFields\n      }\n    }\n  }\n"): (typeof documents)["\n  query getRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      name\n      category {\n        id\n        name\n      }\n      cookTime\n      course {\n        id\n        name\n      }\n      directions\n      leftoverFridgeLife\n      leftoverFreezerLife\n      marinadeTime\n      totalTime\n      verifed\n      notes\n      photos {\n        id\n        isPrimary\n        url\n      }\n      prepTime\n      source\n      ingredients {\n        ...RecipeIngredientFields\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment RecipeSearchFields on Recipe {\n    id\n    name\n    verifed\n    aggregateLabel {\n      caloriesPerServing\n      servings\n    }\n    photos {\n      id\n      isPrimary\n      url\n    }\n  }\n"): (typeof documents)["\n  fragment RecipeSearchFields on Recipe {\n    id\n    name\n    verifed\n    aggregateLabel {\n      caloriesPerServing\n      servings\n    }\n    photos {\n      id\n      isPrimary\n      url\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query searchRecipes($filters: RecipeFilter, $pagination: OffsetPagination!) {\n    recipes(filter: $filters, pagination: $pagination) {\n      itemsRemaining\n      nextOffset\n      recipes {\n        ...RecipeSearchFields\n      }\n    }\n  }\n"): (typeof documents)["\n  query searchRecipes($filters: RecipeFilter, $pagination: OffsetPagination!) {\n    recipes(filter: $filters, pagination: $pagination) {\n      itemsRemaining\n      nextOffset\n      recipes {\n        ...RecipeSearchFields\n      }\n    }\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

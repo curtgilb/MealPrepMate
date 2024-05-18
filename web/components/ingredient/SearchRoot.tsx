@@ -4,20 +4,8 @@ import IngredientCard from "@/components/ingredient/IngredientCard";
 import { useCallback } from "react";
 import { useInView } from "react-intersection-observer";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SmallCard } from "../generics/SmallCard";
 
-function Loading() {
-  return (
-    <>
-      <SmallCard imageUrl="adsf" loading={true} />
-      <SmallCard imageUrl="adsf" loading={true} />
-      <SmallCard imageUrl="adsf" loading={true} />
-      <SmallCard imageUrl="adsf" loading={true} />
-      <SmallCard imageUrl="adsf" loading={true} />
-      <SmallCard imageUrl="adsf" loading={true} />
-    </>
-  );
-}
+import { LoadingCards } from "../generics/LoadingCards";
 
 const ingredientsListQuery = graphql(/* GraphQL */ `
   query fetchIngredients($pagination: OffsetPagination!, $search: String) {
@@ -68,7 +56,7 @@ export const SearchRoot = ({ searchTerm = "", resultsPerPage = 50 }) => {
           skip={data.ingredients.nextOffset}
         />
       ) : result.fetching ? (
-        <Loading />
+        <LoadingCards small={true} />
       ) : null}
     </>
   );
@@ -83,11 +71,6 @@ function SearchPage({
   take: number;
   skip: number | null | undefined;
 }) {
-  const { ref, inView, entry } = useInView({
-    /* Optional options */
-    threshold: 1,
-    triggerOnce: true,
-  });
   // Each <SearchPage> fetches its own page results!
   const [results, executeQuery] = useQuery({
     query: ingredientsListQuery,
@@ -112,7 +95,7 @@ function SearchPage({
   }, [executeQuery]);
 
   if (results.fetching) {
-    return <Loading />;
+    return <LoadingCards />;
   }
   if (results.error) return <p>Oh no... {results.error.message}</p>;
 
@@ -142,8 +125,7 @@ function SearchPage({
 
       {!results.data?.ingredients && !results.fetching ? (
         <>
-          <div ref={ref}></div>
-          <Loading />
+          <LoadingCards small={true} />
         </>
       ) : null}
     </>

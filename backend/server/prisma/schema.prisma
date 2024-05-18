@@ -1,4 +1,4 @@
-// This is your Prisma schema file,
+   // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
@@ -389,8 +389,22 @@ model Recipe {
   ingredientGroups    RecipeIngredientGroup[]
   importRecord        ImportRecord[]
   bookmarkUrl         WebScrapedRecipe?
+  aggregateLabel     AggregateLabel?
+
   // @@map("recipe")
 }
+
+model AggregateLabel {
+  id String  @id @default(cuid())
+  /// [SummedNutrientMapJson]
+  nutrients Json
+  /// [AggregateLabelJson]
+  label Json
+  updated DateTime  @updatedAt
+  recipe  Recipe  @relation(fields: [recipeId], references: [id])
+  recipeId  String @unique
+}
+
 
 // BREAKFAST, LUNCH, DINNER, SNACK
 model Course {
@@ -442,6 +456,7 @@ model NutritionLabel {
   servingsUsed      Float?
   isPrimary         Boolean                  @default(false)
   importRecords     ImportRecord[]
+  updated DateTime  @updatedAt
   // @@map("nutrition_label")
 
   @@unique([recipeId, ingredientGroupId])
