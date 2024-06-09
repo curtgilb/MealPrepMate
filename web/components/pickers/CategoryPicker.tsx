@@ -6,7 +6,7 @@ import { useMutation, useQuery } from "@urql/next";
 import { TagList } from "../ui/taglist";
 import { Category } from "@/gql/graphql";
 import { Label } from "../ui/label";
-import { Combobox } from "../ui/picker";
+import { Picker } from "../ui/picker";
 
 const getCategoriesQuery = graphql(`
   query fetchCategories($search: String) {
@@ -63,8 +63,8 @@ export function CategoryPicker({
       <div className="grid gap-1.5">
         <Label>Categories</Label>
         {data?.categories && (
-          <Combobox<(typeof data.categories)[0]>
-            items={data.categories}
+          <Picker<(typeof data.categories)[0]>
+            options={data.categories}
             id="id"
             label="name"
             selectedItems={selectedItems}

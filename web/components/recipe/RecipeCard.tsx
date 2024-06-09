@@ -1,38 +1,38 @@
-import { FragmentType, graphql, useFragment } from "@/gql";
-import Image from "next/image";
-import { Card } from "../generics/Card";
+"use client";
+import { FragmentType, useFragment } from "@/gql";
 import { recipeSearchFragment } from "@/graphql/recipe/getRecipe";
-import { Button } from "../ui/button";
-import { PlusCircle } from "lucide-react";
+import { useState } from "react";
+import { Card } from "../generics/Card";
 import { ModalDrawer } from "../ModalDrawer";
+import { NumberInput } from "../ui/number-input";
+import { RecipeSearchFieldsFragment } from "@/gql/graphql";
+import AnimatedNumbers from "react-animated-numbers";
+import { Button } from "../ui/button";
+import { AddRecipeDialog } from "../mealplan/AddRecipeDialog";
 
 interface RecipeCardProps {
   recipe: FragmentType<typeof recipeSearchFragment>;
 }
 
-export default function RecipeCard({ recipe }: RecipeCardProps) {
-  const tRecipe = useFragment(recipeSearchFragment, recipe);
-  const photoUrls = tRecipe.photos.map((photo) => {});
+type AggregateLabelFields = RecipeSearchFieldsFragment["aggregateLabel"];
+
+export default function RecipeCard({ recipe: input }: RecipeCardProps) {
+  const recipe = useFragment(recipeSearchFragment, input);
+
+  const photoUrls = recipe.photos.map((photo) => {});
 
   return (
     <ModalDrawer
-      title="Add to meal plan"
-      content={<p>asdf</p>}
+      title={recipe.name}
+      content={<AddRecipeDialog recipe={recipe} />}
       trigger={
         <Card
           urls={[]}
-          altText={`Photo of ${tRecipe.name} recipe`}
+          altText={`Photo of ${recipe.name} recipe`}
           vertical={false}
         >
-          <p className="text-sm line-clamp-1 font-semibold">{tRecipe.name}</p>
-          <p className="text-sm">
-            {tRecipe.aggregateLabel?.servings} servings
-            {tRecipe.aggregateLabel?.caloriesPerServing
-              ? `(${Math.round(
-                  tRecipe.aggregateLabel?.caloriesPerServing
-                )} calories)`
-              : null}
-          </p>
+          <p className="text-sm line-clamp-1 font-semibold">{recipe.name}</p>
+          <p className="text-sm"></p>
         </Card>
       }
     />

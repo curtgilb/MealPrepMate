@@ -194,8 +194,10 @@ async function loadMealPlan() {
 }
 
 async function loadRecipes() {
-  await createHalalChicken();
-  await createChickenGyro();
+  const halal = await createHalalChicken();
+  const gyro = await createChickenGyro();
+  await db.recipe.updateAggregateLabel(halal.id);
+  await db.recipe.updateAggregateLabel(gyro.id);
 }
 
 async function loadNotificationSettings() {

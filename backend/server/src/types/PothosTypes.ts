@@ -1,5 +1,5 @@
 /* eslint-disable */
-import type { Prisma, Notification, ScheduledPlan, MealPlan, NotificationSetting, MealPlanServing, MealPlanRecipe, Import, ImportRecord, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, GroceryStore, Receipt, ReceiptLine, WebScrapedRecipe, Recipe, AggregateLabel, Course, Category, Cuisine, Photo, NutritionLabel, NutritionLabelNutrient, Nutrient, NutrientImportMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
+import type { Prisma, Notification, ScheduledPlan, MealPlan, NotificationSetting, MealPlanServing, MealPlanRecipe, Import, ImportItem, ImportDraft, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, GroceryStore, Receipt, ReceiptLine, WebScrapedRecipe, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, AggregateLabel, NutritionLabelNutrient, AggLabelNutrient, Nutrient, NutrientImportMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
 export default interface PrismaTypes {
     Notification: {
         Name: "Notification";
@@ -148,19 +148,19 @@ export default interface PrismaTypes {
         ListRelations: "importRecords";
         Relations: {
             importRecords: {
-                Shape: ImportRecord[];
-                Name: "ImportRecord";
+                Shape: ImportItem[];
+                Name: "ImportItem";
             };
         };
     };
-    ImportRecord: {
-        Name: "ImportRecord";
-        Shape: ImportRecord;
-        Include: Prisma.ImportRecordInclude;
-        Select: Prisma.ImportRecordSelect;
-        OrderBy: Prisma.ImportRecordOrderByWithRelationAndSearchRelevanceInput;
-        WhereUnique: Prisma.ImportRecordWhereUniqueInput;
-        Where: Prisma.ImportRecordWhereInput;
+    ImportItem: {
+        Name: "ImportItem";
+        Shape: ImportItem;
+        Include: Prisma.ImportItemInclude;
+        Select: Prisma.ImportItemSelect;
+        OrderBy: Prisma.ImportItemOrderByWithRelationAndSearchRelevanceInput;
+        WhereUnique: Prisma.ImportItemWhereUniqueInput;
+        Where: Prisma.ImportItemWhereInput;
         Create: {};
         Update: {};
         RelationName: "import" | "recipe" | "nutritionLabel" | "ingredientGroup";
@@ -183,6 +183,20 @@ export default interface PrismaTypes {
                 Name: "RecipeIngredientGroup";
             };
         };
+    };
+    ImportDraft: {
+        Name: "ImportDraft";
+        Shape: ImportDraft;
+        Include: never;
+        Select: Prisma.ImportDraftSelect;
+        OrderBy: Prisma.ImportDraftOrderByWithRelationAndSearchRelevanceInput;
+        WhereUnique: Prisma.ImportDraftWhereUniqueInput;
+        Where: Prisma.ImportDraftWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: never;
+        ListRelations: never;
+        Relations: {};
     };
     RecipeIngredient: {
         Name: "RecipeIngredient";
@@ -225,8 +239,8 @@ export default interface PrismaTypes {
         Where: Prisma.MeasurementUnitWhereInput;
         Create: {};
         Update: {};
-        RelationName: "ingredients" | "nutrients" | "ingredientPrice" | "servingSizes" | "fromUnit" | "toUnit" | "recieptItems";
-        ListRelations: "ingredients" | "nutrients" | "ingredientPrice" | "servingSizes" | "fromUnit" | "toUnit" | "recieptItems";
+        RelationName: "ingredients" | "nutrients" | "ingredientPrice" | "servingSizes" | "aggServingSizes" | "fromUnit" | "toUnit" | "recieptItems";
+        ListRelations: "ingredients" | "nutrients" | "ingredientPrice" | "servingSizes" | "aggServingSizes" | "fromUnit" | "toUnit" | "recieptItems";
         Relations: {
             ingredients: {
                 Shape: RecipeIngredient[];
@@ -243,6 +257,10 @@ export default interface PrismaTypes {
             servingSizes: {
                 Shape: NutritionLabel[];
                 Name: "NutritionLabel";
+            };
+            aggServingSizes: {
+                Shape: AggregateLabel[];
+                Name: "AggregateLabel";
             };
             fromUnit: {
                 Shape: MeasurementConversion[];
@@ -284,8 +302,8 @@ export default interface PrismaTypes {
                 Name: "NutritionLabel";
             };
             importRecords: {
-                Shape: ImportRecord[];
-                Name: "ImportRecord";
+                Shape: ImportItem[];
+                Name: "ImportItem";
             };
         };
     };
@@ -566,8 +584,8 @@ export default interface PrismaTypes {
                 Name: "RecipeIngredientGroup";
             };
             importRecord: {
-                Shape: ImportRecord[];
-                Name: "ImportRecord";
+                Shape: ImportItem[];
+                Name: "ImportItem";
             };
             bookmarkUrl: {
                 Shape: WebScrapedRecipe | null;
@@ -576,25 +594,6 @@ export default interface PrismaTypes {
             aggregateLabel: {
                 Shape: AggregateLabel | null;
                 Name: "AggregateLabel";
-            };
-        };
-    };
-    AggregateLabel: {
-        Name: "AggregateLabel";
-        Shape: AggregateLabel;
-        Include: Prisma.AggregateLabelInclude;
-        Select: Prisma.AggregateLabelSelect;
-        OrderBy: Prisma.AggregateLabelOrderByWithRelationAndSearchRelevanceInput;
-        WhereUnique: Prisma.AggregateLabelWhereUniqueInput;
-        Where: Prisma.AggregateLabelWhereInput;
-        Create: {};
-        Update: {};
-        RelationName: "recipe";
-        ListRelations: never;
-        Relations: {
-            recipe: {
-                Shape: Recipe;
-                Name: "Recipe";
             };
         };
     };
@@ -704,8 +703,35 @@ export default interface PrismaTypes {
                 Name: "MeasurementUnit";
             };
             importRecords: {
-                Shape: ImportRecord[];
-                Name: "ImportRecord";
+                Shape: ImportItem[];
+                Name: "ImportItem";
+            };
+        };
+    };
+    AggregateLabel: {
+        Name: "AggregateLabel";
+        Shape: AggregateLabel;
+        Include: Prisma.AggregateLabelInclude;
+        Select: Prisma.AggregateLabelSelect;
+        OrderBy: Prisma.AggregateLabelOrderByWithRelationAndSearchRelevanceInput;
+        WhereUnique: Prisma.AggregateLabelWhereUniqueInput;
+        Where: Prisma.AggregateLabelWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "recipe" | "nutrients" | "servingSizeUnit";
+        ListRelations: "nutrients";
+        Relations: {
+            recipe: {
+                Shape: Recipe;
+                Name: "Recipe";
+            };
+            nutrients: {
+                Shape: AggLabelNutrient[];
+                Name: "AggLabelNutrient";
+            };
+            servingSizeUnit: {
+                Shape: MeasurementUnit | null;
+                Name: "MeasurementUnit";
             };
         };
     };
@@ -732,6 +758,29 @@ export default interface PrismaTypes {
             };
         };
     };
+    AggLabelNutrient: {
+        Name: "AggLabelNutrient";
+        Shape: AggLabelNutrient;
+        Include: Prisma.AggLabelNutrientInclude;
+        Select: Prisma.AggLabelNutrientSelect;
+        OrderBy: Prisma.AggLabelNutrientOrderByWithRelationAndSearchRelevanceInput;
+        WhereUnique: Prisma.AggLabelNutrientWhereUniqueInput;
+        Where: Prisma.AggLabelNutrientWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "aggLabel" | "nutrient";
+        ListRelations: never;
+        Relations: {
+            aggLabel: {
+                Shape: AggregateLabel;
+                Name: "AggregateLabel";
+            };
+            nutrient: {
+                Shape: Nutrient;
+                Name: "Nutrient";
+            };
+        };
+    };
     Nutrient: {
         Name: "Nutrient";
         Shape: Nutrient;
@@ -742,8 +791,8 @@ export default interface PrismaTypes {
         Where: Prisma.NutrientWhereInput;
         Create: {};
         Update: {};
-        RelationName: "dri" | "parentNutrient" | "subNutrients" | "NutritionLabelNutrients" | "unit" | "mappings";
-        ListRelations: "dri" | "subNutrients" | "NutritionLabelNutrients" | "mappings";
+        RelationName: "dri" | "parentNutrient" | "subNutrients" | "nutritionLabelNutrients" | "aggLabelNutrients" | "unit" | "mappings";
+        ListRelations: "dri" | "subNutrients" | "nutritionLabelNutrients" | "aggLabelNutrients" | "mappings";
         Relations: {
             dri: {
                 Shape: DailyReferenceIntake[];
@@ -757,9 +806,13 @@ export default interface PrismaTypes {
                 Shape: Nutrient[];
                 Name: "Nutrient";
             };
-            NutritionLabelNutrients: {
+            nutritionLabelNutrients: {
                 Shape: NutritionLabelNutrient[];
                 Name: "NutritionLabelNutrient";
+            };
+            aggLabelNutrients: {
+                Shape: AggLabelNutrient[];
+                Name: "AggLabelNutrient";
             };
             unit: {
                 Shape: MeasurementUnit;

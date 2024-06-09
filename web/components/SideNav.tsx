@@ -1,49 +1,123 @@
 "use client";
-
 import { usePathname } from "next/navigation";
-import { LucideIcon } from "lucide-react";
+import {
+  Apple,
+  CalendarDays,
+  FolderInput,
+  Home,
+  HomeIcon,
+  Library,
+  LucideIcon,
+  Package2,
+  Settings,
+  Target,
+  UtensilsCrossed,
+} from "lucide-react";
 import Link from "next/link";
-import { buttonVariants } from "./ui/button";
+import { Button, buttonVariants } from "./ui/button";
 import { cn } from "@/lib/utils";
 import Icon from "./Icon";
 import dynamicIconImports from "lucide-react/dynamicIconImports";
 
+import { motion } from "framer-motion";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+export const navigationLinks = [
+  {
+    title: "Meal Plans",
+    icon: <UtensilsCrossed className="h-4 w-4" />,
+    link: "/mealplans",
+  },
+  {
+    title: "Recipes",
+    icon: <Library className="h-4 w-4" />,
+    link: "/recipes",
+  },
+  {
+    title: "Calendar",
+    icon: <CalendarDays className="h-4 w-4" />,
+    link: "/calendar",
+  },
+  {
+    title: "Ingredients",
+    icon: <Apple className="h-4 w-4" />,
+    link: "/ingredients",
+  },
+  {
+    title: "Nutrition Targets",
+    icon: <Target className="h-4 w-4" />,
+    link: "/nutrition",
+  },
+  {
+    title: "Imports",
+    icon: <FolderInput className="h-4 w-4" />,
+    link: "/imports",
+  },
+];
+
 interface SideNavProps {
   isCollapsed: boolean;
-  links: NavLink[];
 }
 
-interface NavLink {
-  title: string;
-  label?: string;
-  icon: keyof typeof dynamicIconImports;
-  link: string;
-}
+const containerVariants = {
+  close: {
+    width: "8rem",
+    transition: {
+      type: "spring",
+      damping: 15,
+      duration: 0.5,
+    },
+  },
+  open: {
+    width: "14rem",
+    transition: {
+      type: "spring",
+      damping: 15,
+      duration: 0.5,
+    },
+  },
+};
 
-function SideNav({ isCollapsed, links }: SideNavProps) {
-  const pathName = usePathname();
+function Navigation({ isCollapsed }: SideNavProps) {
   return (
-    <div className="space-y-4 py-4 px-4 w-56 flex flex-col border-r h-full">
-      {links.map((item, index) => {
-        const activeLink = pathName === item.link ? "default" : "ghost";
-        return (
-          <Link
-            key={index}
-            href={item.link}
-            className={cn(
-              buttonVariants({ variant: activeLink, size: "sm" }),
-              pathName === item.link &&
-                "dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white",
-              "justify-start"
-            )}
-          >
-            <Icon name={item.icon} className="mr-2 h-4 w-4" />
-            {item.title}
-          </Link>
-        );
-      })}
-    </div>
+    <aside>
+      <nav className="flex flex-col z-10 h-full border-r bg-card p-4 gap-y-2">
+        {navigationLinks.map((link) => {
+          return <NavigationItem key={link.link} {...link}></NavigationItem>;
+        })}
+      </nav>
+    </aside>
   );
 }
 
-export { SideNav, type NavLink };
+export { Navigation, type NavLink };
+
+interface NavLink {
+  title: string;
+  icon: JSX.Element;
+  link: string;
+}
+
+function NavigationItem({ title, icon, link }: NavLink) {
+  const pathName = usePathname();
+  const activeLink = pathName.startsWith(link) ? "default" : "ghost";
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <Button variant={activeLink} size="icon" asChild>
+            <Link href={link}>{icon}</Link>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="right">
+          <p>{title}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}

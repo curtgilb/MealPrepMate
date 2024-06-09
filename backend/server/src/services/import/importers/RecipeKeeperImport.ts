@@ -118,7 +118,7 @@ class RecipeKeeperImport extends Importer {
           nutritionLabel: labelInput,
           matchingRecipeId: match.recipeMatchId,
           update: false,
-          verifed: false,
+          verified: false,
           ingredientMatcher,
         });
         item.dbStmt = stmt;
@@ -163,7 +163,7 @@ class RecipeKeeperImport extends Importer {
             nutritionLabels: record.nutritionLabelId
               ? { connect: { id: record.nutritionLabelId } }
               : {},
-            isVerified: true,
+            verified: true,
           },
         });
 
@@ -176,7 +176,7 @@ class RecipeKeeperImport extends Importer {
       }
       await tx.importRecord.update({
         where: { id: record.id },
-        data: { verifed: true, recipeId: record.draftId, draftId: null },
+        data: { verified: true, recipeId: record.draftId, draftId: null },
       });
     });
   }

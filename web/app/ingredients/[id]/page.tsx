@@ -14,37 +14,36 @@ import { Citrus } from "lucide-react";
 import { PriceHistoryGroup } from "@/components/charts/PriceHistoryGroup";
 import { SmallCard } from "@/components/generics/SmallCard";
 
-const ingredientQuery = graphql(`query GetIngredient($id: String!) {
-  query fetchIngredients($id: String!) {
-  ingredient(ingredientId: $id) {
-    id
-    name
-    alternateNames
-    storageInstructions
-    expiration {
-      ...ExpirationRuleFields
-    }
-    priceHistory {
+const ingredientQuery = graphql(`
+  query GetIngredient($id: String!) {
+    ingredient(ingredientId: $id) {
       id
-      date
-      foodType
-      groceryStore {
-        id
-        name
+      name
+      alternateNames
+      storageInstructions
+      expiration {
+        ...ExpirationRuleFields
       }
-      price
-      pricePerUnit
-      quantity
-      unit {
+      priceHistory {
         id
-        name
-        symbol
+        date
+        foodType
+        groceryStore {
+          id
+          name
+        }
+        price
+        pricePerUnit
+        quantity
+        unit {
+          id
+          name
+          symbol
+        }
       }
-      
     }
   }
-}
-}`);
+`);
 
 const items = [
   { id: "1", name: "Hass Avocado" },

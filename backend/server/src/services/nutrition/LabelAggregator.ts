@@ -1,7 +1,7 @@
-import { NutritionLabel } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { db } from "../../db.js";
-import { LabelMaker } from "./LabelMaker.js";
 import { LabelWithNutrients } from "../../types/CustomTypes.js";
+import { LabelMaker } from "./LabelMaker.js";
 
 export type SummedNutrients = Map<
   string,
@@ -31,7 +31,6 @@ export class LabelAggregator {
   private async getLabels() {
     const labels = await db.nutritionLabel.findMany({
       where: {
-        verifed: true,
         recipeId: this.recipeId,
       },
       include: { nutrients: true, servingSizeUnit: true },
@@ -41,33 +40,52 @@ export class LabelAggregator {
     return labels;
   }
 
-  private async retrieveSavedData() {
-    this.primaryLabel = await db.nutritionLabel.findFirst({
-      where: { verifed: true, recipeId: this.recipeId, isPrimary: true },
-      include: { nutrients: true, servingSizeUnit: true },
-    });
-    this.servings = this.primaryLabel?.servings ?? this.servings;
-    const agg = await db.aggregateLabel.findUniqueOrThrow({
-      where: { recipeId: this.recipeId },
-    });
-    return agg.nutrients;
-  }
-
-  async createNutrientTotals() {
+  async upsertAggregateLabel() {
     const nutrients = await this.sumNutrients();
-    return { nutrients: nutrients, label: this.createLabel(nutrients) };
-  }
+    const agg = { nutrients: nutrients, label: this.createLabel(nutrients) };
+    const nutrientCreateInput: Prisma.AggLabelNutrientCreateManyAggLabelInput[] =
+      [];
 
-  async scaleLabel(scale: ScalingArgs) {
-    const summedNutrients = await this.retrieveSavedData();
+    agg.nutrients.forEach((sum, nutrientId) => {
+      nutrientCreateInput.push({
+        value: sum.total,
+        valuePerServing: sum.perServing,
+        nutrientId: nutrientId,
+      });
+    });
 
-    const scaledNutrients = this.scaleNutrients(
-      summedNutrients,
-      scale.totalServings ?? this.servings,
-      scale.factor ?? 1
-    );
-
-    return this.createLabel(scaledNutrients, scale);
+    await db.aggregateLabel.upsert({
+      where: { id: this.recipeId },
+      update: {
+        servings: agg.label.servings,
+        servingSize: agg.label.servingSize,
+        servingSizeUnit: agg.label.servingUnit?.id
+          ? { connect: { id: agg.label.servingUnit?.id } }
+          : undefined,
+        protein: agg.label.protein,
+        carbs: agg.label.carbs,
+        fat: agg.label.fat,
+        alcohol: agg.label.alcohol,
+        totalCalories: agg.label.calories,
+        caloriesPerServing: agg.label.calories / (agg.label.servings ?? 1),
+        nutrients: { createMany: { data: nutrientCreateInput } },
+      },
+      create: {
+        recipe: { connect: { id: this.recipeId } },
+        servings: agg.label.servings,
+        servingSize: agg.label.servingSize,
+        servingSizeUnit: agg.label.servingUnit?.id
+          ? { connect: { id: agg.label.servingUnit?.id } }
+          : undefined,
+        protein: agg.label.protein,
+        carbs: agg.label.carbs,
+        fat: agg.label.fat,
+        alcohol: agg.label.alcohol,
+        totalCalories: agg.label.calories,
+        caloriesPerServing: agg.label.calories / (agg.label.servings ?? 1),
+        nutrients: { createMany: { data: nutrientCreateInput } },
+      },
+    });
   }
 
   // Adds labels to be aggregated

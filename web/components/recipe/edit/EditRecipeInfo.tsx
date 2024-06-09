@@ -38,27 +38,27 @@ export function EditRecipeInfo({ recipe }: GetRecipeQuery) {
             id="prep_time"
             label="Prep Time"
             value={prepTime}
-            setValue={setPrepTime}
+            onUpdate={setPrepTime}
           />
 
           <TimeNumberInput
             id="marinade_time"
             label="Marinade/Rest Time"
             value={marinadeTime}
-            setValue={setMarinadeTime}
+            onUpdate={setMarinadeTime}
           />
 
           <TimeNumberInput
             id="cook_time"
             label="Cook Time"
             value={cookTime}
-            setValue={setCookTime}
+            onUpdate={setCookTime}
           />
           <TimeNumberInput
             id="total_time"
             label="Total Time"
             value={placeholderTotalTime}
-            setValue={setTotalTime}
+            onUpdate={setTotalTime}
           />
         </Fieldset>
         <Fieldset name="Leftover">

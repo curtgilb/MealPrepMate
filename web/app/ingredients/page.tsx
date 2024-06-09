@@ -1,15 +1,12 @@
 "use client";
-import { useQuery, gql } from "@urql/next";
-import { graphql } from "@/gql";
-import { Loader2, Plus, Search, Upload } from "lucide-react";
-import { InputWithIcon } from "@/components/ui/InputWithIcon";
-import IngredientCard from "@/components/ingredient/IngredientCard";
+import { SearchRoot } from "@/components/ingredient/SearchRoot";
+import { ReceiptUpload } from "@/components/receipt/ReceiptUpload";
 import { Button } from "@/components/ui/button";
+import { InputWithIcon } from "@/components/ui/InputWithIcon";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Loader2, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { SearchRoot } from "@/components/ingredient/SearchRoot";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ReceiptUpload } from "@/components/receipt/ReceiptUpload";
 
 export default function IngredientsPage() {
   const [search, setSearch] = useState<string>();

@@ -23,12 +23,11 @@ const ingredientGroups: Prisma.RecipeIngredientGroupCreateInput[] = [
 
 const nutritionLabels: Prisma.NutritionLabelCreateInput[] = [
   {
-    name: "Street Cart Chicken & Yellow Rice (Red Sauce)",
     servings: 2,
     servingsUsed: 1,
     isPrimary: false,
     recipe: { connect: { id: RECIPE_ID } },
-    verifed: true,
+    verified: true,
     ingredientGroup: {
       connect: { id: "clt6uhm4c00070sv9813e4t2v" },
     },
@@ -100,11 +99,10 @@ const nutritionLabels: Prisma.NutritionLabelCreateInput[] = [
     },
   },
   {
-    name: "Street Cart Chicken & Yellow Rice (White Sauce)",
     servings: 4,
     servingsUsed: 3,
     isPrimary: false,
-    verifed: true,
+    verified: true,
     recipe: { connect: { id: RECIPE_ID } },
     ingredientGroup: {
       connect: { id: "clt6uhm4c00060sv96su7dp36" },
@@ -194,12 +192,11 @@ const nutritionLabels: Prisma.NutritionLabelCreateInput[] = [
     },
   },
   {
-    name: "Street Cart Chicken & Yellow Rice (Rice)",
     servings: 1,
     servingsUsed: 1,
     isPrimary: false,
     recipe: { connect: { id: RECIPE_ID } },
-    verifed: true,
+    verified: true,
     ingredientGroup: {
       connect: { id: "clt6uhm4c00050sv9a0i62syo" },
     },
@@ -284,11 +281,10 @@ const nutritionLabels: Prisma.NutritionLabelCreateInput[] = [
     },
   },
   {
-    name: "Street Cart Chicken & Yellow Rice",
     servings: 4,
     isPrimary: true,
     recipe: { connect: { id: RECIPE_ID } },
-    verifed: true,
+    verified: true,
     nutrients: {
       createMany: {
         data: [
@@ -416,7 +412,7 @@ const recipe: Prisma.RecipeCreateInput = {
   Serve a portion of chicken & rice on a plate and drizzle with both of the sauces, as desired.
   Optional: serve with pita bread or fresh vegetables/herbs for garnish`,
   isFavorite: false,
-  isVerified: true,
+  verified: true,
 };
 
 const ingredients: Prisma.RecipeIngredientCreateManyInput[] = [
@@ -782,6 +778,7 @@ async function createHalalChicken() {
 
       return await tx.recipe.findUniqueOrThrow({ where: { id: RECIPE_ID } });
     }
+
     return existingRecipe;
   });
 }

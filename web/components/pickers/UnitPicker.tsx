@@ -3,7 +3,9 @@ import { graphql } from "@/gql";
 import { useMutation, useQuery } from "@urql/next";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Label } from "../ui/label";
-import { Combobox } from "../ui/picker";
+import { Picker } from "../ui/picker";
+import { FetchUnitsQuery } from "@/gql/graphql";
+import { ItemPickerProps } from "./Picker";
 
 const getUnitsQuery = graphql(`
   query fetchUnits($search: String, $pagination: OffsetPagination!) {
@@ -31,13 +33,16 @@ const createUnitMutation = graphql(`
   }
 `);
 
-interface PickerProps {
-  value: string | undefined;
-  setValue: Dispatch<SetStateAction<string | undefined>>;
-  defaultValue?: string;
-}
+type UnitItem = FetchUnitsQuery["units"]["items"][0];
 
-export function UnitPicker({ value, setValue, defaultValue }: PickerProps) {
+export function UnitPicker({
+  select,
+  deselect,
+  selectedIds,
+  create,
+  placeholder,
+  multiselect,
+}: ItemPickerProps<UnitItem>) {
   const [search, setSearch] = useState<string>();
   const [result, reexecuteQuery] = useQuery({
     query: getUnitsQuery,
@@ -47,24 +52,18 @@ export function UnitPicker({ value, setValue, defaultValue }: PickerProps) {
   const { data, fetching, error } = result;
 
   return (
-    <div className="grid gap-1.5">
-      <Label>Unit</Label>
-      {data?.units.items && (
-        <Combobox<(typeof data.units.items)[0]>
-          items={data.units.items}
-          id="id"
-          label="name"
-          value={value}
-          autoFilter={false}
-          onSearchUpdate={setSearch}
-          defaultValue={defaultValue}
-          placeholder="Select unit"
-          createItem={(value: string) => {
-            createUnit({ unit: { name: value, abbreviations: [] } });
-          }}
-          setValue={setValue}
-        />
-      )}
-    </div>
+    <Picker<UnitItem>
+      options={data?.units.items ?? []}
+      id="id"
+      label="name"
+      autoFilter={false}
+      onSearchUpdate={setSearch}
+      placeholder={placeholder}
+      fetching={fetching}
+      multiselect={multiselect}
+      selectedIds={selectedIds}
+      select={select}
+      deselect={deselect}
+    />
   );
 }

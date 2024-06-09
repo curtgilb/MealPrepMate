@@ -3,8 +3,10 @@ import { graphql } from "@/gql";
 import { useMutation, useQuery } from "@urql/next";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Label } from "../ui/label";
-import { Combobox } from "../ui/picker";
+import { Picker } from "../ui/picker";
 import { Separator } from "../ui/separator";
+import { FetchIngredientsListQuery } from "@/gql/graphql";
+import { ItemPickerProps } from "./Picker";
 
 const getIngredientList = graphql(`
   query fetchIngredientsList($search: String, $pagination: OffsetPagination!) {
@@ -28,46 +30,48 @@ const createIngredientMutation = graphql(`
   }
 `);
 
-interface PickerProps {
-  value: string | undefined;
-  setValue: Dispatch<SetStateAction<string | undefined>>;
-  defaultValue?: string;
-}
+export type IngredientItem =
+  FetchIngredientsListQuery["ingredients"]["ingredients"][0];
 
 export function IngredientPicker({
-  value,
-  setValue,
-  defaultValue,
-}: PickerProps) {
+  select,
+  deselect,
+  selectedIds,
+  placeholder,
+  create,
+  multiselect,
+}: ItemPickerProps<IngredientItem>) {
   const [search, setSearch] = useState<string>();
-  const [result, reexecuteQuery] = useQuery({
+  const [result] = useQuery({
     query: getIngredientList,
     variables: { search: search, pagination: { offset: 0, take: 10 } },
   });
+
   const [unitMutation, createIngredient] = useMutation(
     createIngredientMutation
   );
   const { data, fetching, error } = result;
 
   return (
-    <div className="grid gap-1.5">
-      <Label>Ingredient</Label>
-      {data?.ingredients.ingredients && (
-        <Combobox<(typeof data.ingredients.ingredients)[0]>
-          items={data.ingredients.ingredients}
-          id="id"
-          label="name"
-          value={value}
-          autoFilter={false}
-          onSearchUpdate={setSearch}
-          defaultValue={defaultValue}
-          placeholder="Select ingredient"
-          createItem={(value: string) => {
-            createIngredient({ ingredient: { name: value } });
-          }}
-          setValue={setValue}
-        />
-      )}
-    </div>
+    <Picker<IngredientItem>
+      options={data?.ingredients.ingredients ?? []}
+      id="id"
+      label="name"
+      autoFilter={false}
+      onSearchUpdate={setSearch}
+      placeholder={placeholder}
+      fetching={fetching}
+      multiselect={multiselect}
+      selectedIds={selectedIds}
+      select={select}
+      deselect={deselect}
+      createItem={
+        create
+          ? (name) => {
+              createIngredient({ ingredient: { name } });
+            }
+          : undefined
+      }
+    />
   );
 }

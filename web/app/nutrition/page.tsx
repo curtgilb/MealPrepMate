@@ -1,64 +1,8 @@
 "use client";
-import { FragmentType, graphql, useFragment } from "@/gql";
-
-import { getClient } from "@/ssrGraphqlClient";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  GetNutrientsQuery,
-  Nutrient,
-  NutrientFieldsFragment,
-  NutrientType,
-} from "@/gql/graphql";
-import { string } from "zod";
-import { toTitleCase } from "@/utils/utils";
-import { useQuery } from "urql";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import { MacroPieChart } from "@/components/nutrition/charts/MacroPieChart";
 import { Nutrition } from "@/components/nutrition/NutritionLabel";
-
-const nutritionFields = graphql(`
-  fragment NutrientFields on Nutrient {
-    id
-    alternateNames
-    customTarget
-    dri {
-      value
-    }
-    name
-    parentNutrientId
-    type
-    unit {
-      id
-      name
-      symbol
-      abbreviations
-    }
-  }
-`);
-
-type NutrientMap = {
-  [key: string]: NutrientFieldsFragment[];
-};
-
-const getNutrientsQuery = graphql(`
-  query getNutrients($advanced: Boolean!) {
-    nutrients(pagination: { take: 400, offset: 0 }, advanced: $advanced) {
-      items {
-        ...NutrientFields
-      }
-    }
-  }
-`);
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { useState } from "react";
 
 export default function NutritionPage() {
   const [advanced, setAdvanced] = useState<boolean>(false);

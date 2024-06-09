@@ -12,6 +12,7 @@ import {
   buildRecipeIngredientStmt,
   buildRecipeStmt,
 } from "./RecipeStmtBuilder.js";
+import { LabelAggregator } from "../services/nutrition/LabelAggregator.js";
 
 type RecipeQuery = {
   include?: Prisma.RecipeInclude | undefined;
@@ -29,7 +30,7 @@ async function createRecipeCreateStmt(input: {
   matchingRecipeId?: string;
   ingredientMatcher: IngredientMatcher;
   update: boolean;
-  verifed: boolean;
+  verified: boolean;
 }) {
   // Create ingredient stmt
   const ingredients = await createRecipeIngredientsStmt({
@@ -43,7 +44,7 @@ async function createRecipeCreateStmt(input: {
     ? createNutritionLabelStmt(
         {
           label: input.nutritionLabel,
-          verifed: input.verifed,
+          verified: input.verified,
           createRecipe: false,
         },
         true
@@ -54,7 +55,7 @@ async function createRecipeCreateStmt(input: {
   return buildRecipeStmt(
     {
       recipe: input.recipe,
-      verifed: input.verifed,
+      verified: input.verified,
       ingredients,
       nutritionLabel,
     },
@@ -94,7 +95,7 @@ const recipeExtensions = Prisma.defineExtension((client) => {
           const matcher = new IngredientMatcher();
           const stmt = await createRecipeCreateStmt({
             recipe,
-            verifed: true,
+            verified: true,
             ingredientMatcher: matcher,
             update: false,
           });
@@ -110,9 +111,13 @@ const recipeExtensions = Prisma.defineExtension((client) => {
         ): Promise<Recipe> {
           return await client.recipe.update({
             where: { id: recipeId },
-            data: buildRecipeStmt({ recipe, verifed: undefined }, true),
+            data: buildRecipeStmt({ recipe, verified: undefined }, true),
             ...query,
           });
+        },
+        async updateAggregateLabel(recipeId: string) {
+          const aggregator = new LabelAggregator(recipeId);
+          await aggregator.upsertAggregateLabel();
         },
         async updateRecipeIngredients(
           recipe: RecipeIngredientUpdateInput,

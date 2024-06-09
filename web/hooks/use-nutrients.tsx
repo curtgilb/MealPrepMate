@@ -3,40 +3,14 @@ import { FragmentType, graphql, useFragment } from "@/gql";
 import { NutrientFieldsFragment } from "@/gql/graphql";
 import { useQuery } from "@urql/next";
 import { useMemo } from "react";
-
-const nutritionFields = graphql(`
-  fragment NutrientFields on Nutrient {
-    id
-    alternateNames
-    customTarget
-    dri {
-      value
-    }
-    name
-    parentNutrientId
-    type
-    unit {
-      id
-      name
-      symbol
-      abbreviations
-    }
-  }
-`);
+import {
+  getNutrientsQuery,
+  nutritionFieldsFragment,
+} from "@/graphql/nutrition/nutrients";
 
 export type NutrientMap = {
   [key: string]: NutrientFieldsFragment[];
 };
-
-const getNutrientsQuery = graphql(`
-  query getNutrients($advanced: Boolean!) {
-    nutrients(pagination: { take: 400, offset: 0 }, advanced: $advanced) {
-      items {
-        ...NutrientFields
-      }
-    }
-  }
-`);
 
 export function useNutrients(advanced: boolean) {
   const [result, executeQuery] = useQuery({
@@ -46,7 +20,11 @@ export function useNutrients(advanced: boolean) {
     },
   });
   const { data, fetching, error } = result;
-  const nutrients = useFragment(nutritionFields, data?.nutrients.items);
+  const nutrients = useFragment(nutritionFieldsFragment, data?.nutrients.items);
+
+  const importantNutrients = nutrients?.filter(
+    (nutrient) => nutrient.important
+  );
 
   const childLookup = useMemo(() => {
     if (!nutrients) return {};
@@ -74,5 +52,9 @@ export function useNutrients(advanced: boolean) {
       }, {} as NutrientMap);
   }, [nutrients]);
 
-  return [groupCategory, childLookup];
+  return {
+    categorized: groupCategory,
+    childNutrients: childLookup,
+    featured: importantNutrients,
+  };
 }

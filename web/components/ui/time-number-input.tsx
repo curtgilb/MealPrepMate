@@ -8,14 +8,14 @@ interface TimeNumberInputProps {
   id: string;
   label: string;
   value: number;
-  setValue: Dispatch<SetStateAction<number>>;
+  onUpdate: (update: number) => void;
 }
 
 export function TimeNumberInput({
   id,
   label,
   value,
-  setValue,
+  onUpdate: setValue,
 }: TimeNumberInputProps) {
   const hours = Math.floor(value / 60);
   const mins = value % 60;
@@ -26,7 +26,7 @@ export function TimeNumberInput({
         <div>
           <p className="text-xs text-muted-foreground">Hours</p>
           <InputWithIcon
-            className="text-center"
+            className="text-center h-8"
             startIcon={Minus}
             endIcon={Plus}
             value={hours}
@@ -39,7 +39,6 @@ export function TimeNumberInput({
               }
             }}
             onStartClick={() => {
-              console.log("hello");
               setValue(value - 60);
             }}
             onEndClick={() => {
@@ -51,7 +50,7 @@ export function TimeNumberInput({
         <div>
           <p className="text-xs text-muted-foreground">Minutes</p>
           <InputWithIcon
-            className="text-center"
+            className="text-center h-8"
             startIcon={Minus}
             endIcon={Plus}
             value={mins}

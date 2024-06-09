@@ -19,7 +19,7 @@ export const getRecipeQuery = graphql(`
       leftoverFreezerLife
       marinadeTime
       totalTime
-      verifed
+      verified
       notes
       photos {
         id
@@ -39,9 +39,23 @@ export const recipeSearchFragment = graphql(`
   fragment RecipeSearchFields on Recipe {
     id
     name
-    verifed
+    verified
+    ingredients {
+      id
+      sentence
+      quantity
+      unit {
+        id
+        name
+      }
+    }
     aggregateLabel {
-      caloriesPerServing
+      id
+      totalCalories
+      protein
+      fat
+      carbs
+      alcohol
       servings
     }
     photos {

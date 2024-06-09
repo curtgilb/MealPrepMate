@@ -32,7 +32,7 @@ async function searchIngredients(
   const matchingIngredient = await db.receiptLine.findFirst({
     where: {
       OR: [{ description: desc }, { productCode: productCode }],
-      receipt: { verifed: true, matchingStore: { name: store } },
+      receipt: { verified: true, matchingStore: { name: store } },
     },
     include: { matchingIngredient: true },
   });

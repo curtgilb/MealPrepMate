@@ -54,8 +54,7 @@ abstract class Importer {
   abstract finalize(record: ImportRecord): Promise<void>;
 
   abstract deleteDraft(
-    recordId: string,
-    draftId: string | null,
+    importRecord: ImportRecord,
     newStatus: RecordStatus
   ): Promise<void>;
 

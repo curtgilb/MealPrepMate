@@ -1,4 +1,4 @@
-   // This is your Prisma schema file,
+ // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
@@ -144,11 +144,11 @@ model Import {
   /// [ImageMapping]
   imageMapping  Json?
   createdAt     DateTime       @default(now())
-  importRecords ImportRecord[]
+  importRecords ImportItem[]
   // @@map("import")
 }
 
-model ImportRecord {
+model ImportItem {
   id                String                 @id @default(cuid())
   import            Import                 @relation(fields: [importId], references: [id])
   importId          String
@@ -157,7 +157,7 @@ model ImportRecord {
   name              String
   parsedFormat      Json
   status            RecordStatus
-  verifed           Boolean                @default(false)
+  verified           Boolean                @default(false)
   recipe            Recipe?                @relation(fields: [recipeId], references: [id])
   recipeId          String?
   nutritionLabel    NutritionLabel?        @relation(fields: [nutritionLabelId], references: [id])
@@ -166,7 +166,13 @@ model ImportRecord {
   ingredientGroupId String?
   draftId           String?
   createdAt         DateTime               @default(now())
-  // @@map("import_record")
+
+}
+
+model ImportDraft {
+    id                String                 @id @default(cuid())
+    draftId           String
+    type              EntityType
 }
 
 // Status for entire import
@@ -184,6 +190,7 @@ enum RecordStatus {
   DUPLICATE // Item already exists, if duplicate record was created, it will be deleted
   UPDATED // Item will be updated with matching recipe/ nutrition label
   IGNORED // Do not import/update, future imports will not look at it
+  FAILED // Import failed
 }
 
 model RecipeIngredient {
@@ -213,6 +220,7 @@ model MeasurementUnit {
   nutrients       Nutrient[]
   ingredientPrice IngredientPrice[]
   servingSizes    NutritionLabel[]
+  aggServingSizes AggregateLabel[]
   fromUnit        MeasurementConversion[] @relation("FromUnit")
   toUnit          MeasurementConversion[] @relation("ToUnit")
   recieptItems    ReceiptLine[]
@@ -226,7 +234,7 @@ model RecipeIngredientGroup {
   recipeId       String
   ingredients    RecipeIngredient[]
   nutritionLabel NutritionLabel?
-  importRecords  ImportRecord[]
+  importRecords  ImportItem[]
   // @@map("recipe_ingredient_group")
 
   @@unique(name: "ingredientGroup", [recipeId, name])
@@ -287,7 +295,7 @@ model IngredientPrice {
   groceryStore   GroceryStore    @relation(fields: [groceryStoreId], references: [id])
   groceryStoreId String
   price          Float
-  size       Float
+  size           Float
   foodType       FoodType?
   pricePerUnit   Float
   ingredient     Ingredient      @relation(fields: [ingredientId], references: [id])
@@ -302,14 +310,14 @@ model IngredientPrice {
 model GroceryStore {
   id               String            @id @default(cuid())
   name             String            @unique
-  receipts          Receipt[]
+  receipts         Receipt[]
   ingredientPrices IngredientPrice[]
 }
 
 model Receipt {
   id              String        @id @default(cuid())
   merchantName    String?
-  matchingStore    GroceryStore? @relation(fields: [storeId], references: [id])
+  matchingStore   GroceryStore? @relation(fields: [storeId], references: [id])
   storeId         String?
   total           Float?
   transactionDate DateTime?
@@ -317,27 +325,27 @@ model Receipt {
   path            String
   lineItems       ReceiptLine[]
   scanned         Boolean       @default(false)
-  verifed         Boolean       @default(false)
+  verified         Boolean       @default(false)
 }
 
 model ReceiptLine {
-  id              String           @id @default(cuid())
-  totalPrice      Float?
-  description     String?
-  quantity        Float?
-  perUnitPrice    Float?
-  productCode     String?
-  unitQuantity    String?
-  receipt         Receipt          @relation(fields: [receiptId], references: [id])
-  receiptId       String
-  ingredientPrice IngredientPrice?
-  matchingUnit    MeasurementUnit?  @relation(fields:[unitId], references: [id] )
-  unitId          String?
-  matchingIngredient  Ingredient? @relation(fields: [ingredientId], references: [id])
-  foodType        FoodType?
-  ingredientId String?
+  id                 String           @id @default(cuid())
+  totalPrice         Float?
+  description        String?
+  quantity           Float?
+  perUnitPrice       Float?
+  productCode        String?
+  unitQuantity       String?
+  receipt            Receipt          @relation(fields: [receiptId], references: [id])
+  receiptId          String
+  ingredientPrice    IngredientPrice?
+  matchingUnit       MeasurementUnit? @relation(fields: [unitId], references: [id])
+  unitId             String?
+  matchingIngredient Ingredient?      @relation(fields: [ingredientId], references: [id])
+  foodType           FoodType?
+  ingredientId       String?
   /// [BoundingBoxes]
-  boundingBoxes   Json
+  boundingBoxes      Json
 }
 
 enum FoodType {
@@ -358,8 +366,8 @@ model WebScrapedRecipe {
   isBookmark Boolean  @default(false)
   scraped    Boolean  @default(false)
   created    DateTime @default(now())
-  recipe     Recipe?   @relation(fields: [recipeId], references: [id])
-  recipeId   String?   @unique
+  recipe     Recipe?  @relation(fields: [recipeId], references: [id])
+  recipeId   String?  @unique
 }
 
 model Recipe {
@@ -384,27 +392,15 @@ model Recipe {
   importId            String?
   leftoverFridgeLife  Int?
   leftoverFreezerLife Int?
-  isVerified          Boolean                 @default(false)
+  verified          Boolean                 @default(false)
   nutritionLabels     NutritionLabel[]
   ingredientGroups    RecipeIngredientGroup[]
-  importRecord        ImportRecord[]
+  importRecord        ImportItem[]
   bookmarkUrl         WebScrapedRecipe?
-  aggregateLabel     AggregateLabel?
+  aggregateLabel      AggregateLabel?
 
   // @@map("recipe")
 }
-
-model AggregateLabel {
-  id String  @id @default(cuid())
-  /// [SummedNutrientMapJson]
-  nutrients Json
-  /// [AggregateLabelJson]
-  label Json
-  updated DateTime  @updatedAt
-  recipe  Recipe  @relation(fields: [recipeId], references: [id])
-  recipeId  String @unique
-}
-
 
 // BREAKFAST, LUNCH, DINNER, SNACK
 model Course {
@@ -447,19 +443,36 @@ model NutritionLabel {
   ingredientGroup   RecipeIngredientGroup?   @relation(fields: [ingredientGroupId], references: [id], onDelete: Cascade)
   ingredientGroupId String?                  @unique
   nutrients         NutritionLabelNutrient[]
-  name              String?
-  verifed           Boolean                  @default(false)
+  verified           Boolean                  @default(false)
   servings          Float?
   servingSize       Float?
   servingSizeUnit   MeasurementUnit?         @relation(fields: [unitId], references: [id])
   unitId            String?
   servingsUsed      Float?
   isPrimary         Boolean                  @default(false)
-  importRecords     ImportRecord[]
-  updated DateTime  @updatedAt
+  importRecords     ImportItem[]
+  updated           DateTime                 @updatedAt
   // @@map("nutrition_label")
 
   @@unique([recipeId, ingredientGroupId])
+}
+
+model AggregateLabel {
+  id                 String             @id @default(cuid())
+  recipe             Recipe             @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId           String             @unique
+  nutrients          AggLabelNutrient[]
+  servings           Float?
+  servingSize        Float?
+  servingSizeUnit    MeasurementUnit?   @relation(fields: [unitId], references: [id])
+  unitId             String?
+  protein            Float?
+  carbs              Float?
+  fat                Float?
+  alcohol            Float?
+  totalCalories      Float?
+  caloriesPerServing Float?
+  updated            DateTime           @updatedAt
 }
 
 model NutritionLabelNutrient {
@@ -468,9 +481,19 @@ model NutritionLabelNutrient {
   nutrient         Nutrient       @relation(fields: [nutrientId], references: [id], onDelete: Restrict)
   nutrientId       String
   value            Float
-  // @@map("nutrition_label_nutrient")
 
   @@id(name: "compoundId", [nutritionLabelId, nutrientId])
+}
+
+model AggLabelNutrient {
+  aggLabel        AggregateLabel @relation(fields: [aggLabelId], references: [id], onDelete: Cascade)
+  aggLabelId      String
+  nutrient        Nutrient       @relation(fields: [nutrientId], references: [id], onDelete: Restrict)
+  nutrientId      String
+  value           Float
+  valuePerServing Float?
+
+  @@id(name: "compoundId", [aggLabelId, nutrientId])
 }
 
 model Nutrient {
@@ -479,13 +502,15 @@ model Nutrient {
   alternateNames          String[]
   type                    NutrientType
   advancedView            Boolean
+  important               Boolean  @default(false)
   customTarget            Float?
   dri                     DailyReferenceIntake[]
   parentNutrientId        String?
   order                   Int
   parentNutrient          Nutrient?                @relation("SubNutrients", fields: [parentNutrientId], references: [id])
   subNutrients            Nutrient[]               @relation("SubNutrients")
-  NutritionLabelNutrients NutritionLabelNutrient[]
+  nutritionLabelNutrients NutritionLabelNutrient[]
+  aggLabelNutrients       AggLabelNutrient[]
   unit                    MeasurementUnit          @relation(fields: [unitId], references: [id])
   unitId                  String
   mappings                NutrientImportMapping[]

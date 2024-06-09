@@ -68,7 +68,8 @@ const RecipeIngredientUpdateValidation = z.object({
 
 const NutritionLabelValidation = z.object({
   name: cleanedStringSchema(100, toTitleCase),
-  connectingId: z.string().cuid().optional(),
+  recipeId: z.string().cuid().optional(),
+  groupId: z.string().cuid().optional(),
   servings: z.coerce.number().positive(),
   servingSize: z.coerce.number().positive().optional(),
   servingSizeUnitId: z.string().cuid().optional(),

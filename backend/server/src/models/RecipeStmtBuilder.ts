@@ -4,7 +4,7 @@ import { MatchedNlpResponse } from "./IngredientTagger.js";
 
 interface RecipeArgs {
   recipe: RecipeInput;
-  verifed: boolean | undefined;
+  verified: boolean | undefined;
   nutritionLabel?: Prisma.NutritionLabelCreateWithoutRecipeInput;
   ingredients?: Prisma.RecipeIngredientCreateNestedManyWithoutRecipeInput;
 }
@@ -18,7 +18,7 @@ function buildRecipeStmt(
   args: RecipeArgs,
   update: boolean
 ): Prisma.RecipeUpdateInput | Prisma.RecipeCreateInput {
-  const { recipe, nutritionLabel, ingredients, verifed } = args;
+  const { recipe, nutritionLabel, ingredients, verified } = args;
 
   const stmt: Prisma.RecipeUpdateInput | Prisma.RecipeCreateInput = {
     name: recipe.title,
@@ -36,7 +36,7 @@ function buildRecipeStmt(
     cuisine: createConnectManyStmt(recipe.cuisineIds, update),
     leftoverFreezerLife: recipe.leftoverFreezerLife,
     leftoverFridgeLife: recipe.leftoverFridgeLife,
-    isVerified: verifed,
+    verified: verified,
   };
 
   if (update) {

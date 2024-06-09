@@ -8,8 +8,6 @@ const createNutrientValidation = z.object({
 });
 
 const createNutritionLabelValidation = z.object({
-  name: cleanedStringSchema(30, toTitleCase),
-  ingredientGroupId: z.string().cuid().optional().nullish(),
   servings: z.number().gte(1),
   servingSize: z.number().positive().optional().nullish(),
   servingSizeUnitId: z.string().cuid().optional().nullish(),

@@ -5,8 +5,6 @@ import {
   editPriceHistoryValidation,
 } from "../../validations/IngredientValidation.js";
 import { builder } from "../builder.js";
-
-import { FoodType } from "@prisma/client";
 import { foodTypeEnum } from "./EnumSchema.js";
 
 // ============================================ Types ===================================

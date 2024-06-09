@@ -33,11 +33,7 @@ export function RecipeSearchResults({
     <>
       {recipes.map((recipe) => {
         return (
-          <RecipeCard
-            key={(recipe as { id: string }).id}
-            recipe={recipe}
-            smallCard={smallCards}
-          />
+          <RecipeCard key={(recipe as { id: string }).id} recipe={recipe} />
         );
       })}
 
@@ -85,11 +81,7 @@ function SearchPage({ filters, take, skip, smallCards }: SearchPageProps) {
   return (
     <>
       {recipes?.map((recipe) => (
-        <RecipeCard
-          key={(recipe as { id: string }).id}
-          recipe={recipe}
-          smallCard={smallCards}
-        />
+        <RecipeCard key={(recipe as { id: string }).id} recipe={recipe} />
       ))}
 
       {results.data?.recipes.itemsRemaining ? (

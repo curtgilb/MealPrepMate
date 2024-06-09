@@ -23,12 +23,11 @@ const ingredientGroups: Prisma.RecipeIngredientGroupCreateInput[] = [
 
 const nutritionLabels: Prisma.NutritionLabelCreateInput[] = [
   {
-    name: "Chicken Gyro with Tzatziki Sauce (Marinade)",
     servings: 5,
     servingsUsed: 3,
     isPrimary: false,
     recipe: { connect: { id: RECIPE_ID } },
-    verifed: true,
+    verified: true,
     ingredientGroup: { connect: { id: "clt6irl0900054wv97g0e9w7v" } },
     nutrients: {
       createMany: {
@@ -113,11 +112,10 @@ const nutritionLabels: Prisma.NutritionLabelCreateInput[] = [
     },
   },
   {
-    name: "Chicken Gyro with Tzatziki Sauce",
     servings: 6,
     recipe: { connect: { id: RECIPE_ID } },
     isPrimary: true,
-    verifed: true,
+    verified: true,
     nutrients: {
       createMany: {
         data: [
@@ -198,13 +196,12 @@ const nutritionLabels: Prisma.NutritionLabelCreateInput[] = [
     },
   },
   {
-    name: "Chicken Gyro with Tzatziki Sauce (Infused Oil)",
     ingredientGroup: { connect: { id: "clt6irl0a00074wv95kwkeih7" } },
     servings: 3,
     recipe: { connect: { id: RECIPE_ID } },
     servingsUsed: 1,
     isPrimary: false,
-    verifed: true,
+    verified: true,
     nutrients: {
       createMany: {
         data: [
@@ -282,11 +279,10 @@ const nutritionLabels: Prisma.NutritionLabelCreateInput[] = [
     },
   },
   {
-    name: "Chicken Gyro with Tzatziki Sauce (Cucumber Salad)",
     ingredientGroup: { connect: { id: "clt6irl0900064wv9e0rb6kp2" } },
     isPrimary: false,
     recipe: { connect: { id: RECIPE_ID } },
-    verifed: true,
+    verified: true,
     nutrients: {
       createMany: {
         data: [
@@ -661,7 +657,7 @@ const recipe: Prisma.RecipeCreateInput = {
   This recipe can easily be doubled or tripled for serving a crowd.  
   The tzatziki sauce will keep in the fridge for up to 2 weeks, the cooked chicken and cucumber salad will keep for several days.`,
   isFavorite: true,
-  isVerified: true,
+  verified: true,
   category: {
     connectOrCreate: {
       where: { name: "Main Dish" },

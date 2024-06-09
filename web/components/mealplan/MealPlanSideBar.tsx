@@ -9,14 +9,15 @@ import {
 import RecipeFilter from "../recipe/RecipeFilter";
 import { ReactNode, useState } from "react";
 import { RecipeSearch } from "./RecipeSearch";
+import { MealList } from "./MealList";
 
 const menu: {
   title: string;
   value: string;
   component: ReactNode | undefined;
 }[] = [
-  { title: "Recipes", value: "recipe", component: <RecipeSearch /> },
-  { title: "Meals", value: "meals", component: undefined },
+  { title: "Recipe Search", value: "recipe", component: <RecipeSearch /> },
+  { title: "Meals", value: "meals", component: <MealList /> },
   { title: "Ingredients", value: "ingredients", component: undefined },
   {
     title: "Recommendations",
@@ -37,7 +38,7 @@ export function MealPlanSideBar() {
   const [selectedMenu, setMenu] = useState<string>("recipe");
 
   return (
-    <div className="p-4 border-l w-96 min-h-svh">
+    <div className="p-4 border-l w-96 bg-card">
       <Select value={selectedMenu} onValueChange={setMenu}>
         <SelectTrigger className="mb-4">
           <SelectValue placeholder="test" />

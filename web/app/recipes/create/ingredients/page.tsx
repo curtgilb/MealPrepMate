@@ -71,7 +71,10 @@ export default function RecipeIngredients() {
               <div className="flex gap-4">
                 <InputWithLabel id="qty" label="Qty" type="number" />
                 <UnitPicker value={unit} setValue={setUnit} />
-                <IngredientPicker value={ingredient} setValue={setIngredient} />
+                <IngredientPicker
+                  ingredients={ingredient}
+                  setIngredients={setIngredient}
+                />
                 <div className="grid gap-2">
                   <Label>Ingredient Group</Label>
                   <Select>

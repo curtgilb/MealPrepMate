@@ -1,6 +1,7 @@
+"use client";
 import { graphql } from "@/gql";
-import { getClient } from "@/ssrGraphqlClient";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useQuery } from "@urql/next";
 
 const cuisinesQuery = graphql(/* GraphQL */ `
   query getCuisines {
@@ -10,8 +11,8 @@ const cuisinesQuery = graphql(/* GraphQL */ `
     }
   }
 `);
-export default async function CuisineFilter() {
-  const result = await getClient().query(cuisinesQuery, {});
+export function CuisineFilter() {
+  const [result, retry] = useQuery({ query: cuisinesQuery });
   return (
     <div>
       {result.data?.cuisines.map((cuisine) => (

@@ -33,7 +33,7 @@ const worker = new Worker(
     const createStmt = await createRecipeCreateStmt({
       recipe,
       nutritionLabel: label,
-      verifed: false,
+      verified: false,
       ingredientMatcher: new IngredientMatcher(),
       update: false,
     });

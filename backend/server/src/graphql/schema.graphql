@@ -14,26 +14,26 @@ input AddRecipeServingInput {
   servings: Int!
 }
 
-type AggregateLabel {
-  calories: Float!
-  caloriesPerServing: Float
-  carbPercentage: Float!
-  fatPercentage: Float!
-  nutrients: [AggregateNutrient!]!
-  proteinPercentage: Float!
-  servingSize: Float
-  servingUnit: MeasurementUnit
-  servings: Int
-  servingsUsed: Int
+type AggLabelNutrient {
+  id: String!
+  nutrient: Nutrient!
+  perServing: Float
+  value: Float!
 }
 
-type AggregateNutrient {
-  id: String!
-  name: String!
-  perServing: Float
-  target: NutrientTarget
-  unit: MeasurementUnit!
-  value: Float!
+type AggregateLabel {
+  alcohol: Float
+  caloriesPerServing: Float
+  carbs: Float
+  fat: Float
+  id: ID!
+  nutrients: [AggLabelNutrient!]!
+  protein: Float
+  recipe: Recipe
+  servingSize: Float
+  servingSizeUnit: MeasurementUnit
+  servings: Float
+  totalCalories: Float
 }
 
 type Category {
@@ -71,9 +71,7 @@ input CreateNutrientInput {
 }
 
 input CreateNutritionLabelInput {
-  ingredientGroupId: String
   isPrimary: Boolean
-  name: String
   nutrients: [CreateNutrientInput!]
   servingSize: Float
   servingSizeUnitId: String
@@ -113,7 +111,6 @@ input CursorPagination {
 
 type DailyReferenceIntake {
   id: String!
-  nutrient: Nutrient!
   value: Float!
 }
 
@@ -121,8 +118,6 @@ type DailyReferenceIntake {
 A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
 """
 scalar DateTime
-
-union Draft = NutritionLabel | Recipe
 
 input EditMealPlanInput {
   id: String!
@@ -139,7 +134,6 @@ input EditNutritionLabelInput {
   id: String!
   ingredientGroupId: String
   isPrimary: Boolean
-  name: String
   nutrientsToAdd: [CreateNutrientInput!]
   nutrientsToDelete: [String!]
   nutrientsToEdit: [CreateNutrientInput!]
@@ -180,7 +174,7 @@ type ExpirationRule {
 }
 
 type ExpirationRulesQuery {
-  ingredients: [ExpirationRule!]!
+  items: [ExpirationRule!]!
   itemsRemaining: Int!
   nextOffset: Int
 }
@@ -191,6 +185,7 @@ enum FoodType {
   CANNED
   FRESH
   FROZEN
+  PACKAGED
 }
 
 enum Gender {
@@ -226,33 +221,6 @@ type HealthProfile {
   weight: Float
 }
 
-type Import {
-  createdAt: DateTime!
-  fileName: String
-  id: ID!
-  records: [ImportRecord!]
-  recordsCount: Int!
-  status: ImportStatus!
-  type: PrismaImportType!
-}
-
-type ImportRecord {
-  draft: Draft
-  id: String!
-  ingredientGroup: RecipeIngredientGroup
-  label: NutritionLabel
-  name: String!
-  recipe: Recipe
-  status: RecordStatus!
-  verifed: Boolean!
-}
-
-type ImportRecordsQuery {
-  itemsRemaining: Int!
-  nextOffset: Int
-  records: [ImportRecord!]!
-}
-
 enum ImportStatus {
   COMPLETED
   DUPLICATE
@@ -266,18 +234,12 @@ enum ImportType {
   RECIPE_KEEPER
 }
 
-type ImportsQuery {
-  importJobs: [Import!]!
-  itemsRemaining: Int!
-  nextOffset: Int
-}
-
 type Ingredient {
   alternateNames: [String!]!
-  expiration: ExpirationRule!
+  expiration: ExpirationRule
   id: ID!
   name: String!
-  priceHistory: [IngredientPriceHistory!]!
+  priceHistory: [IngredientPriceHistory!]
   storageInstructions: String
 }
 
@@ -306,6 +268,14 @@ type IngredientsQuery {
   nextOffset: Int
 }
 
+input MacroFilter {
+  alcoholPerServing: NumericalComparison
+  caloriePerServing: NumericalComparison
+  carbPerServing: NumericalComparison
+  fatPerServing: NumericalComparison
+  protienPerServing: NumericalComparison
+}
+
 enum Meal {
   BREAKFAST
   DINNER
@@ -328,9 +298,8 @@ type MealPlanRecipe {
   id: ID!
   mealPlan: MealPlan!
   mealPlanServings: [MealPlanServing!]!
-  nutritionLabel(advanced: Boolean): AggregateLabel
-  recipe: Recipe!
-  servingsUsed(mealId: String!): Int!
+  originalRecipe: Recipe!
+  servingsOnPlan: Int!
   totalServings: Int!
 }
 
@@ -338,10 +307,8 @@ type MealPlanServing {
   day: Int!
   id: ID!
   meal: String!
-  mealPlan: MealPlan!
+  mealPlanRecipeId: String!
   numberOfServings: Int!
-  nutritionLabel(advanced: Boolean): AggregateLabel
-  recipe: MealPlanRecipe!
 }
 
 type MeasurementUnit {
@@ -358,9 +325,8 @@ type Mutation {
   addCuisineToRecipe(cuisineId: [String!]!, recipeId: String!): Recipe!
   addPhotoToRecipe(photoId: [String!]!, recipeId: String!): Recipe!
   addPriceHistory(price: CreatePriceHistoryInput!): IngredientPriceHistory!
-  addRecipeServing(serving: AddRecipeServingInput!): [MealPlanServing!]!
-  addRecipeToMealPlan(recipe: AddRecipeInput!): [MealPlanRecipe!]!
-  changeRecordStatus(id: String!, status: RecordStatus!): ImportRecord!
+  addRecipeServing(serving: AddRecipeServingInput!): MealPlanServing!
+  addRecipeToMealPlan(recipe: AddRecipeInput!): MealPlanRecipe!
   connectExpirationRule(expirationRuleId: String!, ingredientId: String!): Ingredient!
   createCategory(name: String!): [Category!]!
   createCourse(name: String!): [Course!]!
@@ -368,7 +334,7 @@ type Mutation {
   createExpirationRule(ingredientId: String!, rule: CreateExpirationRule!): ExpirationRule!
   createIngredient(ingredient: CreateIngredientInput!): Ingredient!
   createMealPlan(name: String!): MealPlan!
-  createNutritionLabels(nutritionLabel: CreateNutritionLabelInput!, recipeId: String!): NutritionLabel!
+  createNutritionLabels(ingredientGroupId: String, nutritionLabel: CreateNutritionLabelInput!, recipeId: String!): NutritionLabel!
   createProfile(profile: ProfileInput!): HealthProfile!
   createRecipe(recipe: RecipeInput!): Recipe!
   createUnit(input: CreateUnitInput!): MeasurementUnit!
@@ -385,11 +351,12 @@ type Mutation {
   editExpirationRule(expirationRule: CreateExpirationRule!, expirationRuleId: String!): ExpirationRule!
   editIngredient(ingredient: CreateIngredientInput!, ingredientId: String!): Ingredient!
   editMealPlan(mealPlan: EditMealPlanInput!): MealPlan!
+  editMealPlanRecipe(id: String!, recipe: EditMealPlanRecipeInput!): [MealPlanRecipe!]!
   editNutritionLabel(label: EditNutritionLabelInput!): NutritionLabel!
   editPriceHistory(price: EditPriceHistoryInput!, priceId: String!): IngredientPriceHistory!
   editProfile(id: String!, profile: ProfileInput!): HealthProfile!
   editRecipeServing(serving: EditRecipeServingInput!): [MealPlanServing!]!
-  finalize(recordId: String!): ImportRecord!
+  finalizeReceipt(receiptId: String!): Receipt!
   mergeIngredients(ingredientIdToDelete: String!, ingredientIdToKeep: String!): Ingredient!
   removeCategoryFromRecipe(categoryId: String!, recipeId: String!): [Category!]!
   removeCourseFromRecipe(courseId: String!, recipeId: String!): Recipe!
@@ -397,11 +364,12 @@ type Mutation {
   removeMealPlanRecipe(id: String!): [MealPlanRecipe!]!
   removePhotoFromRecipe(photoIds: [String!]!, recipeId: String!): Recipe!
   scheduleMealPlan(mealPlanId: String!, startDate: DateTime!): ScheduledPlan!
-  updateMatches(groupId: String, labelId: String, recipeId: String, recordId: String!): ImportRecord!
+  setNutritionTarget(nutrientId: String!, target: Float!): Nutrient!
+  updateReceipt(receipt: UpdateReceipt!, receiptId: String!): Receipt!
+  updateReceiptLine(line: UpdateReceiptItem!, lineId: String!): ReceiptLine!
   updateRecipe(recipe: RecipeInput!, recipeId: String!): Recipe!
   updateRecipeIngredients(ingredient: RecipeIngredientUpdateInput!): [RecipeIngredients!]!
   updateShoppingDays(days: [Int!]!, mealPlanId: String!): [Int!]!
-  uploadImport(file: File!, type: PrismaImportType!): Import!
   uploadPhoto(isPrimary: Boolean!, photo: File!): Photo!
   uploadReceipt(file: File!): Receipt!
 }
@@ -416,16 +384,12 @@ type Nutrient {
   advancedView: Boolean!
   alternateNames: [String!]!
   customTarget: Float
-  dri: [DailyReferenceIntake!]!
+  dri: DailyReferenceIntake
+  id: String!
   name: String!
-  subNutrients: [Nutrient!]!
+  parentNutrientId: String
   type: String!
   unit: MeasurementUnit!
-}
-
-type NutrientTarget {
-  customTarget: Float
-  dri: Float
 }
 
 enum NutrientType {
@@ -439,23 +403,38 @@ enum NutrientType {
   VITAMIN
 }
 
+type NutrientsQuery {
+  items: [Nutrient!]!
+  itemsRemaining: Int!
+  nextOffset: Int
+}
+
 input NutritionFilter {
-  nutrientID: String!
+  nutrientId: String!
   perServing: Boolean
-  target: NumericalComparison
+  target: NumericalComparison!
 }
 
 type NutritionLabel {
-  aggregateLabel(advanced: Boolean): AggregateLabel
   id: ID!
   ingredientGroup: RecipeIngredientGroup!
   isPrimary: Boolean!
-  name: String
   recipe: Recipe
   servingSize: Float
   servingSizeUnit: MeasurementUnit
   servings: Float
   servingsUsed: Float
+}
+
+type NutritionLabelNutrient {
+  nutrient: Nutrient!
+  value: Float!
+}
+
+type NutritionLabelQuery {
+  items: [NutritionLabel!]!
+  itemsRemaining: Int!
+  nextOffset: Int
 }
 
 input OffsetPagination {
@@ -497,26 +476,27 @@ type Query {
   categories(searchString: String): [Category!]!
   courses(searchString: String): [Course!]!
   cuisines(searchString: String): [Cuisine!]!
-  dailyReferenceIntake: [Nutrient!]!
   expirationRule(expirationRuleId: String!): ExpirationRule!
   expirationRules(pagination: OffsetPagination!, search: String): ExpirationRulesQuery!
   groupedRecipeIngredients(recipeIds: [String!]!): [GroupedRecipeIngredient!]!
   healthProfile: HealthProfile!
-  import(importId: String!): Import!
-  importRecord(id: String!): ImportRecord!
-  importRecords(importId: String!, pagination: OffsetPagination!): ImportRecordsQuery!
-  imports(pagination: OffsetPagination!): ImportsQuery!
   ingredient(ingredientId: String!): Ingredient!
   ingredientPrice(ingredientPriceId: String!): IngredientPriceHistory!
   ingredients(pagination: OffsetPagination!, search: String): IngredientsQuery!
   mealPlan(id: String!): MealPlan!
+  mealPlanRecipes(mealPlanId: String!): [MealPlanRecipe!]!
+  mealPlanServings(maxDay: Int, mealPlanId: String!, minDay: Int): [MealPlanServing!]!
   mealPlans: [MealPlan!]!
+  nutrients(advanced: Boolean!, pagination: OffsetPagination!, search: String): NutrientsQuery!
   nutritionLabel(labelId: String!): NutritionLabel!
+  nutritionLabels(pagination: OffsetPagination!, search: String): NutritionLabelQuery!
   priceHistory(ingredientId: String!): [IngredientPriceHistory!]!
   receipt(id: String!): Receipt!
   recipe(recipeId: String!): Recipe!
   recipes(filter: RecipeFilter, pagination: OffsetPagination!): RecipesQuery!
-  units(search: String): [MeasurementUnit!]!
+  stores(pagination: OffsetPagination!, search: String): StoreSearch!
+  unit(id: String!): MeasurementUnit!
+  units(pagination: OffsetPagination!, search: String): UnitQuery!
 }
 
 type Receipt {
@@ -524,13 +504,17 @@ type Receipt {
   id: String!
   imagePath: String!
   items: [ReceiptLine!]
+  merchantName: String
   scanned: Boolean!
   total: Float
 }
 
 type ReceiptLine {
   description: String
+  foodType: FoodType
   id: String!
+  matchingIngredient: Ingredient
+  matchingUnit: MeasurementUnit
   perUnitPrice: Float
   quantity: Float
   totalPrice: Float
@@ -538,7 +522,7 @@ type ReceiptLine {
 }
 
 type Recipe {
-  aggregateLabel(advanced: Boolean): AggregateLabel
+  aggregateLabel: AggregateLabel
   category: [Category!]!
   cookTime: Int
   course: [Course!]!
@@ -558,7 +542,7 @@ type Recipe {
   prepTime: Int
   source: String
   totalTime: Int
-  verifed: Boolean!
+  verified: Boolean!
 }
 
 input RecipeFilter {
@@ -571,6 +555,7 @@ input RecipeFilter {
   isFavorite: Boolean
   leftoverFreezerLife: NumericalComparison
   leftoverFridgeLife: NumericalComparison
+  macroFilter: MacroFilter
   marinadeTime: NumericalComparison
   numOfServings: NumericalComparison
   nutrientFilters: [NutritionFilter!]
@@ -615,7 +600,7 @@ type RecipeIngredients {
   quantity: Float
   recipe: Recipe!
   sentence: String!
-  unit: MeasurementUnit!
+  unit: MeasurementUnit
 }
 
 input RecipeInput {
@@ -644,6 +629,7 @@ type RecipesQuery {
 
 enum RecordStatus {
   DUPLICATE
+  FAILED
   IGNORED
   IMPORTED
   UPDATED
@@ -662,9 +648,38 @@ enum SpecialCondition {
   PREGNANT
 }
 
+type StoreSearch {
+  itemsRemaining: Int!
+  nextOffset: Int
+  stores: [GroceryStore!]!
+}
+
+type UnitQuery {
+  items: [MeasurementUnit!]!
+  itemsRemaining: Int!
+  nextOffset: Int
+}
+
 enum UnitType {
   COUNT
   ENERGY
   VOLUME
   WEIGHT
+}
+
+input UpdateReceipt {
+  date: DateTime
+  store: String
+}
+
+input UpdateReceiptItem {
+  description: String
+  foodType: FoodType
+  ingredientId: String
+  perUnitPrice: Float
+  productCode: String
+  quantity: Float
+  totalPrice: Float
+  unitId: String
+  unitQuantity: String
 }

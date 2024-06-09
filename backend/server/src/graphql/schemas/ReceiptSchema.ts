@@ -150,7 +150,7 @@ builder.mutationFields((t) => ({
       return await db.receipt.update({
         where: { id: args.receiptId },
         data: {
-          verifed: true,
+          verified: true,
         },
         ...query,
       });

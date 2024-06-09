@@ -1,7 +1,7 @@
 import { db } from "../db.js";
 import { Prisma } from "@prisma/client";
 import { IngredientFilter, NumericalComparison } from "../types/gql.js";
-import { FilterError, passFilter } from "./RecipeSearch.js";
+import { FilterError, passFilter } from "./recipe/RecipeSearch.js";
 
 const ingredientsWithExpirationRules =
   Prisma.validator<Prisma.RecipeIngredientDefaultArgs>()({

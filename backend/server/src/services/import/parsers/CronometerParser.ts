@@ -67,8 +67,7 @@ class CronometerParser extends FileParser<
 }
 
 class CronometerParsedRecord extends NutritionLabelParsedRecord<CreateNutritionLabelInput> {
-  parsedData: CronometerJson;
-  matchingRecipeId: string | undefined = undefined;
+  private parsedData: CronometerJson;
 
   constructor(input: string) {
     super(input, "CRONOMETER");
@@ -116,4 +115,4 @@ class CronometerParsedRecord extends NutritionLabelParsedRecord<CreateNutritionL
   }
 }
 
-export { CronometerParser, CronometerParsedRecord };
+export { CronometerParser, CronometerParsedRecord, CronometerJson };

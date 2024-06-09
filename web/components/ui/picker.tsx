@@ -1,10 +1,11 @@
 "use client";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Dispatch, SetStateAction, useState } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -22,39 +23,40 @@ import {
 import { debounce } from "lodash";
 
 interface SearchListProps<T> {
-  items: T[];
+  options: T[];
   id: keyof T;
   label: keyof T;
-  value: string | string[] | undefined;
-  defaultValue?: string | string[];
+  selectedIds: string[];
+  multiselect: boolean;
+  fetching: boolean;
   autoFilter: boolean;
-  setValue:
-    | Dispatch<SetStateAction<string | undefined>>
-    | Dispatch<SetStateAction<string[] | undefined>>;
+  select: (selectedItem: T) => void;
+  deselect: (deselectedItem: T) => void;
   createItem?: (value: string) => void;
   onSearchUpdate: (search: string) => void;
 }
 
-interface ComboxboxProps<T> extends SearchListProps<T> {
+interface PickerProps<T> extends SearchListProps<T> {
   placeholder: string;
 }
 
-export function Combobox<T>({
-  items,
+export function Picker<T>({
+  options,
   id,
   label,
-  defaultValue,
   autoFilter,
-  value,
+  multiselect,
+  selectedIds,
   placeholder,
+  fetching,
   onSearchUpdate,
-  setValue,
+  select,
+  deselect,
   createItem,
-}: ComboxboxProps<T>) {
+}: PickerProps<T>) {
   const [open, setOpen] = useState(false);
   const [displayName, setDisplayName] = useState<string>();
-  const isMultiselect = Array.isArray(value);
-  let display = displayName && !isMultiselect ? displayName : placeholder;
+  let display = displayName && !multiselect ? displayName : placeholder;
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -69,19 +71,25 @@ export function Combobox<T>({
             className="w-full max-w-64 justify-between"
           >
             {display}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            {multiselect ? (
+              <Plus className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            ) : (
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-full max-w-64 p-0">
           <SearchList<T>
-            items={items}
-            value={value}
+            options={options}
             id={id}
+            fetching={fetching}
+            multiselect={multiselect}
             label={label}
-            defaultValue={defaultValue}
             autoFilter={autoFilter}
             onSearchUpdate={onSearchUpdate}
-            setValue={setValue}
+            selectedIds={selectedIds}
+            select={select}
+            deselect={deselect}
             createItem={createItem}
             setDisplayName={setDisplayName}
             setOpen={setOpen}
@@ -101,14 +109,16 @@ export function Combobox<T>({
       <DrawerContent>
         <div className="mt-4 border-t">
           <SearchList<T>
-            items={items}
-            value={value}
+            selectedIds={selectedIds}
+            options={options}
+            multiselect={multiselect}
+            fetching={fetching}
             id={id}
             label={label}
-            defaultValue={defaultValue}
             autoFilter={autoFilter}
             onSearchUpdate={onSearchUpdate}
-            setValue={setValue}
+            select={select}
+            deselect={deselect}
             createItem={createItem}
             setDisplayName={setDisplayName}
             setOpen={setOpen}
@@ -120,14 +130,16 @@ export function Combobox<T>({
 }
 
 function SearchList<T>({
-  items,
-  value,
-  defaultValue,
+  options,
+  selectedIds,
+  multiselect,
   id,
   label,
   autoFilter,
+  fetching,
   onSearchUpdate,
-  setValue,
+  select,
+  deselect,
   createItem,
   setDisplayName,
   setOpen,
@@ -137,7 +149,6 @@ function SearchList<T>({
 }) {
   const [search, setSearch] = useState<string>("");
   const [useDefault, setUseDefault] = useState<boolean>(true);
-  const isMultiselect = Array.isArray(value);
   const debouncedUpdate = debounce((value) => {
     onSearchUpdate(value);
   }, 500);
@@ -153,7 +164,9 @@ function SearchList<T>({
       />
       <CommandList>
         <CommandEmpty>
-          {createItem ? (
+          {{ fetching } ? (
+            <Loader2 className="animate-spin" />
+          ) : { createItem } ? (
             <Button variant="ghost" onClick={() => createItem(search)}>
               Create {search}
             </Button>
@@ -163,50 +176,26 @@ function SearchList<T>({
         </CommandEmpty>
         <CommandGroup
           heading="Suggestions"
-          className={items.length === 0 ? "hidden" : ""}
+          className={options.length === 0 ? "hidden" : ""}
         >
-          {items.map((item) => {
-            let isSelected = false;
-            if (useDefault && defaultValue && item[id] === defaultValue) {
-              isSelected = true;
-            } else if (!isMultiselect && item[id] === value) {
-              isSelected = true;
-            } else if (
-              isMultiselect &&
-              value.find((selectedItem) => selectedItem === item[id])
-            ) {
-              isSelected = true;
-            }
+          {options.map((item) => {
+            let isSelected = selectedIds?.includes(item[id] as string);
 
             return (
               <CommandItem
                 key={item[id] as string}
                 value={item[id] as string}
-                onSelect={(id) => {
+                onSelect={() => {
                   if (useDefault) setUseDefault(false);
                   if (isSelected) {
-                    if (isMultiselect) {
-                      (setValue as Dispatch<SetStateAction<string[]>>)(
-                        value.filter((item) => item !== id)
-                      );
-                    } else {
-                      (
-                        setValue as Dispatch<SetStateAction<string | undefined>>
-                      )(undefined);
-                      setDisplayName(undefined);
-                      setOpen(false);
-                    }
+                    deselect(item);
+                    if (!multiselect) setDisplayName(undefined);
                   } else {
-                    if (isMultiselect) {
-                      (setValue as Dispatch<SetStateAction<string[]>>)([
-                        ...value,
-                        id,
-                      ]);
-                    } else {
-                      (setValue as Dispatch<SetStateAction<string>>)(id);
-                      setDisplayName(item[label] as string);
-                      setOpen(false);
-                    }
+                    select(item);
+                    if (!multiselect) setDisplayName(item[label] as string);
+                  }
+                  if (!multiselect) {
+                    setOpen(false);
                   }
                 }}
               >

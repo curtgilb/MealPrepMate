@@ -1,14 +1,39 @@
 "use client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RecipeFilter as RecipeFilterInput } from "@/gql/graphql";
+import {
+  IngredientFilter as IngFilter,
+  NumericalComparison,
+  RecipeFilter as RecipeFilterInput,
+} from "@/gql/graphql";
 import { Search } from "lucide-react";
 import { useState } from "react";
 import RecipeFilter from "../recipe/RecipeFilter";
 import { RecipeSearchResults } from "../recipe/RecipeResults";
 import { InputWithIcon } from "../ui/InputWithIcon";
+import { NutrientItem } from "../pickers/NutrientPicker";
+import { IngredientItem } from "../pickers/IngredientPicker";
+
+export type NutrientFilter = NutrientItem & {
+  comparison?: NumericalComparison;
+};
+
+export type IngredientFilter = IngredientItem & {
+  filter?: IngFilter;
+};
+
+export type RecipeSearchFilter = Omit<
+  RecipeFilterInput,
+  "ingredientFilter" | "nutrientFilters" | "searchString"
+> & {
+  nutrientFilters: NutrientFilter[];
+  ingredientFilters: IngredientFilter[];
+};
 
 export function RecipeSearch() {
-  const [filter, setFilter] = useState<RecipeFilterInput>();
+  const [filter, setFilter] = useState<RecipeSearchFilter>({
+    nutrientFilters: [],
+    ingredientFilters: [],
+  });
 
   return (
     <div>
@@ -23,10 +48,10 @@ export function RecipeSearch() {
         </TabsList>
         <TabsContent value="recipe">
           <InputWithIcon className="mt-8 mb-12" startIcon={Search} />
-          <RecipeSearchResults filters={filter} smallCards={true} />
+          <RecipeSearchResults filters={{}} smallCards={true} />
         </TabsContent>
         <TabsContent value="filter">
-          <RecipeFilter />
+          <RecipeFilter filter={filter} setFilter={setFilter} />
         </TabsContent>
       </Tabs>
     </div>

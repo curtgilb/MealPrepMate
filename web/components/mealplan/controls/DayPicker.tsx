@@ -4,8 +4,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
-import { Button } from "../ui/button";
-
+import { Button } from "@/components/ui/button";
 interface DayScrollerProps {
   value: number;
   canScrollDays: boolean;
@@ -54,7 +53,9 @@ export function DayScroller({
         )}
       </div>
       <p>
-        Week {week} {canScrollDays ? `Day ${days}` : null}
+        <Button className="min-w-40" variant="outline">
+          Week {week} {canScrollDays ? `Day ${days}` : null}
+        </Button>
       </p>
       <div>
         {canScrollDays && (

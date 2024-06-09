@@ -22,8 +22,8 @@ export function Card({
     <div
       className={
         vertical
-          ? "border rounded overflow-hidden"
-          : "flex border rounded overflow-hidden"
+          ? "border rounded overflow-hidden bg-card"
+          : "flex border rounded overflow-hidden bg-card"
       }
     >
       <div className={vertical ? "w-52" : "w-[5rem]"}>

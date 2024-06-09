@@ -1,3 +1,4 @@
+"use client";
 import { graphql } from "@/gql";
 import { getClient } from "@/ssrGraphqlClient";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -6,6 +7,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useQuery } from "@urql/next";
 
 const courseQuery = graphql(/* GraphQL */ `
   query getCourses {
@@ -15,14 +17,15 @@ const courseQuery = graphql(/* GraphQL */ `
     }
   }
 `);
-export default async function CourseFilter() {
-  const result = await getClient().query(courseQuery, {});
+export function CourseFilter() {
+  const [result, retry] = useQuery({ query: courseQuery });
+  const { data, error, fetching } = result;
   return (
     <Collapsible>
       <CollapsibleTrigger>Courses</CollapsibleTrigger>
       <CollapsibleContent>
         <div>
-          {result.data?.courses.map((course) => (
+          {data?.courses.map((course) => (
             <div key={course.id} className="flex items-center space-x-2">
               <Checkbox id={course.id} />
               <label

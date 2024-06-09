@@ -13,6 +13,7 @@ const nutrient = builder.prismaObject("Nutrient", {
     name: t.exposeString("name"),
     alternateNames: t.exposeStringList("alternateNames"),
     type: t.exposeString("type"),
+    important: t.exposeBoolean("important"),
     advancedView: t.exposeBoolean("advancedView"),
     customTarget: t.exposeFloat("customTarget", { nullable: true }),
     dri: t.prismaField({
@@ -89,7 +90,7 @@ builder.queryFields((t) => ({
       const [data, count] = await db.$transaction([
         db.nutrient.findMany({
           ...queryFromInfo({ context, info, path: ["items"] }),
-          where: { advancedView: args.advanced },
+          where: { advancedView: args.advanced ? undefined : false },
           take: args.pagination.take,
           skip: args.pagination.offset,
           orderBy: { order: "asc" },

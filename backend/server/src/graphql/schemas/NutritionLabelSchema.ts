@@ -1,61 +1,52 @@
+import { queryFromInfo } from "@pothos/plugin-prisma";
+import { NutritionLabel } from "@prisma/client";
 import { z } from "zod";
 import { db } from "../../db.js";
-import { builder } from "../builder.js";
-import { measurementUnit } from "./MeasurementUnitSchema.js";
 import {
   createNutritionLabelValidation,
   editNutritionLabelValidation,
 } from "../../validations/NutritionValidation.js";
-import { NutritionLabel } from "@prisma/client";
-import { nextPageInfo, offsetPagination } from "./UtilitySchema.js";
 import { offsetPaginationValidation } from "../../validations/UtilityValidation.js";
-import { queryFromInfo } from "@pothos/plugin-prisma";
-import {
-  AggregateNutritionLabel,
-  Nutrient,
-} from "../../services/nutrition/LabelMaker.js";
+import { builder } from "../builder.js";
+import { nextPageInfo, offsetPagination } from "./UtilitySchema.js";
 
 // ============================================ Types ===================================
-// const AggregateNutrient = builder.objectRef<FullNutrient>("AggregateNutrient");
-const Label = builder.objectRef<AggregateNutritionLabel>("AggregateLabel");
-const LabelNutrient = builder.objectRef<Nutrient>("LabelNutrient");
 
-// Flatened, aggregated nutrition field
-LabelNutrient.implement({
+const aggLabel = builder.prismaObject("AggregateLabel", {
   fields: (t) => ({
-    id: t.exposeString("id"),
-    total: t.exposeFloat("total"),
-    perServing: t.exposeFloat("perServing", { nullable: true }),
-  }),
-});
-
-// Flattened, aggregated nutrition label
-Label.implement({
-  fields: (t) => ({
-    calories: t.exposeFloat("calories"),
-    carbs: t.exposeFloat("carbs"),
-    protein: t.exposeFloat("protein"),
-    fat: t.exposeFloat("fat"),
-    alcohol: t.exposeFloat("alcohol"),
-    servings: t.exposeInt("servings", { nullable: true }),
-    servingUnit: t.field({
-      type: measurementUnit,
-      nullable: true,
-      resolve: (parent) => parent.servingUnit,
-    }),
+    id: t.exposeID("id"),
+    recipe: t.relation("recipe", { nullable: true }),
+    servings: t.exposeFloat("servings", { nullable: true }),
     servingSize: t.exposeFloat("servingSize", { nullable: true }),
-    nutrients: t.field({
-      type: [LabelNutrient],
-      resolve: (parent) => parent.nutrients,
-    }),
+    servingSizeUnit: t.relation("servingSizeUnit", { nullable: true }),
+    nutrients: t.relation("nutrients"),
+    protein: t.exposeFloat("protein", { nullable: true }),
+    carbs: t.exposeFloat("carbs", { nullable: true }),
+    fat: t.exposeFloat("fat", { nullable: true }),
+    alcohol: t.exposeFloat("alcohol", { nullable: true }),
+    totalCalories: t.exposeFloat("totalCalories", { nullable: true }),
+    caloriesPerServing: t.exposeFloat("caloriesPerServing", { nullable: true }),
   }),
 });
 
-const nutritionLabel = builder.prismaObject("NutritionLabel", {
+builder.prismaObject("AggLabelNutrient", {
+  fields: (t) => ({
+    id: t.string({
+      nullable: false,
+      resolve: (label) => {
+        return `${label.aggLabelId}_${label.nutrientId}`;
+      },
+    }),
+    value: t.exposeFloat("value"),
+    perServing: t.exposeFloat("valuePerServing", { nullable: true }),
+    nutrient: t.relation("nutrient"),
+  }),
+});
+
+export const nutritionLabel = builder.prismaObject("NutritionLabel", {
   name: "NutritionLabel",
   fields: (t) => ({
     id: t.exposeID("id"),
-    name: t.exposeString("name", { nullable: true }),
     recipe: t.relation("recipe", { nullable: true }),
     ingredientGroup: t.relation("ingredientGroup"),
     servings: t.exposeFloat("servings", { nullable: true }),
@@ -63,6 +54,13 @@ const nutritionLabel = builder.prismaObject("NutritionLabel", {
     servingSizeUnit: t.relation("servingSizeUnit", { nullable: true }),
     servingsUsed: t.exposeFloat("servingsUsed", { nullable: true }),
     isPrimary: t.exposeBoolean("isPrimary"),
+  }),
+});
+
+builder.prismaObject("NutritionLabelNutrient", {
+  fields: (t) => ({
+    value: t.exposeFloat("value"),
+    nutrient: t.relation("nutrient"),
   }),
 });
 
@@ -87,8 +85,6 @@ const nutritionLabelQuery = builder
 
 const createNutritionLabel = builder.inputType("CreateNutritionLabelInput", {
   fields: (t) => ({
-    name: t.string(),
-    ingredientGroupId: t.string(),
     servings: t.float({ required: true }),
     servingSize: t.float(),
     servingSizeUnitId: t.string(),
@@ -110,7 +106,6 @@ const createNutrient = builder.inputType("CreateNutrientInput", {
 const editNutritionLabelInput = builder.inputType("EditNutritionLabelInput", {
   fields: (t) => ({
     id: t.string({ required: true }),
-    name: t.string(),
     servings: t.float(),
     servingSize: t.float(),
     servingSizeUnitId: t.string(),
@@ -191,11 +186,13 @@ builder.mutationFields((t) => ({
     type: "NutritionLabel",
     args: {
       recipeId: t.arg.string({ required: true }),
+      ingredientGroupId: t.arg.string(),
       nutritionLabel: t.arg({ type: createNutritionLabel, required: true }),
     },
     validate: {
       schema: z.object({
         recipeId: z.string().cuid(),
+        ingredientGroupId: z.string().cuid().optional(),
         nutritionLabel: createNutritionLabelValidation,
       }),
     },
@@ -232,4 +229,4 @@ builder.mutationFields((t) => ({
   }),
 }));
 
-export { Label, LabelNutrient, nutritionLabel };
+export { aggLabel as AggregateLabel };

@@ -1,10 +1,10 @@
-import { recipe } from "../graphql/schemas/RecipeSchema.js";
+import { NutritionLabel, Prisma } from "@prisma/client";
+import { MatchedLabel } from "../services/import/matchers/LabelMatcher.js";
 import { LabelAggregator } from "../services/nutrition/LabelAggregator.js";
 import {
-  EditNutritionLabelInput,
   CreateNutritionLabelInput,
+  EditNutritionLabelInput,
 } from "../types/gql.js";
-import { Prisma, NutritionLabel } from "@prisma/client";
 
 type NutritionLabelQuery = {
   include?: Prisma.NutritionLabelInclude | undefined;
@@ -13,8 +13,10 @@ type NutritionLabelQuery = {
 
 interface LabelInput {
   label: CreateNutritionLabelInput;
-  recipeId?: string | undefined;
-  verifed: boolean;
+  name?: string;
+  recipeId?: string | undefined | null;
+  ingredientGroupId?: string | undefined | null;
+  verified: boolean;
   createRecipe: boolean;
 }
 
@@ -31,16 +33,15 @@ function createNutritionLabelStmt(
 ):
   | Prisma.NutritionLabelCreateInput
   | Prisma.NutritionLabelCreateWithoutRecipeInput {
-  const { label, recipeId, verifed, createRecipe } = input;
+  const { label, recipeId, verified, createRecipe, name } = input;
   const stmt:
     | Prisma.NutritionLabelCreateInput
     | Prisma.NutritionLabelCreateWithoutRecipeInput = {
-    name: label.name,
     servings: label.servings,
     servingSize: label.servingSize,
     servingsUsed: label.servingsUsed,
     isPrimary: label.isPrimary ?? false,
-    verifed,
+    verified,
     servingSizeUnit: label.servingSizeUnitId
       ? { connect: { id: label.servingSizeUnitId } }
       : undefined,
@@ -66,9 +67,9 @@ function createNutritionLabelStmt(
     };
   }
 
-  if (createRecipe) {
+  if (createRecipe && name) {
     (stmt as Prisma.NutritionLabelCreateInput).recipe = {
-      create: { name: label.name ?? "" },
+      create: { name },
     };
   }
 
@@ -78,48 +79,93 @@ function createNutritionLabelStmt(
 export const nutritionExtension = Prisma.defineExtension((client) => {
   async function updateAggregateLabel(recipeId: string) {
     const aggregator = new LabelAggregator(recipeId);
-    const agg = await aggregator.createNutrientTotals();
-    await client.aggregateLabel.upsert({
-      where: { recipeId: recipeId },
-      update: {
-        label: agg.label,
-        nutrients: agg.nutrients,
-      },
-      create: {
-        label: agg.label,
-        nutrients: agg.nutrients,
-        recipe: { connect: { id: recipeId } },
-      },
-    });
+    await aggregator.upsertAggregateLabel();
   }
 
   return client.$extends({
     model: {
       nutritionLabel: {
         async createNutritionLabel(
-          args: CreateNutritionLabelInput,
-          recipeId: string,
+          label: CreateNutritionLabelInput,
+          recipeId: string | null,
+          ingredientGroupId: string | null,
+          updateAggregate = true,
           query?: NutritionLabelQuery
         ): Promise<NutritionLabel> {
           const newLabel = await client.nutritionLabel.create({
             data: createNutritionLabelStmt(
               {
-                label: args,
+                label,
                 recipeId,
-                verifed: true,
+                ingredientGroupId,
+                verified: true,
                 createRecipe: false,
               },
               false
             ),
             ...query,
           });
-          await updateAggregateLabel(recipeId);
+
+          if (recipeId && updateAggregate) {
+            await updateAggregateLabel(recipeId);
+          }
+
           return client.nutritionLabel.findUniqueOrThrow({
             where: { id: newLabel.id },
             ...query,
           });
         },
+        async bulkImportLabels(importId: string, labels: MatchedLabel[]) {
+          for (const label of labels) {
+            let failed = false;
 
+            let draftId;
+            try {
+              const createdLabel = await client.nutritionLabel.create({
+                data: createNutritionLabelStmt(
+                  {
+                    label: label.label,
+                    recipeId: label.recipeMatchId,
+                    ingredientGroupId: label.ingredientGroupId,
+                    verified: false,
+                    name: label.name,
+                    createRecipe: label.status === "IMPORTED",
+                  },
+                  false
+                ),
+              });
+              draftId = createdLabel.id;
+            } catch (e) {
+              failed = true;
+            } finally {
+              await client.importRecord.create({
+                data: {
+                  import: { connect: { id: importId } },
+                  hash: label.hash,
+                  externalId: label.externalId,
+                  name: label.name,
+                  parsedFormat: label.label,
+                  status: failed ? "FAILED" : label.status,
+                  verified: false,
+                  recipe: label.recipeMatchId
+                    ? { connect: { id: label.recipeMatchId } }
+                    : undefined,
+                  nutritionLabel: label.labelMatchId
+                    ? { connect: { id: label.labelMatchId } }
+                    : undefined,
+                  ingredientGroup: label.ingredientGroupId
+                    ? { connect: { id: label.ingredientGroupId } }
+                    : undefined,
+                  draftId,
+                },
+              });
+            }
+          }
+          await client.import.update({
+            where: { id: importId },
+            data: { status: "REVIEW" },
+          });
+        },
         async editNutritionLabel(
           args: EditNutritionLabelInput,
           query: NutritionLabelQuery
@@ -129,7 +175,6 @@ export const nutritionExtension = Prisma.defineExtension((client) => {
             const newLabel = await tx.nutritionLabel.update({
               where: { id: args.id },
               data: {
-                name: args.name,
                 servings: args.servings,
                 servingSize: args.servingSize,
                 servingSizeUnit: args.servingSizeUnitId
@@ -167,8 +212,13 @@ export const nutritionExtension = Prisma.defineExtension((client) => {
                 });
               }
             }
-
-            await updateAggregateLabel(newLabel.recipeId);
+            if (
+              args.nutrientsToAdd ||
+              args.nutrientsToDelete ||
+              args.nutrientsToEdit
+            ) {
+              await updateAggregateLabel(newLabel.recipeId);
+            }
             return tx.nutritionLabel.findUniqueOrThrow({
               where: { id: args.id },
               ...query,
