@@ -2,7 +2,11 @@
 import { Navigation } from "@/components/SideNav";
 import { Button } from "@/components/ui/button";
 
-import { MutationAddRecipeToMealPlanArgs } from "@/gql/graphql";
+import {
+  MutationAddRecipeServingArgs,
+  MutationAddRecipeToMealPlanArgs,
+  MutationDeleteRecipeServingArgs,
+} from "@/gql/graphql";
 import { cn } from "@/lib/utils";
 import "@/styles/globals.css";
 import { cacheExchange } from "@urql/exchange-graphcache";
@@ -38,8 +42,34 @@ export default function RootLayout({
       fetchOptions: { cache: "no-store" },
       exchanges: [
         cacheExchange({
+          keys: {
+            NutrientsQuery: (data) => null,
+          },
           updates: {
             Mutation: {
+              addRecipeServing(result, args, cache, info) {
+                const typedArgs = (args as MutationAddRecipeServingArgs).serving
+                  .mealPlanId;
+
+                const servings = cache.resolve(
+                  { __typename: "MealPlan", id: typedArgs },
+                  "mealPlanServings"
+                );
+
+                if (Array.isArray(servings)) {
+                  cache.link(
+                    { __typename: "MealPlan", id: typedArgs },
+                    "mealPlanServings",
+                    [...servings, result.addRecipeServing]
+                  );
+                }
+              },
+              deleteRecipeServing(result, args, cache, info) {
+                cache.invalidate({
+                  __typename: "MealPlanServing",
+                  id: (args as MutationDeleteRecipeServingArgs).id,
+                });
+              },
               addRecipeToMealPlan(result, args, cache, info) {
                 const mealPlanId = (args as MutationAddRecipeToMealPlanArgs)
                   .recipe.mealPlanId;
@@ -70,7 +100,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={cn("bg-background font-sans antialiased", fontSans.variable)}
+        className={cn(
+          "bg-background font-sans antialiased h-dvh overflow-y-hidden flex flex-col",
+          fontSans.variable
+        )}
       >
         <header className="px-3 py-2 flex items-center border-b">
           <Button variant="ghost">
@@ -78,7 +111,7 @@ export default function RootLayout({
           </Button>
           <p className="text-2xl font-bold ml-2">Meal Planner</p>
         </header>
-        <main className="flex flex-row w-full relative bg-secondary">
+        <main className="flex flex-row w-full relative bg-secondary h-full flex-grow">
           <Navigation isCollapsed={isCollapsed} />
           <section className="grow">
             <UrqlProvider client={client} ssr={ssr}>

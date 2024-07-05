@@ -5,6 +5,7 @@ import { graphql } from "@/gql";
 import { Plus } from "lucide-react";
 import { useMutation } from "@urql/next";
 import { useState } from "react";
+import { MealPlans as MealPlanList } from "@/components/pagination/MealPlans";
 
 const createMutation = graphql(`
   mutation createMealPlan {
@@ -21,6 +22,7 @@ export default function MealPlans() {
 
   return (
     <div>
+      <h1 className="text-5xl font-black">Meal plans</h1>
       <Button
         disabled={redirecting}
         onClick={() => {
@@ -33,6 +35,7 @@ export default function MealPlans() {
         <Plus className="mr-2 h-4 w-4" />
         Create meal plan
       </Button>
+      <MealPlanList />
     </div>
   );
 }

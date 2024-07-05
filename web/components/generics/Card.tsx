@@ -1,49 +1,49 @@
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import Image from "next/image";
 import { Skeleton } from "../ui/skeleton";
-import { useInView } from "react-intersection-observer";
+import { cn } from "@/lib/utils";
 
-export interface CardProps {
+export interface CardProps extends React.HTMLAttributes<HTMLElement> {
   children?: ReactNode;
   loading?: boolean;
-  urls: string[];
-  altText: string;
+  image: {
+    images: { url: string | null | undefined; altText: string }[];
+    placeholder: string;
+    grid: boolean;
+  };
   vertical: boolean;
-  intersection?: boolean;
 }
 
-export function Card({
-  children,
-  loading = false,
-  urls,
-  vertical = false,
-}: CardProps) {
+export const Card = React.forwardRef<HTMLDivElement, CardProps>(function Card(
+  props,
+  forwardedRef
+) {
+  const { children, loading = false, image, vertical = false, ...rest } = props;
+  const { className, ...additionalProps } = rest;
+
   return (
     <div
-      className={
-        vertical
-          ? "border rounded overflow-hidden bg-card"
-          : "flex border rounded overflow-hidden bg-card"
-      }
+      {...additionalProps}
+      ref={forwardedRef}
+      className={cn(
+        className,
+        "border rounded overflow-hidden bg-card",
+        vertical ? "w-48" : "flex"
+      )}
     >
-      <div className={vertical ? "w-52" : "w-[5rem]"}>
+      <div
+        className={cn(
+          "relative overflow-hidden",
+          vertical ? "w-52 h-52" : "w-[5rem] h-[5rem]"
+        )}
+      >
         {loading ? (
           <Skeleton className="h-full w-full" />
         ) : (
-          <Image
-            src="/pancakes.jpg"
-            style={{
-              width: "100%",
-              height: "auto",
-              objectFit: "fill",
-            }}
-            alt="recipe image"
-            width={208}
-            height={208}
-          />
+          <CardImage images={image} />
         )}
       </div>
-      <div className="p-2">
+      <div className="p-2 text-left">
         {loading ? (
           <div>
             <Skeleton className="h-4 w-24 mb-2" />
@@ -54,5 +54,24 @@ export function Card({
         )}
       </div>
     </div>
+  );
+});
+
+interface CardImageProps {
+  images: CardProps["image"];
+}
+
+function CardImage({ images }: CardImageProps) {
+  const showGrid = images.grid && images.images.length > 1;
+
+  return (
+    <Image
+      src="/pancakes.jpg"
+      alt="recipe image"
+      fill
+      style={{
+        objectFit: "fill",
+      }}
+    />
   );
 }

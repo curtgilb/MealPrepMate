@@ -18,6 +18,7 @@ type AggregateLabelFields = RecipeSearchFieldsFragment["aggregateLabel"];
 
 export default function RecipeCard({ recipe: input }: RecipeCardProps) {
   const recipe = useFragment(recipeSearchFragment, input);
+  const [open, setOpen] = useState<boolean>(false);
 
   const photoUrls = recipe.photos.map((photo) => {});
 
@@ -25,10 +26,20 @@ export default function RecipeCard({ recipe: input }: RecipeCardProps) {
     <ModalDrawer
       title={recipe.name}
       content={<AddRecipeDialog recipe={recipe} />}
+      open={open}
+      setOpen={setOpen}
       trigger={
         <Card
-          urls={[]}
-          altText={`Photo of ${recipe.name} recipe`}
+          image={{
+            images: recipe.photos
+              .filter((photo) => photo.isPrimary)
+              .map((photo) => ({
+                url: photo.url,
+                altText: recipe.name,
+              })),
+            grid: false,
+            placeholder: "/pot.jpg",
+          }}
           vertical={false}
         >
           <p className="text-sm line-clamp-1 font-semibold">{recipe.name}</p>

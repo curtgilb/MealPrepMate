@@ -14,7 +14,7 @@
       Path to tsx binary
       Assuming locally installed
       */
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/tsx",
+      "runtimeExecutable": "tsx",
 
       /*
       Open terminal when debugging starts (Optional)

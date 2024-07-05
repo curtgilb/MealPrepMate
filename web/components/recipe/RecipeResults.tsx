@@ -24,7 +24,7 @@ export function RecipeSearchResults({
   });
 
   const { data, fetching, error } = result;
-  if (fetching) return <LoadingCards small={true} />;
+  if (fetching) return <LoadingCards vertical={false} />;
   const recipes = data?.recipes.recipes as FragmentType<
     typeof recipeSearchFragment
   >[];
@@ -46,7 +46,7 @@ export function RecipeSearchResults({
           smallCards={smallCards}
         />
       ) : result.fetching ? (
-        <LoadingCards small={true} />
+        <LoadingCards vertical={false} />
       ) : null}
     </>
   );
@@ -73,7 +73,7 @@ function SearchPage({ filters, take, skip, smallCards }: SearchPageProps) {
   }, [executeQuery]);
 
   if (results.fetching) {
-    return <LoadingCards small={true} />;
+    return <LoadingCards vertical={false} />;
   }
   if (results.error) return <p>Oh no... {results.error.message}</p>;
 
@@ -94,7 +94,7 @@ function SearchPage({ filters, take, skip, smallCards }: SearchPageProps) {
       ) : null}
 
       {!results.data?.recipes && !results.fetching ? (
-        <LoadingCards small={true} onView={onLoadMore} />
+        <LoadingCards vertical={false} onView={onLoadMore} />
       ) : null}
     </>
   );

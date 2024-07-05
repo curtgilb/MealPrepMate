@@ -45,6 +45,7 @@ enum UnitType {
   WEIGHT
   COUNT
   ENERGY
+  LENGTH
 }
 
 enum Meal {
@@ -129,7 +130,7 @@ model MealPlanRecipe {
   recipeId      String
   factor        Float             @default(1)
   totalServings Int
-  cookDay       Int?
+  cookDayOffset       Int               @default(0)
   servings      MealPlanServing[]
   // @@map("meal_plan_recipe")
 }
@@ -197,6 +198,8 @@ model RecipeIngredient {
   id                String                 @id @default(cuid())
   sentence          String
   quantity          Float?
+  minQty               Float?
+  maxQty            Float?
   name              String?
   order             Int
   unit              MeasurementUnit?       @relation(fields: [measurementUnitId], references: [id])
@@ -210,12 +213,19 @@ model RecipeIngredient {
   // @@map("recipe_ingredient")
 }
 
+enum MeasurementSystem {
+  IMPERIAL
+  METRIC
+}
+
 model MeasurementUnit {
   id              String                  @id @default(cuid())
   name            String                  @unique
+  conversionName  String?
   abbreviations   String[]
   symbol          String?
   type            UnitType?
+  system          MeasurementSystem?
   ingredients     RecipeIngredient[]
   nutrients       Nutrient[]
   ingredientPrice IngredientPrice[]

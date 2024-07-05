@@ -45,7 +45,7 @@ const ingredientsQuery = builder
     }),
   });
 
-const ingredient = builder.prismaObject("Ingredient", {
+export const ingredient = builder.prismaObject("Ingredient", {
   fields: (t) => ({
     id: t.exposeID("id"),
     name: t.exposeString("name"),

@@ -1,12 +1,16 @@
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { MealPlan } from "@/contexts/MealPlanContext";
 import { MealPlanServingsFieldFragment } from "@/gql/graphql";
-import { useNutrients } from "@/hooks/use-nutrients";
-import { Component, ReactNode, useContext, useMemo } from "react";
-import { MealPlanDay } from "./MealPlanDay";
-import { PlanMode } from "../controls/ModeDropdown";
-import { PlanDay } from "./DayInterface";
 import { DisplayMode } from "@/app/mealplans/[id]/page";
+import { MealPlanServings } from "@/contexts/ServingsContext";
+import { useContext, useMemo } from "react";
+import { PlanMode } from "../controls/ModeDropdown";
+import { CookingDay } from "./CookingDay";
+import { PlanDayProps } from "./DayInterface";
+import { MealPlanDay } from "./MealPlanDay";
+import { NutritionDay } from "./NutritionDay";
+import { ShoppingDay } from "./ShoppingDay";
+import { useRecipeLabelLookup } from "@/hooks/use-recipe-label-lookup";
 
 const courses = ["Breakfast", "Lunch", "Dinner", "Snacks"];
 
@@ -14,20 +18,19 @@ const courses = ["Breakfast", "Lunch", "Dinner", "Snacks"];
 interface DayManagerProps {
   days: number;
   display: DisplayMode;
+  planMode: PlanMode;
 }
 
 export type ServingsLookup = Map<
-  number,
-  Map<string, MealPlanServingsFieldFragment[]>
+  number, // Day
+  Map<string, MealPlanServingsFieldFragment[]> //Course, servings
 >;
 
-export function DayManager({ days }: DayManagerProps) {
-  const { categorized, childNutrients, featured } = useNutrients(true);
+export function DayManager({ days, planMode }: DayManagerProps) {
   const week = Math.ceil(days / 7);
-  const mealPlan = useContext(MealPlan);
-  const servings = mealPlan?.servings;
+  const mealServings = useContext(MealPlanServings);
   const servingsByMeal = useMemo(() => {
-    return servings?.reduce((acc, cur) => {
+    return mealServings?.reduce((acc, cur) => {
       const day = acc.get(cur.day);
       if (!day) {
         acc.set(cur.day, new Map<string, MealPlanServingsFieldFragment[]>());
@@ -42,14 +45,17 @@ export function DayManager({ days }: DayManagerProps) {
       if (servings) {
         servings.push(cur);
       }
-
       return acc;
     }, new Map<number, Map<string, MealPlanServingsFieldFragment[]>>());
-  }, [servings]);
+  }, [mealServings]);
 
-  const dayComponent: Record<PlanMode, React.FC<PlanDay>> = {
+  const dayTypes: Record<PlanMode, React.FC<PlanDayProps>> = {
     meal_planning: MealPlanDay,
+    shopping: ShoppingDay,
+    nutrition: NutritionDay,
+    cooking: CookingDay,
   };
+  const Day = dayTypes[planMode];
 
   return (
     <ScrollArea className="w-full">
@@ -58,7 +64,7 @@ export function DayManager({ days }: DayManagerProps) {
           const displayNumber = index + 1;
           const dayNumber = (week - 1) * 7 + displayNumber;
           return (
-            <MealPlanDay
+            <Day
               key={dayNumber}
               dayNumber={dayNumber}
               displayNumber={displayNumber}

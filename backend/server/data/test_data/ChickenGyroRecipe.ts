@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { db } from "../../src/db.js";
+import { replaceVulgarFractions } from "../../src/util/fractionToDecimal.js";
 
 const RECIPE_ID = "cltus93fj000008jq4rh9fnod";
 
@@ -623,7 +624,10 @@ const ingredients: Prisma.RecipeIngredientCreateManyInput[] = [
     ingredientId: "clt6irl0900044wv96j9306zj",
     recipeId: RECIPE_ID,
   },
-];
+].map((ingredient) => {
+  ingredient.sentence = replaceVulgarFractions(ingredient.sentence);
+  return ingredient;
+});
 
 const recipe: Prisma.RecipeCreateInput = {
   id: RECIPE_ID,

@@ -50,16 +50,17 @@ type FullScheduledMealPlan = Prisma.ScheduledPlanGetPayload<
   typeof scheduleWithNotifciations
 >;
 
-type ScheduledPlanQuery = {
-  include?: Prisma.ScheduledPlanInclude | undefined;
-  select?: Prisma.ScheduledPlanSelect | undefined;
-};
+// type ScheduledPlanQuery = {
+//   include?: Prisma.ScheduledPlanInclude | undefined;
+//   select?: Prisma.ScheduledPlanSelect | undefined;
+// };
 
 async function scheduleMealPlan(
   mealPlanId: string,
   date: Date,
   query: ScheduledPlanQuery
 ): Promise<ScheduledPlan> {
+  console.log(query);
   const { startingDate, notificationSetting, mealPlan } = await getMealPlanInfo(
     mealPlanId,
     date
@@ -250,7 +251,7 @@ function getRecipeCookDay(
   recipe: MealPlanRecipe,
   recipeServings: MealPlanServing[]
 ) {
-  if (recipe.cookDay) return recipe.cookDay;
+  if (recipe.cookDayOffset) return recipe.cookDayOffset;
   if (recipeServings.length > 0) {
     recipeServings.sort((a, b) => a.day - b.day);
     return recipeServings[0].day;

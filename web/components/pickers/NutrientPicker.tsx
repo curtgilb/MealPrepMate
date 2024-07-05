@@ -12,6 +12,7 @@ const getNutrients = graphql(`
         id
         name
         unit {
+          id
           symbol
         }
         alternateNames
@@ -20,7 +21,7 @@ const getNutrients = graphql(`
   }
 `);
 
-export type NutrientItem = SearchNutrientsQuery["nutrients"]["items"][0];
+export type NutrientItem = SearchNutrientsQuery["nutrients"]["items"][number];
 
 export function NutrientPicker({
   select,
@@ -35,6 +36,7 @@ export function NutrientPicker({
   });
 
   const { data, fetching, error } = result;
+  console.log(error);
 
   return (
     <Picker<NutrientItem>

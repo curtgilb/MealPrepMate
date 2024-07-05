@@ -12,7 +12,7 @@ export type NutrientMap = {
   [key: string]: NutrientFieldsFragment[];
 };
 
-export function useNutrients(advanced: boolean) {
+export function useCategorizedNutrients(advanced: boolean) {
   const [result, executeQuery] = useQuery({
     query: getNutrientsQuery,
     variables: {
@@ -22,13 +22,9 @@ export function useNutrients(advanced: boolean) {
   const { data, fetching, error } = result;
   const nutrients = useFragment(nutritionFieldsFragment, data?.nutrients.items);
 
-  const importantNutrients = nutrients?.filter(
-    (nutrient) => nutrient.important
-  );
-
-  const childLookup = useMemo(() => {
+  return useMemo(() => {
     if (!nutrients) return {};
-    return nutrients.reduce((acc, nutrient) => {
+    const childLookup = nutrients.reduce((acc, nutrient) => {
       if (nutrient.parentNutrientId) {
         if (!(nutrient.parentNutrientId in acc)) {
           acc[nutrient.parentNutrientId] = [];
@@ -37,11 +33,8 @@ export function useNutrients(advanced: boolean) {
       }
       return acc;
     }, {} as NutrientMap);
-  }, [nutrients]);
 
-  const groupCategory = useMemo(() => {
-    if (!nutrients) return {};
-    return nutrients
+    const categories = nutrients
       .filter((nutrient) => !nutrient.parentNutrientId)
       .reduce((acc, nutrient) => {
         if (!(nutrient.type in acc)) {
@@ -50,11 +43,16 @@ export function useNutrients(advanced: boolean) {
         acc[nutrient.type].push(nutrient);
         return acc;
       }, {} as NutrientMap);
-  }, [nutrients]);
 
-  return {
-    categorized: groupCategory,
-    childNutrients: childLookup,
-    featured: importantNutrients,
-  };
+    const allNutrients = nutrients.reduce((acc, cur) => {
+      acc.set(cur.id, cur);
+      return acc;
+    }, new Map<string, NutrientFieldsFragment>());
+
+    return {
+      categorized: categories,
+      childNutrients: childLookup,
+      all: allNutrients,
+    };
+  }, [nutrients]);
 }

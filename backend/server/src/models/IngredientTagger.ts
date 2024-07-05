@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { coerceNumeric } from "../validations/utilValidations.js";
 import { IngredientMatcher } from "./IngredientMatcher.js";
+import { replaceVulgarFractions } from "../util/fractionToDecimal.js";
 
 type RecipeNlpResponse = {
   sentence: string;
@@ -23,7 +24,10 @@ async function tagIngredients(
 ): Promise<RecipeNlpResponse[]> {
   const ingredientsByLine = ingredients
     .split("\n")
-    .map((ingredient) => ingredient.trim())
+    .map((ingredient) => {
+      const cleaned = replaceVulgarFractions(ingredient);
+      return cleaned.trim();
+    })
     .filter((sentence) => sentence);
   const body = {
     ingredients: ingredientsByLine,

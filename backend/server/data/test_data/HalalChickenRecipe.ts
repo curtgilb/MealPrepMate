@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { db } from "../../src/db.js";
+import { replaceVulgarFractions } from "../../src/util/fractionToDecimal.js";
 
 const RECIPE_ID = "cltp0k2yi000008la6ybr3shp";
 
@@ -757,7 +758,11 @@ const ingredients: Prisma.RecipeIngredientCreateManyInput[] = [
     ingredientId: "clt6deiem003gy8v90uhf0fuh",
     recipeId: RECIPE_ID,
   },
-];
+].map((ingredient) => {
+  ingredient.sentence = replaceVulgarFractions(ingredient.sentence);
+  return ingredient;
+});
+
 async function createHalalChicken() {
   return await db.$transaction(async (tx) => {
     const existingRecipe = await tx.recipe.findUnique({

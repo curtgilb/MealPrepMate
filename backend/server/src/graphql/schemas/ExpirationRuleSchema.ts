@@ -17,6 +17,17 @@ const expRule = builder.prismaObject("ExpirationRule", {
     tableLife: t.exposeInt("tableLife", { nullable: true }),
     fridgeLife: t.exposeInt("fridgeLife", { nullable: true }),
     freezerLife: t.exposeInt("freezerLife", { nullable: true }),
+    longestLife: t.int({
+      nullable: true,
+      resolve: (rule) => {
+        const lifes = [
+          rule.tableLife,
+          rule.fridgeLife,
+          rule.freezerLife,
+        ].filter((lifespan) => lifespan) as number[];
+        return Math.max(...lifes);
+      },
+    }),
   }),
 });
 

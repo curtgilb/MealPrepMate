@@ -16,7 +16,7 @@ const mealPlanCreateStmt: Prisma.MealPlanCreateInput = {
         recipeId: GyroId,
         factor: 1.5,
         totalServings: 9,
-        cookDay: 1,
+        cookDayOffset: -1,
         servings: {
           createMany: {
             data: [
@@ -82,7 +82,7 @@ const mealPlanCreateStmt: Prisma.MealPlanCreateInput = {
         recipeId: HalalId,
         factor: 2,
         totalServings: 8,
-        cookDay: 4,
+        cookDayOffset: -4,
         servings: {
           createMany: {
             data: [

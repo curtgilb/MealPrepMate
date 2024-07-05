@@ -18,6 +18,7 @@ builder.prismaObject("MealPlanServing", {
     meal: t.exposeString("meal"),
     numberOfServings: t.exposeInt("numberOfServings"),
     mealPlanRecipeId: t.exposeString("mealPlanRecipeId"),
+    mealRecipe: t.relation("recipe"),
   }),
 });
 // ============================================ Inputs ==================================
@@ -53,7 +54,7 @@ builder.queryFields((t) => ({
       return await db.mealPlanServing.findMany({
         where: {
           mealPlan: { id: args.mealPlanId },
-          day: { lte: args.maxDay, gte: args.minDay },
+          day: { lte: args.maxDay ?? undefined, gte: args.minDay ?? undefined },
         },
         ...query,
       });
@@ -73,13 +74,6 @@ builder.mutationFields((t) => ({
     },
     validate: { schema: z.object({ serving: addRecipeServingValidation }) },
     resolve: async (query, root, args) => {
-      // await canChangeServings(
-      //   {
-      //     recipeId: args.serving.mealPlanRecipeId,
-      //     mealPlanId: args.serving.mealPlanId,
-      //   },
-      //   args.serving.servings
-      // );
       return await db.mealPlanServing.create({
         data: {
           day: args.serving.day,
@@ -96,17 +90,20 @@ builder.mutationFields((t) => ({
       });
     },
   }),
-  deleteRecipeServing: t.prismaField({
-    type: ["MealPlanServing"],
+  deleteRecipeServing: t.boolean({
     args: {
       id: t.arg.string({ required: true }),
     },
     validate: { schema: z.object({ id: z.string().cuid() }) },
-    resolve: async (query, root, args) => {
-      await db.mealPlanServing.delete({
-        where: { id: args.id },
-      });
-      return await db.mealPlanServing.findMany({ ...query });
+    resolve: async (root, args) => {
+      try {
+        await db.mealPlanServing.delete({
+          where: { id: args.id },
+        });
+        return true;
+      } catch {
+        return false;
+      }
     },
   }),
   editRecipeServing: t.prismaField({
@@ -116,7 +113,17 @@ builder.mutationFields((t) => ({
     },
     validate: { schema: z.object({ serving: editRecipeServingValidation }) },
     resolve: async (query, root, args) => {
-      await canChangeServings(args.serving.id, args.serving.servings);
+      if (args.serving.servings) {
+        const mealRecipe = await db.mealPlanServing.findUniqueOrThrow({
+          where: { id: args.serving.id },
+          select: { mealPlanRecipeId: true },
+        });
+        await canChangeServings(
+          mealRecipe.mealPlanRecipeId,
+          args.serving.servings,
+          args.serving.id
+        );
+      }
       await db.mealPlanServing.update({
         where: { id: args.serving.id },
         data: {
@@ -130,52 +137,26 @@ builder.mutationFields((t) => ({
   }),
 }));
 
-type MealPlanAndRecipeIds = {
-  mealPlanId: string;
-  recipeId: string;
-};
-
 async function canChangeServings(
-  servingInput: string | MealPlanAndRecipeIds,
-  newServingsAmount: number | null | undefined
+  mealRecipeId: string,
+  servingAmount: number,
+  servingId?: string
 ) {
-  if (newServingsAmount) {
-    let totalServings;
-    let originalServings;
-    let mealPlanId;
-    let recipeId;
-    if (typeof servingInput === "string") {
-      const serving = await db.mealPlanServing.findUniqueOrThrow({
-        where: { id: servingInput },
-        include: { recipe: true, mealPlan: true },
-      });
+  const meal = await db.mealPlanRecipe.findUniqueOrThrow({
+    where: { id: mealRecipeId },
+    include: { servings: true },
+  });
+  let originalAmount = 0;
+  const servingsAlreadyAdded =
+    meal?.servings.reduce((total, serving) => {
+      if (serving.id === servingId) {
+        originalAmount = serving.numberOfServings;
+      }
+      return total + serving.numberOfServings;
+    }, 0) ?? 0;
 
-      totalServings = serving.recipe.totalServings;
-      originalServings = serving.numberOfServings;
-      mealPlanId = serving.mealPlanId;
-      recipeId = serving.mealPlanRecipeId;
-    } else {
-      const mealPlanRecipe = await db.mealPlanRecipe.findUniqueOrThrow({
-        where: { id: servingInput.recipeId },
-      });
-      totalServings = mealPlanRecipe.totalServings;
-      originalServings = 0;
-      mealPlanId = servingInput.mealPlanId;
-      recipeId = servingInput.recipeId;
-    }
-
-    const aggregation = await db.mealPlanServing.aggregate({
-      _sum: { numberOfServings: true },
-      where: {
-        recipe: { id: recipeId },
-        mealPlan: { id: mealPlanId },
-      },
-    });
-    const totalUsed = aggregation._sum.numberOfServings ?? 0;
-
-    const updatedTotal = totalUsed - originalServings + newServingsAmount;
-    if (updatedTotal > totalServings) {
-      throw new Error("Cannot add more servings than available");
-    }
+  const newServingTotal = servingsAlreadyAdded - originalAmount + servingAmount;
+  if (newServingTotal > meal.totalServings) {
+    throw new Error("Servings must not exceed the total available");
   }
 }

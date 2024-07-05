@@ -56,7 +56,7 @@ const worker = new Worker(
     });
     const receiptFile = await downloadFileFromBucket(receipt.path);
 
-    const client = new DocumentAnalysisClient();
+    const client = new DocumentAnalysisClient("1", new AzureKeyCredential("1"));
 
     const poller = await client.beginAnalyzeDocument(
       PrebuiltReceiptModel,

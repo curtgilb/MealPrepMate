@@ -1,34 +1,35 @@
 "use client";
-import { graphql } from "@/gql";
-import AnimatedNumbers from "react-animated-numbers";
-import MacroDistribution from "../MacroDistribution";
-import NutrientBar from "../NutrientBar";
-import { Button } from "../../ui/button";
-import { AddServingDialog } from "../AddServingDialog";
+import { MealPlan } from "@/contexts/MealPlanContext";
 import { Meal } from "@/gql/graphql";
 import { toTitleCase } from "@/utils/utils";
-import { Card } from "../../generics/Card";
 import { useContext } from "react";
-import { MealPlan } from "@/contexts/MealPlanContext";
-import { Nutrients, useNutrientSum } from "@/hooks/use-recipe-label-lookup";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { PlanDay } from "./DayInterface";
+import { Card } from "../../generics/Card";
+import { AddServingDialog } from "../AddServingDialog";
+import { useNutrientSum } from "@/hooks/use-nutrient-sum";
+import { Nutrients } from "@/hooks/use-recipe-label-lookup";
+import { PlanDayProps } from "./DayInterface";
+import { MealPlanServingCard } from "../ServingCard";
 
-const courses: Meal[] = [Meal.Breakfast, Meal.Lunch, Meal.Dinner, Meal.Snack];
+export const courses: Meal[] = [
+  Meal.Breakfast,
+  Meal.Lunch,
+  Meal.Dinner,
+  Meal.Snack,
+];
 
 export function MealPlanDay({
   dayNumber,
   displayNumber,
   servingsByMeal,
-}: PlanDay) {
+}: PlanDayProps) {
   const mealPlan = useContext(MealPlan);
   const recipes = mealPlan?.recipes;
   const servingsByCourse = servingsByMeal?.get(dayNumber);
-  const allServings = mealPlan?.servings?.filter(
-    (serving) => serving.day === dayNumber
-  );
+  const allServingsForDay = Array.from(
+    servingsByMeal?.get(dayNumber)?.values() ?? []
+  ).flat();
   const dayTotal = useNutrientSum(
-    allServings ?? [],
+    allServingsForDay,
     mealPlan?.labels ?? new Map<string, Nutrients>()
   );
 
@@ -61,18 +62,16 @@ export function MealPlanDay({
                         serving.numberOfServings
                     );
                     return (
-                      <Card
+                      <MealPlanServingCard
+                        id={serving.id}
+                        meal={serving.meal as Meal}
+                        dayNumber={dayNumber}
                         key={serving.id}
-                        urls={[]}
-                        altText="test"
-                        vertical={false}
-                      >
-                        <p className="line-clamp-1 text-sm font-medium">
-                          {matchingRecipe?.originalRecipe.name}
-                        </p>
-                        <p className="font-light text-sm">{`${serving.numberOfServings} servings`}</p>
-                        <p className="font-light text-sm">{`${servingCalories} calories`}</p>
-                      </Card>
+                        servings={serving.numberOfServings}
+                        calories={servingCalories}
+                        name={matchingRecipe?.originalRecipe.name ?? ""}
+                        photoUrl={""}
+                      />
                     );
                   })}
                 </div>

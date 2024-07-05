@@ -126,6 +126,7 @@ input EditMealPlanInput {
 }
 
 input EditMealPlanRecipeInput {
+  cookDayOffset: Int
   factor: Float
   servings: Int
 }
@@ -167,6 +168,7 @@ type ExpirationRule {
   freezerLife: Int
   fridgeLife: Int
   id: ID!
+  longestLife: Int
   name: String!
   perishable: Boolean
   tableLife: Int
@@ -262,6 +264,11 @@ type IngredientPriceHistory {
   unit: MeasurementUnit!
 }
 
+type IngredientTotal {
+  qty: Float!
+  unit: MeasurementUnit
+}
+
 type IngredientsQuery {
   ingredients: [Ingredient!]!
   itemsRemaining: Int!
@@ -293,7 +300,14 @@ type MealPlan {
   shopppingDays: [Int!]!
 }
 
+type MealPlanIngredient {
+  baseIngredient: Ingredient
+  recipeIngredients: [ScaledRecipeIngredient!]!
+  total: [IngredientTotal!]!
+}
+
 type MealPlanRecipe {
+  cookDayOffset: Int!
   factor: Float!
   id: ID!
   mealPlan: MealPlan!
@@ -308,6 +322,7 @@ type MealPlanServing {
   id: ID!
   meal: String!
   mealPlanRecipeId: String!
+  mealRecipe: MealPlanRecipe!
   numberOfServings: Int!
 }
 
@@ -346,7 +361,7 @@ type Mutation {
   deleteMealPlan(id: String!): [MealPlan!]!
   deleteNutritionLabel(id: String!): [NutritionLabel!]!
   deletePriceHistory(ingredientId: String!, ingredientPriceId: String!): [IngredientPriceHistory!]!
-  deleteRecipeServing(id: String!): [MealPlanServing!]!
+  deleteRecipeServing(id: String!): Boolean!
   deleteRecipes(recipeIds: [String!]!): [Recipe!]!
   editExpirationRule(expirationRule: CreateExpirationRule!, expirationRuleId: String!): ExpirationRule!
   editIngredient(ingredient: CreateIngredientInput!, ingredientId: String!): Ingredient!
@@ -386,6 +401,7 @@ type Nutrient {
   customTarget: Float
   dri: DailyReferenceIntake
   id: String!
+  important: Boolean!
   name: String!
   parentNutrientId: String
   type: String!
@@ -429,12 +445,6 @@ type NutritionLabel {
 type NutritionLabelNutrient {
   nutrient: Nutrient!
   value: Float!
-}
-
-type NutritionLabelQuery {
-  items: [NutritionLabel!]!
-  itemsRemaining: Int!
-  nextOffset: Int
 }
 
 input OffsetPagination {
@@ -484,12 +494,12 @@ type Query {
   ingredientPrice(ingredientPriceId: String!): IngredientPriceHistory!
   ingredients(pagination: OffsetPagination!, search: String): IngredientsQuery!
   mealPlan(id: String!): MealPlan!
+  mealPlanIngredients(mealPlanId: String!): [MealPlanIngredient!]!
   mealPlanRecipes(mealPlanId: String!): [MealPlanRecipe!]!
   mealPlanServings(maxDay: Int, mealPlanId: String!, minDay: Int): [MealPlanServing!]!
   mealPlans: [MealPlan!]!
   nutrients(advanced: Boolean!, pagination: OffsetPagination!, search: String): NutrientsQuery!
   nutritionLabel(labelId: String!): NutritionLabel!
-  nutritionLabels(pagination: OffsetPagination!, search: String): NutritionLabelQuery!
   priceHistory(ingredientId: String!): [IngredientPriceHistory!]!
   receipt(id: String!): Receipt!
   recipe(recipeId: String!): Recipe!
@@ -635,9 +645,16 @@ enum RecordStatus {
   UPDATED
 }
 
+type ScaledRecipeIngredient {
+  factor: Float!
+  name: String!
+  recipeId: String!
+  recipeIngredient: RecipeIngredients!
+}
+
 type ScheduledPlan {
-  duration: Int!
-  id: String!
+  duration: Int
+  id: String
   mealPlan: MealPlan!
   startDate: DateTime!
 }
@@ -663,6 +680,7 @@ type UnitQuery {
 enum UnitType {
   COUNT
   ENERGY
+  LENGTH
   VOLUME
   WEIGHT
 }

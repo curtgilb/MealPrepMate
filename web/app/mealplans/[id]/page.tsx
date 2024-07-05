@@ -16,12 +16,13 @@ import { useRecipeLabelLookup } from "@/hooks/use-recipe-label-lookup";
 import { useQuery } from "@urql/next";
 import { MealPlan } from "@/contexts/MealPlanContext";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { MealPlanServings } from "@/contexts/ServingsContext";
 
 export type DisplayMode = "week" | "day";
 
 export default function MealPlanPage() {
+  console.log("IWAS RENDERED");
   const params = useParams<{ id: string }>();
   const [mealPlanResult, refetchMealPlan] = useQuery({
     query: mealPlanQuery,
@@ -40,7 +41,6 @@ export default function MealPlanPage() {
   );
 
   if (!data) return "loading or error";
-  console.log(data);
 
   return (
     <MealPlan.Provider
@@ -51,7 +51,7 @@ export default function MealPlanPage() {
       }}
     >
       <MealPlanServings.Provider value={servings}>
-        <div className="flex">
+        <div className="flex h-full">
           <div className="p-4 grow">
             <div className="flex justify-between mb-8">
               <MealPlanName
@@ -65,9 +65,8 @@ export default function MealPlanPage() {
               />
               <ModeDropdown mode={mode} setMode={setMode} />
             </div>
-            <DayManager />
+            {/* <DayManager days={days} display="week" planMode={mode} /> */}
           </div>
-
           <MealPlanSideBar />
         </div>
       </MealPlanServings.Provider>

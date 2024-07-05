@@ -3,9 +3,9 @@ import { Card } from "./Card";
 
 interface LoadingCardsProps {
   onView?: () => void;
-  small: boolean;
+  vertical: boolean;
 }
-export function LoadingCards({ onView, small }: LoadingCardsProps) {
+export function LoadingCards({ onView, vertical }: LoadingCardsProps) {
   return (
     <>
       <InView
@@ -17,10 +17,34 @@ export function LoadingCards({ onView, small }: LoadingCardsProps) {
         }}
         triggerOnce={true}
       >
-        <Card loading={true} urls={[]} altText="" small={small}></Card>
+        <Card
+          loading={true}
+          image={{
+            images: [],
+            placeholder: "/pot.jpg",
+            grid: false,
+          }}
+          vertical={vertical}
+        ></Card>
       </InView>
-      <Card loading={true} urls={[]} altText="" small={small}></Card>
-      <Card loading={true} urls={[]} altText="" small={small}></Card>
+      <Card
+        loading={true}
+        image={{
+          images: [],
+          placeholder: "/pot.jpg",
+          grid: false,
+        }}
+        vertical={vertical}
+      ></Card>
+      <Card
+        loading={true}
+        image={{
+          images: [],
+          placeholder: "/pot.jpg",
+          grid: false,
+        }}
+        vertical={vertical}
+      ></Card>
     </>
   );
 }

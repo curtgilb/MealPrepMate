@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { ServingsLookup } from "./DayManager";
 
-export interface PlanDay {
+export interface PlanDayProps {
   dayNumber: number;
   displayNumber: number;
   servingsByMeal: ServingsLookup | null | undefined;
@@ -10,7 +10,7 @@ export interface PlanDay {
 interface BasePlanDay {
   displayNumber: number;
   children: ReactNode;
-  topRight: ReactNode;
+  topRight?: ReactNode;
 }
 
 export function PlanDay({ children, topRight, displayNumber }: BasePlanDay) {

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { MeasurementSystem, PrismaClient } from "@prisma/client";
 import { DateTime } from "luxon";
 import { createChickenGyro } from "../../data/test_data/ChickenGyroRecipe.js";
 import { createHalalChicken } from "../../data/test_data/HalalChickenRecipe.js";
@@ -7,7 +7,7 @@ import {
   mealPlanCreateStmt,
 } from "../../data/test_data/MealPlan.js";
 import { db } from "../db.js";
-import { RecipeKeeperImport } from "../services/import/importers/RecipeKeeperImport.js";
+// import { RecipeKeeperImport } from "../services/import/importers/RecipeKeeperImport.js";
 import { readCSV } from "../services/io/Readers.js";
 import { storage } from "../storage.js";
 import { toMeasurementUnitTypeEnum } from "../util/Cast.js";
@@ -55,21 +55,21 @@ async function seedDb() {
   await prisma.$disconnect();
 }
 
-async function loadImport() {
-  const recipeKeeperImport = await db.import.create({
-    data: {
-      fileName: "RecipeKeeper.zip",
-      type: "RECIPE_KEEPER",
-      status: "PENDING",
-      storagePath: "somewhere",
-    },
-  });
-  const importer = new RecipeKeeperImport({
-    source: "../../../data/RecipeKeeper.zip",
-    import: recipeKeeperImport,
-  });
-  await importer.processImport();
-}
+// async function loadImport() {
+//   const recipeKeeperImport = await db.import.create({
+//     data: {
+//       fileName: "RecipeKeeper.zip",
+//       type: "RECIPE_KEEPER",
+//       status: "PENDING",
+//       storagePath: "somewhere",
+//     },
+//   });
+//   const importer = new RecipeKeeperImport({
+//     source: "../../../data/RecipeKeeper.zip",
+//     import: recipeKeeperImport,
+//   });
+//   await importer.processImport();
+// }
 
 async function loadGroceryStores() {
   await db.groceryStore.createMany({
@@ -243,6 +243,10 @@ async function loadUnits() {
       name: record.name,
       abbreviations: record.lookupNames?.split(", "),
       symbol: record.symbol ?? undefined,
+      conversionName: record.conversionName,
+      system: record.system
+        ? (record.system.toUpperCase() as MeasurementSystem)
+        : undefined,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       type: toMeasurementUnitTypeEnum(record.type),
     })),

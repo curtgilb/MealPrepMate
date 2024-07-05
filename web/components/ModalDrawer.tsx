@@ -21,11 +21,13 @@ import {
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 interface DrawerDialogProps {
   title: string;
   description?: string;
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
   trigger: React.ReactNode;
   content: React.ReactNode;
 }
@@ -35,14 +37,15 @@ export function ModalDrawer({
   description,
   trigger,
   content,
+  open,
+  setOpen,
 }: DrawerDialogProps) {
-  const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger>{trigger}</DialogTrigger>
+        <DialogTrigger asChild>{trigger}</DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>

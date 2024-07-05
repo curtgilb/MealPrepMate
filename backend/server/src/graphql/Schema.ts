@@ -6,7 +6,7 @@ import "./schemas/CuisineSchema.js";
 import "./schemas/EnumSchema.js";
 import "./schemas/ExpirationRuleSchema.js";
 import "./schemas/GroceryStoreSchema.js";
-import "./schemas/ImportSchema.js";
+// import "./schemas/ImportSchema.js";
 import "./schemas/IngredientPrice.js";
 import "./schemas/IngredientSchema.js";
 import "./schemas/MealplanSchema.js";
@@ -20,5 +20,7 @@ import "./schemas/UserSchema.js";
 import "./schemas/UtilitySchema.js";
 import "./schemas/MealPlanRecipeSchema.js";
 import "./schemas/MealPlanServingsSchema.js";
+import "./schemas/MealPlanIngredients.js";
+import "./schemas/IngredientCategorySchema.js";
 
 export const schema = builder.toSchema();

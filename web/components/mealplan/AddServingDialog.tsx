@@ -9,7 +9,7 @@ import {
 import { MealPlan } from "@/contexts/MealPlanContext";
 import { graphql } from "@/gql";
 import { Meal } from "@/gql/graphql";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { ModalDrawer } from "../ModalDrawer";
 import { Button } from "../ui/button";
 import {
@@ -36,6 +36,10 @@ const addServingMutation = graphql(`
       meal
       mealPlanRecipeId
       numberOfServings
+      mealRecipe {
+        id
+        servingsOnPlan
+      }
     }
   }
 `);
@@ -44,7 +48,12 @@ interface AddServingDialogProps {
   day: number;
 }
 
-const meals: Meal[] = [Meal.Breakfast, Meal.Lunch, Meal.Dinner, Meal.Snack];
+export const meals: Meal[] = [
+  Meal.Breakfast,
+  Meal.Lunch,
+  Meal.Dinner,
+  Meal.Snack,
+];
 
 const FormSchema = z.object({
   mealPlanRecipeId: z.string().cuid(),
@@ -53,6 +62,7 @@ const FormSchema = z.object({
 });
 
 export function AddServingDialog({ day }: AddServingDialogProps) {
+  const [open, setOpen] = useState(false);
   const mealPlan = useContext(MealPlan);
   const [result, addServing] = useMutation(addServingMutation);
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -83,6 +93,8 @@ export function AddServingDialog({ day }: AddServingDialogProps) {
 
   return (
     <ModalDrawer
+      open={open}
+      setOpen={setOpen}
       title="Add serving"
       trigger={
         <Button

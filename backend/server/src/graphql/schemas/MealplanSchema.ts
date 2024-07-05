@@ -23,12 +23,12 @@ builder.prismaObject("MealPlan", {
 
 builder.prismaObject("ScheduledPlan", {
   fields: (t) => ({
-    id: t.exposeString("id"),
+    id: t.exposeString("id", { nullable: true }),
     startDate: t.field({
       type: "DateTime",
       resolve: (parent) => parent.startDate,
     }),
-    duration: t.exposeInt("duration"),
+    duration: t.exposeInt("duration", { nullable: true }),
     mealPlan: t.relation("mealPlan"),
   }),
 });

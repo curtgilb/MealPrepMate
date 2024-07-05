@@ -1,6 +1,6 @@
 import {
   Import as PrismaImport,
-  ImportRecord,
+  ImportItem,
   Prisma,
   RecordStatus,
 } from "@prisma/client";
@@ -13,7 +13,7 @@ type ImportServiceInput = {
 };
 
 type MatchUpdate = {
-  record: ImportRecord;
+  record: ImportItem;
   matchingRecipeId?: string;
   matchingLabelId?: string;
   createDraft: boolean;
@@ -26,10 +26,9 @@ abstract class Importer {
   // Import service input just has an extra  field for source (like a file path), this allows for local file import
   // Import record is already made by message queue, this class is instantiated to process that import
   constructor(input: ImportServiceInput | PrismaImport) {
-    if (Object.hasOwn(input, "id"))
-      this.input = { source: "", import: input as PrismaImport };
+    if ("id" in input) this.input = { source: "", import: input };
     else {
-      this.input = input as ImportServiceInput;
+      this.input = input;
     }
   }
 
@@ -47,14 +46,14 @@ abstract class Importer {
   }
 
   abstract createDraft(
-    record: ImportRecord,
+    record: ImportItem,
     newStatus: RecordStatus
   ): Promise<void>;
 
-  abstract finalize(record: ImportRecord): Promise<void>;
+  abstract finalize(record: ImportItem): Promise<void>;
 
   abstract deleteDraft(
-    importRecord: ImportRecord,
+    importRecord: ImportItem,
     newStatus: RecordStatus
   ): Promise<void>;
 

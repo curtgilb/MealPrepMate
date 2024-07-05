@@ -146,13 +146,13 @@ type FileMetaData = {
   ext: string;
 };
 
-const recordWithImport = Prisma.validator<Prisma.ImportRecordDefaultArgs>()({
+const recordWithImport = Prisma.validator<Prisma.ImportItemDefaultArgs>()({
   include: {
     import: true,
   },
 });
 
-type RecordWithImport = Prisma.ImportRecordGetPayload<typeof recordWithImport>;
+type RecordWithImport = Prisma.ImportItemGetPayload<typeof recordWithImport>;
 
 const recipeWithIngredients = Prisma.validator<Prisma.RecipeDefaultArgs>()({
   include: {

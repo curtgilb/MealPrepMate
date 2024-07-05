@@ -12,6 +12,7 @@ builder.prismaObject("MealPlanRecipe", {
     factor: t.exposeFloat("factor"),
     mealPlanServings: t.relation("servings"),
     totalServings: t.exposeInt("totalServings"),
+    cookDayOffset: t.exposeInt("cookDayOffset"),
     servingsOnPlan: t.int({
       resolve: async (recipe) => {
         const result = await db.mealPlanServing.aggregate({
@@ -31,6 +32,7 @@ const editMealPlanRecipeInput = builder.inputType("EditMealPlanRecipeInput", {
   fields: (t) => ({
     factor: t.float(),
     servings: t.int(),
+    cookDayOffset: t.int(),
   }),
 });
 
@@ -78,7 +80,7 @@ builder.mutationFields((t) => ({
           recipe: { connect: { id: args.recipe.recipeId } },
           factor: args.recipe.scaleFactor,
           totalServings: args.recipe.servings,
-          cookDay: args.recipe.cookDay,
+          cookDayOffset: args.recipe.cookDay ?? 0,
         },
         ...query,
       });

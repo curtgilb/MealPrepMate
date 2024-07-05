@@ -31,7 +31,8 @@ async function searchRecipes(
     return await db.recipe.findMany({
       where: { verified: true },
       orderBy: { name: "desc" },
-      ...query,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...(query as any),
     });
   } else {
     const recipes = (await db.recipe.findMany(
@@ -81,7 +82,7 @@ function filterMaxFreshness(
   return maxIngredientLife;
 }
 
-function passFilter(
+export function passFilter(
   value: number | undefined | null,
   filter: NumericalComparison | null | undefined
 ): void {
@@ -105,7 +106,7 @@ function passFilter(
   }
 }
 
-class FilterError extends Error {
+export class FilterError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "FilterError";

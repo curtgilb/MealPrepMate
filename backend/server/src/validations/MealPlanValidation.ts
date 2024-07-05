@@ -12,6 +12,7 @@ const editMealPlanValidation = z.object({
 const editMealPlanRecipeValidation = z.object({
   factor: z.number().positive().optional(),
   servings: z.number().gte(1).optional(),
+  cookDayOffset: z.number().optional(),
 });
 
 const addRecipeServingValidation = z.object({
@@ -34,7 +35,7 @@ const addRecipeToMealPlanValidation = z.object({
   recipeId: z.string().cuid(),
   scaleFactor: z.number().gte(1),
   servings: z.number().positive(),
-  cookDay: z.number().optional(),
+  cookDayOffset: z.number().optional(),
 });
 
 export {
