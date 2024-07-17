@@ -14,69 +14,58 @@ const store = builder.prismaObject("GroceryStore", {
   }),
 });
 
-const storeSearch = builder
-  .objectRef<{
-    nextOffset: number | null;
-    itemsRemaining: number;
-    stores: GroceryStore[];
-  }>("StoreSearch")
-  .implement({
-    fields: (t) => ({
-      nextOffset: t.exposeInt("nextOffset", { nullable: true }),
-      itemsRemaining: t.exposeInt("itemsRemaining"),
-      stores: t.field({
-        type: [store],
-        resolve: (result) => result.stores,
-      }),
-    }),
-  });
+// const storeSearch = builder
+//   .objectRef<{
+//     nextOffset: number | null;
+//     itemsRemaining: number;
+//     stores: GroceryStore[];
+//   }>("StoreSearch")
+//   .implement({
+//     fields: (t) => ({
+//       nextOffset: t.exposeInt("nextOffset", { nullable: true }),
+//       itemsRemaining: t.exposeInt("itemsRemaining"),
+//       stores: t.field({
+//         type: [store],
+//         resolve: (result) => result.stores,
+//       }),
+//     }),
+//   });
 
 // ============================================ Inputs ==================================
 // builder.inputType("", {});
 
 // ============================================ Queries =================================
 builder.queryFields((t) => ({
-  stores: t.field({
-    type: storeSearch,
+  stores: t.prismaField({
+    type: ["GroceryStore"],
     args: {
       search: t.arg.string(),
-      pagination: t.arg({
-        type: offsetPagination,
-        required: true,
-      }),
     },
     validate: {
       schema: z.object({
         search: z.string().optional(),
-        pagination: offsetPaginationValidation,
       }),
     },
-    resolve: async (root, args, context, info) => {
-      const search: Prisma.GroceryStoreWhereInput = args.search
-        ? { name: { contains: args.search, mode: "insensitive" } }
-        : {};
-      const query = queryFromInfo({ context, info, path: ["stores"] });
-      const [data, count] = await db.$transaction([
-        db.groceryStore.findMany({
-          where: search,
-          orderBy: { name: "asc" },
-          take: args.pagination.take,
-          skip: args.pagination.offset,
-          ...query,
-        }),
-        db.groceryStore.count(),
-      ]);
-
-      const { itemsRemaining, nextOffset } = nextPageInfo(
-        data.length,
-        args.pagination.take,
-        args.pagination.offset,
-        count
-      );
-      return { stores: data, nextOffset, itemsRemaining };
+    resolve: async (query, root, args) => {
+      return await db.groceryStore.findMany({
+        where: {
+          name: { contains: args.search ?? undefined, mode: "insensitive" },
+        },
+        orderBy: { name: "asc" },
+      });
     },
   }),
 }));
 
 // ============================================ Mutations ===============================
-// builder.mutationFields((t) => ({}));
+builder.mutationFields((t) => ({
+  createGroceryStore: t.prismaField({
+    type: "GroceryStore",
+    args: {
+      name: t.arg.string({ required: true }),
+    },
+    resolve: async (query, root, args) => {
+      return await db.groceryStore.create({ data: { name: args.name } });
+    },
+  }),
+}));

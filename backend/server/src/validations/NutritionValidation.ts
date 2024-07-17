@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { cleanedStringSchema } from "./utilValidations.js";
 import { toTitleCase } from "../util/utils.js";
+import { TargetPreference } from "@prisma/client";
 
 const createNutrientValidation = z.object({
   nutrientId: z.string().cuid(),
@@ -27,8 +28,16 @@ const editNutritionLabelValidation = z.object({
   nutrients: z.array(createNutrientValidation).optional(),
 });
 
+const editNutrientTargetValidation = z.object({
+  nutrientId: z.string().cuid(),
+  target: z.number().positive(),
+  threshold: z.number().min(0).max(1),
+  preference: z.nativeEnum(TargetPreference),
+});
+
 export {
   createNutritionLabelValidation,
   editNutritionLabelValidation,
   createNutrientValidation,
+  editNutrientTargetValidation,
 };

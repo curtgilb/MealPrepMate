@@ -1,9 +1,11 @@
+"use client";
+import { IngredientPicker } from "@/components/pickers/IngredientPicker";
+import { UnitPicker } from "@/components/pickers/UnitPicker";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -18,19 +20,29 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { FragmentType, graphql, useFragment } from "@/gql";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { graphql } from "@/gql";
+import {
+  FoodType,
+  ReceiptItemFragment as ReceiptItemType,
+} from "@/gql/graphql";
+import { toTitleCase } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { toTitleCase } from "@/utils/utils";
 
 export const ReceiptItemFragment = graphql(`
   fragment ReceiptItem on ReceiptLine {
@@ -52,35 +64,48 @@ export const ReceiptItemFragment = graphql(`
   }
 `);
 
+const editReceiptItem = graphql(
+  `
+    mutation editReceiptItem($lineId: String!, $lineItem: UpdateReceiptItem!) {
+      updateReceiptLine(lineId: $lineId, line: $lineItem) {
+        ...ReceiptItem
+      }
+    }
+  `
+);
+
 interface ReceiptItem {
   itemNumber: number;
-  item: FragmentType<typeof ReceiptItemFragment>;
+  item: ReceiptItemType;
 }
 
 const formSchema = z.object({
-  username: z.string().min(2).max(50),
-  totalPrice: z.number(),
-  quantity: z.number(),
-  matchingUnit: z.string().min(2).max(50),
-  matchingIngredient: z.string().min(2).max(50),
+  totalPrice: z.number().positive().optional(),
+  description: z.string().optional(),
+  quantity: z.number().optional(),
+  perUnitPrice: z.number().optional(),
+  unitQuantity: z.string().optional(),
+  unit: z.object({ id: z.string().cuid(), name: z.string() }),
+  ingredient: z.object({ id: z.string().cuid(), name: z.string() }),
+  foodType: z.nativeEnum(FoodType),
 });
 
 export function ReceiptItem({ itemNumber, item }: ReceiptItem) {
-  const lineItem = useFragment(ReceiptItemFragment, item);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
-      totalPrice: 3,
-      quantity: 1,
-      matchingUnit: "adsf",
-      matchingIngredient: "adf",
+      totalPrice: item.totalPrice ?? undefined,
+      description: item.description ?? undefined,
+      quantity: item.quantity ?? undefined,
+      perUnitPrice: item.perUnitPrice ?? undefined,
+      unitQuantity: item.unitQuantity ?? undefined,
+      unit: item.matchingUnit ?? undefined,
+      ingredient: item.matchingIngredient ?? undefined,
+      foodType: item.foodType ?? undefined,
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
     console.log(values);
   }
 
@@ -89,11 +114,10 @@ export function ReceiptItem({ itemNumber, item }: ReceiptItem) {
       <CardHeader>
         <div className="flex flex-cols justify-between">
           <div>
-            <CardTitle>{toTitleCase(lineItem.description)}</CardTitle>
-
+            <CardTitle>{toTitleCase(item.description)}</CardTitle>
             <CardDescription>Item {`#${itemNumber}`}</CardDescription>
           </div>
-          <DropdownMenu>
+          {/* <DropdownMenu>
             <DropdownMenuTrigger>
               <Button variant="ghost" size="icon">
                 <MoreVertical className="h-4 w-4"></MoreVertical>
@@ -111,7 +135,7 @@ export function ReceiptItem({ itemNumber, item }: ReceiptItem) {
                 Remove
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
         </div>
       </CardHeader>
       <CardContent>
@@ -120,12 +144,23 @@ export function ReceiptItem({ itemNumber, item }: ReceiptItem) {
             <div className="flex flex-cols gap-4 flex-wrap">
               <FormField
                 control={form.control}
-                name="matchingIngredient"
+                name="ingredient"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel>Matching Ingredient</FormLabel>
                     <FormControl>
-                      <Input placeholder="Pita Bread" {...field} />
+                      {/* <IngredientPicker
+                        select={(ingredient) => field.onChange(ingredient)}
+                        deselect={() => {
+                          field.onChange(undefined);
+                        }}
+                        selectedIds={field.value ? [field.value.id] : []}
+                        create={false}
+                        multiselect={false}
+                        placeholder={
+                          field.value ? field.value.name : "Select a match"
+                        }
+                      /> */}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -135,7 +170,7 @@ export function ReceiptItem({ itemNumber, item }: ReceiptItem) {
                 control={form.control}
                 name="quantity"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel>Qty</FormLabel>
                     <FormControl>
                       <Input className="w-20" type="number" {...field} />
@@ -148,7 +183,7 @@ export function ReceiptItem({ itemNumber, item }: ReceiptItem) {
                 control={form.control}
                 name="totalPrice"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel>Total Price</FormLabel>
                     <FormControl>
                       <Input className="w-24" type="number" {...field} />
@@ -159,26 +194,39 @@ export function ReceiptItem({ itemNumber, item }: ReceiptItem) {
               />
               <FormField
                 control={form.control}
-                name="totalPrice"
+                name="unitQuantity"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Size</FormLabel>
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Weight/Volume</FormLabel>
                     <FormControl>
                       <Input className="w-24" type="number" {...field} />
                     </FormControl>
-                    <FormDescription>Weight or volume</FormDescription>
+
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
-                name="totalPrice"
+                name="unit"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Size unit</FormLabel>
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Weight/Volume Unit</FormLabel>
                     <FormControl>
-                      <Input className="w-28" type="number" {...field} />
+                      {/* <UnitPicker
+                        select={(unit) => {
+                          field.onChange(unit);
+                        }}
+                        deselect={() => {
+                          field.onChange(undefined);
+                        }}
+                        selectedIds={field.value ? [field.value.id] : []}
+                        create={false}
+                        placeholder={
+                          field.value ? field.value.name : "Pick a unit"
+                        }
+                        multiselect={false}
+                      /> */}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -186,13 +234,34 @@ export function ReceiptItem({ itemNumber, item }: ReceiptItem) {
               />
               <FormField
                 control={form.control}
-                name="totalPrice"
+                name="foodType"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel>Food Type</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select food type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={FoodType.Canned}>
+                          {toTitleCase(FoodType.Canned)}
+                        </SelectItem>
+                        <SelectItem value={FoodType.Fresh}>
+                          {toTitleCase(FoodType.Fresh)}
+                        </SelectItem>
+                        <SelectItem value={FoodType.Frozen}>
+                          {toTitleCase(FoodType.Frozen)}
+                        </SelectItem>
+                        <SelectItem value={FoodType.Packaged}>
+                          {toTitleCase(FoodType.Packaged)}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

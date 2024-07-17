@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "../ui/button";
 import { Loader2, Plus } from "lucide-react";
 import { ModalDrawer } from "../ModalDrawer";
@@ -14,12 +15,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { graphql } from "@/gql";
 import { useMutation } from "urql";
 import { useRouter } from "next/navigation";
 
-const uploadReceipt = graphql(/* GraphQL */ `
+const uploadReceipt = graphql(`
   mutation uploadReceipt($file: File!) {
     uploadReceipt(file: $file) {
       id
@@ -28,30 +29,37 @@ const uploadReceipt = graphql(/* GraphQL */ `
 `);
 
 export function ReceiptUpload() {
+  const [open, setOpen] = useState<boolean>(false);
   return (
     <>
       <ModalDrawer
         title="Upload receipt"
         description="Upload your grocery store receipt to add prices to ingredients"
+        open={open}
+        setOpen={setOpen}
         trigger={
           <Button>
             <Plus className="mr-2 h-4 w-4" />
             Upload Receipt
           </Button>
         }
-        content={<ReceiptUploadDialog />}
+        content={<ReceiptUploadDialog open={open} setOpen={setOpen} />}
       />
     </>
   );
 }
 
-function ReceiptUploadDialog() {
+interface ReceiptUploadDialogProps {
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+}
+
+function ReceiptUploadDialog({ open, setOpen }: ReceiptUploadDialogProps) {
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File>();
   const [result, uploadFile] = useMutation(uploadReceipt);
 
   const handleFileUpload = () => {
-    console.log(`${selectedFile}`);
     uploadFile({ file: selectedFile }).then((uploadResult) => {
       router.push(
         `/ingredients/receipt/${uploadResult.data?.uploadReceipt.id}`

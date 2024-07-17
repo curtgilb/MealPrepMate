@@ -9,7 +9,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { NumericalComparison, Recipe } from "@/gql/graphql";
-import { useState, Dispatch, SetStateAction } from "react";
+import { useState, Dispatch, SetStateAction, HTMLAttributes } from "react";
 import NumericalFilter from "./NumericalFilter";
 import { Button } from "../ui/button";
 import { Filter, FilterX, X } from "lucide-react";
@@ -18,7 +18,7 @@ import { TimeNumberInput } from "../ui/time-number-input";
 import { RecipeSearchFilter } from "../mealplan/RecipeSearch";
 import { IngredientFilter } from "./filters/IngredientFilter";
 
-interface RecipeFilterProps {
+interface RecipeFilterProps extends HTMLAttributes<HTMLDivElement> {
   filter: RecipeSearchFilter;
   setFilter: Dispatch<SetStateAction<RecipeSearchFilter>>;
 }
@@ -28,7 +28,11 @@ export interface FilterChildProp<K extends keyof RecipeSearchFilter> {
   updateFilter: (prop: K, value: RecipeSearchFilter[K]) => void;
 }
 
-export default function RecipeFilter({ filter, setFilter }: RecipeFilterProps) {
+export default function RecipeFilter({
+  filter,
+  setFilter,
+  ...divAttributes
+}: RecipeFilterProps) {
   function handleFilterUpdate<K extends keyof RecipeSearchFilter>(
     prop: K,
     value: RecipeSearchFilter[K]
@@ -37,7 +41,7 @@ export default function RecipeFilter({ filter, setFilter }: RecipeFilterProps) {
   }
 
   return (
-    <div>
+    <div {...divAttributes}>
       <div className="flex gap-2 my-6">
         <Button onClick={() => {}}>
           <Filter className="mr-2 h-4 w-4" />

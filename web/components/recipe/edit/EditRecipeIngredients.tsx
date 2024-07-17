@@ -1,44 +1,54 @@
-import { graphql } from "@/gql";
-import { FragmentType, useFragment } from "@/gql/fragment-masking";
+import {
+  EditRecipeProps,
+  EditRecipeSubmit,
+} from "@/app/recipes/[id]/edit/page";
+import { forwardRef, useImperativeHandle } from "react";
+import {
+  getRecipeIngredients,
+  RecipeIngredientFragment,
+} from "@/graphql/recipe/queries";
+import { useQuery } from "@urql/next";
+import { useFragment } from "@/gql";
+import { Input } from "@/components/ui/input";
+import { UnitPicker } from "@/components/pickers/UnitPicker";
+import { IngredientPicker } from "@/components/pickers/IngredientPicker";
+import { EditRecipeIngredientItem } from "./EditRecipeIngredientItem";
 
-export const RecipeIngredientFields = graphql(`
-  fragment RecipeIngredientFields on RecipeIngredients {
-    id
-    name
-    order
-    quantity
-    sentence
-    unit {
-      id
-      name
-      symbol
-    }
-    baseIngredient {
-      id
-      name
-      alternateNames
-    }
-    group {
-      id
-      name
-    }
-  }
-`);
+export const EditRecipeIngredients = forwardRef<
+  EditRecipeSubmit,
+  EditRecipeProps
+>(function EditIngredients(props, ref) {
+  const [result] = useQuery({
+    query: getRecipeIngredients,
+    variables: { id: props.recipeId },
+  });
 
-export function EditRecipeIngredients(props: {
-  ingredients?: FragmentType<typeof RecipeIngredientFields>[];
-}) {
-  const ingredients = useFragment(RecipeIngredientFields, props.ingredients);
+  const { data, error, fetching } = result;
+  const ingredients = useFragment(
+    RecipeIngredientFragment,
+    data?.recipe.ingredients
+  );
+  useImperativeHandle(ref, () => ({
+    submit(postSubmit) {
+      console.log("child method");
+      postSubmit();
+    },
+  }));
+
   return (
     <div>
-      <p>Ingredients</p>
-      {ingredients?.map((ingredient) => {
-        return (
-          <div key={ingredient.id}>
-            <p>{ingredient.sentence}</p>
-          </div>
-        );
-      })}
+      <p>Edit Recipe Ingredients</p>
+      <ol className="flex flex-col gap-8">
+        {ingredients?.map((ingredient) => {
+          console.log(ingredient?.unit?.id);
+          return (
+            <EditRecipeIngredientItem
+              key={ingredient.id}
+              ingredient={ingredient}
+            />
+          );
+        })}
+      </ol>
     </div>
   );
-}
+});

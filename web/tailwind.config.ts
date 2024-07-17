@@ -26,7 +26,8 @@ const config = {
         sans: ["var(--font-sans)", ...fontFamily.sans],
       },
       gridTemplateColumns: {
-        "grid-52": "repeat(auto-fit, minmax(208px, 1fr))",
+        "autofit-vertical": "repeat(auto-fill, minmax(208px, 1fr))",
+        "autofit-horizontal": "repeat(auto-fill, minmax(250px, 1fr))",
         "auto-fr": "auto 1fr",
       },
       colors: {

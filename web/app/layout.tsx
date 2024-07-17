@@ -113,7 +113,7 @@ export default function RootLayout({
         </header>
         <main className="flex flex-row w-full relative bg-secondary h-full flex-grow">
           <Navigation isCollapsed={isCollapsed} />
-          <section className="grow">
+          <section className="grow min-w-0 overflow-hidden">
             <UrqlProvider client={client} ssr={ssr}>
               {children}
             </UrqlProvider>

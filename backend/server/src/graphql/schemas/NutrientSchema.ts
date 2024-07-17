@@ -1,10 +1,11 @@
-import { Nutrient } from "@prisma/client";
+import { Nutrient, TargetPreference } from "@prisma/client";
 import { builder } from "../builder.js";
 import { nextPageInfo, offsetPagination } from "./UtilitySchema.js";
 import { offsetPaginationValidation } from "../../validations/UtilityValidation.js";
 import { db } from "../../db.js";
 import { z } from "zod";
 import { queryFromInfo } from "@pothos/plugin-prisma";
+import { editNutrientTargetValidation } from "../../validations/NutritionValidation.js";
 
 // // ============================================ Types ===================================
 const nutrient = builder.prismaObject("Nutrient", {
@@ -15,7 +16,7 @@ const nutrient = builder.prismaObject("Nutrient", {
     type: t.exposeString("type"),
     important: t.exposeBoolean("important"),
     advancedView: t.exposeBoolean("advancedView"),
-    customTarget: t.exposeFloat("customTarget", { nullable: true }),
+    target: t.relation("target", { nullable: true }),
     dri: t.prismaField({
       type: "DailyReferenceIntake",
       nullable: true,
@@ -36,6 +37,22 @@ const nutrient = builder.prismaObject("Nutrient", {
     }),
     parentNutrientId: t.exposeString("parentNutrientId", { nullable: true }),
     unit: t.relation("unit"),
+  }),
+});
+
+const nutrientTargetEnum = builder.enumType(TargetPreference, {
+  name: "TargetPreference",
+});
+
+const nutrientTarget = builder.prismaObject("NutrientTarget", {
+  fields: (t) => ({
+    id: t.exposeString("id"),
+    nutrientTarget: t.exposeFloat("targetValue"),
+    threshold: t.exposeFloat("threshold", { nullable: true }),
+    preference: t.field({
+      type: nutrientTargetEnum,
+      resolve: (parent) => parent.preference,
+    }),
   }),
 });
 
@@ -65,7 +82,14 @@ const nutrientsQuery = builder
   });
 
 // // ============================================ Inputs ==================================
-// builder.inputType("", {});
+const nutrientTargetInput = builder.inputType("NutrientTargetInput", {
+  fields: (t) => ({
+    nutrientId: t.string({ required: true }),
+    target: t.float({ required: true }),
+    threshold: t.float(),
+    preference: t.field({ type: nutrientTargetEnum, required: true }),
+  }),
+});
 
 // // ============================================ Queries =================================
 builder.queryFields((t) => ({
@@ -114,13 +138,30 @@ builder.mutationFields((t) => ({
   setNutritionTarget: t.prismaField({
     type: "Nutrient",
     args: {
-      nutrientId: t.arg.string({ required: true }),
-      target: t.arg.float({ required: true }),
+      target: t.arg({ type: nutrientTargetInput, required: true }),
+    },
+    validate: {
+      schema: z.object({
+        target: editNutrientTargetValidation,
+      }),
     },
     resolve: async (query, root, args) => {
-      return await db.nutrient.update({
-        where: { id: args.nutrientId },
-        data: { customTarget: args.target },
+      await db.nutrientTarget.upsert({
+        where: { id: args.target.nutrientId },
+        update: {
+          targetValue: args.target.target,
+          preference: args.target.preference,
+          threshold: args.target.threshold,
+        },
+        create: {
+          targetValue: args.target.target,
+          preference: args.target.preference,
+          threshold: args.target.threshold,
+          nutrient: { connect: { id: args.target.nutrientId } },
+        },
+      });
+      return await db.nutrient.findUniqueOrThrow({
+        where: { id: args.target.nutrientId },
         ...query,
       });
     },

@@ -4,7 +4,12 @@ export const nutritionFieldsFragment = graphql(`
   fragment NutrientFields on Nutrient {
     id
     alternateNames
-    customTarget
+    target {
+      id
+      nutrientTarget
+      preference
+      threshold
+    }
     dri {
       id
       value

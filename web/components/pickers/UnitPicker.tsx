@@ -1,23 +1,18 @@
 "use client";
 import { graphql } from "@/gql";
-import { useMutation, useQuery } from "@urql/next";
-import { Dispatch, SetStateAction, useState } from "react";
-import { Label } from "../ui/label";
-import { Picker } from "../ui/picker";
 import { FetchUnitsQuery } from "@/gql/graphql";
+import { useMutation, useQuery } from "@urql/next";
+import { useState } from "react";
+import { Picker } from "../ui/picker";
 import { ItemPickerProps } from "./Picker";
 
 const getUnitsQuery = graphql(`
-  query fetchUnits($search: String, $pagination: OffsetPagination!) {
-    units(search: $search, pagination: $pagination) {
-      items {
-        id
-        name
-        symbol
-        abbreviations
-      }
-      itemsRemaining
-      nextOffset
+  query fetchUnits {
+    units {
+      id
+      name
+      symbol
+      abbreviations
     }
   }
 `);
@@ -33,7 +28,7 @@ const createUnitMutation = graphql(`
   }
 `);
 
-type UnitItem = FetchUnitsQuery["units"]["items"][0];
+type UnitItem = FetchUnitsQuery["units"][number];
 
 export function UnitPicker({
   select,
@@ -46,17 +41,16 @@ export function UnitPicker({
   const [search, setSearch] = useState<string>();
   const [result, reexecuteQuery] = useQuery({
     query: getUnitsQuery,
-    variables: { search: search, pagination: { offset: 0, take: 10 } },
   });
   const [unitMutation, createUnit] = useMutation(createUnitMutation);
   const { data, fetching, error } = result;
 
   return (
     <Picker<UnitItem>
-      options={data?.units.items ?? []}
+      options={data?.units ?? []}
       id="id"
       label="name"
-      autoFilter={false}
+      autoFilter={true}
       onSearchUpdate={setSearch}
       placeholder={placeholder}
       fetching={fetching}
@@ -64,6 +58,13 @@ export function UnitPicker({
       selectedIds={selectedIds}
       select={select}
       deselect={deselect}
+      createItem={
+        create
+          ? (newUnitName) => {
+              createUnit({ unit: { name: newUnitName, abbreviations: [] } });
+            }
+          : undefined
+      }
     />
   );
 }

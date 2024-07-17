@@ -51,6 +51,7 @@ export const nutritionLabel = builder.prismaObject("NutritionLabel", {
     servingSizeUnit: t.relation("servingSizeUnit", { nullable: true }),
     servingsUsed: t.exposeFloat("servingsUsed", { nullable: true }),
     isPrimary: t.exposeBoolean("isPrimary"),
+    nutrients: t.relation("nutrients"),
   }),
 });
 

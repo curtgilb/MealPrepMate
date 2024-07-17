@@ -22,7 +22,10 @@ const ingredientsListQuery = graphql(/* GraphQL */ `
 
 // This is the <SearchRoot> component that we render in `./App.jsx`.
 // It accepts our variables as props.
-export const SearchRoot = ({ searchTerm = "", resultsPerPage = 50 }) => {
+export const IngredientSearchList = ({
+  searchTerm = "",
+  resultsPerPage = 50,
+}) => {
   const [result] = useQuery({
     query: ingredientsListQuery,
     variables: {
@@ -36,6 +39,8 @@ export const SearchRoot = ({ searchTerm = "", resultsPerPage = 50 }) => {
   if (fetching) return <p>Loading...</p>;
   if (error) return <p>Oh no... {error.message}</p>;
   const ingredients = data?.ingredients.ingredients;
+  const itemsRemaining = data?.ingredients.itemsRemaining ?? 0;
+
   return (
     <>
       {ingredients?.length === 0 ? <strong>No Results</strong> : null}
@@ -49,14 +54,14 @@ export const SearchRoot = ({ searchTerm = "", resultsPerPage = 50 }) => {
       ))}
 
       {/* The <SearchPage> component receives the same props, plus the `afterCursor` for its variables */}
-      {data?.ingredients.itemsRemaining ? (
+      {itemsRemaining > 0 && data ? (
         <SearchPage
           searchTerm={searchTerm}
           take={resultsPerPage}
           skip={data.ingredients.nextOffset}
         />
       ) : result.fetching ? (
-        <LoadingCards small={true} />
+        <LoadingCards vertical={false} />
       ) : null}
     </>
   );
@@ -95,7 +100,7 @@ function SearchPage({
   }, [executeQuery]);
 
   if (results.fetching) {
-    return <LoadingCards />;
+    return <LoadingCards vertical={false} />;
   }
   if (results.error) return <p>Oh no... {results.error.message}</p>;
 
@@ -125,7 +130,7 @@ function SearchPage({
 
       {!results.data?.ingredients && !results.fetching ? (
         <>
-          <LoadingCards small={true} />
+          <LoadingCards vertical={false} onView={onLoadMore} />
         </>
       ) : null}
     </>

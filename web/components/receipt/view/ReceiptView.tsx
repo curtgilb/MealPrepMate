@@ -1,6 +1,7 @@
-import { FragmentType } from "@/gql";
-import { GetReceiptQuery } from "@/gql/graphql";
-import { ReceiptItemFragment } from "../edit/ReceiptItemEdit";
+"use client";
+import { FragmentType, graphql, useFragment } from "@/gql";
+import { GetReceiptQuery, GetRecipeBaiscInfoQuery } from "@/gql/graphql";
+import { ReceiptItem, ReceiptItemFragment } from "../edit/ReceiptItemEdit";
 import {
   ChevronLeft,
   ChevronRight,
@@ -27,149 +28,133 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
+import {
+  GroceryStorePicker,
+  Store,
+} from "@/components/pickers/GroceryStorePicker";
+import { useState } from "react";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 
 interface ReceiptViewProps {
-  groceryStore: string;
-  date: string;
-  items: FragmentType<typeof ReceiptItemFragment>;
+  receipt: GetReceiptQuery["receipt"];
 }
 
-export function ReceiptView() {
+const editReceiptMutation = graphql(
+  `
+    mutation editReceipt($receiptId: String!, $receipt: UpdateReceipt!) {
+      updateReceipt(receipt: $receipt, receiptId: $receiptId) {
+        id
+        imagePath
+        total
+        merchantName
+        matchingStore {
+          id
+          name
+        }
+        date
+        items {
+          ...ReceiptItem
+        }
+        scanned
+      }
+    }
+  `
+);
+
+const receiptInputSchema = z.object({
+  date: z.date().optional(),
+  store: z.object({ id: z.string(), name: z.string() }),
+});
+
+export function ReceiptView({ receipt }: ReceiptViewProps) {
+  const items = useFragment(ReceiptItemFragment, receipt.items);
+  const form = useForm<z.infer<typeof receiptInputSchema>>({
+    resolver: zodResolver(receiptInputSchema),
+    defaultValues: {
+      store: receipt.matchingStore ?? undefined,
+      date: receipt.date ? new Date(receipt.date) : new Date(),
+    },
+  });
+
+  function updateReceipt(values: z.infer<typeof receiptInputSchema>) {
+    console.log(values);
+  }
+
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="flex flex-row items-start bg-muted/50">
-        <div className="grid gap-0.5">
-          <CardTitle className="group flex items-center gap-2 text-lg">
-            Order Oe31b70H
-            <Button
-              size="icon"
-              variant="outline"
-              className="h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
-            >
-              <Copy className="h-3 w-3" />
-              <span className="sr-only">Copy Order ID</span>
-            </Button>
-          </CardTitle>
-          <CardDescription>Date: November 23, 2023</CardDescription>
-        </div>
-        <div className="ml-auto flex items-center gap-1">
-          <Button size="sm" variant="outline" className="h-8 gap-1">
-            <Truck className="h-3.5 w-3.5" />
-            <span className="lg:sr-only xl:not-sr-only xl:whitespace-nowrap">
-              Track Order
-            </span>
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="icon" variant="outline" className="h-8 w-8">
-                <MoreVertical className="h-3.5 w-3.5" />
-                <span className="sr-only">More</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>Edit</DropdownMenuItem>
-              <DropdownMenuItem>Export</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Trash</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </CardHeader>
-      <CardContent className="p-6 text-sm">
-        <div className="grid gap-3">
-          <div className="font-semibold">Order Details</div>
-          <ul className="grid gap-3">
-            <li className="flex items-center justify-between">
-              <span className="text-muted-foreground">
-                Glimmer Lamps x <span>2</span>
-              </span>
-              <span>$250.00</span>
-            </li>
-            <li className="flex items-center justify-between">
-              <span className="text-muted-foreground">
-                Aqua Filters x <span>1</span>
-              </span>
-              <span>$49.00</span>
-            </li>
-          </ul>
-          <Separator className="my-2" />
-          <ul className="grid gap-3">
-            <li className="flex items-center justify-between">
-              <span className="text-muted-foreground">Subtotal</span>
-              <span>$299.00</span>
-            </li>
-            <li className="flex items-center justify-between">
-              <span className="text-muted-foreground">Shipping</span>
-              <span>$5.00</span>
-            </li>
-            <li className="flex items-center justify-between">
-              <span className="text-muted-foreground">Tax</span>
-              <span>$25.00</span>
-            </li>
-            <li className="flex items-center justify-between font-semibold">
-              <span className="text-muted-foreground">Total</span>
-              <span>$329.00</span>
-            </li>
-          </ul>
-        </div>
-        <Separator className="my-4" />
-        <div className="grid grid-cols-2 gap-4">
-          <div className="grid gap-3">
-            <div className="font-semibold">Shipping Information</div>
-            <address className="grid gap-0.5 not-italic text-muted-foreground">
-              <span>Liam Johnson</span>
-              <span>1234 Main St.</span>
-              <span>Anytown, CA 12345</span>
-            </address>
-          </div>
-          <div className="grid auto-rows-max gap-3">
-            <div className="font-semibold">Billing Information</div>
-            <div className="text-muted-foreground">
-              Same as shipping address
-            </div>
-          </div>
-        </div>
-        <Separator className="my-4" />
-        <div className="grid gap-3">
-          <div className="font-semibold">Customer Information</div>
-          <dl className="grid gap-3">
-            <div className="flex items-center justify-between">
-              <dt className="text-muted-foreground">Customer</dt>
-              <dd>Liam Johnson</dd>
-            </div>
-            <div className="flex items-center justify-between">
-              <dt className="text-muted-foreground">Email</dt>
-              <dd>
-                <a href="mailto:">liam@acme.com</a>
-              </dd>
-            </div>
-            <div className="flex items-center justify-between">
-              <dt className="text-muted-foreground">Phone</dt>
-              <dd>
-                <a href="tel:">+1 234 567 890</a>
-              </dd>
-            </div>
-          </dl>
-        </div>
-        <Separator className="my-4" />
-        <div className="grid gap-3">
-          <div className="font-semibold">Payment Information</div>
-          <dl className="grid gap-3">
-            <div className="flex items-center justify-between">
-              <dt className="flex items-center gap-1 text-muted-foreground">
-                <CreditCard className="h-4 w-4" />
-                Visa
-              </dt>
-              <dd>**** **** **** 4532</dd>
-            </div>
-          </dl>
-        </div>
-      </CardContent>
-      <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
-        <div className="text-xs text-muted-foreground">
-          Updated <time dateTime="2023-11-23">November 23, 2023</time>
-        </div>
-      </CardFooter>
-    </Card>
+    <div>
+      <h2 className="">Receipt Details</h2>
+      {/* <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(updateReceipt)}
+          className="flex gap-x-6"
+        >
+          <FormField
+            control={form.control}
+            name="store"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Grocery Store</FormLabel>
+                <FormControl>
+                  <GroceryStorePicker
+                    select={(store) => {
+                      field.onChange(store);
+                    }}
+                    deselect={() => {
+                      field.onChange(undefined);
+                    }}
+                    selectedIds={field.value ? [field.value.id] : []}
+                    multiselect={false}
+                    placeholder={
+                      field.value ? field.value.name : "Pick a store"
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="date"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Date</FormLabel>
+                <FormControl>
+                  <DatePicker
+                    date={field.value ?? new Date()}
+                    onChange={(newDate) => {
+                      field.onChange(newDate);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </form>
+      </Form> */}
+
+      {items?.map((item, index) => {
+        return (
+          <ReceiptItem
+            key={item.id}
+            itemNumber={index + 1}
+            item={item}
+          ></ReceiptItem>
+        );
+      })}
+    </div>
   );
 }

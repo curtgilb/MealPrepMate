@@ -19,8 +19,8 @@ export function BreadcrumbPath({ path }: BreadcrumbProps) {
         {path.map((param, index) => {
           const isLast = path.length === index + 1;
           return (
-            <div key={param.name}>
-              <BreadcrumbItem>
+            <>
+              <BreadcrumbItem key={param.name}>
                 {!isLast ? (
                   <BreadcrumbLink href={param.link}>
                     {param.name}
@@ -30,7 +30,7 @@ export function BreadcrumbPath({ path }: BreadcrumbProps) {
                 )}
               </BreadcrumbItem>
               {!isLast && <BreadcrumbSeparator />}
-            </div>
+            </>
           );
         })}
       </BreadcrumbList>

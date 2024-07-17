@@ -1,5 +1,5 @@
 /* eslint-disable */
-import type { Prisma, Notification, ScheduledPlan, MealPlan, NotificationSetting, MealPlanServing, MealPlanRecipe, Import, ImportItem, ImportDraft, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, GroceryStore, Receipt, ReceiptLine, WebScrapedRecipe, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, AggregateLabel, NutritionLabelNutrient, AggLabelNutrient, Nutrient, NutrientImportMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
+import type { Prisma, Notification, ScheduledPlan, MealPlan, NotificationSetting, MealPlanServing, MealPlanRecipe, Import, ImportItem, ImportDraft, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, GroceryStore, Receipt, ReceiptLine, WebScrapedRecipe, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, AggregateLabel, NutritionLabelNutrient, AggLabelNutrient, Nutrient, RankedNutrient, NutrientTarget, NutrientImportMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
 export default interface PrismaTypes {
     Notification: {
         Name: "Notification";
@@ -874,7 +874,7 @@ export default interface PrismaTypes {
         Where: Prisma.NutrientWhereInput;
         Create: {};
         Update: {};
-        RelationName: "dri" | "parentNutrient" | "subNutrients" | "nutritionLabelNutrients" | "aggLabelNutrients" | "unit" | "mappings";
+        RelationName: "dri" | "parentNutrient" | "subNutrients" | "nutritionLabelNutrients" | "aggLabelNutrients" | "unit" | "mappings" | "ranking" | "target";
         ListRelations: "dri" | "subNutrients" | "nutritionLabelNutrients" | "aggLabelNutrients" | "mappings";
         Relations: {
             dri: {
@@ -910,6 +910,56 @@ export default interface PrismaTypes {
             mappings: {
                 Shape: NutrientImportMapping[];
                 Name: "NutrientImportMapping";
+                Nullable: false;
+            };
+            ranking: {
+                Shape: RankedNutrient | null;
+                Name: "RankedNutrient";
+                Nullable: true;
+            };
+            target: {
+                Shape: NutrientTarget | null;
+                Name: "NutrientTarget";
+                Nullable: true;
+            };
+        };
+    };
+    RankedNutrient: {
+        Name: "RankedNutrient";
+        Shape: RankedNutrient;
+        Include: Prisma.RankedNutrientInclude;
+        Select: Prisma.RankedNutrientSelect;
+        OrderBy: Prisma.RankedNutrientOrderByWithRelationInput;
+        WhereUnique: Prisma.RankedNutrientWhereUniqueInput;
+        Where: Prisma.RankedNutrientWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "nutrient";
+        ListRelations: never;
+        Relations: {
+            nutrient: {
+                Shape: Nutrient;
+                Name: "Nutrient";
+                Nullable: false;
+            };
+        };
+    };
+    NutrientTarget: {
+        Name: "NutrientTarget";
+        Shape: NutrientTarget;
+        Include: Prisma.NutrientTargetInclude;
+        Select: Prisma.NutrientTargetSelect;
+        OrderBy: Prisma.NutrientTargetOrderByWithRelationInput;
+        WhereUnique: Prisma.NutrientTargetWhereUniqueInput;
+        Where: Prisma.NutrientTargetWhereInput;
+        Create: {};
+        Update: {};
+        RelationName: "nutrient";
+        ListRelations: never;
+        Relations: {
+            nutrient: {
+                Shape: Nutrient;
+                Name: "Nutrient";
                 Nullable: false;
             };
         };

@@ -7,8 +7,10 @@ import { Card } from "../../generics/Card";
 import { AddServingDialog } from "../AddServingDialog";
 import { useNutrientSum } from "@/hooks/use-nutrient-sum";
 import { Nutrients } from "@/hooks/use-recipe-label-lookup";
-import { PlanDayProps } from "./DayInterface";
+import { PlanDay, PlanDayProps } from "./DayInterface";
 import { MealPlanServingCard } from "../ServingCard";
+import { SummedNutrients } from "@/utils/nutrients";
+import { cn } from "@/lib/utils";
 
 export const courses: Meal[] = [
   Meal.Breakfast,
@@ -17,10 +19,18 @@ export const courses: Meal[] = [
   Meal.Snack,
 ];
 
+const macros: Array<keyof SummedNutrients> = [
+  "calories",
+  "protein",
+  "carbs",
+  "fat",
+];
+
 export function MealPlanDay({
   dayNumber,
   displayNumber,
   servingsByMeal,
+  isVerticalLayout,
 }: PlanDayProps) {
   const mealPlan = useContext(MealPlan);
   const recipes = mealPlan?.recipes;
@@ -34,21 +44,43 @@ export function MealPlanDay({
   );
 
   return (
-    <div className="border rounded-sm p-6 w-96 bg-card shadow grid gap-y-4">
-      <div className="flex items-baseline justify-between">
-        <p className="text-2xl font-extrabold mb-4">Day {displayNumber}</p>
-        <p className="text-xl font-semibold mb-4">
-          {Math.round(dayTotal.calories)} calories
-        </p>
+    <PlanDay
+      isVerticalLayout={isVerticalLayout}
+      displayNumber={displayNumber}
+      topRight={<AddServingDialog day={dayNumber} />}
+    >
+      <div className="flex justify-between mb-8">
+        <ul
+          className={cn("flex justify-between  w-full", {
+            "max-w-[20rem]": isVerticalLayout,
+            "ms-auto": isVerticalLayout,
+          })}
+        >
+          {macros.map((macro) => {
+            return (
+              <li className="flex flex-col items-center" key={macro}>
+                {/* TODO: get rid of as number */}
+                <p className="font-semibold">
+                  {Math.round(dayTotal[macro] as number)} g
+                </p>
+                <p className="text-sm">{toTitleCase(macro)}</p>
+              </li>
+            );
+          })}
+        </ul>
       </div>
-      <AddServingDialog day={dayNumber} />
       <div>
-        <div className="grid grid-cols-1">
+        <div
+          className={cn(
+            "grid gap-4",
+            isVerticalLayout ? "grid-cols-2" : "grid-cols-1"
+          )}
+        >
           {courses.map((course) => {
             const mealServings = servingsByCourse?.get(course);
             return (
               <div key={course}>
-                <p className="text-lg font-bold mb-2">{toTitleCase(course)}</p>
+                <p className="font-semibold mb-2">{toTitleCase(course)}</p>
                 <div className="bg-secondary/50 min-h-48 rounded p-2">
                   {mealServings?.map((serving) => {
                     const matchingRecipe = recipes?.find(
@@ -80,6 +112,6 @@ export function MealPlanDay({
           })}
         </div>
       </div>
-    </div>
+    </PlanDay>
   );
 }

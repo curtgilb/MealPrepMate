@@ -6,13 +6,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import RecipeFilter from "../recipe/RecipeFilter";
 import { ReactNode, useState } from "react";
-import { RecipeSearch } from "./RecipeSearch";
 import { MealList } from "./MealList";
-import { AllIngredients } from "./sidebar/ingredients/AllIngredients";
+import { RecipeSearch } from "./RecipeSearch";
 import { MealPlanIngredients } from "./sidebar/MealPlanIngredients";
-
 
 const menu: {
   title: string;

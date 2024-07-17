@@ -1,32 +1,11 @@
 import { graphql } from "@/gql";
 import { FragmentType, useFragment } from "@/gql/fragment-masking";
 import { RecipeIngredientFragmentFragment } from "@/gql/graphql";
+import { RecipeIngredientFragment } from "@/graphql/recipe/queries";
 
 type GroupedIngredient = {
   [key: string]: { id: string; lines: RecipeIngredientFragmentFragment[] };
 };
-
-export const RecipeIngredientFragment = graphql(/* GraphQL */ `
-  fragment RecipeIngredientFragment on RecipeIngredients {
-    id
-    sentence
-    order
-    quantity
-    baseIngredient {
-      id
-      name
-    }
-    unit {
-      id
-      name
-      symbol
-    }
-    group {
-      id
-      name
-    }
-  }
-`);
 
 export default function RecipeIngredients(props: {
   ingredients: FragmentType<typeof RecipeIngredientFragment>[];

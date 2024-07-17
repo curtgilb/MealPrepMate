@@ -18,23 +18,21 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(function Card(
   props,
   forwardedRef
 ) {
-  const { children, loading = false, image, vertical = false, ...rest } = props;
+  const { children, loading, image, vertical, ...rest } = props;
   const { className, ...additionalProps } = rest;
 
   return (
     <div
       {...additionalProps}
       ref={forwardedRef}
-      className={cn(
-        className,
-        "border rounded overflow-hidden bg-card",
-        vertical ? "w-48" : "flex"
-      )}
+      className={cn(className, "border rounded overflow-hidden bg-card", {
+        vertical: "w-64",
+      })}
     >
       <div
         className={cn(
           "relative overflow-hidden",
-          vertical ? "w-52 h-52" : "w-[5rem] h-[5rem]"
+          vertical ? "w-64 h-64" : "w-[5rem] h-[5rem]"
         )}
       >
         {loading ? (

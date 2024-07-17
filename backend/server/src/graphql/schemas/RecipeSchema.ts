@@ -1,30 +1,25 @@
 import { queryFromInfo } from "@pothos/plugin-prisma";
+import {
+  parseResolveInfo,
+  ResolveTree,
+  simplifyParsedResolveInfoFragmentWithType,
+} from "graphql-parse-resolve-info";
 import { z } from "zod";
 import { db } from "../../db.js";
 import { IngredientMatcher } from "../../models/IngredientMatcher.js";
 import { createRecipeCreateStmt } from "../../models/RecipeExtension.js";
 import { getIngredientMaxFreshness } from "../../services/ingredient/IngredientService.js";
 import {
-  RecipeFilterValidation,
-  RecipeIngredientUpdateValidation,
-  RecipeInputValidation,
-} from "../../validations/RecipeValidation.js";
-import { offsetPaginationValidation } from "../../validations/UtilityValidation.js";
+  RecipeWithFreshness,
+  searchRecipes,
+} from "../../services/recipe/RecipeSearch.js";
+import { RecipeInputValidation } from "../../validations/RecipeValidation.js";
 import { builder } from "../builder.js";
 import {
   nextPageInfo,
   numericalComparison,
   offsetPagination,
 } from "./UtilitySchema.js";
-import {
-  parseResolveInfo,
-  ResolveTree,
-  simplifyParsedResolveInfoFragmentWithType,
-} from "graphql-parse-resolve-info";
-import {
-  RecipeWithFreshness,
-  searchRecipes,
-} from "../../services/recipe/RecipeSearch.js";
 
 // ============================================ Types ===================================
 const recipe = builder.prismaObject("Recipe", {
@@ -63,21 +58,6 @@ const recipe = builder.prismaObject("Recipe", {
   }),
 });
 
-const recipeIngredient = builder.prismaObject("RecipeIngredient", {
-  name: "RecipeIngredients",
-  fields: (t) => ({
-    id: t.exposeString("id"),
-    order: t.exposeInt("order"),
-    sentence: t.exposeString("sentence"),
-    quantity: t.exposeFloat("quantity", { nullable: true }),
-    unit: t.relation("unit", { nullable: true }),
-    name: t.exposeString("name", { nullable: true }),
-    recipe: t.relation("recipe"),
-    baseIngredient: t.relation("ingredient", { nullable: true }),
-    group: t.relation("group", { nullable: true }),
-  }),
-});
-
 builder.prismaObject("RecipeIngredientGroup", {
   name: "RecipeIngredientGroup",
   fields: (t) => ({
@@ -107,34 +87,6 @@ const recipeInput = builder.inputType("RecipeInput", {
     leftoverFreezerLife: t.int(),
   }),
 });
-
-const recipeIngredientInput = builder.inputType("RecipeIngredientInput", {
-  fields: (t) => ({
-    id: t.string(),
-    order: t.int(),
-    sentence: t.string(),
-    quantity: t.int(),
-    unitId: t.string(),
-    name: t.string(),
-    ingredientId: t.string(),
-    groupName: t.string(),
-    groupId: t.string(),
-  }),
-});
-
-const recipeIngredientUpdateInput = builder.inputType(
-  "RecipeIngredientUpdateInput",
-  {
-    fields: (t) => ({
-      recipeId: t.string({ required: true }),
-      ingredientsToAdd: t.field({ type: [recipeIngredientInput] }),
-      ingredientsToDelete: t.stringList(),
-      ingredientsToUpdate: t.field({ type: [recipeIngredientInput] }),
-      groupsToAdd: t.stringList(),
-      groupsToDelete: t.stringList(),
-    }),
-  }
-);
 
 const nutritionFilter = builder.inputType("NutritionFilter", {
   fields: (t) => ({
@@ -325,23 +277,6 @@ builder.mutationFields((t) => ({
       return await db.recipe.updateRecipe(args.recipeId, args.recipe, query);
     },
   }),
-  updateRecipeIngredients: t.prismaField({
-    type: ["RecipeIngredient"],
-    args: {
-      ingredient: t.arg({
-        type: recipeIngredientUpdateInput,
-        required: true,
-      }),
-    },
-    validate: {
-      schema: z.object({
-        ingredient: RecipeIngredientUpdateValidation,
-      }),
-    },
-    resolve: async (query, root, args) => {
-      return await db.recipe.updateRecipeIngredients(args.ingredient, query);
-    },
-  }),
   deleteRecipes: t.prismaField({
     type: ["Recipe"],
     args: {
@@ -361,4 +296,4 @@ builder.mutationFields((t) => ({
   }),
 }));
 
-export { recipe, recipeIngredient };
+export { recipe };

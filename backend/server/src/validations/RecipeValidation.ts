@@ -46,24 +46,18 @@ const RecipeInputValidation = schemaForType<RecipeInput>()(
 );
 
 const RecipeIngredientValidation = z.object({
-  id: z.string().cuid().nullable().optional(),
+  id: z.string().cuid(),
   order: z.number().nullable().optional(),
   sentence: z.string().nullable().optional(),
   quantity: z.number().nullable().optional(),
   unitId: z.string().cuid(),
   name: z.string().nullable().optional(),
   ingredientId: z.string().cuid().nullable().optional(),
-  groupName: z.string().nullable().optional(),
   groupId: z.string().cuid().nullable().optional(),
 });
 
-const RecipeIngredientUpdateValidation = z.object({
-  recipeId: z.string().cuid(),
-  ingredientsToAdd: RecipeIngredientValidation.array().optional().nullish(),
-  ingredientsToDelete: z.string().array().optional(),
-  ingredientsToUpdate: RecipeIngredientValidation.array().optional(),
-  groupsToAdd: z.string().array().optional(),
-  groupsToDelete: z.string().array().optional(),
+const RecipeIngredientsValidation = z.object({
+  ingredients: RecipeIngredientValidation.array(),
 });
 
 const NutritionLabelValidation = z.object({
@@ -127,7 +121,7 @@ export {
   NutritionFilterValidation,
   NutritionLabelValidation,
   RecipeFilterValidation,
-  RecipeIngredientUpdateValidation,
+  RecipeIngredientsValidation,
   RecipeIngredientValidation,
   RecipeInputValidation,
 };

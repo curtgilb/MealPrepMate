@@ -11,6 +11,9 @@ import { MealPlanDay } from "./MealPlanDay";
 import { NutritionDay } from "./NutritionDay";
 import { ShoppingDay } from "./ShoppingDay";
 import { useRecipeLabelLookup } from "@/hooks/use-recipe-label-lookup";
+import useMeasure from "react-use-measure";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { cn } from "@/lib/utils";
 
 const courses = ["Breakfast", "Lunch", "Dinner", "Snacks"];
 
@@ -27,6 +30,8 @@ export type ServingsLookup = Map<
 >;
 
 export function DayManager({ days, planMode }: DayManagerProps) {
+  const isVerticalLayout = useMediaQuery("(768px <= width <= 1440px)");
+  const [ref, bounds] = useMeasure();
   const week = Math.ceil(days / 7);
   const mealServings = useContext(MealPlanServings);
   const servingsByMeal = useMemo(() => {
@@ -56,24 +61,35 @@ export function DayManager({ days, planMode }: DayManagerProps) {
     cooking: CookingDay,
   };
   const Day = dayTypes[planMode];
+  const size = isVerticalLayout
+    ? { height: bounds.height }
+    : { width: bounds.width };
 
   return (
-    <ScrollArea className="w-full">
-      <div className="flex flex-row w-full gap-6">
-        {[...Array(7)].map((item, index) => {
-          const displayNumber = index + 1;
-          const dayNumber = (week - 1) * 7 + displayNumber;
-          return (
-            <Day
-              key={dayNumber}
-              dayNumber={dayNumber}
-              displayNumber={displayNumber}
-              servingsByMeal={servingsByMeal}
-            />
-          );
-        })}
-      </div>
-      <ScrollBar orientation="horizontal" />
-    </ScrollArea>
+    <div ref={ref} className="grow w-full h-full">
+      <ScrollArea style={size}>
+        <div
+          className={cn(
+            "flex w-full h-full gap-6 items-center justify-center",
+            isVerticalLayout ? "flex-col" : "flex-row"
+          )}
+        >
+          {[...Array(7)].map((item, index) => {
+            const displayNumber = index + 1;
+            const dayNumber = (week - 1) * 7 + displayNumber;
+            return (
+              <Day
+                isVerticalLayout={isVerticalLayout}
+                key={dayNumber}
+                dayNumber={dayNumber}
+                displayNumber={displayNumber}
+                servingsByMeal={servingsByMeal}
+              />
+            );
+          })}
+        </div>
+        <ScrollBar orientation={isVerticalLayout ? "vertical" : "horizontal"} />
+      </ScrollArea>
+    </div>
   );
 }

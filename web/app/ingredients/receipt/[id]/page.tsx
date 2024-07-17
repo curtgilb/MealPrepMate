@@ -26,6 +26,10 @@ const receiptQuery = graphql(/* GraphQL */ `
       imagePath
       total
       merchantName
+      matchingStore {
+        id
+        name
+      }
       date
       items {
         ...ReceiptItem
@@ -56,13 +60,13 @@ export default function Receipt() {
 
   return (
     <>
-      <BreadcrumbPath
+      {/* <BreadcrumbPath
         path={[
           { name: "Ingredients", link: "/ingredients" },
           { name: "Receipt upload", link: "/ingredients/receipt" },
         ]}
-      />
-      <h1 className="text-5xl font-black">Receipt Upload</h1>
+      /> */}
+      <h1 className="text-4xl font-black">Receipt Upload</h1>
       <div className="grid grid-cols-2 gap-8">
         <Card>
           <CardHeader>
@@ -85,9 +89,7 @@ export default function Receipt() {
           </CardContent>
         </Card>
 
-        <div>
-          <ReceiptView />
-        </div>
+        {data?.receipt && <ReceiptView receipt={data.receipt} />}
       </div>
     </>
   );

@@ -1,4 +1,4 @@
-import { cacheExchange, createClient, fetchExchange, gql } from "@urql/core";
+import { cacheExchange, createClient, fetchExchange } from "@urql/core";
 import { registerUrql } from "@urql/next/rsc";
 
 const makeClient = () => {

@@ -5,7 +5,7 @@ import { db } from "../../db.js";
 import { builder } from "../builder.js";
 import { ingredient } from "./IngredientSchema.js";
 import { measurementUnit } from "./MeasurementUnitSchema.js";
-import { recipeIngredient } from "./RecipeSchema.js";
+import { recipeIngredient } from "./RecipeIngredientSchema.js";
 import { convert } from "convert";
 import { Unit, BestKind } from "convert";
 

@@ -20,3 +20,24 @@ export function isNumeric(str: string) {
 export function getImageUrl(path: string) {
   return `http://localhost:9000/${path}`;
 }
+
+// type NestedKeyOf<T> = {
+//   [K in keyof T & (string | number)]: T[K] extends object
+//     ? `${K}` | `${K}.${NestedKeyOf<T[K]>}`
+//     : `${K}`;
+// }[keyof T & (string | number)];
+
+// function getValueByPath<T>(obj: T, path: string): any {
+//   return path.split(".").reduce((acc, part) => acc && (acc as any)[part], obj);
+// }
+
+// function groupList<T>(list: T[], groupKey: NestedKeyOf<T>): Map<string, T[]> {
+//   return list.reduce((acc, item) => {
+//     const key = String(getValueByPath(item, groupKey));
+//     if (!acc.has(key)) {
+//       acc.set(key, []);
+//     }
+//     acc.get(key)!.push(item);
+//     return acc;
+//   }, new Map<string, T[]>());
+// }

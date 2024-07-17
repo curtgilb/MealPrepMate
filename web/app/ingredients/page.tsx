@@ -1,6 +1,6 @@
 "use client";
-import { SearchRoot } from "@/components/ingredient/SearchRoot";
-import { ReceiptUpload } from "@/components/receipt/ReceiptUpload";
+import { IngredientSearchList } from "@/components/ingredient/IngredientSearchList";
+import { ReceiptUpload } from "@/components/receipt/ReceiptUploadDialog";
 import { Button } from "@/components/ui/button";
 import { InputWithIcon } from "@/components/ui/InputWithIcon";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -13,8 +13,8 @@ export default function IngredientsPage() {
 
   return (
     <div>
-      <h1 className="text-5xl font-black">Ingredients</h1>
-      <div className="flex items-center py-8">
+      <h1 className="text-4xl font-black">Ingredients</h1>
+      <div className="flex items-center justify-between py-8">
         <InputWithIcon
           onChange={(e) => {
             setSearch(e.target.value);
@@ -33,11 +33,10 @@ export default function IngredientsPage() {
           <ReceiptUpload />
         </div>
       </div>
-      <ScrollArea className="h-[800px]">
-        <div className="grid grid-cols-auto-fill-5 gap-8">
-          <SearchRoot />
+      <ScrollArea className="h-[900px] pr-4">
+        <div className="grid grid-cols-autofit-horizontal gap-8">
+          <IngredientSearchList searchTerm={search} />
         </div>
-        <Loader2 className="animate-spin" />
       </ScrollArea>
     </div>
   );

@@ -8,11 +8,15 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { PriceHistoryChart } from "@/components/charts/PriceHistory";
+import {
+  PriceHistory,
+  PriceHistoryChart,
+} from "@/components/charts/PriceHistory";
 import { ExpirationRule } from "@/components/ingredient/ExpirationRule";
 import { Citrus } from "lucide-react";
 import { PriceHistoryGroup } from "@/components/charts/PriceHistoryGroup";
-import { SmallCard } from "@/components/generics/SmallCard";
+import { getClient } from "@/ssrGraphqlClient";
+import { useParams } from "next/navigation";
 
 const ingredientQuery = graphql(`
   query GetIngredient($id: String!) {
@@ -21,6 +25,10 @@ const ingredientQuery = graphql(`
       name
       alternateNames
       storageInstructions
+      category {
+        id
+        name
+      }
       expiration {
         ...ExpirationRuleFields
       }
@@ -53,7 +61,15 @@ const items = [
   { id: "5", name: "Reed Avocado" },
 ];
 
-export default function IngredientPage() {
+export default async function IngredientPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const { data, error } = await getClient().query(ingredientQuery, {
+    id: params.id,
+  });
+
   return (
     <>
       <Breadcrumb className="mb-10">
@@ -63,16 +79,15 @@ export default function IngredientPage() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Avocado</BreadcrumbPage>
+            <BreadcrumbPage>{data?.ingredient.name}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
       <div className="mb-8">
-        <h1 className="text-5xl font-black">Avocado</h1>
-        <div className="flex items-center gap-2 mb-4">
-          <Citrus className="h-4 w-4 stroke-1 inline-block" />
-          <p className="font-light uppercase tracking-[.25em]">Fruit</p>
-        </div>
+        <h1 className="text-5xl font-black mb-2">{data?.ingredient.name}</h1>
+        <p className="font-light uppercase tracking-[.25em]">
+          {data?.ingredient.category?.name}
+        </p>
 
         <TagList list={items} />
       </div>
@@ -93,8 +108,9 @@ export default function IngredientPage() {
           <h2 className="text-xl font-semibold">Expiration</h2>
           <ExpirationRule />
         </div>
+        <PriceHistory />
 
-        <div>
+        {/* <div>
           <h2 className="text-xl font-semibold">Price History</h2>
           <PriceHistoryGroup />
         </div>
@@ -102,7 +118,7 @@ export default function IngredientPage() {
         <div>
           <h2 className="text-xl font-semibold">Recipes</h2>
           <SmallCard imageUrl="adf" />
-        </div>
+        </div> */}
       </div>
     </>
   );

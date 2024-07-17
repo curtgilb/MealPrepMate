@@ -2,8 +2,6 @@ import { z } from "zod";
 import { db } from "../../db.js";
 import { uploadReceipt } from "../../services/ingredient/receipt/ReceiptScan.js";
 import { builder } from "../builder.js";
-import { FoodType } from "@prisma/client";
-import { foodTypeEnum } from "./EnumSchema.js";
 
 builder.prismaObject("Receipt", {
   name: "Receipt",
@@ -11,43 +9,11 @@ builder.prismaObject("Receipt", {
     id: t.exposeString("id"),
     total: t.exposeFloat("total", { nullable: true }),
     merchantName: t.exposeString("merchantName", { nullable: true }),
+    matchingStore: t.relation("matchingStore", { nullable: true }),
     date: t.expose("transactionDate", { type: "DateTime", nullable: true }),
     imagePath: t.exposeString("path"),
     items: t.relation("lineItems", { nullable: true }),
     scanned: t.exposeBoolean("scanned"),
-  }),
-});
-
-builder.prismaObject("ReceiptLine", {
-  name: "ReceiptLine",
-  fields: (t) => ({
-    id: t.exposeString("id"),
-    totalPrice: t.exposeFloat("totalPrice", { nullable: true }),
-    description: t.exposeString("description", { nullable: true }),
-    quantity: t.exposeFloat("quantity", { nullable: true }),
-    perUnitPrice: t.exposeFloat("perUnitPrice", { nullable: true }),
-    unitQuantity: t.exposeString("unitQuantity", { nullable: true }),
-    matchingUnit: t.relation("matchingUnit", { nullable: true }),
-    matchingIngredient: t.relation("matchingIngredient", { nullable: true }),
-    foodType: t.field({
-      type: foodTypeEnum,
-      nullable: true,
-      resolve: (parent) => parent.foodType,
-    }),
-  }),
-});
-
-const updateReceiptLine = builder.inputType("UpdateReceiptItem", {
-  fields: (t) => ({
-    totalPrice: t.float(),
-    description: t.string(),
-    quantity: t.float(),
-    perUnitPrice: t.float(),
-    productCode: t.string(),
-    unitQuantity: t.string(),
-    unitId: t.string(),
-    ingredientId: t.string(),
-    foodType: t.field({ type: foodTypeEnum }),
   }),
 });
 
@@ -151,32 +117,6 @@ builder.mutationFields((t) => ({
         where: { id: args.receiptId },
         data: {
           verified: true,
-        },
-        ...query,
-      });
-    },
-  }),
-  updateReceiptLine: t.prismaField({
-    type: "ReceiptLine",
-    args: {
-      lineId: t.arg.string({ required: true }),
-      line: t.arg({ type: updateReceiptLine, required: true }),
-    },
-    resolve: async (query, root, args) => {
-      return await db.receiptLine.update({
-        where: { id: args.lineId },
-        data: {
-          totalPrice: args.line.totalPrice,
-          description: args.line.description,
-          quantity: args.line.quantity,
-          perUnitPrice: args.line.perUnitPrice,
-          unitQuantity: args.line.unitQuantity,
-          matchingUnit: args.line.unitId
-            ? { connect: { id: args.line.unitId } }
-            : undefined,
-          matchingIngredient: args.line.ingredientId
-            ? { connect: { id: args.line.ingredientId } }
-            : undefined,
         },
         ...query,
       });

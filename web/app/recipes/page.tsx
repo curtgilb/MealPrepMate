@@ -2,103 +2,51 @@
 import SingleColumnCentered from "@/components/layouts/single-column-centered";
 import { Button } from "@/components/ui/button";
 import { InputWithIcon } from "@/components/ui/InputWithIcon";
-import RecipeCard from "@/components/recipe/RecipeCard";
+import { searchRecipes } from "@/graphql/recipe/queries";
+import { useQuery } from "@urql/next";
+
+import { RecipeSearchFilter } from "@/components/mealplan/RecipeSearch";
+import { RecipeSearchResults } from "@/components/recipe/RecipeResults";
 import { Import, Plus, Search } from "lucide-react";
 import Link from "next/link";
-
-const recipes = [
-  {
-    id: 1,
-    name: "Good Recipe",
-    servings: 4,
-    calories: 320,
-  },
-  {
-    id: 2,
-    name: "Chicken Gryo with tzaiki sauce",
-    servings: 4,
-    calories: 320,
-  },
-  {
-    id: 3,
-    name: "Good Recipe",
-    servings: 4,
-    calories: 320,
-  },
-  {
-    id: 4,
-    name: "Good Recipe",
-    servings: 4,
-    calories: 320,
-  },
-  {
-    id: 5,
-    name: "Good Recipe",
-    servings: 4,
-    calories: 320,
-  },
-  {
-    id: 6,
-    name: "Good Recipe",
-    servings: 4,
-    calories: 320,
-  },
-  {
-    id: 7,
-    name: "Good Recipe",
-    servings: 4,
-    calories: 320,
-  },
-  {
-    id: 8,
-    name: "Good Recipe",
-    servings: 4,
-    calories: 320,
-  },
-  {
-    id: 9,
-    name: "Good Recipe",
-    servings: 4,
-    calories: 320,
-  },
-  {
-    id: 10,
-    name: "Good Recipe",
-    servings: 4,
-    calories: 320,
-  },
-];
+import { useState } from "react";
+import { ClickableRecipeCard } from "@/components/recipe/RecipeCard";
 
 export default function RecipesPage() {
+  const [filter, setFilter] = useState<RecipeSearchFilter>({
+    nutrientFilters: [],
+    ingredientFilters: [],
+  });
+  const [result] = useQuery({
+    query: searchRecipes,
+    variables: { filters: {}, pagination: { take: 50, offset: 0 } },
+  });
+
   return (
     <SingleColumnCentered>
-      <h1 className="text-2xl font-semibold">Recipes</h1>
-      <div>
-        <InputWithIcon className="mt-8 mb-12 w-80" startIcon={Search} />
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Recipe
-        </Button>
-        <Link href="/recipes/create/web">
+      <div className="flex justify-between">
+        <h1 className="text-4xl font-black">Recipes</h1>
+        <div className="flex gap-2">
           <Button>
-            <Import className="mr-2 h-4 w-4" />
-            Import Recipe
+            <Plus className="mr-2 h-4 w-4" />
+            Add Recipe
           </Button>
-        </Link>
+          <Link href="/recipes/create/web">
+            <Button>
+              <Import className="mr-2 h-4 w-4" />
+              Import Recipe
+            </Button>
+          </Link>
+        </div>
       </div>
 
-      <div className="grid grid-cols-auto-fill-5 gap-8">
-        {recipes.map((recipe) => {
-          return (
-            <RecipeCard
-              key={recipe.id}
-              name={recipe.name}
-              servings={recipe.servings}
-              calories={recipe.calories}
-            />
-          );
-        })}
-      </div>
+      <InputWithIcon className="mt-8 mb-12 w-96" startIcon={Search} />
+
+      <RecipeSearchResults
+        filters={{}}
+        vertical={true}
+        Component={ClickableRecipeCard}
+      />
     </SingleColumnCentered>
   );
 }

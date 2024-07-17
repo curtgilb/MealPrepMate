@@ -1,36 +1,50 @@
-import { schema } from "./graphql/Schema.js";
-import { createYoga } from "graphql-yoga";
+import "dotenv/config";
+import { createYoga, Plugin } from "graphql-yoga";
 import { createServer } from "node:http";
-// import { applyMiddleware } from "graphql-middleware";
+import { createLogger, format, transports } from "winston";
+import { schema } from "./graphql/Schema.js";
 
 const PORT = 3025;
 
-// const middlewareSchema = applyMiddleware(
-//   schema,
-//   async (
-//     resolve,
-//     root,
-//     args,
-//     context: {
+const { combine, timestamp, colorize, align, json } = format;
+const logger = createLogger({
+  level: "info",
+  format: combine(colorize(), timestamp(), align(), json()),
+  transports: [
+    new transports.Console({
+      format: format.simple(),
+    }),
+  ],
+});
 
-//       params: { query: string };
-//       req: { socket: { remoteAddress: string } };
-//     },
-//     info: { fieldName: string }
-//   ) => {
-//     if (!root) {
-//       console.log(`SOURCE IP ADDRESS: ${context.req.socket.remoteAddress} `);
-//       info.fieldName, context.params.query, context.req.socket.remoteAddress;
-//     }
-//     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-//     return await resolve(root, args, context, info);
-//   }
-// );
+function useLogger(): Plugin {
+  return {
+    onExecute({ args }) {
+      const startTime = performance.now();
+      const queryName = args.contextValue.params.operationName || "Anonymous";
+      const ipSource = "";
+      const userId = "";
+      args.document;
 
-const yoga = createYoga({ schema });
+      return {
+        onExecuteDone() {
+          const endTime = performance.now();
+          logger.info(queryName, {
+            executionTime: endTime - startTime,
+            queryName,
+            ipSource,
+            userId,
+          });
+        },
+      };
+    },
+  };
+}
+
+const yoga = createYoga({ schema, plugins: [useLogger()] });
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 const server = createServer(yoga);
 server.listen(PORT, () => {
-  console.log(`Server listening on ${PORT}`);
+  logger.info(`Server listening on ${PORT}`);
 });

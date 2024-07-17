@@ -23,22 +23,22 @@ const measurementUnit = builder.prismaObject("MeasurementUnit", {
   }),
 });
 
-const unitQuery = builder
-  .objectRef<{
-    nextOffset: number | null;
-    itemsRemaining: number;
-    items: MeasurementUnit[];
-  }>("UnitQuery")
-  .implement({
-    fields: (t) => ({
-      nextOffset: t.exposeInt("nextOffset", { nullable: true }),
-      itemsRemaining: t.exposeInt("itemsRemaining"),
-      items: t.field({
-        type: [measurementUnit],
-        resolve: (result) => result.items,
-      }),
-    }),
-  });
+// const unitQuery = builder
+//   .objectRef<{
+//     nextOffset: number | null;
+//     itemsRemaining: number;
+//     items: MeasurementUnit[];
+//   }>("UnitQuery")
+//   .implement({
+//     fields: (t) => ({
+//       nextOffset: t.exposeInt("nextOffset", { nullable: true }),
+//       itemsRemaining: t.exposeInt("itemsRemaining"),
+//       items: t.field({
+//         type: [measurementUnit],
+//         resolve: (result) => result.items,
+//       }),
+//     }),
+//   });
 
 // ============================================ Inputs ==================================
 const createUnitInput = builder.inputType("CreateUnitInput", {
@@ -64,42 +64,10 @@ builder.queryFields((t) => ({
       });
     },
   }),
-  units: t.field({
-    type: unitQuery,
-    args: {
-      search: t.arg.string(),
-      pagination: t.arg({
-        type: offsetPagination,
-        required: true,
-      }),
-    },
-    validate: {
-      schema: z.object({
-        search: z.string().optional(),
-        pagination: offsetPaginationValidation,
-      }),
-    },
-    resolve: async (parent, args, context, info) => {
-      const [data, count] = await db.$transaction([
-        db.measurementUnit.findMany({
-          ...queryFromInfo({ context, info, path: ["items"] }),
-          where: {
-            name: { contains: args.search ?? undefined, mode: "insensitive" },
-          },
-          take: args.pagination.take,
-          skip: args.pagination.offset,
-          orderBy: { name: "asc" },
-        }),
-        db.measurementUnit.count(),
-      ]);
-
-      const { itemsRemaining, nextOffset } = nextPageInfo(
-        data.length,
-        args.pagination.take,
-        args.pagination.offset,
-        count
-      );
-      return { items: data, nextOffset, itemsRemaining };
+  units: t.prismaField({
+    type: ["MeasurementUnit"],
+    resolve: async (query) => {
+      return await db.measurementUnit.findMany({ ...query });
     },
   }),
 }));

@@ -5,7 +5,7 @@ import { db } from "../../db.js";
 import { createIngredientValidation } from "../../validations/IngredientValidation.js";
 import { offsetPaginationValidation } from "../../validations/UtilityValidation.js";
 import { builder } from "../builder.js";
-import { recipeIngredient } from "./RecipeSchema.js";
+import { recipeIngredient } from "./RecipeIngredientSchema.js";
 import { nextPageInfo, offsetPagination } from "./UtilitySchema.js";
 
 // ============================================ Types ===================================
@@ -50,6 +50,7 @@ export const ingredient = builder.prismaObject("Ingredient", {
     id: t.exposeID("id"),
     name: t.exposeString("name"),
     alternateNames: t.exposeStringList("alternateNames"),
+    category: t.relation("category", { nullable: true }),
     storageInstructions: t.exposeString("storageInstructions", {
       nullable: true,
     }),

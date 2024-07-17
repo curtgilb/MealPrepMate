@@ -40,7 +40,7 @@ async function seedDb() {
   await createBuckets();
   await loadUnits();
   await loadCourses();
-  await loadCateogries();
+  await loadCategories();
   await loadCuisines();
   await loadNutrients();
   await loadIngredients();
@@ -278,7 +278,7 @@ async function loadHealthProfile() {
   });
 }
 
-async function loadCateogries() {
+async function loadCategories() {
   await prisma.category.createMany({
     data: [
       { name: "Main Dish" },

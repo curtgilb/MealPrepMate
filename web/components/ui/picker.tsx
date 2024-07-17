@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/popover";
 import { debounce } from "lodash";
 
-interface SearchListProps<T> {
+interface SearchListProps<T extends { id: string }> {
   options: T[];
   id: keyof T;
   label: keyof T;
@@ -36,11 +36,11 @@ interface SearchListProps<T> {
   onSearchUpdate: (search: string) => void;
 }
 
-interface PickerProps<T> extends SearchListProps<T> {
+interface PickerProps<T extends { id: string }> extends SearchListProps<T> {
   placeholder: string;
 }
 
-export function Picker<T>({
+export function Picker<T extends { id: string }>({
   options,
   id,
   label,
@@ -55,8 +55,6 @@ export function Picker<T>({
   createItem,
 }: PickerProps<T>) {
   const [open, setOpen] = useState(false);
-  const [displayName, setDisplayName] = useState<string>();
-  let display = displayName && !multiselect ? displayName : placeholder;
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -70,7 +68,7 @@ export function Picker<T>({
             aria-expanded={open}
             className="w-full max-w-64 justify-between"
           >
-            {display}
+            {placeholder}
             {multiselect ? (
               <Plus className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             ) : (
@@ -91,7 +89,7 @@ export function Picker<T>({
             select={select}
             deselect={deselect}
             createItem={createItem}
-            setDisplayName={setDisplayName}
+            // setDisplayName={display}
             setOpen={setOpen}
           />
         </PopoverContent>
@@ -103,7 +101,7 @@ export function Picker<T>({
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button variant="outline" className="w-[150px] justify-start">
-          {display}
+          {placeholder}
         </Button>
       </DrawerTrigger>
       <DrawerContent>
@@ -120,7 +118,7 @@ export function Picker<T>({
             select={select}
             deselect={deselect}
             createItem={createItem}
-            setDisplayName={setDisplayName}
+            // setDisplayName={display}
             setOpen={setOpen}
           />
         </div>
@@ -129,7 +127,7 @@ export function Picker<T>({
   );
 }
 
-function SearchList<T>({
+function SearchList<T extends { id: string }>({
   options,
   selectedIds,
   multiselect,
@@ -141,10 +139,8 @@ function SearchList<T>({
   select,
   deselect,
   createItem,
-  setDisplayName,
   setOpen,
 }: SearchListProps<T> & {
-  setDisplayName: (value: string | undefined) => void;
   setOpen: (value: boolean) => void;
 }) {
   const [search, setSearch] = useState<string>("");
@@ -189,10 +185,10 @@ function SearchList<T>({
                   if (useDefault) setUseDefault(false);
                   if (isSelected) {
                     deselect(item);
-                    if (!multiselect) setDisplayName(undefined);
+                    // if (!multiselect) setDisplayName(undefined);
                   } else {
                     select(item);
-                    if (!multiselect) setDisplayName(item[label] as string);
+                    // if (!multiselect) setDisplayName(item[label] as string);
                   }
                   if (!multiselect) {
                     setOpen(false);

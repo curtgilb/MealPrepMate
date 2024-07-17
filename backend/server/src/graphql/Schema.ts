@@ -6,6 +6,8 @@ import "./schemas/CuisineSchema.js";
 import "./schemas/EnumSchema.js";
 import "./schemas/ExpirationRuleSchema.js";
 import "./schemas/GroceryStoreSchema.js";
+import "./schemas/RecipeIngredientSchema.js";
+import "./schemas/ReceiptLineSchema.js";
 // import "./schemas/ImportSchema.js";
 import "./schemas/IngredientPrice.js";
 import "./schemas/IngredientSchema.js";

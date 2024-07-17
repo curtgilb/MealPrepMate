@@ -1,51 +1,51 @@
-"use client";
-import { FragmentType, useFragment } from "@/gql";
-import { recipeSearchFragment } from "@/graphql/recipe/getRecipe";
-import { useState } from "react";
+import { recipeSearchFragment } from "@/graphql/recipe/queries";
 import { Card } from "../generics/Card";
-import { ModalDrawer } from "../ModalDrawer";
-import { NumberInput } from "../ui/number-input";
+import { FragmentType, useFragment } from "@/gql";
 import { RecipeSearchFieldsFragment } from "@/gql/graphql";
-import AnimatedNumbers from "react-animated-numbers";
-import { Button } from "../ui/button";
-import { AddRecipeDialog } from "../mealplan/AddRecipeDialog";
+import Link from "next/link";
 
 interface RecipeCardProps {
-  recipe: FragmentType<typeof recipeSearchFragment>;
+  recipe: RecipeSearchFieldsFragment;
+  vertical: boolean;
+  children?: React.ReactNode;
 }
 
-type AggregateLabelFields = RecipeSearchFieldsFragment["aggregateLabel"];
-
-export default function RecipeCard({ recipe: input }: RecipeCardProps) {
-  const recipe = useFragment(recipeSearchFragment, input);
-  const [open, setOpen] = useState<boolean>(false);
-
-  const photoUrls = recipe.photos.map((photo) => {});
-
+export function RecipeCard({ recipe, vertical, children }: RecipeCardProps) {
   return (
-    <ModalDrawer
-      title={recipe.name}
-      content={<AddRecipeDialog recipe={recipe} />}
-      open={open}
-      setOpen={setOpen}
-      trigger={
-        <Card
-          image={{
-            images: recipe.photos
-              .filter((photo) => photo.isPrimary)
-              .map((photo) => ({
-                url: photo.url,
-                altText: recipe.name,
-              })),
-            grid: false,
-            placeholder: "/pot.jpg",
-          }}
-          vertical={false}
-        >
+    <Card
+      className="shadow"
+      image={{
+        images: recipe.photos
+          .filter((photo) => photo.isPrimary)
+          .map((photo) => ({
+            url: photo.url,
+            altText: recipe.name,
+          })),
+        grid: false,
+        placeholder: "/pot.jpg",
+      }}
+      vertical={vertical}
+    >
+      {children ? (
+        children
+      ) : (
+        <>
           <p className="text-sm line-clamp-1 font-semibold">{recipe.name}</p>
           <p className="text-sm"></p>
-        </Card>
-      }
-    />
+        </>
+      )}
+    </Card>
+  );
+}
+
+export function ClickableRecipeCard({
+  recipe,
+}: {
+  recipe: RecipeSearchFieldsFragment;
+}) {
+  return (
+    <Link href={`/recipes/${recipe.id}`}>
+      <RecipeCard recipe={recipe} vertical={true} />
+    </Link>
   );
 }

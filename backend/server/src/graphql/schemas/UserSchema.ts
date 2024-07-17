@@ -25,18 +25,6 @@ builder.prismaObject("HealthProfile", {
       resolve: (profile) => new Date().getFullYear() - profile.yearBorn,
     }),
     activityLevel: t.exposeFloat("activityLevel", { nullable: true }),
-    targetProteinPecentage: t.exposeFloat("targetProteinPercentage", {
-      nullable: true,
-    }),
-    targetProteinGrams: t.exposeFloat("targetProteinGrams", { nullable: true }),
-    targetFatPercentage: t.exposeFloat("targetFatPercentage", {
-      nullable: true,
-    }),
-    targetFatGrams: t.exposeFloat("targetFatGrams", { nullable: true }),
-    targetCarbsPercentage: t.exposeFloat("targetCarbsPercentage", {
-      nullable: true,
-    }),
-    targetCarbsGrams: t.exposeFloat("targetCarbsGrams", { nullable: true }),
   }),
 });
 // ============================================ Inputs ==================================

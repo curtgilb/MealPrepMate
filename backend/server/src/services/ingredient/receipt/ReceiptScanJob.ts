@@ -56,7 +56,13 @@ const worker = new Worker(
     });
     const receiptFile = await downloadFileFromBucket(receipt.path);
 
-    const client = new DocumentAnalysisClient("1", new AzureKeyCredential("1"));
+    if (!process.env.AZURE_ENDPOINT || !process.env.AZURE_KEY) {
+      throw new Error("Missing azure credentials");
+    }
+    const client = new DocumentAnalysisClient(
+      process.env.AZURE_ENDPOINT,
+      new AzureKeyCredential(process.env.AZURE_KEY)
+    );
 
     const poller = await client.beginAnalyzeDocument(
       PrebuiltReceiptModel,

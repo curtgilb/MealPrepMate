@@ -4,6 +4,7 @@ import { Input } from "../ui/input";
 import { InputWithIcon } from "../ui/InputWithIcon";
 import { graphql } from "@/gql";
 import { useMutation } from "@urql/next";
+import { cn } from "@/lib/utils";
 
 const changeNameMutation = graphql(`
   mutation changeName($id: String!, $name: String!) {
@@ -24,9 +25,7 @@ export function MealPlanName({
   const [edit, setEdit] = useState<boolean>(false);
   const [result, changeName] = useMutation(changeNameMutation);
   const [newName, setName] = useState<string>();
-  const css = edit
-    ? "text-xl font-bold"
-    : "text-xl font-bold border-transparent bg-inherit";
+  const css = edit ? "text-xl font-bold" : " ";
 
   function handleNameSave() {
     setEdit(false);
@@ -36,7 +35,7 @@ export function MealPlanName({
   }
 
   return (
-    <div className="flex">
+    <div className="flex w-min">
       <InputWithIcon
         value={newName}
         onChange={(e) => {
@@ -54,7 +53,10 @@ export function MealPlanName({
         //   }
         //   e.
         // }}
-        className={css}
+        className={cn(
+          "text-xl font-bold w-fit",
+          edit || "border-transparent bg-inherit "
+        )}
         defaultValue={name}
         startIcon={edit ? Save : Pencil}
       />

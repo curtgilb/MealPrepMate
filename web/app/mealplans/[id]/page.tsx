@@ -22,7 +22,6 @@ import { MealPlanServings } from "@/contexts/ServingsContext";
 export type DisplayMode = "week" | "day";
 
 export default function MealPlanPage() {
-  console.log("IWAS RENDERED");
   const params = useParams<{ id: string }>();
   const [mealPlanResult, refetchMealPlan] = useQuery({
     query: mealPlanQuery,
@@ -51,9 +50,9 @@ export default function MealPlanPage() {
       }}
     >
       <MealPlanServings.Provider value={servings}>
-        <div className="flex h-full">
-          <div className="p-4 grow">
-            <div className="flex justify-between mb-8">
+        <div className="flex h-full min-w-0 overflow-hidden">
+          <div className="flex flex-col p-4 grow h-full min-w-0 overflow-hidden">
+            <div className="flex justify-between mb-6">
               <MealPlanName
                 name={data.mealPlan.name ?? "Untitled meal plan"}
                 mealPlanId={params.id}
@@ -65,7 +64,7 @@ export default function MealPlanPage() {
               />
               <ModeDropdown mode={mode} setMode={setMode} />
             </div>
-            {/* <DayManager days={days} display="week" planMode={mode} /> */}
+            <DayManager days={days} display="week" planMode={mode} />
           </div>
           <MealPlanSideBar />
         </div>

@@ -303,3 +303,5 @@ cython_debug/
 #.idea/
 
 .DS_Store
+.env
+web/package-lock.json

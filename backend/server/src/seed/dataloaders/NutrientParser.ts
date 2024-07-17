@@ -1,4 +1,10 @@
-import { Gender, ImportType, Prisma, SpecialCondition } from "@prisma/client";
+import {
+  Gender,
+  ImportType,
+  Prisma,
+  SpecialCondition,
+  TargetPreference,
+} from "@prisma/client";
 import { readCSV } from "../../services/io/Readers.js";
 import { db } from "../../db.js";
 import { z } from "zod";
@@ -18,6 +24,24 @@ type NutrientParseInput = {
   mappingSavePath: string;
 };
 
+const stringToNumberSchema = z.string().transform((str) => {
+  // If the string is empty, return undefined
+  if (str === "") {
+    return undefined;
+  }
+
+  // Try to convert the string to a number
+  const num = Number(str);
+
+  // If the conversion results in NaN, return undefined
+  if (isNaN(num)) {
+    return undefined;
+  }
+
+  // Otherwise, return the number
+  return num;
+});
+
 const booleanParamSchema = z
   .enum(["TRUE", "FALSE"])
   .transform((value) => value === "TRUE");
@@ -26,6 +50,11 @@ const nutrientSchema = z.object({
   id: z.string().cuid(),
   nutrient: cleanedStringSchema(30, toTitleCase),
   unitAbbreviation: nullableString,
+  target: stringToNumberSchema,
+  preference: z.preprocess((val) => {
+    return String(val).toUpperCase();
+  }, z.nativeEnum(TargetPreference)),
+  threshold: stringToNumberSchema,
   unit: cleanedStringSchema(10),
   advancedView: booleanParamSchema,
   important: booleanParamSchema,
@@ -116,6 +145,16 @@ export class NutrientLoader {
         },
       };
 
+      if (cleanedRecord.target && cleanedRecord.preference) {
+        createStmt.target = {
+          create: {
+            targetValue: cleanedRecord.target,
+            threshold: cleanedRecord.threshold,
+            preference: cleanedRecord.preference,
+          },
+        };
+      }
+
       createNutrientsStmt.push(createStmt);
 
       // Connect parent and child nutrients
@@ -164,10 +203,14 @@ export class NutrientLoader {
       const { gender, specialCondition, minAge, maxAge, ...rest } = record;
 
       for (const [nutrient, value] of Object.entries(rest)) {
-        if (mapping.has(nutrient)) {
+        if (nutrient.indexOf("Max") === -1 && mapping.has(nutrient)) {
+          const upperLimit = rest[`${nutrient}Max`]
+            ? z.coerce.number().positive().parse(rest[`${nutrient}Max`])
+            : undefined;
           createDriStmts.push({
             nutrient: { connect: { id: mapping.get(nutrient) } },
             value: z.coerce.number().positive().parse(value),
+            upperLimit,
             gender: z
               .preprocess(
                 (val) => String(val).toUpperCase(),

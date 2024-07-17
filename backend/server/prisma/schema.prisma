@@ -1,4 +1,4 @@
- // This is your Prisma schema file,
+// This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
@@ -130,13 +130,13 @@ model MealPlanRecipe {
   recipeId      String
   factor        Float             @default(1)
   totalServings Int
-  cookDayOffset       Int               @default(0)
+  cookDayOffset Int               @default(0)
   servings      MealPlanServing[]
   // @@map("meal_plan_recipe")
 }
 
 model Import {
-  id            String         @id @default(cuid())
+  id            String       @id @default(cuid())
   fileName      String?
   fileHash      String?
   type          ImportType
@@ -144,7 +144,7 @@ model Import {
   storagePath   String
   /// [ImageMapping]
   imageMapping  Json?
-  createdAt     DateTime       @default(now())
+  createdAt     DateTime     @default(now())
   importRecords ImportItem[]
   // @@map("import")
 }
@@ -158,7 +158,7 @@ model ImportItem {
   name              String
   parsedFormat      Json
   status            RecordStatus
-  verified           Boolean                @default(false)
+  verified          Boolean                @default(false)
   recipe            Recipe?                @relation(fields: [recipeId], references: [id])
   recipeId          String?
   nutritionLabel    NutritionLabel?        @relation(fields: [nutritionLabelId], references: [id])
@@ -167,13 +167,12 @@ model ImportItem {
   ingredientGroupId String?
   draftId           String?
   createdAt         DateTime               @default(now())
-
 }
 
 model ImportDraft {
-    id                String                 @id @default(cuid())
-    draftId           String
-    type              EntityType
+  id      String     @id @default(cuid())
+  draftId String
+  type    EntityType
 }
 
 // Status for entire import
@@ -198,7 +197,7 @@ model RecipeIngredient {
   id                String                 @id @default(cuid())
   sentence          String
   quantity          Float?
-  minQty               Float?
+  minQty            Float?
   maxQty            Float?
   name              String?
   order             Int
@@ -335,7 +334,7 @@ model Receipt {
   path            String
   lineItems       ReceiptLine[]
   scanned         Boolean       @default(false)
-  verified         Boolean       @default(false)
+  verified        Boolean       @default(false)
 }
 
 model ReceiptLine {
@@ -355,7 +354,7 @@ model ReceiptLine {
   foodType           FoodType?
   ingredientId       String?
   /// [BoundingBoxes]
-  boundingBoxes      Json
+  boundingBoxes      Json?
 }
 
 enum FoodType {
@@ -402,7 +401,7 @@ model Recipe {
   importId            String?
   leftoverFridgeLife  Int?
   leftoverFreezerLife Int?
-  verified          Boolean                 @default(false)
+  verified            Boolean                 @default(false)
   nutritionLabels     NutritionLabel[]
   ingredientGroups    RecipeIngredientGroup[]
   importRecord        ImportItem[]
@@ -453,7 +452,7 @@ model NutritionLabel {
   ingredientGroup   RecipeIngredientGroup?   @relation(fields: [ingredientGroupId], references: [id], onDelete: Cascade)
   ingredientGroupId String?                  @unique
   nutrients         NutritionLabelNutrient[]
-  verified           Boolean                  @default(false)
+  verified          Boolean                  @default(false)
   servings          Float?
   servingSize       Float?
   servingSizeUnit   MeasurementUnit?         @relation(fields: [unitId], references: [id])
@@ -512,8 +511,7 @@ model Nutrient {
   alternateNames          String[]
   type                    NutrientType
   advancedView            Boolean
-  important               Boolean  @default(false)
-  customTarget            Float?
+  important               Boolean                  @default(false)
   dri                     DailyReferenceIntake[]
   parentNutrientId        String?
   order                   Int
@@ -524,7 +522,31 @@ model Nutrient {
   unit                    MeasurementUnit          @relation(fields: [unitId], references: [id])
   unitId                  String
   mappings                NutrientImportMapping[]
+  ranking                 RankedNutrient?
+  target                  NutrientTarget?
   // @@map("nutrient")
+}
+
+model RankedNutrient {
+  id         String   @id @default(cuid())
+  rank       Int
+  nutrient   Nutrient @relation(fields: [nutrientId], references: [id])
+  nutrientId String   @unique
+}
+
+model NutrientTarget {
+  id          String           @id @default(cuid())
+  targetValue Float
+  preference  TargetPreference
+  threshold   Float?
+  nutrient    Nutrient         @relation(fields: [nutrientId], references: [id])
+  nutrientId  String           @unique
+}
+
+enum TargetPreference {
+  OVER
+  UNDER
+  NONE
 }
 
 model NutrientImportMapping {
@@ -540,6 +562,7 @@ model NutrientImportMapping {
 model DailyReferenceIntake {
   id               String           @id @default(cuid())
   value            Float
+  upperLimit       Float?
   gender           Gender
   ageMin           Int
   ageMax           Int
@@ -569,11 +592,5 @@ model HealthProfile {
   yearBorn                Int
   activityLevel           Float?
   specialCondition        SpecialCondition
-  targetProteinPercentage Float?
-  targetProteinGrams      Float?
-  targetCarbsPercentage   Float?
-  targetCarbsGrams        Float?
-  targetFatPercentage     Float?
-  targetFatGrams          Float?
   // @@map("health_profile")
 }
