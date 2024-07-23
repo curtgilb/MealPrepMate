@@ -14,13 +14,13 @@ interface BreadcrumbProps {
 
 export function BreadcrumbPath({ path }: BreadcrumbProps) {
   return (
-    <Breadcrumb>
+    <Breadcrumb className="mb-4">
       <BreadcrumbList>
         {path.map((param, index) => {
           const isLast = path.length === index + 1;
           return (
-            <>
-              <BreadcrumbItem key={param.name}>
+            <div key={param.name}>
+              <BreadcrumbItem>
                 {!isLast ? (
                   <BreadcrumbLink href={param.link}>
                     {param.name}
@@ -30,7 +30,7 @@ export function BreadcrumbPath({ path }: BreadcrumbProps) {
                 )}
               </BreadcrumbItem>
               {!isLast && <BreadcrumbSeparator />}
-            </>
+            </div>
           );
         })}
       </BreadcrumbList>

@@ -1,12 +1,10 @@
 "use client";
 import { FragmentType, graphql, useFragment } from "@/gql";
 import { NutrientFieldsFragment } from "@/gql/graphql";
+import { nutritionFieldsFragment } from "@/graphql/nutrition/fragments";
+import { getNutrientsQuery } from "@/graphql/nutrition/queries";
 import { useQuery } from "@urql/next";
 import { useMemo } from "react";
-import {
-  getNutrientsQuery,
-  nutritionFieldsFragment,
-} from "@/graphql/nutrition/nutrients";
 
 export type NutrientMap = {
   [key: string]: NutrientFieldsFragment[];
@@ -20,7 +18,7 @@ export function useCategorizedNutrients(advanced: boolean) {
     },
   });
   const { data, fetching, error } = result;
-  const nutrients = useFragment(nutritionFieldsFragment, data?.nutrients.items);
+  const nutrients = useFragment(nutritionFieldsFragment, data?.nutrients);
 
   return useMemo(() => {
     if (!nutrients) return {};

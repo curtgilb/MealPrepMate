@@ -1,27 +1,12 @@
-import { graphql } from "@/gql";
+"use client";
 import { SearchNutrientsQuery } from "@/gql/graphql";
-import { Picker } from "../ui/picker";
+import { getNutrientsForPicker } from "@/graphql/nutrition/queries";
 import { useState } from "react";
 import { useQuery } from "urql";
+import { Picker } from "../ui/picker";
 import { ItemPickerProps } from "./Picker";
 
-const getNutrients = graphql(`
-  query searchNutrients {
-    nutrients(advanced: true, pagination: { offset: 0, take: 200 }) {
-      items {
-        id
-        name
-        unit {
-          id
-          symbol
-        }
-        alternateNames
-      }
-    }
-  }
-`);
-
-export type NutrientItem = SearchNutrientsQuery["nutrients"]["items"][number];
+export type NutrientItem = SearchNutrientsQuery["nutrients"][number];
 
 export function NutrientPicker({
   select,
@@ -31,19 +16,19 @@ export function NutrientPicker({
   multiselect,
 }: ItemPickerProps<NutrientItem>) {
   const [search, setSearch] = useState<string>();
-  const [result, reexecuteQuery] = useQuery({
-    query: getNutrients,
+  const [result] = useQuery({
+    query: getNutrientsForPicker,
   });
 
   const { data, fetching, error } = result;
-  console.log(error);
+  console.log(fetching);
 
   return (
     <Picker<NutrientItem>
-      options={data?.nutrients.items ?? []}
+      options={data?.nutrients ?? []}
       id="id"
       label="name"
-      autoFilter={false}
+      autoFilter={true}
       onSearchUpdate={setSearch}
       placeholder={placeholder}
       fetching={fetching}

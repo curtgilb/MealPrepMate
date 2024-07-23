@@ -1,160 +1,52 @@
 "use client";
-import { FragmentType, graphql, useFragment } from "@/gql";
-import { GetReceiptQuery, GetRecipeBaiscInfoQuery } from "@/gql/graphql";
+import { graphql, useFragment } from "@/gql";
+import { GetReceiptQuery } from "@/gql/graphql";
 import { ReceiptItem, ReceiptItemFragment } from "../edit/ReceiptItemEdit";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Copy,
-  CreditCard,
-  MoreVertical,
-  Truck,
-} from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
-import {
-  GroceryStorePicker,
-  Store,
-} from "@/components/pickers/GroceryStorePicker";
-import { useState } from "react";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { DatePicker } from "@/components/ui/date-picker";
+import { Progress } from "@/components/ui/progress";
+import { useEffect, useMemo, useState } from "react";
+import { useReceiptItems } from "@/hooks/use-receipt-items";
+import { EditReceipt } from "@/components/receipt/edit/ReceiptEdit";
 
 interface ReceiptViewProps {
   receipt: GetReceiptQuery["receipt"];
 }
 
-const editReceiptMutation = graphql(
-  `
-    mutation editReceipt($receiptId: String!, $receipt: UpdateReceipt!) {
-      updateReceipt(receipt: $receipt, receiptId: $receiptId) {
-        id
-        imagePath
-        total
-        merchantName
-        matchingStore {
-          id
-          name
-        }
-        date
-        items {
-          ...ReceiptItem
-        }
-        scanned
-      }
-    }
-  `
-);
-
-const receiptInputSchema = z.object({
-  date: z.date().optional(),
-  store: z.object({ id: z.string(), name: z.string() }),
-});
-
 export function ReceiptView({ receipt }: ReceiptViewProps) {
   const items = useFragment(ReceiptItemFragment, receipt.items);
-  const form = useForm<z.infer<typeof receiptInputSchema>>({
-    resolver: zodResolver(receiptInputSchema),
-    defaultValues: {
-      store: receipt.matchingStore ?? undefined,
-      date: receipt.date ? new Date(receipt.date) : new Date(),
-    },
-  });
-
-  function updateReceipt(values: z.infer<typeof receiptInputSchema>) {
-    console.log(values);
-  }
+  const { index, setIndex, isClient, sortedItems } = useReceiptItems(
+    receipt.id,
+    items
+  );
+  console.log(sortedItems);
 
   return (
-    <div>
-      <h2 className="">Receipt Details</h2>
-      {/* <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(updateReceipt)}
-          className="flex gap-x-6"
-        >
-          <FormField
-            control={form.control}
-            name="store"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Grocery Store</FormLabel>
-                <FormControl>
-                  <GroceryStorePicker
-                    select={(store) => {
-                      field.onChange(store);
-                    }}
-                    deselect={() => {
-                      field.onChange(undefined);
-                    }}
-                    selectedIds={field.value ? [field.value.id] : []}
-                    multiselect={false}
-                    placeholder={
-                      field.value ? field.value.name : "Pick a store"
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+    <div className="flex flex-col">
+      <h2 className="text-2xl font-bold mb-4">Receipt Verification</h2>
+      <EditReceipt receipt={receipt} />
+      <div className="flex flex-col gap-4 mb-4">
+        <h2 className="text-xl font-bold">Receipt Line Items</h2>
+        {isClient && (
+          <>
+            <div>
+              <p>{`Verified ${index + 1} of ${sortedItems?.length}`}</p>
+              <Progress
+                value={(index - 1 / (sortedItems?.length ?? 1)) * 100}
+              />
+            </div>
+            {sortedItems && (
+              <ReceiptItem
+                index={index}
+                length={sortedItems.length}
+                item={sortedItems[index]}
+                receiptId={receipt.id}
+                setIndex={setIndex}
+              ></ReceiptItem>
             )}
-          />
-          <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Date</FormLabel>
-                <FormControl>
-                  <DatePicker
-                    date={field.value ?? new Date()}
-                    onChange={(newDate) => {
-                      field.onChange(newDate);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </form>
-      </Form> */}
-
-      {items?.map((item, index) => {
-        return (
-          <ReceiptItem
-            key={item.id}
-            itemNumber={index + 1}
-            item={item}
-          ></ReceiptItem>
-        );
-      })}
+          </>
+        )}
+      </div>
     </div>
   );
 }

@@ -55,47 +55,43 @@ export function Picker<T extends { id: string }>({
   createItem,
 }: PickerProps<T>) {
   const [open, setOpen] = useState(false);
+  const isDesktop = true; //useMediaQuery("(min-width: 768px)");
 
-  const isDesktop = useMediaQuery("(min-width: 768px)");
-
-  if (isDesktop) {
-    return (
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-full max-w-64 justify-between"
-          >
-            {placeholder}
-            {multiselect ? (
-              <Plus className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            ) : (
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full max-w-64 p-0">
-          <SearchList<T>
-            options={options}
-            id={id}
-            fetching={fetching}
-            multiselect={multiselect}
-            label={label}
-            autoFilter={autoFilter}
-            onSearchUpdate={onSearchUpdate}
-            selectedIds={selectedIds}
-            select={select}
-            deselect={deselect}
-            createItem={createItem}
-            // setDisplayName={display}
-            setOpen={setOpen}
-          />
-        </PopoverContent>
-      </Popover>
-    );
-  }
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="justify-between"
+        >
+          {placeholder}
+          {multiselect ? (
+            <Plus className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          ) : (
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full max-w-64 p-0">
+        <SearchList<T>
+          options={options}
+          id={id}
+          fetching={fetching}
+          multiselect={multiselect}
+          label={label}
+          autoFilter={autoFilter}
+          onSearchUpdate={onSearchUpdate}
+          selectedIds={selectedIds}
+          select={select}
+          deselect={deselect}
+          createItem={createItem}
+          setOpen={setOpen}
+        />
+      </PopoverContent>
+    </Popover>
+  );
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
@@ -160,15 +156,7 @@ function SearchList<T extends { id: string }>({
       />
       <CommandList>
         <CommandEmpty>
-          {{ fetching } ? (
-            <Loader2 className="animate-spin" />
-          ) : { createItem } ? (
-            <Button variant="ghost" onClick={() => createItem(search)}>
-              Create {search}
-            </Button>
-          ) : (
-            <p>No results</p>
-          )}
+          <p>empty</p>
         </CommandEmpty>
         <CommandGroup
           heading="Suggestions"
@@ -180,15 +168,13 @@ function SearchList<T extends { id: string }>({
             return (
               <CommandItem
                 key={item[id] as string}
-                value={item[id] as string}
+                value={item[label] as string}
                 onSelect={() => {
                   if (useDefault) setUseDefault(false);
                   if (isSelected) {
                     deselect(item);
-                    // if (!multiselect) setDisplayName(undefined);
                   } else {
                     select(item);
-                    // if (!multiselect) setDisplayName(item[label] as string);
                   }
                   if (!multiselect) {
                     setOpen(false);

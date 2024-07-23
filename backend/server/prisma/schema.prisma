@@ -355,6 +355,7 @@ model ReceiptLine {
   ingredientId       String?
   /// [BoundingBoxes]
   boundingBoxes      Json?
+  order            Int
 }
 
 enum FoodType {

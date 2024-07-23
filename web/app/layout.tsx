@@ -6,6 +6,7 @@ import {
   MutationAddRecipeServingArgs,
   MutationAddRecipeToMealPlanArgs,
   MutationDeleteRecipeServingArgs,
+  MutationSetRankedNutrientsArgs,
 } from "@/gql/graphql";
 import { cn } from "@/lib/utils";
 import "@/styles/globals.css";
@@ -44,6 +45,7 @@ export default function RootLayout({
         cacheExchange({
           keys: {
             NutrientsQuery: (data) => null,
+            IngredientsQuery: (data) => null,
           },
           updates: {
             Mutation: {
@@ -83,6 +85,21 @@ export default function RootLayout({
                     "planRecipes",
                     [...mealPlan, result.addRecipeToMealPlan]
                   );
+                }
+              },
+              setRankedNutrients(result, args, cache, info) {
+                const rankedNutrients = cache.resolve(
+                  "Query",
+                  "getRankedNutrients"
+                );
+
+                if (
+                  Array.isArray(rankedNutrients) &&
+                  Array.isArray(result.setRankedNutrients)
+                ) {
+                  cache.link("Query", "getRankedNutrients", [
+                    ...result.setRankedNutrients,
+                  ]);
                 }
               },
             },

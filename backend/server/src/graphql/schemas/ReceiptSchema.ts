@@ -31,7 +31,7 @@ builder.queryFields((t) => ({
       id: t.arg.string({ required: true }),
     },
     validate: {
-      schema: z.object({ id: z.string().cuid() }),
+      schema: z.object({ id: z.string() }),
     },
     type: "Receipt",
     resolve: async (query, root, args) => {

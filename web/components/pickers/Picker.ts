@@ -5,4 +5,5 @@ export interface ItemPickerProps<T> {
   selectedIds: string[];
   placeholder: string;
   multiselect: boolean;
+  className?: string;
 }

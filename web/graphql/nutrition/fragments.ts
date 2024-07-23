@@ -13,26 +13,23 @@ export const nutritionFieldsFragment = graphql(`
     dri {
       id
       value
+      upperLimit
     }
     name
     important
     parentNutrientId
+    target {
+      id
+      nutrientTarget
+      preference
+      threshold
+    }
     type
     unit {
       id
       name
       symbol
       abbreviations
-    }
-  }
-`);
-
-export const getNutrientsQuery = graphql(`
-  query getNutrients($advanced: Boolean!) {
-    nutrients(pagination: { take: 400, offset: 0 }, advanced: $advanced) {
-      items {
-        ...NutrientFields
-      }
     }
   }
 `);

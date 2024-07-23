@@ -89,7 +89,7 @@ const worker = new Worker(
 
       const itemsCreateStmt: Prisma.ReceiptLineCreateManyReceiptInput[] = [];
       if (items) {
-        for (const receiptItem of items.values) {
+        for (const [index, receiptItem] of items.values.entries()) {
           const itemBoundingBoxes = receiptItem.boundingRegions?.map(
             (region) => region.polygon
           );
@@ -114,6 +114,7 @@ const worker = new Worker(
             ingredientId: matchingIngredientId,
             unitId: matchingUnitId,
             boundingBoxes: itemBoundingBoxes as BoundingBox[],
+            order: index + 1,
           });
         }
       }

@@ -27,7 +27,8 @@ interface NutritionLabelProps {
 }
 
 export function NutritionLabel({ nutrientValues }: NutritionLabelProps) {
-  const { categorized, childNutrients } = useCategorizedNutrients(true);
+  const { categorized: categorized, childNutrients } =
+    useCategorizedNutrients(true);
   const isDesktop = useMediaQuery("(min-width: 480px)");
   const LabelSection: React.FC<NutritionLabelLayoutProps> = isDesktop
     ? NutritionLabelTable

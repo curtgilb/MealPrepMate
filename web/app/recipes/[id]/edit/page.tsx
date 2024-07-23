@@ -1,5 +1,5 @@
 "use client";
-import { EditIngredientGroups } from "@/components/recipe/edit/EditIngredientGroups";
+import { EditIngredientGroups } from "@/components/recipe/edit/groups/EditIngredientGroups";
 import { EditRecipeInfo } from "@/components/recipe/edit/EditRecipeInfo";
 import { EditRecipeIngredients } from "@/components/recipe/edit/EditRecipeIngredients";
 import { EditRecipeNutritionLabels } from "@/components/recipe/edit/EditRecipeNutritionLabels";

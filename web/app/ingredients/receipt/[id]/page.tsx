@@ -1,43 +1,12 @@
 "use client";
-import { ComboboxDemo } from "@/components/GrocerySearch";
-import { ReceiptItem } from "@/components/receipt/edit/ReceiptItemEdit";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { graphql } from "@/gql";
+import { BreadcrumbPath } from "@/components/generics/Breadcrumb";
+import { ReceiptView } from "@/components/receipt/view/ReceiptView";
+import { Card, CardContent } from "@/components/ui/card";
+import { receiptQuery } from "@/graphql/receipt/queries";
 import { useQuery } from "@urql/next";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
-
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { BreadcrumbPath } from "@/components/generics/Breadcrumb";
-import { ReceiptView } from "@/components/receipt/view/ReceiptView";
-
-const receiptQuery = graphql(/* GraphQL */ `
-  query getReceipt($id: String!) {
-    receipt(id: $id) {
-      id
-      imagePath
-      total
-      merchantName
-      matchingStore {
-        id
-        name
-      }
-      date
-      items {
-        ...ReceiptItem
-      }
-      scanned
-    }
-  }
-`);
 
 export default function Receipt() {
   const params = useParams<{ id: string }>();
@@ -60,20 +29,18 @@ export default function Receipt() {
 
   return (
     <>
-      {/* <BreadcrumbPath
+      <BreadcrumbPath
         path={[
           { name: "Ingredients", link: "/ingredients" },
           { name: "Receipt upload", link: "/ingredients/receipt" },
         ]}
-      /> */}
-      <h1 className="text-4xl font-black">Receipt Upload</h1>
-      <div className="grid grid-cols-2 gap-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Receipt Image</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {data?.receipt && (
+      />
+      <h1 className="text-4xl font-black mb-6">Receipt Upload</h1>
+
+      <Card className="py-8">
+        <CardContent className="flex gap-x-14">
+          {data?.receipt && (
+            <div>
               <Image
                 src={`http://localhost:9000/${data?.receipt.imagePath}`}
                 title="Uploaded Receipt"
@@ -85,12 +52,11 @@ export default function Receipt() {
                   height: "auto",
                 }}
               />
-            )}
-          </CardContent>
-        </Card>
-
-        {data?.receipt && <ReceiptView receipt={data.receipt} />}
-      </div>
+            </div>
+          )}
+          {data?.receipt && <ReceiptView receipt={data.receipt} />}
+        </CardContent>
+      </Card>
     </>
   );
 }

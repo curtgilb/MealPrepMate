@@ -14,6 +14,7 @@ builder.prismaObject("ReceiptLine", {
     unitQuantity: t.exposeString("unitQuantity", { nullable: true }),
     matchingUnit: t.relation("matchingUnit", { nullable: true }),
     matchingIngredient: t.relation("matchingIngredient", { nullable: true }),
+    order: t.exposeInt("order"),
     foodType: t.field({
       type: foodTypeEnum,
       nullable: true,
@@ -40,7 +41,7 @@ const updateReceiptLine = builder.inputType("UpdateReceiptItem", {
 // ============================================ Queries =================================
 // builder.queryFields((t) => ({}));
 
-// ============================================ Mutaations ===============================
+// ============================================ Mutations ===============================
 builder.mutationFields((t) => ({
   createReceiptItem: t.prismaField({
     type: "ReceiptLine",
@@ -51,6 +52,7 @@ builder.mutationFields((t) => ({
     resolve: async (query, root, args) => {
       return await db.receiptLine.create({
         data: {
+          order: 0,
           receipt: { connect: { id: args.receiptId } },
           totalPrice: args.line.totalPrice,
           description: args.line.description,
@@ -64,6 +66,7 @@ builder.mutationFields((t) => ({
             ? { connect: { id: args.line.ingredientId } }
             : undefined,
         },
+        ...query,
       });
     },
   }),
@@ -96,6 +99,7 @@ builder.mutationFields((t) => ({
   deleteReceiptItem: t.field({
     type: "Boolean",
     args: {
+      receiptId: t.arg.string({ required: true }),
       lineId: t.arg.string({ required: true }),
     },
     resolve: async (root, args) => {
