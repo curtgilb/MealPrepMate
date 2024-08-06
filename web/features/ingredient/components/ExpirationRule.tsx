@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "../ui/button";
+import { Button } from "../../../components/ui/button";
 import { Link } from "lucide-react";
 
 const expirationFragment = graphql(`

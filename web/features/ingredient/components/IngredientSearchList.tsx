@@ -1,10 +1,11 @@
-"use client";
-import { TypedDocumentNode, useQuery, UseQueryState } from "@urql/next";
+import { useQuery } from "@urql/next";
 import { graphql } from "@/gql";
-import IngredientCard from "@/components/ingredient/IngredientCard";
-import { ComponentType, ReactNode, useCallback } from "react";
-import { TypedQueryDocumentNode } from "graphql";
-import { FetchIngredientsQuery } from "@/gql/graphql";
+import IngredientCard from "@/features/ingredient/components/IngredientCard";
+import { useCallback } from "react";
+import { useInView } from "react-intersection-observer";
+import { Skeleton } from "@/components/ui/skeleton";
+
+import { LoadingCards } from "../../../components/generics/LoadingCards";
 
 const ingredientsListQuery = graphql(/* GraphQL */ `
   query fetchIngredients($pagination: OffsetPagination!, $search: String) {
@@ -19,40 +20,12 @@ const ingredientsListQuery = graphql(/* GraphQL */ `
   }
 `);
 
-interface SearchProps<Q> {
-  query: TypedDocumentNode<Q>;
-  variables: { [key: string]: any };
-  ItemComponent: ComponentType<{
-    result: Q | undefined;
-  }>;
-}
-
-function TestComponent({ item }: { item: FetchIngredientsQuery }) {
-  return (
-    <p>
-      {item.ingredients.ingredients.map((item) => (
-        <span key={item.id}>{item.name}</span>
-      ))}
-    </p>
-  );
-}
-
-function TestRoot<Q>({ query, variables, ItemComponent }: SearchProps<Q>) {
-  const [result] = useQuery({
-    query: query,
-    variables: variables,
-  });
-
-  const { data, fetching, error } = result;
-
-  if (fetching) return <p>Loading...</p>;
-  if (error) return <p>Oh no... {error.message}</p>;
-  return <ItemComponent result={data} />;
-}
-
 // This is the <SearchRoot> component that we render in `./App.jsx`.
 // It accepts our variables as props.
-export function SearchRoot({ searchTerm = "", resultsPerPage = 50 }) {
+export const IngredientSearchList = ({
+  searchTerm = "",
+  resultsPerPage = 50,
+}) => {
   const [result] = useQuery({
     query: ingredientsListQuery,
     variables: {
@@ -66,6 +39,8 @@ export function SearchRoot({ searchTerm = "", resultsPerPage = 50 }) {
   if (fetching) return <p>Loading...</p>;
   if (error) return <p>Oh no... {error.message}</p>;
   const ingredients = data?.ingredients.ingredients;
+  const itemsRemaining = data?.ingredients.itemsRemaining ?? 0;
+
   return (
     <>
       {ingredients?.length === 0 ? <strong>No Results</strong> : null}
@@ -79,18 +54,18 @@ export function SearchRoot({ searchTerm = "", resultsPerPage = 50 }) {
       ))}
 
       {/* The <SearchPage> component receives the same props, plus the `afterCursor` for its variables */}
-      {data?.ingredients.itemsRemaining ? (
+      {itemsRemaining > 0 && data ? (
         <SearchPage
           searchTerm={searchTerm}
           take={resultsPerPage}
           skip={data.ingredients.nextOffset}
         />
       ) : result.fetching ? (
-        <em>Loading...</em>
+        <LoadingCards vertical={false} />
       ) : null}
     </>
   );
-}
+};
 
 function SearchPage({
   searchTerm,
@@ -125,7 +100,7 @@ function SearchPage({
   }, [executeQuery]);
 
   if (results.fetching) {
-    return <em>Loading...</em>;
+    return <LoadingCards vertical={false} />;
   }
   if (results.error) return <p>Oh no... {results.error.message}</p>;
 
@@ -153,11 +128,11 @@ function SearchPage({
         <em>Loading...</em>
       ) : null}
 
-      {/* {!results.data?.ingredients && !results.fetching ? (
-        <button type="button" onClick={onLoadMore}>
-          Load more
-        </button>
-      ) : null} */}
+      {!results.data?.ingredients && !results.fetching ? (
+        <>
+          <LoadingCards vertical={false} onView={onLoadMore} />
+        </>
+      ) : null}
     </>
   );
 }

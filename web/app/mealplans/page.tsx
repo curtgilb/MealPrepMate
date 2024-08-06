@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import { useMutation } from "@urql/next";
 import { useState } from "react";
 import { MealPlans as MealPlanList } from "@/components/pagination/MealPlans";
+import SingleColumnCentered from "@/components/layouts/single-column-centered";
 
 const createMutation = graphql(`
   mutation createMealPlan {
@@ -21,21 +22,23 @@ export default function MealPlans() {
   const [redirecting, setRedirecting] = useState<boolean>(false);
 
   return (
-    <div>
-      <h1 className="text-5xl font-black">Meal plans</h1>
-      <Button
-        disabled={redirecting}
-        onClick={() => {
-          setRedirecting(true);
-          createMealPlan({}).then((result) =>
-            router.push(`/mealplans/${result.data?.createMealPlan.id}`)
-          );
-        }}
-      >
-        <Plus className="mr-2 h-4 w-4" />
-        Create meal plan
-      </Button>
+    <SingleColumnCentered>
+      <div className="flex justify-between mb-10 items-baseline">
+        <h1 className="text-5xl font-black">Meal plans</h1>
+        <Button
+          disabled={redirecting}
+          onClick={() => {
+            setRedirecting(true);
+            createMealPlan({}).then((result) =>
+              router.push(`/mealplans/${result.data?.createMealPlan.id}`)
+            );
+          }}
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          New meal plan
+        </Button>
+      </div>
       <MealPlanList />
-    </div>
+    </SingleColumnCentered>
   );
 }

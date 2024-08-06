@@ -12,13 +12,13 @@ import { NutrientFieldsFragment } from "@/gql/graphql";
 
 import { isNumeric, toTitleCase } from "@/utils/utils";
 import { useQuery } from "urql";
-import { Input } from "../ui/input";
+import { Input } from "../../../components/ui/input";
 import { useState } from "react";
 import {
   NutrientMap,
   useCategorizedNutrients,
 } from "@/hooks/use-categorized-nutrients";
-import { Progress } from "../ui/progress";
+import { Progress } from "../../../components/ui/progress";
 import { SummedNutrients } from "@/utils/nutrients";
 import { useMediaQuery } from "@/hooks/use-media-query";
 

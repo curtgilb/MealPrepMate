@@ -1,7 +1,7 @@
 import { Pencil, Save } from "lucide-react";
 import { useState } from "react";
-import { Input } from "../ui/input";
-import { InputWithIcon } from "../ui/InputWithIcon";
+import { Input } from "../../../components/ui/input";
+import { InputWithIcon } from "../../../components/ui/InputWithIcon";
 import { graphql } from "@/gql";
 import { useMutation } from "@urql/next";
 import { cn } from "@/lib/utils";

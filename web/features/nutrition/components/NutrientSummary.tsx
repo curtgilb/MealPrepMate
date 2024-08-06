@@ -1,5 +1,5 @@
 import { NutrientFieldsFragment } from "@/gql/graphql";
-import { Progress } from "../ui/progress";
+import { Progress } from "../../../components/ui/progress";
 
 interface NutrientSummaryProps {
   id: string;

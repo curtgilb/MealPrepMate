@@ -12,7 +12,10 @@ import {
 import { Bar } from "react-chartjs-2";
 import { faker } from "@faker-js/faker";
 import { SummedNutrients } from "@/utils/nutrients";
-import { NutrientItem, NutrientPicker } from "../pickers/NutrientPicker";
+import {
+  NutrientItem,
+  NutrientPicker,
+} from "../components/pickers/NutrientPicker";
 import { useCategorizedNutrients } from "@/hooks/use-categorized-nutrients";
 import Annotations from "chartjs-plugin-annotation";
 

@@ -1,5 +1,5 @@
 "use client";
-import { MealPlanName } from "@/components/ingredient/PlanName";
+import { MealPlanName } from "@/features/ingredient/components/PlanName";
 import { DayScroller } from "@/components/mealplan/controls/DayPicker";
 import {
   ModeDropdown,

@@ -1,24 +1,13 @@
 "use client";
-import { Button } from "../ui/button";
+
 import { Loader2, Plus } from "lucide-react";
-import { ModalDrawer } from "../ModalDrawer";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { ModalDrawer } from "@/components/ModalDrawer";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dispatch, SetStateAction, useState } from "react";
 import { graphql } from "@/gql";
-import { useMutation } from "urql";
 import { useRouter } from "next/navigation";
+import { Dispatch, SetStateAction, useState } from "react";
+import { useMutation } from "urql";
 
 const uploadReceipt = graphql(`
   mutation uploadReceipt($file: File!) {
@@ -34,13 +23,13 @@ export function ReceiptUpload() {
     <>
       <ModalDrawer
         title="Upload receipt"
-        description="Upload your grocery store receipt to add prices to ingredients"
+        description="Upload a photo of your grocery store receipt to add prices to ingredients"
         open={open}
         setOpen={setOpen}
         trigger={
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Upload Receipt
+            Upload receipt
           </Button>
         }
         content={<ReceiptUploadDialog open={open} setOpen={setOpen} />}

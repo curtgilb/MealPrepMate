@@ -19,6 +19,15 @@ const config = {
       },
     },
     extend: {
+      minHeight: {
+        "main-full": "calc(100vh - var(--top-bar-height))",
+      },
+      height: {
+        "main-full": "calc(100vh - var(--top-bar-height))",
+      },
+      width: {
+        "mini-side-bar": "var(--mini-side-bar-width)",
+      },
       screens: {
         "4xl": "3440px",
       },

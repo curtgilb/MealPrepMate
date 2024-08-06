@@ -4,6 +4,7 @@ import {
   ImportStatus,
   ImportType,
   Meal,
+  MeasurementSystem,
   NutrientType,
   RecordStatus,
 } from "@prisma/client";
@@ -19,6 +20,9 @@ const importStatus = builder.enumType(ImportStatus, { name: "ImportStatus" });
 const foodTypeEnum = builder.enumType(FoodType, { name: "FoodType" });
 const recordStatus = builder.enumType(RecordStatus, { name: "RecordStatus" });
 const meal = builder.enumType(Meal, { name: "Meal" });
+const measurementSystem = builder.enumType(MeasurementSystem, {
+  name: "MeasurementSystem",
+});
 const externalImportType = builder.enumType(ExternalImportType, {
   name: "ImportType",
 });
@@ -35,4 +39,5 @@ export {
   PrismaImportType,
   recordStatus,
   foodTypeEnum,
+  measurementSystem,
 };

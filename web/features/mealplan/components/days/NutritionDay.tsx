@@ -1,4 +1,4 @@
-import { NutrientTargetBar } from "@/components/nutrition/NutrientTargetBar";
+import { NutrientTargetBar } from "@/features/nutrition/components/NutrientTargetBar";
 import { PlanDay, PlanDayProps } from "./DayInterface";
 import { useFeaturedNutrients } from "@/hooks/use-featured-nutrients";
 import {

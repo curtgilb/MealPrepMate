@@ -1,6 +1,7 @@
 "use client";
 import { Navigation } from "@/components/SideNav";
 import { Button } from "@/components/ui/button";
+import { animated, useSpring } from "@react-spring/web";
 
 import {
   MutationAddRecipeServingArgs,
@@ -114,29 +115,55 @@ export default function RootLayout({
     return [client, ssr];
   }, []);
 
+  const sideBarSprings = useSpring({ width: isCollapsed ? "4.5rem" : "15rem" });
+  const mainSprings = useSpring({
+    marginLeft: isCollapsed ? "4.5rem" : "15rem",
+  });
+
+  // function handleClick() {
+  //   api.start({
+  //     from: {
+  //       width: "4.5rem",
+  //     },
+  //     to: {
+  //       width: "18rem",
+  //     },
+  //   });
+  // }
+
   return (
     <html lang="en">
       <body
-        className={cn(
-          "bg-background font-sans antialiased h-dvh overflow-y-hidden flex flex-col",
-          fontSans.variable
-        )}
+        className={cn("bg-background font-sans antialiased", fontSans.variable)}
       >
-        <header className="px-3 py-2 flex items-center border-b">
-          <Button variant="ghost">
+        <header className="fixed z-50 inset-x-0 top-0 px-3 py-2 flex items-center border-b bg-white">
+          <Button
+            onClick={() => {
+              setCollapsed(!isCollapsed);
+            }}
+            variant="ghost"
+          >
             <Menu />
           </Button>
-          <p className="text-2xl font-bold ml-2">Meal Planner</p>
+          <p className="text-2xl font-bold ml-2">MyPantryPal</p>
         </header>
-        <main className="flex flex-row w-full relative bg-secondary h-full flex-grow">
+        <animated.aside
+          style={{
+            ...sideBarSprings,
+          }}
+          className="fixed z-30 top-[3.5rem] bottom-0 "
+        >
           <Navigation isCollapsed={isCollapsed} />
-          <section className="grow min-w-0 overflow-hidden">
-            <UrqlProvider client={client} ssr={ssr}>
-              {children}
-            </UrqlProvider>
-          </section>
-          <Toaster />
-        </main>
+        </animated.aside>
+        <animated.main
+          className="mt-[3.5rem] bg-muted min-h-main-full"
+          style={{ ...mainSprings }}
+        >
+          <UrqlProvider client={client} ssr={ssr}>
+            {children}
+          </UrqlProvider>
+        </animated.main>
+        <Toaster />
       </body>
     </html>
   );

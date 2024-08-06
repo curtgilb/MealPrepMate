@@ -1,5 +1,5 @@
 "use client";
-import { NutrientRanking } from "@/components/nutrition/NutrientRanking";
+import { NutrientRanking } from "@/features/nutrition/components/NutrientRanking";
 import { MacroSummary } from "@/components/nutrition/target/MacroNutritionSummary";
 import { NutritionTargets } from "@/components/nutrition/target/NutrientTarget";
 import { Label } from "@/components/ui/label";

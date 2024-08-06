@@ -17,9 +17,9 @@ import {
 } from "@/utils/nutrients";
 import { MealPlanServingsFieldFragment } from "@/gql/graphql";
 import { useAggregateNutrients } from "@/hooks/use-aggregated-nutrients";
-import { NutrientWeekSummary } from "@/components/charts/NutrientSummaryChart";
-import { MacroSummaryChart } from "@/components/nutrition/charts/MacroSummary";
-import { NutritionLabel } from "@/components/nutrition/NutritionLabel";
+import { NutrientWeekSummary } from "@/deletion/NutrientSummaryChart";
+import { MacroSummaryChart } from "@/deletion/MacroSummary";
+import { NutritionLabel } from "@/features/nutrition/components/NutritionLabel";
 
 export default function NutritionSummary() {
   const params = useParams<{ id: string }>();

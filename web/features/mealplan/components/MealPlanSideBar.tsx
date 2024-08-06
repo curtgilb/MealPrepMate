@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import { ReactNode, useState } from "react";
 import { MealList } from "./MealList";
-import { RecipeSearch } from "./RecipeSearch";
+import { RecipeSearch } from "./mealplan/RecipeSearch";
 import { MealPlanIngredients } from "./sidebar/MealPlanIngredients";
 
 const menu: {
