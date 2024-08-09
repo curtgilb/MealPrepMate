@@ -13,7 +13,7 @@ const rankedNutrientInput = builder.inputType("RankedNutrientInput", {
 
 // ============================================ Queries =================================
 builder.queryFields((t) => ({
-  getRankedNutrients: t.prismaField({
+  rankedNutrients: t.prismaField({
     type: ["Nutrient"],
     resolve: async (query) => {
       return await db.nutrient.findMany({

@@ -1,4 +1,3 @@
-import { WeekNumber } from "@/components/mealplan/summary/WeekSelect";
 import { RecipeNutrientLookup } from "./use-recipe-label-lookup";
 import { ServingsLookup } from "./use-meal-plan";
 import {
@@ -8,6 +7,7 @@ import {
 } from "@/utils/nutrients";
 import { MealPlanServingsFieldFragment } from "@/gql/graphql";
 import { useMemo } from "react";
+import { WeekNumber } from "@/features/mealplan/components/summary/WeekSelect";
 
 export function useAggregateNutrients(
   week: WeekNumber,

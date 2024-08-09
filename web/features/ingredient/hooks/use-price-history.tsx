@@ -10,7 +10,7 @@ import { useMemo } from "react";
 // Return applicable UnitTypes[]
 // grouped price points
 
-type Ingredient = NonNullable<
+type PricePoint = NonNullable<
   GetIngredientQuery["ingredient"]["priceHistory"]
 >[number];
 
@@ -26,17 +26,42 @@ function getCutoffDate(timeframe: Timeframe) {
 }
 
 type GroupedPrices = {
-  [key: string]: PriceGroup;
+  [key: string]: { [key: string]: PriceGroup };
 };
 
 export type PriceGroup = {
   date: Date;
-  uncategorized: Ingredient | undefined;
-  canned: Ingredient | undefined;
-  frozen: Ingredient | undefined;
-  packaged: Ingredient | undefined;
-  fresh: Ingredient | undefined;
+  storeName: string;
+  uncategorized: PricePoint | undefined;
+  canned: PricePoint | undefined;
+  frozen: PricePoint | undefined;
+  packaged: PricePoint | undefined;
+  fresh: PricePoint | undefined;
 };
+
+function addPriceToGroup(
+  price: PricePoint,
+  groups: GroupedPrices,
+  dateString: string
+) {
+  switch (price.foodType) {
+    case FoodType.Canned:
+      groups[price.groceryStore.id][dateString].canned = price;
+      break;
+    case FoodType.Fresh:
+      groups[price.groceryStore.id][dateString].fresh = price;
+      break;
+    case FoodType.Frozen:
+      groups[price.groceryStore.id][dateString].frozen = price;
+      break;
+    case FoodType.Packaged:
+      groups[price.groceryStore.id][dateString].packaged = price;
+      break;
+    default:
+      groups[price.groceryStore.id][dateString].uncategorized = price;
+      break;
+  }
+}
 
 export function usePriceHistory(
   timeframe: Timeframe,
@@ -45,28 +70,27 @@ export function usePriceHistory(
 ) {
   const cutoffDate = getCutoffDate(timeframe).toJSDate();
   return prices
-    ?.sort((a, b) => b.date - a.date)
+    ?.sort((a, b) => a.date - b.date)
     .reduce((groups, price) => {
       // Filter out-of-range datets and non-matching unit types.
       if (price.date >= cutoffDate) {
-        // Add the grocery store
         if (!(price.groceryStore.id in groups)) {
-          groups[price.groceryStore.id] = {
+          groups[price.groceryStore.id] = {};
+        }
+        // Add the date object
+        const dateString = price.date.toISOString().split("T")[0];
+        if (!(dateString in groups[price.groceryStore.id])) {
+          groups[price.groceryStore.id][dateString] = {
+            date: price.date,
             storeName: price.groceryStore.name,
-            uncategorized: [],
-            byType: {},
+            uncategorized: undefined,
+            canned: undefined,
+            frozen: undefined,
+            packaged: undefined,
+            fresh: undefined,
           };
         }
-
-        // Add the price to food type
-        if (price.foodType) {
-          if (!(price.foodType in groups[price.groceryStore.id])) {
-            groups[price.groceryStore.id].byType[price.foodType] = [];
-          }
-          groups[price.groceryStore.id].byType[price.foodType]?.push(price);
-        } else {
-          groups[price.groceryStore.id].uncategorized.push(price);
-        }
+        addPriceToGroup(price, groups, dateString);
       }
       return groups;
     }, {} as GroupedPrices);

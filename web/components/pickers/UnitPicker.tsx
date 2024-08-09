@@ -3,7 +3,7 @@ import { graphql } from "@/gql";
 import { FetchUnitsQuery } from "@/gql/graphql";
 import { useMutation, useQuery } from "@urql/next";
 import { useState } from "react";
-import { Picker } from "../ui/picker";
+import { Picker } from "../picker";
 import { ItemPickerProps } from "./Picker";
 
 const getUnitsQuery = graphql(`

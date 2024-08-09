@@ -2,11 +2,18 @@ import { queryFromInfo } from "@pothos/plugin-prisma";
 import { Ingredient, Prisma, RecipeIngredient } from "@prisma/client";
 import { z } from "zod";
 import { db } from "../../db.js";
-import { createIngredientValidation } from "../../validations/IngredientValidation.js";
+import {
+  createIngredientValidation,
+  editIngredientValidation,
+} from "../../validations/IngredientValidation.js";
 import { offsetPaginationValidation } from "../../validations/UtilityValidation.js";
 import { builder } from "../builder.js";
 import { recipeIngredient } from "./RecipeIngredientSchema.js";
-import { nextPageInfo, offsetPagination } from "./UtilitySchema.js";
+import {
+  deleteResult,
+  nextPageInfo,
+  offsetPagination,
+} from "./UtilitySchema.js";
 
 // ============================================ Types ===================================
 
@@ -65,6 +72,19 @@ const createIngredientInput = builder.inputType("CreateIngredientInput", {
     name: t.string({ required: true }),
     alternateNames: t.stringList(),
     storageInstructions: t.string(),
+    categoryId: t.string({ required: true }),
+    expirationRuleId: t.string(),
+  }),
+});
+
+const editIngredientInput = builder.inputType("EditIngredientInput", {
+  fields: (t) => ({
+    ingredientId: t.string({ required: true }),
+    name: t.string(),
+    alternateNames: t.stringList(),
+    storageInstructions: t.string(),
+    categoryId: t.string(),
+    expirationRuleId: t.string(),
   }),
 });
 
@@ -184,14 +204,16 @@ builder.mutationFields((t) => ({
     },
     validate: { schema: z.object({ ingredient: createIngredientValidation }) },
     resolve: async (query, root, args) => {
-      const ingredientInput: Prisma.IngredientCreateInput = {
-        name: args.ingredient.name,
-        storageInstructions: args.ingredient.storageInstructions,
-      };
-      if (args.ingredient.alternateNames)
-        ingredientInput.alternateNames = args.ingredient.alternateNames;
       return await db.ingredient.create({
-        data: ingredientInput,
+        data: {
+          name: args.ingredient.name,
+          storageInstructions: args.ingredient.storageInstructions,
+          alternateNames: args.ingredient.alternateNames ?? undefined,
+          category: { connect: { id: args.ingredient.categoryId } },
+          expirationRule: args.ingredient.expirationRuleId
+            ? { connect: { id: args.ingredient.expirationRuleId } }
+            : undefined,
+        },
         ...query,
       });
     },
@@ -199,22 +221,30 @@ builder.mutationFields((t) => ({
   editIngredient: t.prismaField({
     type: "Ingredient",
     args: {
-      ingredientId: t.arg.string({ required: true }),
-      ingredient: t.arg({ type: createIngredientInput, required: true }),
+      ingredient: t.arg({ type: editIngredientInput, required: true }),
     },
     validate: {
       schema: z.object({
-        ingredientId: z.string().cuid(),
-        ingredient: createIngredientValidation,
+        ingredient: editIngredientValidation,
       }),
     },
     resolve: async (query, root, args) => {
       return db.ingredient.update({
-        where: { id: args.ingredientId },
+        where: { id: args.ingredient.ingredientId },
         data: {
-          name: args.ingredient.name,
+          name: args.ingredient.name ?? undefined,
           storageInstructions: args.ingredient.storageInstructions,
+          alternateNames: args.ingredient.alternateNames
+            ? { set: args.ingredient.alternateNames }
+            : undefined,
+          category: args.ingredient.categoryId
+            ? { connect: { id: args.ingredient.categoryId } }
+            : undefined,
+          expirationRule: args.ingredient.expirationRuleId
+            ? { connect: { id: args.ingredient.expirationRuleId } }
+            : undefined,
         },
+        ...query,
       });
     },
   }),
@@ -258,17 +288,21 @@ builder.mutationFields((t) => ({
       });
     },
   }),
-  deleteIngredient: t.prismaField({
-    type: ["Ingredient"],
+  deleteIngredient: t.field({
+    type: deleteResult,
     args: {
-      ingredientToDeleteId: t.arg.string({ required: true }),
+      ingredientId: t.arg.string({ required: true }),
     },
-    validate: { schema: z.object({ ingredientToDeleteId: z.string().cuid() }) },
-    resolve: async (query, root, args) => {
-      await db.ingredient.delete({
-        where: { id: args.ingredientToDeleteId },
-      });
-      return await db.ingredient.findMany({ ...query });
+    validate: { schema: z.object({ ingredientId: z.string().cuid() }) },
+    resolve: async (root, args) => {
+      try {
+        await db.ingredient.delete({
+          where: { id: args.ingredientId },
+        });
+      } catch (e) {
+        return { success: false, message: e instanceof Error ? e.message : "" };
+      }
+      return { success: true };
     },
   }),
 }));

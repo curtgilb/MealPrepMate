@@ -1,4 +1,5 @@
 "use client";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -28,73 +29,40 @@ export function PriceHistoryGroup({ prices }: PriceHistoryGroupProps) {
   console.log(groupedPrices);
 
   return (
-    <div className="grid grid-cols-2">
-      <div className="flex justify-end gap-x-4">
-        <Select defaultValue="WEIGHT">
-          <SelectTrigger className="w-[150px]">
-            <SelectValue defaultValue="ppu" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="WEIGHT">Weight</SelectItem>
-            <SelectItem value="VOLUME">Volume</SelectItem>
-            <SelectItem value="LENGTH">Length</SelectItem>
-            <SelectItem value="COUNT">Count</SelectItem>
-          </SelectContent>
-        </Select>
+    <Card>
+      <CardHeader className="flex flex-row justify-between">
+        <h2 className="text-2xl font-semibold">Price History</h2>
+        <div className="flex justify-end gap-x-2">
+          <Select defaultValue="WEIGHT">
+            <SelectTrigger className="w-[150px]">
+              <SelectValue defaultValue="ppu" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="WEIGHT">Weight</SelectItem>
+              <SelectItem value="VOLUME">Volume</SelectItem>
+              <SelectItem value="LENGTH">Length</SelectItem>
+              <SelectItem value="COUNT">Count</SelectItem>
+            </SelectContent>
+          </Select>
 
-        <Select defaultValue="3months">
-          <SelectTrigger className="w-[150px]">
-            <SelectValue defaultValue="ppu" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="3months">Last 3 months</SelectItem>
-            <SelectItem value="1year">Last year</SelectItem>
-            <SelectItem value="3years">Last 3 years</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      {groupedPrices &&
-        Object.entries(groupedPrices)?.map(([id, priceGroup]) => {
-          return <PriceHistory key={id} prices={priceGroup} />;
-        })}
-    </div>
+          <Select defaultValue="3months">
+            <SelectTrigger className="w-[150px]">
+              <SelectValue defaultValue="ppu" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="3months">Last 3 months</SelectItem>
+              <SelectItem value="1year">Last year</SelectItem>
+              <SelectItem value="3years">Last 3 years</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </CardHeader>
+      <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {groupedPrices &&
+          Object.entries(groupedPrices)?.map(([id, priceGroup]) => {
+            return <PriceHistory key={id} prices={Object.values(priceGroup)} />;
+          })}
+      </CardContent>
+    </Card>
   );
 }
-
-// type price = {
-//   id: string;
-//   date?: any | null;
-//   foodType?: FoodType | null;
-//   price: number;
-//   pricePerUnit: number;
-//   quantity: number;
-//   groceryStore: {
-//     id: string;
-//     name: string;
-//   };
-//   unit: {
-//     id: string;
-//     name: string;
-//     symbol?: string | null;
-//     conversionName?: string | null;
-//     measurementSystem?: MeasurementSystem | null;
-//     type?: UnitType | null;
-//   };
-// };
-
-// enum MeasurementSystem {
-//   Imperial = "IMPERIAL",
-//   Metric = "METRIC",
-// }
-
-// enum MeasurementSystem {
-//   Imperial = "IMPERIAL",
-//   Metric = "METRIC",
-// }
-
-// export enum FoodType {
-//   Canned = "CANNED",
-//   Fresh = "FRESH",
-//   Frozen = "FROZEN",
-//   Packaged = "PACKAGED",
-// }

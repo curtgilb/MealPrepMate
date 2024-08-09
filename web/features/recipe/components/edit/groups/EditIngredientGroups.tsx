@@ -13,7 +13,7 @@ import { DndContext, DragEndEvent, DragOverEvent } from "@dnd-kit/core";
 import { useQuery } from "@urql/next";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 
-import { IngredientGroup } from "@/components/recipe/edit/groups/EditIngredientGroup";
+import { IngredientGroup } from "@/features/recipe/components/edit/groups/EditIngredientGroup";
 import {
   closestCenter,
   KeyboardSensor,

@@ -1,9 +1,10 @@
 "use client";
-import { EditIngredientGroups } from "@/components/recipe/edit/groups/EditIngredientGroups";
-import { EditRecipeInfo } from "@/components/recipe/edit/EditRecipeInfo";
-import { EditRecipeIngredients } from "@/components/recipe/edit/EditRecipeIngredients";
-import { EditRecipeNutritionLabels } from "@/components/recipe/edit/EditRecipeNutritionLabels";
+
 import { Button } from "@/components/ui/button";
+import { EditRecipeInfo } from "@/features/recipe/components/edit/EditRecipeInfo";
+import { EditRecipeIngredients } from "@/features/recipe/components/edit/EditRecipeIngredients";
+import { EditRecipeNutritionLabels } from "@/features/recipe/components/edit/EditRecipeNutritionLabels";
+import { EditIngredientGroups } from "@/features/recipe/components/edit/groups/EditIngredientGroups";
 import { getRecipeQuery } from "@/graphql/recipe/queries";
 import { useQuery } from "@urql/next";
 import { useRouter } from "next/navigation";

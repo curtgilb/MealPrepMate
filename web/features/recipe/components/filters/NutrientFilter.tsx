@@ -1,18 +1,8 @@
 "use client";
-import { graphql } from "@/gql";
-import {
-  NutritionFilter as NFilter,
-  SearchNutrientsQuery,
-} from "@/gql/graphql";
-import { useQuery } from "@urql/next";
-import { Dispatch, SetStateAction, useState } from "react";
-import { Picker } from "@/components/ui/picker";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import NumericalFilter from "@/components/recipe/NumericalFilter";
-import { FilterChildProp } from "../RecipeFilter";
+import { useState } from "react";
 import { NutrientPicker } from "@/components/pickers/NutrientPicker";
+import { FilterChildProp } from "../RecipeFilter";
+import NumericalFilter from "@/features/recipe/components/NumericalFilter";
 
 export function NutritionFilter({
   filter,

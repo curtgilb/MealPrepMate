@@ -1,10 +1,11 @@
 "use client";
 import { SearchNutrientsQuery } from "@/gql/graphql";
-import { getNutrientsForPicker } from "@/graphql/nutrition/queries";
+
 import { useState } from "react";
-import { useQuery } from "urql";
-import { Picker } from "../ui/picker";
+import { useQuery } from "@urql/next";
+import { Picker } from "../picker";
 import { ItemPickerProps } from "./Picker";
+import { getNutrientsForPicker } from "@/features/nutrition/api/Nutrient";
 
 export type NutrientItem = SearchNutrientsQuery["nutrients"][number];
 
@@ -21,7 +22,6 @@ export function NutrientPicker({
   });
 
   const { data, fetching, error } = result;
-  console.log(fetching);
 
   return (
     <Picker<NutrientItem>

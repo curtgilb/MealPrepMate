@@ -1,7 +1,8 @@
 import { FilterChildProp } from "../RecipeFilter";
-import NumericalFilter from "@/components/recipe/NumericalFilter";
+
 import { IngredientPicker } from "@/components/pickers/IngredientPicker";
 import { UnitPicker } from "@/components/pickers/UnitPicker";
+import NumericalFilter from "@/features/recipe/components/NumericalFilter";
 
 export function IngredientFilter({
   filter,

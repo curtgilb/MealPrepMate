@@ -1,4 +1,3 @@
-import { graphql } from "@/gql";
 import { FragmentType, useFragment } from "@/gql/fragment-masking";
 import { RecipeIngredientFragmentFragment } from "@/gql/graphql";
 import { RecipeIngredientFragment } from "@/graphql/recipe/queries";

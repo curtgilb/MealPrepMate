@@ -3,23 +3,27 @@ import {
   NutrientItem,
   NutrientPicker,
 } from "@/components/pickers/NutrientPicker";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { GripVertical } from "lucide-react";
-import { useState } from "react";
 import {
-  DndContext,
+  getRankedNutrients,
+  setRankedNutrients,
+} from "@/features/nutrition/api/Nutrient";
+import {
   closestCenter,
+  DndContext,
+  DragEndEvent,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -29,10 +33,9 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Button } from "@/components/ui/button";
 import { useMutation, useQuery } from "@urql/next";
-import { setRankedNutrients } from "@/graphql/nutrition/mutations";
-import { getRankedNutrients } from "@/graphql/nutrition/queries";
+import { ArrowDownUp, GripVertical } from "lucide-react";
+import { useState } from "react";
 
 export function NutrientRanking() {
   const [setResult, changeRanking] = useMutation(setRankedNutrients);
@@ -40,8 +43,8 @@ export function NutrientRanking() {
   const [rankQuery] = useQuery({ query: getRankedNutrients });
   const [selectedNutrients, setSelectedNutrients] = useState<NutrientItem[]>(
     () => {
-      if (rankQuery.data?.getRankedNutrients) {
-        return [...rankQuery.data.getRankedNutrients];
+      if (rankQuery.data?.rankedNutrients) {
+        return [...rankQuery.data.rankedNutrients];
       } else {
         return [];
       }
@@ -132,10 +135,12 @@ export function NutrientRanking() {
             </ol>
           </SortableContext>
         </DndContext>
+      </CardContent>
+      <CardFooter>
         <Button onClick={handleSubmit} disabled={!canSave} className="">
           Save
         </Button>
-      </CardContent>
+      </CardFooter>
     </Card>
   );
 }
@@ -163,7 +168,7 @@ function NutrientSortItem({ id, name, index }: NutrientItemProps) {
 
   return (
     <li
-      className="flex items-center gap-2 border rounded px-4 py-5 bg-white"
+      className="flex text-sm items-center gap-2 border rounded px-4 py-3 bg-white"
       ref={setNodeRef}
       style={style}
       {...attributes}

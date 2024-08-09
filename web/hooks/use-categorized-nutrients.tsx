@@ -1,8 +1,10 @@
 "use client";
-import { FragmentType, graphql, useFragment } from "@/gql";
+import {
+  getNutrientsQuery,
+  nutritionFieldsFragment,
+} from "@/features/nutrition/api/Nutrient";
+import { useFragment } from "@/gql";
 import { NutrientFieldsFragment } from "@/gql/graphql";
-import { nutritionFieldsFragment } from "@/graphql/nutrition/fragments";
-import { getNutrientsQuery } from "@/graphql/nutrition/queries";
 import { useQuery } from "@urql/next";
 import { useMemo } from "react";
 
@@ -48,8 +50,11 @@ export function useCategorizedNutrients(advanced: boolean) {
     }, new Map<string, NutrientFieldsFragment>());
 
     return {
+      // A map of nutrients with no parent id
       categorized: categories,
+      // parentId -> list of nutrients with that id
       childNutrients: childLookup,
+      // nutritionId -> nutrient
       all: allNutrients,
     };
   }, [nutrients]);

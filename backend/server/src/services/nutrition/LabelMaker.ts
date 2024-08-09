@@ -1,6 +1,13 @@
 import { MeasurementUnit } from "@prisma/client";
 import { SummedNutrients } from "./LabelAggregator.js";
 import { round } from "../../util/utils.js";
+import {
+  ALCOHOL_ID,
+  CALORIE_ID,
+  CARB_ID,
+  FAT_ID,
+  PROTIEN_ID,
+} from "../../config.js";
 
 export type AggregateNutritionLabel = {
   calories: number;
@@ -29,12 +36,6 @@ type CreateLabelArgs = {
 
 export class LabelMaker {
   private getMacroDistribution(nutrients: SummedNutrients) {
-    const CALORIE_ID = "clt6dqtz90000awv9anfb343o";
-    const CARB_ID = "clt6dqtzc0007awv9h1mv5pbi";
-    const PROTIEN_ID = "clt6dqtzg000uawv918m4fxsm";
-    const FAT_ID = "clt6dqtze000lawv9b3w34hxe";
-    const ALCOHOL_ID = "clt6dqtza0001awv954je0dq5";
-
     return {
       calories: round(nutrients.get(CALORIE_ID)?.total ?? 0),
       alcohol: round(nutrients.get(ALCOHOL_ID)?.total ?? 0),

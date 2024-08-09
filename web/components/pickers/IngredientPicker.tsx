@@ -3,7 +3,7 @@ import { graphql } from "@/gql";
 import { useMutation, useQuery } from "@urql/next";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Label } from "../ui/label";
-import { Picker } from "../ui/picker";
+import { Picker } from "../picker";
 import { Separator } from "../ui/separator";
 import { FetchIngredientsListQuery } from "@/gql/graphql";
 import { ItemPickerProps } from "./Picker";

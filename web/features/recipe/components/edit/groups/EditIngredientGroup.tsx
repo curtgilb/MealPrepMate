@@ -1,4 +1,4 @@
-import { EditIngredientGroupItem } from "@/components/recipe/edit/groups/EditIngredientGroupItem";
+import { EditIngredientGroupItem } from "@/features/recipe/components/edit/groups/EditIngredientGroupItem";
 import { RecipeIngredientFragmentFragment } from "@/gql/graphql";
 import {
   SortableContext,

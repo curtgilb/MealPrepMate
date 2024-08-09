@@ -41,51 +41,23 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 interface PriceHistoryProps {
-  prices: PriceGroup;
+  prices: PriceGroup[];
 }
-
-// foodType --> color string
-function getLineColor(type: FoodType | null | undefined) {
-  switch (type) {
-    case FoodType.Canned:
-      return;
-      break;
-
-    default:
-      break;
-  }
-}
-
-const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-];
 
 export function PriceHistory({ prices }: PriceHistoryProps) {
   const [foodType, setFoodType] = useState<FoodType | "ALL">("ALL");
-  const selectedDataSet =
-    foodType === "ALL"
-      ? Object.values(prices.byType)
-      : [prices.byType[foodType]];
-  if (foodType === "ALL" && prices.uncategorized) {
-    selectedDataSet?.push(prices.uncategorized);
-  }
 
   return (
-    <div>
+    <div className="w-full max-w-96">
       <div className="flex justify-between">
-        <p>{prices.storeName}</p>
+        <p className="text-lg text-semibold">{prices[0].storeName}</p>
         <Select
           defaultValue={foodType}
           onValueChange={(value) => {
             setFoodType(value as FoodType | "ALL");
           }}
         >
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-[120px] h-6 tex-xs">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -97,27 +69,24 @@ export function PriceHistory({ prices }: PriceHistoryProps) {
           </SelectContent>
         </Select>
       </div>
-      <ChartContainer config={chartConfig} className="min-h-[200px] w-[900px]">
-        <LineChart accessibilityLayer data={chartData}>
+      <ChartContainer config={chartConfig} className="min-h-[200px]">
+        <LineChart accessibilityLayer data={prices}>
           <CartesianGrid vertical={false} />
           <XAxis
             dataKey="date"
-            tickLine={false}
-            axisLine={false}
-            tickMargin={8}
-            tickFormatter={(value) => value.slice(0, 3)}
+            scale="time"
+            tickFormatter={(unixTime) =>
+              new Date(unixTime).toLocaleDateString()
+            }
           />
-          {selectedDataSet.map((dataset) => {
-            return (
-              <Line
-                dataKey="pricePerUnit"
-                type="step"
-                stroke="var(--color-desktop)"
-                strokeWidth={2}
-                dot={false}
-              />
-            );
-          })}
+
+          <Line
+            dataKey="fresh.pricePerUnit"
+            type="step"
+            stroke="var(--color-fresh)"
+            strokeWidth={2}
+            dot={false}
+          />
 
           <ChartTooltip
             cursor={false}

@@ -8,8 +8,8 @@ import {
 } from "@/components/ui/select";
 import { ReactNode, useState } from "react";
 import { MealList } from "./MealList";
-import { RecipeSearch } from "./mealplan/RecipeSearch";
 import { MealPlanIngredients } from "./sidebar/MealPlanIngredients";
+import { RecipeSearch } from "@/features/mealplan/components/RecipeSearch";
 
 const menu: {
   title: string;

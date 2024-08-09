@@ -1,11 +1,6 @@
+import { Button } from "@/components/ui/button";
 import { MealPlan } from "@/contexts/MealPlanContext";
-import { graphql, useFragment } from "@/gql";
-import { useQuery } from "@urql/next";
 import { useContext } from "react";
-import { Button } from "../ui/button";
-import { Pencil, Plus, PlusCircle } from "lucide-react";
-import { MealRecipeFieldsFragment } from "@/gql/graphql";
-import { mealRecipeFragment } from "@/app/mealplans/[id]/page";
 
 export function MealList() {
   const mealPlan = useContext(MealPlan);

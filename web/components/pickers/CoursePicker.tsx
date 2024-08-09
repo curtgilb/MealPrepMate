@@ -6,7 +6,7 @@ import { useMutation, useQuery } from "@urql/next";
 import { TagList } from "../ui/taglist";
 import { Category } from "@/gql/graphql";
 import { Label } from "../ui/label";
-import { Picker } from "../ui/picker";
+import { Picker } from "../picker";
 
 const getCoursesQuery = graphql(`
   query fetchCourses($search: String) {

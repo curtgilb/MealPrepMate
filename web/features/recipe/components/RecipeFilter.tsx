@@ -1,7 +1,5 @@
 "use client";
-import { CategoryFilter } from "@/components/recipe/filters/CategoryFilter";
-import { CourseFilter } from "@/components/recipe/filters/CourseFilter";
-import { CuisineFilter } from "@/components/recipe/filters/CuisineFIlter";
+
 import {
   Accordion,
   AccordionContent,
@@ -11,12 +9,17 @@ import {
 import { NumericalComparison, Recipe } from "@/gql/graphql";
 import { useState, Dispatch, SetStateAction, HTMLAttributes } from "react";
 import NumericalFilter from "./NumericalFilter";
-import { Button } from "../ui/button";
+
 import { Filter, FilterX, X } from "lucide-react";
 import { NutritionFilter } from "./filters/NutrientFilter";
-import { TimeNumberInput } from "../ui/time-number-input";
-import { RecipeSearchFilter } from "../mealplan/RecipeSearch";
+
 import { IngredientFilter } from "./filters/IngredientFilter";
+import { RecipeSearchFilter } from "@/features/mealplan/components/RecipeSearch";
+import { Button } from "@/components/ui/button";
+import { CategoryFilter } from "@/features/recipe/components/filters/CategoryFilter";
+import { CourseFilter } from "@/features/recipe/components/filters/CourseFilter";
+import { CuisineFilter } from "@/features/recipe/components/filters/CuisineFIlter";
+import { TimeNumberInput } from "@/components/ui/time-number-input";
 
 interface RecipeFilterProps extends HTMLAttributes<HTMLDivElement> {
   filter: RecipeSearchFilter;

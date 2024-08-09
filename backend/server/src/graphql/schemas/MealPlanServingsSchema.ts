@@ -90,7 +90,8 @@ builder.mutationFields((t) => ({
       });
     },
   }),
-  deleteRecipeServing: t.boolean({
+  deleteRecipeServing: t.field({
+    type: "Boolean",
     args: {
       id: t.arg.string({ required: true }),
     },

@@ -14,50 +14,13 @@ import { PriceHistory } from "@/features/ingredient/components/PriceHistory";
 import SingleColumnCentered from "@/components/layouts/single-column-centered";
 import { PriceHistoryGroup } from "@/features/ingredient/components/PriceHistoryGroup";
 import { FoodType, MeasurementSystem, UnitType } from "@/gql/graphql";
-
-const ingredientQuery = graphql(`
-  query GetIngredient($id: String!) {
-    ingredient(ingredientId: $id) {
-      id
-      name
-      alternateNames
-      storageInstructions
-      category {
-        id
-        name
-      }
-      expiration {
-        ...ExpirationRuleFields
-      }
-      priceHistory {
-        id
-        date
-        foodType
-        groceryStore {
-          id
-          name
-        }
-        price
-        pricePerUnit
-        quantity
-        unit {
-          id
-          name
-          symbol
-          conversionName
-          measurementSystem
-          type
-        }
-      }
-    }
-  }
-`);
+import { getIngredientQuery } from "@/features/ingredient/api/Ingredient";
 
 const items = [
   { id: "1", name: "Hass Avocado" },
   { id: "2", name: "Alligator Pear" },
   { id: "3", name: "Fuerte Avocado" },
-  { id: "5", name: "Reed" },
+  { id: "4", name: "Reed" },
   { id: "5", name: "Reed Avocado" },
 ];
 
@@ -66,7 +29,7 @@ export default async function IngredientPage({
 }: {
   params: { id: string };
 }) {
-  const { data, error } = await getClient().query(ingredientQuery, {
+  const { data, error } = await getClient().query(getIngredientQuery, {
     id: params.id,
   });
 
@@ -108,11 +71,10 @@ export default async function IngredientPage({
         </div>
         <div>
           <h2 className="text-2xl font-semibold">Expiration</h2>
-          <ExpirationRule />
+          {/* <ExpirationRule rule={} /> */}
         </div>
 
         <div className="col-span-2">
-          <h2 className="text-2xl font-semibold">Price History</h2>
           <PriceHistoryGroup prices={dataPoints} />
         </div>
       </div>

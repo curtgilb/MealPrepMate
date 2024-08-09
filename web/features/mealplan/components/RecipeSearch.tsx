@@ -1,5 +1,10 @@
 "use client";
+import { IngredientItem } from "@/components/pickers/IngredientPicker";
+import { NutrientItem } from "@/components/pickers/NutrientPicker";
+import { InputWithIcon } from "@/components/ui/InputWithIcon";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import RecipeFilter from "@/features/recipe/components/RecipeFilter";
+import { RecipeSearchResults } from "@/features/recipe/components/RecipeResults";
 import {
   IngredientFilter as IngFilter,
   NumericalComparison,
@@ -7,11 +12,6 @@ import {
 } from "@/gql/graphql";
 import { Search } from "lucide-react";
 import { useState } from "react";
-import RecipeFilter from "../recipe/RecipeFilter";
-import { RecipeSearchResults } from "../recipe/RecipeResults";
-import { InputWithIcon } from "../ui/InputWithIcon";
-import { NutrientItem } from "../pickers/NutrientPicker";
-import { IngredientItem } from "../pickers/IngredientPicker";
 
 export type NutrientFilter = NutrientItem & {
   comparison?: NumericalComparison;

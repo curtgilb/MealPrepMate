@@ -10,8 +10,7 @@ import { MealPlan } from "@/contexts/MealPlanContext";
 import { graphql } from "@/gql";
 import { Meal } from "@/gql/graphql";
 import { useContext, useState } from "react";
-import { ModalDrawer } from "../ModalDrawer";
-import { Button } from "../ui/button";
+
 import {
   Form,
   FormControl,
@@ -24,9 +23,11 @@ import { toTitleCase } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Input } from "../ui/input";
 import { useMutation } from "@urql/next";
 import { toast } from "sonner";
+import { ModalDrawer } from "@/components/ModalDrawer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const addServingMutation = graphql(`
   mutation addServingToPlan($serving: AddRecipeServingInput!) {

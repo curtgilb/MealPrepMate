@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { Card } from "../generics/Card";
-import { ModalDrawer } from "../ModalDrawer";
 import { graphql } from "@/gql";
 import { useMutation } from "urql";
 import {
@@ -13,14 +11,16 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "../ui/button";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { toTitleCase } from "@/utils/utils";
 import { meals } from "./AddServingDialog";
-import { Input } from "../ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Meal } from "@/gql/graphql";
 import { toast } from "sonner";
+import { Card } from "@/components/generics/Card";
+import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Button } from "@/components/ui/button";
+import { ModalDrawer } from "@/components/ModalDrawer";
 
 interface MealPlanServingCardProps {
   id: string;

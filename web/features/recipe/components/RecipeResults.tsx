@@ -2,10 +2,10 @@ import { FragmentType, graphql, useFragment } from "@/gql";
 import { RecipeFilter, RecipeSearchFieldsFragment } from "@/gql/graphql";
 import { recipeSearchFragment, searchRecipes } from "@/graphql/recipe/queries";
 import { useQuery } from "@urql/next";
-import { LoadingCards } from "../generics/LoadingCards";
-import { RecipeCard } from "../RecipeCard";
+
 import { useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { LoadingCards } from "@/components/generics/LoadingCards";
 
 interface RecipeSearchResultsProps {
   filters?: RecipeFilter;

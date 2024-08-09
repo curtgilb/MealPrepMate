@@ -5,7 +5,7 @@ import { ItemPickerProps } from "./Picker";
 import { useMutation, useQuery } from "@urql/next";
 import { useState } from "react";
 import { GetGroceryStoresQuery } from "@/gql/graphql";
-import { Picker } from "../ui/picker";
+import { Picker } from "../picker";
 
 const getGroceryStores = graphql(`
   query getGroceryStores {

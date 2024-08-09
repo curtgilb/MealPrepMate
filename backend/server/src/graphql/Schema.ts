@@ -26,5 +26,6 @@ import "./schemas/ReceiptSchema.js";
 import "./schemas/RecipeSchema.js";
 import "./schemas/UserSchema.js";
 import "./schemas/UtilitySchema.js";
+import "./schemas/MacroSchema.js";
 
 export const schema = builder.toSchema();

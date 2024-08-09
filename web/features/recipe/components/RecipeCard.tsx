@@ -1,8 +1,9 @@
 import { recipeSearchFragment } from "@/graphql/recipe/queries";
-import { Card } from "../generics/Card";
+
 import { FragmentType, useFragment } from "@/gql";
 import { RecipeSearchFieldsFragment } from "@/gql/graphql";
 import Link from "next/link";
+import { Card } from "@/components/generics/Card";
 
 interface RecipeCardProps {
   recipe: RecipeSearchFieldsFragment;

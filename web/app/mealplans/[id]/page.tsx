@@ -1,13 +1,5 @@
 "use client";
-import { MealPlanName } from "@/features/ingredient/components/PlanName";
-import { DayScroller } from "@/components/mealplan/controls/DayPicker";
-import {
-  ModeDropdown,
-  PlanMode,
-} from "@/components/mealplan/controls/ModeDropdown";
-
-import { DayManager } from "@/components/mealplan/days/DayManager";
-import { MealPlanSideBar } from "@/components/mealplan/MealPlanSideBar";
+import { MealPlanName } from "@/features/mealplan/components/PlanName";
 import { graphql, useFragment } from "@/gql";
 import { mealPlanQuery } from "@/graphql/mealplan/mealplan";
 import { mealRecipeFragment } from "@/graphql/mealplan/mealrecipes";
@@ -18,6 +10,13 @@ import { MealPlan } from "@/contexts/MealPlanContext";
 import { useParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { MealPlanServings } from "@/contexts/ServingsContext";
+import {
+  ModeDropdown,
+  PlanMode,
+} from "@/features/mealplan/components/controls/ModeDropdown";
+import { DayScroller } from "@/features/mealplan/components/controls/DayPicker";
+import { DayManager } from "@/features/mealplan/components/days/DayManager";
+import { MealPlanSideBar } from "@/features/mealplan/components/MealPlanSideBar";
 
 export type DisplayMode = "week" | "day";
 
