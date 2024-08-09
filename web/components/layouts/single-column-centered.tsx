@@ -1,13 +1,20 @@
+import { cn } from "@/lib/utils";
 import React from "react";
 
 export default function SingleColumnCentered({
+  locked = false,
   children,
 }: {
+  locked?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex p-8 justify-center w-full overflow-y-scroll">
-      <div className="max-w-screen-2xl w-full">{children}</div>
+    <div
+      className={cn("max-w-screen-2xl w-full px-8 pt-6 mx-auto", {
+        "h-main-full pb-6 overflow-hidden": locked,
+      })}
+    >
+      {children}
     </div>
   );
 }

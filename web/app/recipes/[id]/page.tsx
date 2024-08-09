@@ -1,5 +1,5 @@
-import RecipeIngredients from "@/components/recipe/RecipeIngredients";
 import { Button } from "@/components/ui/button";
+import RecipeIngredients from "@/features/recipe/components/RecipeIngredients";
 import { getRecipeQuery } from "@/graphql/recipe/queries";
 import { getClient } from "@/ssrGraphqlClient";
 import { Pencil } from "lucide-react";

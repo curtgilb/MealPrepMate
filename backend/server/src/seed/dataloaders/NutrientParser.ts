@@ -49,6 +49,7 @@ const booleanParamSchema = z
 const nutrientSchema = z.object({
   id: z.string().cuid(),
   nutrient: cleanedStringSchema(30, toTitleCase),
+  isMacro: booleanParamSchema,
   unitAbbreviation: nullableString,
   target: stringToNumberSchema,
   preference: z.preprocess((val) => {
@@ -109,6 +110,7 @@ export class NutrientLoader {
       const createStmt: Prisma.NutrientCreateInput = {
         id: cleanedRecord.id,
         name: cleanedRecord.nutrient,
+        isMacro: cleanedRecord.isMacro,
         alternateNames: cleanedRecord.alternateNames,
         type: cleanedRecord.type,
         important: cleanedRecord.important,

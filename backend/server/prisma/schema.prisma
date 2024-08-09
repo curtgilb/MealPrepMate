@@ -512,6 +512,7 @@ model AggLabelNutrient {
 model Nutrient {
   id                      String                   @id @default(cuid())
   name                    String                   @unique
+  isMacro                 Boolean         
   alternateNames          String[]
   type                    NutrientType
   advancedView            Boolean

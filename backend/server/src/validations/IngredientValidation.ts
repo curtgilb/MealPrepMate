@@ -10,6 +10,20 @@ const createIngredientValidation = z.object({
     .optional()
     .nullish(),
   storageInstructions: z.string(),
+  categoryId: z.string().cuid(),
+  expirationRuleId: z.string().cuid().nullish().optional(),
+});
+
+const editIngredientValidation = z.object({
+  ingredientId: z.string().cuid(),
+  name: cleanedStringSchema(30, toTitleCase).nullish().optional(),
+  alternateNames: z
+    .array(cleanedStringSchema(30, toTitleCase))
+    .optional()
+    .nullish(),
+  storageInstructions: z.string().nullish().optional(),
+  categoryId: z.string().cuid().nullish().optional(),
+  expirationRuleId: z.string().cuid().nullish().optional(),
 });
 
 const createPriceHistoryValidation = z.object({
@@ -47,9 +61,22 @@ const createExpirationRuleValidation = z.object({
   ingredientId: z.string().cuid().optional().nullish(),
 });
 
+const editExpirationRuleValidation = z.object({
+  id: z.string().cuid(),
+  name: cleanedStringSchema(30, toTitleCase).optional().nullish(),
+  variant: cleanedStringSchema(30).optional().nullish(),
+  defrostTime: z.number().positive().optional().nullish(),
+  perishable: z.boolean().optional(),
+  tableLife: z.number().gte(0).optional().nullish(),
+  fridgeLife: z.number().gte(0).optional().nullish(),
+  freezerLife: z.number().gte(0).optional().nullish(),
+});
+
 export {
   createIngredientValidation,
   createPriceHistoryValidation,
   editPriceHistoryValidation,
   createExpirationRuleValidation,
+  editIngredientValidation,
+  editExpirationRuleValidation,
 };

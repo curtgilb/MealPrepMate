@@ -2,15 +2,14 @@
 import SingleColumnCentered from "@/components/layouts/single-column-centered";
 import { Button } from "@/components/ui/button";
 import { InputWithIcon } from "@/components/ui/InputWithIcon";
+import { RecipeSearchFilter } from "@/features/mealplan/components/RecipeSearch";
+import { ClickableRecipeCard } from "@/features/recipe/components/RecipeCard";
+import { RecipeSearchResults } from "@/features/recipe/components/RecipeResults";
 import { searchRecipes } from "@/graphql/recipe/queries";
 import { useQuery } from "@urql/next";
-
-import { RecipeSearchFilter } from "@/components/mealplan/RecipeSearch";
-import { RecipeSearchResults } from "@/components/recipe/RecipeResults";
 import { Import, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { ClickableRecipeCard } from "@/components/recipe/RecipeCard";
 
 export default function RecipesPage() {
   const [filter, setFilter] = useState<RecipeSearchFilter>({

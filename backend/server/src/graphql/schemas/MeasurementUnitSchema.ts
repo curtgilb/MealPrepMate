@@ -1,10 +1,7 @@
+import { UnitType } from "@prisma/client";
 import { db } from "../../db.js";
 import { builder } from "../builder.js";
-import { MeasurementUnit, UnitType } from "@prisma/client";
-import { nextPageInfo, offsetPagination } from "./UtilitySchema.js";
-import { queryFromInfo } from "@pothos/plugin-prisma";
-import { z } from "zod";
-import { offsetPaginationValidation } from "../../validations/UtilityValidation.js";
+import { measurementSystem } from "./EnumSchema.js";
 
 const unitType = builder.enumType(UnitType, { name: "UnitType" });
 
@@ -15,6 +12,12 @@ const measurementUnit = builder.prismaObject("MeasurementUnit", {
     name: t.exposeString("name"),
     abbreviations: t.exposeStringList("abbreviations"),
     symbol: t.exposeString("symbol", { nullable: true }),
+    conversionName: t.exposeString("conversionName", { nullable: true }),
+    measurementSystem: t.field({
+      type: measurementSystem,
+      nullable: true,
+      resolve: (parent) => parent.system,
+    }),
     type: t.field({
       type: unitType,
       nullable: true,

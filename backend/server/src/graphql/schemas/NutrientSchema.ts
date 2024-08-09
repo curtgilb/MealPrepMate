@@ -11,6 +11,7 @@ const nutrient = builder.prismaObject("Nutrient", {
     id: t.exposeString("id"),
     name: t.exposeString("name"),
     alternateNames: t.exposeStringList("alternateNames"),
+    isMacro: t.exposeBoolean("isMacro"),
     type: t.exposeString("type"),
     important: t.exposeBoolean("important"),
     advancedView: t.exposeBoolean("advancedView"),
@@ -70,7 +71,7 @@ builder.queryFields((t) => ({
           name: { contains: args.search ?? undefined, mode: "insensitive" },
           advancedView: args.advanced ? undefined : false,
         },
-        orderBy: { order: "desc" },
+        orderBy: { order: "asc" },
         ...query,
       });
     },
