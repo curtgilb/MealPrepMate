@@ -1,12 +1,10 @@
 import RecipeIngredients from "@/components/recipe/RecipeIngredients";
 import { Button } from "@/components/ui/button";
 import { getRecipeQuery } from "@/graphql/recipe/queries";
-import { cacheExchange, createClient, fetchExchange } from "@urql/core";
-import { registerUrql } from "@urql/next/rsc";
+import { getClient } from "@/ssrGraphqlClient";
 import { Pencil } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { getClient } from "@/ssrGraphqlClient";
 
 export default async function Recipe({ params }: { params: { id: string } }) {
   const result = await getClient().query(getRecipeQuery, {

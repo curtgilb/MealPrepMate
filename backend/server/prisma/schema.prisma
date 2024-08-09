@@ -89,6 +89,9 @@ model MealPlan {
   mealPrepInstructions String?
   planRecipes          MealPlanRecipe[]
   mealPlanServings     MealPlanServing[]
+  numOfWeeks           Int @default(1)
+  startDay             Int?
+  endDay               Int?
   shoppingDays         Int[]
   draft                Boolean           @default(true)
   schedules            ScheduledPlan[]

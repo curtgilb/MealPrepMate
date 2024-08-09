@@ -14,6 +14,9 @@ builder.prismaObject("MealPlan", {
     mealPrepInstructions: t.exposeString("mealPrepInstructions", {
       nullable: true,
     }),
+    numOfWeeks: t.exposeInt("numOfWeeks"),
+    startDay: t.exposeInt("startDay", { nullable: true }),
+    endDay: t.exposeInt("endDay", { nullable: true }),
     planRecipes: t.relation("planRecipes"),
     mealPlanServings: t.relation("mealPlanServings"),
     shopppingDays: t.exposeIntList("shoppingDays"),
