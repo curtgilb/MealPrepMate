@@ -10,10 +10,14 @@ export function EditRecipeIngredientItem({
   ingredient,
 }: EditRecipeIngredientItemProps) {
   return (
-    <li className="p-4 rounded-md bg-white">
+    <li className="p-4 border rounded-md bg-white max-w-lg">
       <p className="text-lg font-medium mb-4">{ingredient.sentence}</p>
       <div className="flex gap-6">
-        <Input type="number" defaultValue={ingredient.quantity ?? ""}></Input>
+        <Input
+          className="max-w-24"
+          type="number"
+          defaultValue={ingredient.quantity ?? ""}
+        ></Input>
         <UnitPicker
           create
           placeholder={ingredient.unit ? ingredient.unit.name : "Unit"}

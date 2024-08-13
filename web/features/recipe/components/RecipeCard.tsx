@@ -1,9 +1,7 @@
-import { recipeSearchFragment } from "@/graphql/recipe/queries";
-
-import { FragmentType, useFragment } from "@/gql";
+import { Card } from "@/components/generics/Card";
+import { MacroCardDisplay } from "@/features/recipe/components/recipe_search/MacroCardDisplay";
 import { RecipeSearchFieldsFragment } from "@/gql/graphql";
 import Link from "next/link";
-import { Card } from "@/components/generics/Card";
 
 interface RecipeCardProps {
   recipe: RecipeSearchFieldsFragment;
@@ -14,7 +12,7 @@ interface RecipeCardProps {
 export function RecipeCard({ recipe, vertical, children }: RecipeCardProps) {
   return (
     <Card
-      className="shadow"
+      className="shadow group focus:outline"
       image={{
         images: recipe.photos
           .filter((photo) => photo.isPrimary)
@@ -30,10 +28,16 @@ export function RecipeCard({ recipe, vertical, children }: RecipeCardProps) {
       {children ? (
         children
       ) : (
-        <>
-          <p className="text-sm line-clamp-1 font-semibold">{recipe.name}</p>
-          <p className="text-sm"></p>
-        </>
+        <div className="flex flex-col justify-between">
+          <div>
+            <p className="group-hover:underline font-semibold">{recipe.name}</p>
+            <p className="text-sm min-h-16 ">
+              {recipe.aggregateLabel?.servings} servings
+            </p>
+          </div>
+
+          <MacroCardDisplay label={recipe.aggregateLabel} />
+        </div>
       )}
     </Card>
   );

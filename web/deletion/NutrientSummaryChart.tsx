@@ -16,7 +16,7 @@ import {
   NutrientItem,
   NutrientPicker,
 } from "../components/pickers/NutrientPicker";
-import { useCategorizedNutrients } from "@/hooks/use-categorized-nutrients";
+import { useNutrients } from "@/hooks/use-nutrients";
 import Annotations from "chartjs-plugin-annotation";
 
 ChartJS.register(
@@ -39,7 +39,7 @@ export function NutrientWeekSummary({
   labels,
 }: NutrientWeekSummary) {
   const [nutrient, setNutrient] = useState<NutrientItem | undefined>();
-  const { all } = useCategorizedNutrients(true);
+  const { all } = useNutrients(true);
   const nutrientInfo = all?.get(nutrient?.id ?? "");
   const dataset = datapoints.map((point) => {
     if (point && nutrient?.id) {

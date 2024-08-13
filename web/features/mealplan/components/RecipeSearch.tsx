@@ -48,7 +48,7 @@ export function RecipeSearch() {
         </TabsList>
         <TabsContent value="recipe">
           <InputWithIcon className="mt-8 mb-12" startIcon={Search} />
-          <RecipeSearchResults filters={{}} vertical={true} />
+          {/* <RecipeSearchResults filters={{}} vertical={true} /> */}
         </TabsContent>
         <TabsContent value="filter">
           <RecipeFilter filter={filter} setFilter={setFilter} />

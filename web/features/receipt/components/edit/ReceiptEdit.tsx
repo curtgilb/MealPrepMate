@@ -1,4 +1,4 @@
-import { GroceryStorePicker } from "@/components/pickers/GroceryStorePicker";
+import { GroceryStorePicker } from "@/features/receipt/components/GroceryStorePicker";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,

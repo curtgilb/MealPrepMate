@@ -14,10 +14,7 @@ import { isNumeric, toTitleCase } from "@/utils/utils";
 import { useQuery } from "urql";
 import { Input } from "../../../components/ui/input";
 import { useState } from "react";
-import {
-  NutrientMap,
-  useCategorizedNutrients,
-} from "@/hooks/use-categorized-nutrients";
+import { NutrientMap, useNutrients } from "@/hooks/use-nutrients";
 import { Progress } from "../../../components/ui/progress";
 import { SummedNutrients } from "@/utils/nutrients";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -27,8 +24,7 @@ interface NutritionLabelProps {
 }
 
 export function NutritionLabel({ nutrientValues }: NutritionLabelProps) {
-  const { categorized: categorized, childNutrients } =
-    useCategorizedNutrients(true);
+  const { categorized: categorized, childNutrients } = useNutrients(true);
   const isDesktop = useMediaQuery("(min-width: 480px)");
   const LabelSection: React.FC<NutritionLabelLayoutProps> = isDesktop
     ? NutritionLabelTable

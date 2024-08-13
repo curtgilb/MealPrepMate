@@ -36,9 +36,9 @@ const config = {
         sans: ["var(--font-sans)", ...fontFamily.sans],
       },
       gridTemplateColumns: {
-        "autofit-vertical": "repeat(auto-fill, minmax(208px, 1fr))",
+        "autofit-vertical": "repeat(auto-fill, minmax(240px, 1fr))",
         "autofit-horizontal": "repeat(auto-fill, minmax(250px, 1fr))",
-        "auto-fr": "auto 1fr",
+        recipe: "400px 1fr",
       },
       colors: {
         border: "hsl(var(--border))",

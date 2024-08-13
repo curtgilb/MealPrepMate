@@ -17,12 +17,6 @@ const documents = {
     "\n  fragment PhotoFields on Photo {\n    id\n    isPrimary\n    url\n  }\n": types.PhotoFieldsFragmentDoc,
     "\n  mutation uploadPhoto($file: File!) {\n    uploadPhoto(photo: $file, isPrimary: false) {\n      id\n      url\n      isPrimary\n    }\n  }\n": types.UploadPhotoDocument,
     "\n  query GetMealPlans {\n    mealPlans {\n      id\n      name\n      planRecipes {\n        id\n        originalRecipe {\n          id\n          name\n          photos {\n            id\n            isPrimary\n            url\n          }\n        }\n      }\n    }\n  }\n": types.GetMealPlansDocument,
-    "\n  query fetchCategories($search: String) {\n    categories(searchString: $search) {\n      id\n      name\n    }\n  }\n": types.FetchCategoriesDocument,
-    "\n  mutation createCategory($name: String!) {\n    createCategory(name: $name) {\n      id\n      name\n    }\n  }\n": types.CreateCategoryDocument,
-    "\n  query fetchCourses($search: String) {\n    courses(searchString: $search) {\n      id\n      name\n    }\n  }\n": types.FetchCoursesDocument,
-    "\n  mutation createCourse($name: String!) {\n    createCourse(name: $name) {\n      id\n      name\n    }\n  }\n": types.CreateCourseDocument,
-    "\n  query fetchCuisines($search: String) {\n    cuisines(searchString: $search) {\n      id\n      name\n    }\n  }\n": types.FetchCuisinesDocument,
-    "\n  mutation createCuisine($name: String!) {\n    createCuisine(name: $name) {\n      id\n      name\n    }\n  }\n": types.CreateCuisineDocument,
     "\n  query getGroceryStores {\n    stores {\n      id\n      name\n    }\n  }\n": types.GetGroceryStoresDocument,
     "\n  mutation createStore($name: String!) {\n    createGroceryStore(name: $name) {\n      id\n      name\n    }\n  }\n": types.CreateStoreDocument,
     "\n  query fetchIngredientsList($search: String, $pagination: OffsetPagination!) {\n    ingredients(search: $search, pagination: $pagination) {\n      ingredients {\n        id\n        name\n      }\n      itemsRemaining\n      nextOffset\n    }\n  }\n": types.FetchIngredientsListDocument,
@@ -59,22 +53,29 @@ const documents = {
     "\n  fragment ReceiptItem on ReceiptLine {\n    id\n    totalPrice\n    description\n    quantity\n    perUnitPrice\n    unitQuantity\n    foodType\n    order\n    matchingUnit {\n      id\n      name\n    }\n    matchingIngredient {\n      id\n      name\n    }\n  }\n": types.ReceiptItemFragmentDoc,
     "\n    mutation editReceiptItem($lineId: String!, $lineItem: UpdateReceiptItem!) {\n      updateReceiptLine(lineId: $lineId, line: $lineItem) {\n        ...ReceiptItem\n      }\n    }\n  ": types.EditReceiptItemDocument,
     "\n  mutation finalizeReceipt($receiptId: String!) {\n    finalizeReceipt(receiptId: $receiptId) {\n      id\n      imagePath\n      total\n      merchantName\n      matchingStore {\n        id\n        name\n      }\n      date\n      items {\n        ...ReceiptItem\n      }\n      scanned\n    }\n  }\n": types.FinalizeReceiptDocument,
+    "\n  query getCategories($search: String) {\n    categories(searchString: $search) {\n      id\n      name\n    }\n  }\n": types.GetCategoriesDocument,
+    "\n  mutation createCategory($name: String!) {\n    createCategory(name: $name) {\n      id\n      name\n    }\n  }\n": types.CreateCategoryDocument,
+    "\n  query getCourses($search: String) {\n    courses(searchString: $search) {\n      id\n      name\n    }\n  }\n": types.GetCoursesDocument,
+    "\n  mutation createCourse($name: String!) {\n    createCourse(name: $name) {\n      id\n      name\n    }\n  }\n": types.CreateCourseDocument,
+    "\n  query getCuisines($search: String) {\n    cuisines(searchString: $search) {\n      id\n      name\n    }\n  }\n": types.GetCuisinesDocument,
+    "\n  mutation createCuisine($name: String!) {\n    createCuisine(name: $name) {\n      id\n      name\n    }\n  }\n": types.CreateCuisineDocument,
+    "\n  query getRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      name\n      category {\n        id\n        name\n      }\n      cuisine {\n        id\n        name\n      }\n      cookTime\n      course {\n        id\n        name\n      }\n      directions\n      leftoverFridgeLife\n      leftoverFreezerLife\n      marinadeTime\n      totalTime\n      verified\n      notes\n      photos {\n        id\n        isPrimary\n        url\n      }\n      prepTime\n      source\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n      aggregateLabel {\n        id\n        alcohol\n        servings\n        totalCalories\n        carbs\n        fat\n        protein\n        servingSize\n        servingSizeUnit {\n          id\n          name\n          symbol\n        }\n        nutrients {\n          id\n          value\n          perServing\n          nutrient {\n            id\n          }\n        }\n      }\n    }\n  }\n": types.GetRecipeDocument,
+    "\n  query getRecipeBaiscInfo($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      name\n      category {\n        id\n        name\n      }\n      cuisine {\n        id\n        name\n      }\n      cookTime\n      course {\n        id\n        name\n      }\n      directions\n      leftoverFridgeLife\n      leftoverFreezerLife\n      marinadeTime\n      totalTime\n      verified\n      notes\n      photos {\n        id\n        isPrimary\n        url\n      }\n      prepTime\n      source\n    }\n  }\n": types.GetRecipeBaiscInfoDocument,
+    "\n  query getRecipeLabels($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      nutritionLabels {\n        id\n        ingredientGroup {\n          id\n          name\n        }\n        isPrimary\n        servingSize\n        servingSizeUnit {\n          id\n          name\n          symbol\n        }\n        servings\n        servingsUsed\n        nutrients {\n          value\n          nutrient {\n            id\n          }\n        }\n      }\n    }\n  }\n": types.GetRecipeLabelsDocument,
+    "\n  fragment RecipeSearchFields on Recipe {\n    id\n    name\n    verified\n    ingredients {\n      id\n      sentence\n      quantity\n      unit {\n        id\n        name\n      }\n    }\n    aggregateLabel {\n      id\n      totalCalories\n      protein\n      fat\n      carbs\n      alcohol\n      servings\n    }\n    photos {\n      id\n      isPrimary\n      url\n    }\n  }\n": types.RecipeSearchFieldsFragmentDoc,
+    "\n  query searchRecipes($filters: RecipeFilter, $pagination: OffsetPagination!) {\n    recipes(filter: $filters, pagination: $pagination) {\n      itemsRemaining\n      nextOffset\n      recipes {\n        ...RecipeSearchFields\n      }\n    }\n  }\n": types.SearchRecipesDocument,
+    "\n  fragment RecipeIngredientFragment on RecipeIngredients {\n    id\n    sentence\n    order\n    quantity\n    baseIngredient {\n      id\n      name\n    }\n    unit {\n      id\n      name\n      symbol\n    }\n    group {\n      id\n      name\n    }\n  }\n": types.RecipeIngredientFragmentFragmentDoc,
+    "\n  query getRecipeIngredients($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n    }\n  }\n": types.GetRecipeIngredientsDocument,
+    "\n  mutation deleteRecipeIngredient($id: String!) {\n    deleteRecipeIngredientGroup(groupId: $id) {\n      success\n    }\n  }\n": types.DeleteRecipeIngredientDocument,
+    "\n  mutation createIngredientGroup($name: String!, $recipeId: String!) {\n    createRecipeIngredientGroup(name: $name, recipeId: $recipeId) {\n      id\n      name\n    }\n  }\n": types.CreateIngredientGroupDocument,
+    "\n  mutation deleteIngredientGroup($groupId: String!) {\n    deleteRecipeIngredientGroup(groupId: $groupId) {\n      success\n    }\n  }\n": types.DeleteIngredientGroupDocument,
+    "\n  mutation editIngredientGroup($name: String!, $groupId: String!) {\n    editRecipeIngredientGroup(name: $name, groupId: $groupId) {\n      id\n      name\n    }\n  }\n": types.EditIngredientGroupDocument,
     "\n  query fetchRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n    }\n  }\n": types.FetchRecipeDocument,
-    "\n  query getCategories {\n    categories {\n      id\n      name\n    }\n  }\n": types.GetCategoriesDocument,
-    "\n  query getCourses {\n    courses {\n      id\n      name\n    }\n  }\n": types.GetCoursesDocument,
-    "\n  query getCuisines {\n    cuisines {\n      id\n      name\n    }\n  }\n": types.GetCuisinesDocument,
     "\n  query GetMealPlan($mealPlanId: String!) {\n    mealPlan(id: $mealPlanId) {\n      id\n      name\n      mealPrepInstructions\n      mealPlanServings {\n        ...MealPlanServingsField\n      }\n      planRecipes {\n        ...MealRecipeFields\n      }\n    }\n  }\n": types.GetMealPlanDocument,
     "\n  fragment MealRecipeFields on MealPlanRecipe {\n    id\n    totalServings\n    factor\n    servingsOnPlan\n    originalRecipe {\n      id\n      name\n      photos {\n        id\n        url\n        isPrimary\n      }\n      ingredientFreshness\n      ingredients {\n        id\n        quantity\n        sentence\n        baseIngredient {\n          id\n          name\n        }\n        unit {\n          id\n          name\n          symbol\n        }\n      }\n      aggregateLabel {\n        id\n        totalCalories\n        fat\n        alcohol\n        carbs\n        protein\n        nutrients {\n          id\n          perServing\n          value\n          nutrient {\n            id\n          }\n        }\n        servings\n        servingSize\n        servingSizeUnit {\n          id\n          name\n          symbol\n        }\n      }\n    }\n  }\n": types.MealRecipeFieldsFragmentDoc,
     "\n  fragment MealPlanServingsField on MealPlanServing {\n    id\n    day\n    meal\n    numberOfServings\n    mealPlanRecipeId\n  }\n": types.MealPlanServingsFieldFragmentDoc,
     "\n    mutation editReceipt($receiptId: String!, $receipt: UpdateReceipt!) {\n      updateReceipt(receipt: $receipt, receiptId: $receiptId) {\n        id\n        imagePath\n        total\n        merchantName\n        matchingStore {\n          id\n          name\n        }\n        date\n        items {\n          ...ReceiptItem\n        }\n        scanned\n      }\n    }\n  ": types.EditReceiptDocument,
     "\n  query getReceipt($id: String!) {\n    receipt(id: $id) {\n      id\n      imagePath\n      total\n      merchantName\n      matchingStore {\n        id\n        name\n      }\n      date\n      items {\n        ...ReceiptItem\n      }\n      scanned\n    }\n  }\n": types.GetReceiptDocument,
-    "\n  fragment RecipeIngredientFragment on RecipeIngredients {\n    id\n    sentence\n    order\n    quantity\n    baseIngredient {\n      id\n      name\n    }\n    unit {\n      id\n      name\n      symbol\n    }\n    group {\n      id\n      name\n    }\n  }\n": types.RecipeIngredientFragmentFragmentDoc,
-    "\n  query getRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      name\n      category {\n        id\n        name\n      }\n      cuisine {\n        id\n        name\n      }\n      cookTime\n      course {\n        id\n        name\n      }\n      directions\n      leftoverFridgeLife\n      leftoverFreezerLife\n      marinadeTime\n      totalTime\n      verified\n      notes\n      photos {\n        id\n        isPrimary\n        url\n      }\n      prepTime\n      source\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n    }\n  }\n": types.GetRecipeDocument,
-    "\n  query getRecipeBaiscInfo($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      name\n      category {\n        id\n        name\n      }\n      cuisine {\n        id\n        name\n      }\n      cookTime\n      course {\n        id\n        name\n      }\n      directions\n      leftoverFridgeLife\n      leftoverFreezerLife\n      marinadeTime\n      totalTime\n      verified\n      notes\n      photos {\n        id\n        isPrimary\n        url\n      }\n      prepTime\n      source\n    }\n  }\n": types.GetRecipeBaiscInfoDocument,
-    "\n  query getRecipeIngredients($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n    }\n  }\n": types.GetRecipeIngredientsDocument,
-    "\n  query getRecipeLabels($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      nutritionLabels {\n        id\n        ingredientGroup {\n          id\n          name\n        }\n        isPrimary\n        servingSize\n        servingSizeUnit {\n          id\n          name\n          symbol\n        }\n        servings\n        servingsUsed\n        nutrients {\n          value\n          nutrient {\n            id\n          }\n        }\n      }\n    }\n  }\n": types.GetRecipeLabelsDocument,
-    "\n  fragment RecipeSearchFields on Recipe {\n    id\n    name\n    verified\n    ingredients {\n      id\n      sentence\n      quantity\n      unit {\n        id\n        name\n      }\n    }\n    aggregateLabel {\n      id\n      totalCalories\n      protein\n      fat\n      carbs\n      alcohol\n      servings\n    }\n    photos {\n      id\n      isPrimary\n      url\n    }\n  }\n": types.RecipeSearchFieldsFragmentDoc,
-    "\n  query searchRecipes($filters: RecipeFilter, $pagination: OffsetPagination!) {\n    recipes(filter: $filters, pagination: $pagination) {\n      itemsRemaining\n      nextOffset\n      recipes {\n        ...RecipeSearchFields\n      }\n    }\n  }\n": types.SearchRecipesDocument,
 };
 
 /**
@@ -107,30 +108,6 @@ export function graphql(source: "\n  mutation uploadPhoto($file: File!) {\n    u
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query GetMealPlans {\n    mealPlans {\n      id\n      name\n      planRecipes {\n        id\n        originalRecipe {\n          id\n          name\n          photos {\n            id\n            isPrimary\n            url\n          }\n        }\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetMealPlans {\n    mealPlans {\n      id\n      name\n      planRecipes {\n        id\n        originalRecipe {\n          id\n          name\n          photos {\n            id\n            isPrimary\n            url\n          }\n        }\n      }\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query fetchCategories($search: String) {\n    categories(searchString: $search) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query fetchCategories($search: String) {\n    categories(searchString: $search) {\n      id\n      name\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  mutation createCategory($name: String!) {\n    createCategory(name: $name) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation createCategory($name: String!) {\n    createCategory(name: $name) {\n      id\n      name\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query fetchCourses($search: String) {\n    courses(searchString: $search) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query fetchCourses($search: String) {\n    courses(searchString: $search) {\n      id\n      name\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  mutation createCourse($name: String!) {\n    createCourse(name: $name) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation createCourse($name: String!) {\n    createCourse(name: $name) {\n      id\n      name\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query fetchCuisines($search: String) {\n    cuisines(searchString: $search) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query fetchCuisines($search: String) {\n    cuisines(searchString: $search) {\n      id\n      name\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  mutation createCuisine($name: String!) {\n    createCuisine(name: $name) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation createCuisine($name: String!) {\n    createCuisine(name: $name) {\n      id\n      name\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -278,19 +255,75 @@ export function graphql(source: "\n  mutation finalizeReceipt($receiptId: String
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n  query getCategories($search: String) {\n    categories(searchString: $search) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query getCategories($search: String) {\n    categories(searchString: $search) {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation createCategory($name: String!) {\n    createCategory(name: $name) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation createCategory($name: String!) {\n    createCategory(name: $name) {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query getCourses($search: String) {\n    courses(searchString: $search) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query getCourses($search: String) {\n    courses(searchString: $search) {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation createCourse($name: String!) {\n    createCourse(name: $name) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation createCourse($name: String!) {\n    createCourse(name: $name) {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query getCuisines($search: String) {\n    cuisines(searchString: $search) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query getCuisines($search: String) {\n    cuisines(searchString: $search) {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation createCuisine($name: String!) {\n    createCuisine(name: $name) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation createCuisine($name: String!) {\n    createCuisine(name: $name) {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query getRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      name\n      category {\n        id\n        name\n      }\n      cuisine {\n        id\n        name\n      }\n      cookTime\n      course {\n        id\n        name\n      }\n      directions\n      leftoverFridgeLife\n      leftoverFreezerLife\n      marinadeTime\n      totalTime\n      verified\n      notes\n      photos {\n        id\n        isPrimary\n        url\n      }\n      prepTime\n      source\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n      aggregateLabel {\n        id\n        alcohol\n        servings\n        totalCalories\n        carbs\n        fat\n        protein\n        servingSize\n        servingSizeUnit {\n          id\n          name\n          symbol\n        }\n        nutrients {\n          id\n          value\n          perServing\n          nutrient {\n            id\n          }\n        }\n      }\n    }\n  }\n"): (typeof documents)["\n  query getRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      name\n      category {\n        id\n        name\n      }\n      cuisine {\n        id\n        name\n      }\n      cookTime\n      course {\n        id\n        name\n      }\n      directions\n      leftoverFridgeLife\n      leftoverFreezerLife\n      marinadeTime\n      totalTime\n      verified\n      notes\n      photos {\n        id\n        isPrimary\n        url\n      }\n      prepTime\n      source\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n      aggregateLabel {\n        id\n        alcohol\n        servings\n        totalCalories\n        carbs\n        fat\n        protein\n        servingSize\n        servingSizeUnit {\n          id\n          name\n          symbol\n        }\n        nutrients {\n          id\n          value\n          perServing\n          nutrient {\n            id\n          }\n        }\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query getRecipeBaiscInfo($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      name\n      category {\n        id\n        name\n      }\n      cuisine {\n        id\n        name\n      }\n      cookTime\n      course {\n        id\n        name\n      }\n      directions\n      leftoverFridgeLife\n      leftoverFreezerLife\n      marinadeTime\n      totalTime\n      verified\n      notes\n      photos {\n        id\n        isPrimary\n        url\n      }\n      prepTime\n      source\n    }\n  }\n"): (typeof documents)["\n  query getRecipeBaiscInfo($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      name\n      category {\n        id\n        name\n      }\n      cuisine {\n        id\n        name\n      }\n      cookTime\n      course {\n        id\n        name\n      }\n      directions\n      leftoverFridgeLife\n      leftoverFreezerLife\n      marinadeTime\n      totalTime\n      verified\n      notes\n      photos {\n        id\n        isPrimary\n        url\n      }\n      prepTime\n      source\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query getRecipeLabels($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      nutritionLabels {\n        id\n        ingredientGroup {\n          id\n          name\n        }\n        isPrimary\n        servingSize\n        servingSizeUnit {\n          id\n          name\n          symbol\n        }\n        servings\n        servingsUsed\n        nutrients {\n          value\n          nutrient {\n            id\n          }\n        }\n      }\n    }\n  }\n"): (typeof documents)["\n  query getRecipeLabels($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      nutritionLabels {\n        id\n        ingredientGroup {\n          id\n          name\n        }\n        isPrimary\n        servingSize\n        servingSizeUnit {\n          id\n          name\n          symbol\n        }\n        servings\n        servingsUsed\n        nutrients {\n          value\n          nutrient {\n            id\n          }\n        }\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment RecipeSearchFields on Recipe {\n    id\n    name\n    verified\n    ingredients {\n      id\n      sentence\n      quantity\n      unit {\n        id\n        name\n      }\n    }\n    aggregateLabel {\n      id\n      totalCalories\n      protein\n      fat\n      carbs\n      alcohol\n      servings\n    }\n    photos {\n      id\n      isPrimary\n      url\n    }\n  }\n"): (typeof documents)["\n  fragment RecipeSearchFields on Recipe {\n    id\n    name\n    verified\n    ingredients {\n      id\n      sentence\n      quantity\n      unit {\n        id\n        name\n      }\n    }\n    aggregateLabel {\n      id\n      totalCalories\n      protein\n      fat\n      carbs\n      alcohol\n      servings\n    }\n    photos {\n      id\n      isPrimary\n      url\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query searchRecipes($filters: RecipeFilter, $pagination: OffsetPagination!) {\n    recipes(filter: $filters, pagination: $pagination) {\n      itemsRemaining\n      nextOffset\n      recipes {\n        ...RecipeSearchFields\n      }\n    }\n  }\n"): (typeof documents)["\n  query searchRecipes($filters: RecipeFilter, $pagination: OffsetPagination!) {\n    recipes(filter: $filters, pagination: $pagination) {\n      itemsRemaining\n      nextOffset\n      recipes {\n        ...RecipeSearchFields\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment RecipeIngredientFragment on RecipeIngredients {\n    id\n    sentence\n    order\n    quantity\n    baseIngredient {\n      id\n      name\n    }\n    unit {\n      id\n      name\n      symbol\n    }\n    group {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  fragment RecipeIngredientFragment on RecipeIngredients {\n    id\n    sentence\n    order\n    quantity\n    baseIngredient {\n      id\n      name\n    }\n    unit {\n      id\n      name\n      symbol\n    }\n    group {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query getRecipeIngredients($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n    }\n  }\n"): (typeof documents)["\n  query getRecipeIngredients($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation deleteRecipeIngredient($id: String!) {\n    deleteRecipeIngredientGroup(groupId: $id) {\n      success\n    }\n  }\n"): (typeof documents)["\n  mutation deleteRecipeIngredient($id: String!) {\n    deleteRecipeIngredientGroup(groupId: $id) {\n      success\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation createIngredientGroup($name: String!, $recipeId: String!) {\n    createRecipeIngredientGroup(name: $name, recipeId: $recipeId) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation createIngredientGroup($name: String!, $recipeId: String!) {\n    createRecipeIngredientGroup(name: $name, recipeId: $recipeId) {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation deleteIngredientGroup($groupId: String!) {\n    deleteRecipeIngredientGroup(groupId: $groupId) {\n      success\n    }\n  }\n"): (typeof documents)["\n  mutation deleteIngredientGroup($groupId: String!) {\n    deleteRecipeIngredientGroup(groupId: $groupId) {\n      success\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation editIngredientGroup($name: String!, $groupId: String!) {\n    editRecipeIngredientGroup(name: $name, groupId: $groupId) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation editIngredientGroup($name: String!, $groupId: String!) {\n    editRecipeIngredientGroup(name: $name, groupId: $groupId) {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n  query fetchRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n    }\n  }\n"): (typeof documents)["\n  query fetchRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query getCategories {\n    categories {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query getCategories {\n    categories {\n      id\n      name\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query getCourses {\n    courses {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query getCourses {\n    courses {\n      id\n      name\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query getCuisines {\n    cuisines {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query getCuisines {\n    cuisines {\n      id\n      name\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -311,34 +344,6 @@ export function graphql(source: "\n    mutation editReceipt($receiptId: String!,
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query getReceipt($id: String!) {\n    receipt(id: $id) {\n      id\n      imagePath\n      total\n      merchantName\n      matchingStore {\n        id\n        name\n      }\n      date\n      items {\n        ...ReceiptItem\n      }\n      scanned\n    }\n  }\n"): (typeof documents)["\n  query getReceipt($id: String!) {\n    receipt(id: $id) {\n      id\n      imagePath\n      total\n      merchantName\n      matchingStore {\n        id\n        name\n      }\n      date\n      items {\n        ...ReceiptItem\n      }\n      scanned\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  fragment RecipeIngredientFragment on RecipeIngredients {\n    id\n    sentence\n    order\n    quantity\n    baseIngredient {\n      id\n      name\n    }\n    unit {\n      id\n      name\n      symbol\n    }\n    group {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  fragment RecipeIngredientFragment on RecipeIngredients {\n    id\n    sentence\n    order\n    quantity\n    baseIngredient {\n      id\n      name\n    }\n    unit {\n      id\n      name\n      symbol\n    }\n    group {\n      id\n      name\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query getRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      name\n      category {\n        id\n        name\n      }\n      cuisine {\n        id\n        name\n      }\n      cookTime\n      course {\n        id\n        name\n      }\n      directions\n      leftoverFridgeLife\n      leftoverFreezerLife\n      marinadeTime\n      totalTime\n      verified\n      notes\n      photos {\n        id\n        isPrimary\n        url\n      }\n      prepTime\n      source\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n    }\n  }\n"): (typeof documents)["\n  query getRecipe($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      name\n      category {\n        id\n        name\n      }\n      cuisine {\n        id\n        name\n      }\n      cookTime\n      course {\n        id\n        name\n      }\n      directions\n      leftoverFridgeLife\n      leftoverFreezerLife\n      marinadeTime\n      totalTime\n      verified\n      notes\n      photos {\n        id\n        isPrimary\n        url\n      }\n      prepTime\n      source\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query getRecipeBaiscInfo($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      name\n      category {\n        id\n        name\n      }\n      cuisine {\n        id\n        name\n      }\n      cookTime\n      course {\n        id\n        name\n      }\n      directions\n      leftoverFridgeLife\n      leftoverFreezerLife\n      marinadeTime\n      totalTime\n      verified\n      notes\n      photos {\n        id\n        isPrimary\n        url\n      }\n      prepTime\n      source\n    }\n  }\n"): (typeof documents)["\n  query getRecipeBaiscInfo($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      name\n      category {\n        id\n        name\n      }\n      cuisine {\n        id\n        name\n      }\n      cookTime\n      course {\n        id\n        name\n      }\n      directions\n      leftoverFridgeLife\n      leftoverFreezerLife\n      marinadeTime\n      totalTime\n      verified\n      notes\n      photos {\n        id\n        isPrimary\n        url\n      }\n      prepTime\n      source\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query getRecipeIngredients($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n    }\n  }\n"): (typeof documents)["\n  query getRecipeIngredients($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      ingredients {\n        ...RecipeIngredientFragment\n      }\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query getRecipeLabels($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      nutritionLabels {\n        id\n        ingredientGroup {\n          id\n          name\n        }\n        isPrimary\n        servingSize\n        servingSizeUnit {\n          id\n          name\n          symbol\n        }\n        servings\n        servingsUsed\n        nutrients {\n          value\n          nutrient {\n            id\n          }\n        }\n      }\n    }\n  }\n"): (typeof documents)["\n  query getRecipeLabels($id: String!) {\n    recipe(recipeId: $id) {\n      id\n      nutritionLabels {\n        id\n        ingredientGroup {\n          id\n          name\n        }\n        isPrimary\n        servingSize\n        servingSizeUnit {\n          id\n          name\n          symbol\n        }\n        servings\n        servingsUsed\n        nutrients {\n          value\n          nutrient {\n            id\n          }\n        }\n      }\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  fragment RecipeSearchFields on Recipe {\n    id\n    name\n    verified\n    ingredients {\n      id\n      sentence\n      quantity\n      unit {\n        id\n        name\n      }\n    }\n    aggregateLabel {\n      id\n      totalCalories\n      protein\n      fat\n      carbs\n      alcohol\n      servings\n    }\n    photos {\n      id\n      isPrimary\n      url\n    }\n  }\n"): (typeof documents)["\n  fragment RecipeSearchFields on Recipe {\n    id\n    name\n    verified\n    ingredients {\n      id\n      sentence\n      quantity\n      unit {\n        id\n        name\n      }\n    }\n    aggregateLabel {\n      id\n      totalCalories\n      protein\n      fat\n      carbs\n      alcohol\n      servings\n    }\n    photos {\n      id\n      isPrimary\n      url\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query searchRecipes($filters: RecipeFilter, $pagination: OffsetPagination!) {\n    recipes(filter: $filters, pagination: $pagination) {\n      itemsRemaining\n      nextOffset\n      recipes {\n        ...RecipeSearchFields\n      }\n    }\n  }\n"): (typeof documents)["\n  query searchRecipes($filters: RecipeFilter, $pagination: OffsetPagination!) {\n    recipes(filter: $filters, pagination: $pagination) {\n      itemsRemaining\n      nextOffset\n      recipes {\n        ...RecipeSearchFields\n      }\n    }\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

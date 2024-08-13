@@ -25,23 +25,17 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(function Card(
     <div
       {...additionalProps}
       ref={forwardedRef}
-      className={cn(className, "border rounded overflow-hidden bg-card", {
-        vertical: "w-64",
+      className={cn(className, "border rounded-md overflow-hidden bg-card", {
+        vertical: "w-60",
       })}
     >
-      <div
-        className={cn(
-          "relative overflow-hidden",
-          vertical ? "w-64 h-64" : "w-[5rem] h-[5rem]"
-        )}
-      >
-        {loading ? (
-          <Skeleton className="h-full w-full" />
-        ) : (
-          <CardImage images={image} />
-        )}
-      </div>
-      <div className="p-2 text-left">
+      {loading ? (
+        <Skeleton className="h-full w-full" />
+      ) : (
+        <CardImage images={image} />
+      )}
+
+      <div className={cn("p-2 text-left", { "px-4 py-2.5": vertical })}>
         {loading ? (
           <div>
             <Skeleton className="h-4 w-24 mb-2" />
@@ -63,13 +57,19 @@ function CardImage({ images }: CardImageProps) {
   const showGrid = images.grid && images.images.length > 1;
 
   return (
-    <Image
-      src="/pancakes.jpg"
-      alt="recipe image"
-      fill
-      style={{
-        objectFit: "fill",
-      }}
-    />
+    <div className="overflow-hidden">
+      <Image
+        className="group-hover:scale-105 transition-transform"
+        src="/pancakes.jpg"
+        alt="recipe image"
+        sizes="100vw"
+        style={{
+          width: "100%",
+          height: "auto",
+        }}
+        width={200}
+        height={200}
+      />
+    </div>
   );
 }

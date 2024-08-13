@@ -1,147 +1,300 @@
-import { Fieldset } from "@/components/ui/fieldset";
-import { ImagePicker } from "@/components/ImagePicker";
+"use client";
+import { BasicMultiSelect } from "@/components/BasicMultiSelect";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { TimeNumberInput } from "@/components/ui/time-number-input";
-import { InputWithLabel } from "@/components/ui/InputWithLabel";
-import { CategoryPicker } from "@/components/pickers/CategoryPicker";
-import { CuisinePicker } from "@/components/pickers/CuisinePicker";
-import { CoursePicker } from "@/components/pickers/CoursePicker";
-import { forwardRef, useImperativeHandle, useState } from "react";
-import { GetRecipeQuery } from "@/gql/graphql";
 import {
   EditRecipeProps,
   EditRecipeSubmit,
-} from "@/app/recipes/[id]/edit/page";
-import { useQuery } from "@urql/next";
-import { getRecipeBaiscInfo } from "@/graphql/recipe/queries";
+} from "@/features/recipe/components/edit/RecipeEditor";
+import {
+  GetCategoriesDocument,
+  GetCoursesDocument,
+  GetCuisinesDocument,
+} from "@/gql/graphql";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { forwardRef, useImperativeHandle } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+const BasicItem = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+const recipeInputValidation = z.object({
+  title: z.string(),
+  source: z.string().trim().optional(),
+  prepTime: z.number(),
+  cookTime: z.coerce.number().optional(),
+  marinadeTime: z.coerce.number().optional(),
+  directions: z.string().optional(),
+  notes: z.string().optional(),
+  leftoverFridgeLife: z.coerce.number().int().positive().optional(),
+  leftoverFreezerLife: z.coerce.number().int().positive().optional(),
+  ingredients: z.string().optional(),
+  cuisine: z.array(BasicItem),
+  category: z.array(BasicItem),
+  course: z.array(BasicItem),
+  photos: z.array(BasicItem),
+});
 
 export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
-  function EditIngredients(props, ref) {
-    const [result] = useQuery({
-      query: getRecipeBaiscInfo,
-      variables: { id: props.recipeId },
+  function EditIngredients({ recipe }, ref) {
+    const form = useForm<z.infer<typeof recipeInputValidation>>({
+      resolver: zodResolver(recipeInputValidation),
+      defaultValues: {
+        title: recipe?.name ?? "",
+        source: recipe?.source ?? "",
+        prepTime: recipe?.prepTime ?? undefined,
+        cookTime: recipe?.cookTime ?? undefined,
+        marinadeTime: recipe?.marinadeTime ?? undefined,
+        directions: recipe?.directions ?? undefined,
+        notes: recipe?.notes ?? undefined,
+        leftoverFridgeLife: recipe?.leftoverFridgeLife ?? 0,
+        leftoverFreezerLife: recipe?.leftoverFreezerLife ?? undefined,
+        ingredients: undefined,
+        cuisine: recipe?.cuisine ?? [],
+        category: recipe?.category ?? [],
+        course: recipe?.course ?? [],
+        photos: recipe?.photos ?? [],
+      },
     });
 
     useImperativeHandle(ref, () => ({
       submit(postSubmit) {
-        console.log("child method");
-        postSubmit();
+        form.handleSubmit(
+          (values: z.infer<typeof recipeInputValidation>) => {
+            console.log("Form is valid. Values:", values);
+            postSubmit();
+          },
+          (errors) => {
+            console.log("Form is invalid. Errors:", errors);
+          }
+        )();
       },
     }));
-    const recipe = result.data?.recipe;
-
-    const [fridgeLife, setFridgeLife] = useState<string>();
-    const [freezerLife, setFreezerLife] = useState<string>();
-    const [source, setSource] = useState<string>();
-    const [title, setTitle] = useState<string>();
-
-    const [categoryIds, setCategories] = useState<string[]>([]);
-    const [cuisineIds, setCuisines] = useState<string[]>([]);
-    const [courseIds, setCourses] = useState<string[]>([]);
-    const [prepTime, setPrepTime] = useState<number>(0);
-    const [marinadeTime, setMarinadeTime] = useState<number>(0);
-    const [cookTime, setCookTime] = useState<number>(0);
-    const [totalTime, setTotalTime] = useState<number>(0);
-    const placeholderTotalTime = prepTime + marinadeTime + cookTime;
 
     return (
-      <div className="grid grid-cols-4 gap-8">
-        <div className="col-span-1">
-          <Fieldset name="Photos">
-            <ImagePicker />
-          </Fieldset>
-          <Fieldset name="Ingredients">
-            <Textarea className="min-h-72" />
-          </Fieldset>
-          <Fieldset name="Time">
-            <TimeNumberInput
-              id="prep_time"
-              label="Prep Time"
-              value={prepTime}
-              onUpdate={setPrepTime}
+      <div className="">
+        <Form {...form}>
+          <form className="">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem className="max-w-96">
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Name of Recipe" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-
-            <TimeNumberInput
-              id="marinade_time"
-              label="Marinade/Rest Time"
-              value={marinadeTime}
-              onUpdate={setMarinadeTime}
+            <FormField
+              control={form.control}
+              name="source"
+              render={({ field }) => (
+                <FormItem className="max-w-96">
+                  <FormLabel>Source</FormLabel>
+                  <FormControl>
+                    <Input placeholder="" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-
-            <TimeNumberInput
-              id="cook_time"
-              label="Cook Time"
-              value={cookTime}
-              onUpdate={setCookTime}
-            />
-            <TimeNumberInput
-              id="total_time"
-              label="Total Time"
-              value={placeholderTotalTime}
-              onUpdate={setTotalTime}
-            />
-          </Fieldset>
-          <Fieldset name="Leftover">
-            <InputWithLabel
-              id="fridge_life"
-              label="Fridge Life"
-              placeholder="Days in fridge"
-              type="number"
-              value={fridgeLife}
-              setValue={setFridgeLife}
-              defaultValue={recipe?.leftoverFridgeLife ?? undefined}
-            ></InputWithLabel>
-            <InputWithLabel
-              id="freezer_life"
-              label="Freezer Life"
-              placeholder="Days in freezer"
-              type="number"
-              value={freezerLife}
-              setValue={setFreezerLife}
-              defaultValue={recipe?.leftoverFreezerLife ?? undefined}
-            ></InputWithLabel>
-          </Fieldset>
-        </div>
-        <div className="grid col-span-3 gap-6">
-          <Fieldset name="Basic Info">
-            <InputWithLabel
-              id="name"
-              label="Name"
-              placeholder="e.g., fried chicken"
-              value={title}
-              setValue={setTitle}
-              defaultValue={recipe?.name}
-            />
-            <InputWithLabel
-              id="source"
-              label="Source"
-              placeholder="e.g., website or book"
-              value={source}
-              setValue={setSource}
-              defaultValue={recipe?.source ?? undefined}
-            />
-            <div className="grid grid-cols-3 gap-4">
-              <CategoryPicker
-                selectedItems={categoryIds}
-                setSelectedItems={setCategories}
+            <div className="grid grid-cols-3 gap-6">
+              <FormField
+                control={form.control}
+                name="ingredients"
+                render={({ field }) => (
+                  <FormItem className="row-span-2 flex flex-col gap-2">
+                    <FormLabel>Ingredients</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Ingredient list"
+                        className="resize-none grow"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <CuisinePicker
-                selectedItems={categoryIds}
-                setSelectedItems={setCategories}
+
+              <FormField
+                control={form.control}
+                name="directions"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Directions</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Tell us a little bit about yourself"
+                        className="resize-none min-h-96"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <CoursePicker
-                selectedItems={categoryIds}
-                setSelectedItems={setCategories}
+
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Notes</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Tell us a little bit about yourself"
+                        className="resize-none min-h-72"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-          </Fieldset>
-          <Fieldset name="Directions">
-            <Textarea className="min-h-96" />
-          </Fieldset>
-          <Fieldset name="Notes">
-            <Textarea className="min-h-72" />
-          </Fieldset>
-        </div>
+
+            <FormField
+              control={form.control}
+              name="cuisine"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cuisine</FormLabel>
+                  <FormControl>
+                    <BasicMultiSelect
+                      queryDocument={GetCuisinesDocument}
+                      listKey={"cuisines"}
+                      defaultValue={field.value}
+                      onChange={(value) => {
+                        form.setValue("cuisine", value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cuisine</FormLabel>
+                  <FormControl>
+                    <BasicMultiSelect
+                      queryDocument={GetCategoriesDocument}
+                      listKey={"categories"}
+                      defaultValue={field.value}
+                      onChange={(value) => {
+                        form.setValue("category", value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="course"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Courses</FormLabel>
+                  <FormControl>
+                    <BasicMultiSelect
+                      queryDocument={GetCoursesDocument}
+                      listKey={"courses"}
+                      defaultValue={field.value}
+                      onChange={(value) => {
+                        form.setValue("course", value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="prepTime"
+              render={({ field }) => (
+                <FormItem className="max-w-20">
+                  <FormLabel>Prep Time</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="marinadeTime"
+              render={({ field }) => (
+                <FormItem className="max-w-20">
+                  <FormLabel>Rest Time</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="cookTime"
+              render={({ field }) => (
+                <FormItem className="max-w-20">
+                  <FormLabel>Cook Time</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="leftoverFridgeLife"
+              render={({ field }) => (
+                <FormItem className="max-w-20">
+                  <FormLabel>Fridge Life</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="leftoverFridgeLife"
+              render={({ field }) => (
+                <FormItem className="max-w-20">
+                  <FormLabel>Freezer Life</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
       </div>
     );
   }

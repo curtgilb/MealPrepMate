@@ -242,7 +242,7 @@ export function ReceiptItem({
                     <FormItem className="flex flex-col w-56">
                       <FormLabel>Unit Type</FormLabel>
                       <FormControl>
-                        <UnitPicker
+                        {/* <UnitPicker
                           select={(unit) => {
                             field.onChange(unit);
                           }}
@@ -255,7 +255,7 @@ export function ReceiptItem({
                             field.value ? field.value.name : "Pick a unit"
                           }
                           multiselect={false}
-                        />
+                        /> */}
                       </FormControl>
 
                       <FormMessage />

@@ -58,15 +58,6 @@ const recipe = builder.prismaObject("Recipe", {
   }),
 });
 
-builder.prismaObject("RecipeIngredientGroup", {
-  name: "RecipeIngredientGroup",
-  fields: (t) => ({
-    id: t.exposeString("id"),
-    name: t.exposeString("name"),
-    nutritionLabel: t.relation("nutritionLabel", { nullable: true }),
-  }),
-});
-
 // ============================================ Inputs ==================================
 const recipeInput = builder.inputType("RecipeInput", {
   fields: (t) => ({

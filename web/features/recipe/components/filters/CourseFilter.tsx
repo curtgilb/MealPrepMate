@@ -9,14 +9,6 @@ import {
 } from "@/components/ui/collapsible";
 import { useQuery } from "@urql/next";
 
-const courseQuery = graphql(/* GraphQL */ `
-  query getCourses {
-    courses {
-      id
-      name
-    }
-  }
-`);
 export function CourseFilter() {
   const [result, retry] = useQuery({ query: courseQuery });
   const { data, error, fetching } = result;

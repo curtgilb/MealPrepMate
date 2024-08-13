@@ -83,7 +83,7 @@ export function GenericCombobox<
       // Remove from array
       if (alreadySelected) {
         (onSelect as (value: T[]) => void)(
-          value.filter((item) => item.id === selectedItem.id)
+          value.filter((item) => item.id !== selectedItem.id)
         );
       }
       //   Add to array
@@ -96,6 +96,7 @@ export function GenericCombobox<
       } else {
         (onSelect as (value: T | undefined) => void)(selectedItem);
       }
+      setOpen(false);
     }
   }
 

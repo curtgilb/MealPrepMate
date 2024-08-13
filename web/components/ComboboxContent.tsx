@@ -45,7 +45,10 @@ export function ComboboxContent<T extends { id: string }>({
           {items.map((item: T) => {
             let isSelected = false;
             if (selectedItems && Array.isArray(selectedItems)) {
-              isSelected = selectedItems.find((item) => item.id) !== undefined;
+              isSelected =
+                selectedItems.find(
+                  (selectedItem) => item.id === selectedItem.id
+                ) !== undefined;
             } else {
               isSelected = item.id === selectedItems?.id;
             }

@@ -3,15 +3,6 @@ import { graphql } from "@/gql";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useMutation, useQuery } from "@urql/next";
 
-const categoryQuery = graphql(/* GraphQL */ `
-  query getCategories {
-    categories {
-      id
-      name
-    }
-  }
-`);
-
 interface CategoryFilterProps {
   selectedIds: string[];
   setSelectedIds: (selected: string[]) => void;

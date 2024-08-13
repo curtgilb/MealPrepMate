@@ -2,17 +2,10 @@
 import { graphql } from "@/gql";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useQuery } from "@urql/next";
+import { getCuisinesQuery } from "@/features/recipe/api/Cuisine";
 
-const cuisinesQuery = graphql(/* GraphQL */ `
-  query getCuisines {
-    cuisines {
-      id
-      name
-    }
-  }
-`);
 export function CuisineFilter() {
-  const [result, retry] = useQuery({ query: cuisinesQuery });
+  const [result, retry] = useQuery({ query: getCuisinesQuery });
   return (
     <div>
       {result.data?.cuisines.map((cuisine) => (

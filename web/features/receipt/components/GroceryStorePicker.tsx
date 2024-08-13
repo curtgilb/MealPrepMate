@@ -1,11 +1,11 @@
 "use client";
 
 import { graphql } from "@/gql";
-import { ItemPickerProps } from "./Picker";
+import { ItemPickerProps } from "../../../components/pickers/Picker";
 import { useMutation, useQuery } from "@urql/next";
 import { useState } from "react";
 import { GetGroceryStoresQuery } from "@/gql/graphql";
-import { Picker } from "../picker";
+import { Picker } from "../../../components/picker";
 
 const getGroceryStores = graphql(`
   query getGroceryStores {

@@ -1,4 +1,4 @@
-import { EditIngredientGroupItem } from "@/features/recipe/components/edit/groups/EditIngredientGroupItem";
+import { EditIngredientGroupItem } from "@/features/recipe/components/edit/ingredient_groups/EditIngredientGroupItem";
 import { RecipeIngredientFragmentFragment } from "@/gql/graphql";
 import {
   SortableContext,
@@ -12,7 +12,7 @@ interface IngredientGroupProps {
   index: number;
 }
 
-export function IngredientGroup({
+export function EditIngredientGroup({
   groupId,
   groupName,
   ingredients,

@@ -1,19 +1,16 @@
 "use client";
+
+import { useFragment } from "@/gql";
+import { RecipeIngredientFragmentFragment } from "@/gql/graphql";
+import { DndContext, DragEndEvent, DragOverEvent } from "@dnd-kit/core";
+import { forwardRef, useImperativeHandle, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { RecipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
 import {
   EditRecipeProps,
   EditRecipeSubmit,
-} from "@/app/recipes/[id]/edit/page";
-import { useFragment } from "@/gql";
-import { RecipeIngredientFragmentFragment } from "@/gql/graphql";
-import {
-  getRecipeIngredients,
-  RecipeIngredientFragment,
-} from "@/graphql/recipe/queries";
-import { DndContext, DragEndEvent, DragOverEvent } from "@dnd-kit/core";
-import { useQuery } from "@urql/next";
-import { forwardRef, useImperativeHandle, useRef } from "react";
-
-import { IngredientGroup } from "@/features/recipe/components/edit/groups/EditIngredientGroup";
+} from "@/features/recipe/components/edit/RecipeEditor";
+import { EditIngredientGroup } from "@/features/recipe/components/edit/ingredient_groups/EditIngredientGroup";
 import {
   closestCenter,
   KeyboardSensor,
@@ -28,17 +25,13 @@ export const EditIngredientGroups = forwardRef<
   EditRecipeSubmit,
   EditRecipeProps
 >(function EditIngredientGroups(props, ref) {
-  const [result] = useQuery({
-    query: getRecipeIngredients,
-    variables: { id: props.recipeId },
-  });
-
   const ingredients = useFragment(
     RecipeIngredientFragment,
-    result.data?.recipe.ingredients
+    props.recipe?.ingredients
   );
 
   const groupNames = useRef<{ [key: string]: string }>({});
+
   const [groupedIngredients, setGroupedIngredients] = useState(
     ingredients?.reduce((acc, ingredient) => {
       const groupId = ingredient.group?.id ?? "primary";
@@ -137,28 +130,31 @@ export const EditIngredientGroups = forwardRef<
   }
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragOver={handleDragOver}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="grid grid-cols-4 gap-6">
-        {groupedIngredients &&
-          Object.entries(groupedIngredients).map(
-            ([groupId, ingredients], index) => {
-              return (
-                <IngredientGroup
-                  key={groupId}
-                  groupId={groupId}
-                  groupName={groupNames.current["groupId"]}
-                  ingredients={ingredients}
-                  index={index}
-                />
-              );
-            }
-          )}
-      </div>
-    </DndContext>
+    <div>
+      <Button>Add New Group</Button>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="grid grid-cols-autofit-horizontal gap-6">
+          {groupedIngredients &&
+            Object.entries(groupedIngredients).map(
+              ([groupId, ingredients], index) => {
+                return (
+                  <EditIngredientGroup
+                    key={groupId}
+                    groupId={groupId}
+                    groupName={groupNames.current["groupId"]}
+                    ingredients={ingredients}
+                    index={index}
+                  />
+                );
+              }
+            )}
+        </div>
+      </DndContext>
+    </div>
   );
 });

@@ -7,7 +7,7 @@ import { z } from "zod";
 import { Progress } from "@/components/ui/progress";
 import { useEffect, useMemo, useState } from "react";
 import { useReceiptItems } from "@/hooks/use-receipt-items";
-import { EditReceipt } from "@/components/receipt/edit/ReceiptEdit";
+import { EditReceipt } from "@/features/receipt/components/edit/ReceiptEdit";
 
 interface ReceiptViewProps {
   receipt: GetReceiptQuery["receipt"];

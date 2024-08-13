@@ -31,7 +31,7 @@ export interface FilterChildProp<K extends keyof RecipeSearchFilter> {
   updateFilter: (prop: K, value: RecipeSearchFilter[K]) => void;
 }
 
-export default function RecipeFilter({
+export function RecipeFilter({
   filter,
   setFilter,
   ...divAttributes
@@ -45,7 +45,7 @@ export default function RecipeFilter({
 
   return (
     <div {...divAttributes}>
-      <div className="flex gap-2 my-6">
+      <div className="grid grid-cols-2 gap-2 my-6">
         <Button onClick={() => {}}>
           <Filter className="mr-2 h-4 w-4" />
           Apply

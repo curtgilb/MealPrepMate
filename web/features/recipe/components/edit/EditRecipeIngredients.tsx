@@ -1,32 +1,30 @@
-import {
-  EditRecipeProps,
-  EditRecipeSubmit,
-} from "@/app/recipes/[id]/edit/page";
-import { forwardRef, useImperativeHandle } from "react";
-import {
-  getRecipeIngredients,
-  RecipeIngredientFragment,
-} from "@/graphql/recipe/queries";
+"use client";
+import { forwardRef, useImperativeHandle, useState } from "react";
+
 import { useQuery } from "@urql/next";
 import { useFragment } from "@/gql";
 import { Input } from "@/components/ui/input";
 import { UnitPicker } from "@/components/pickers/UnitPicker";
 import { IngredientPicker } from "@/components/pickers/IngredientPicker";
 import { EditRecipeIngredientItem } from "./EditRecipeIngredientItem";
+import {
+  getRecipeIngredients,
+  RecipeIngredientFragment,
+} from "@/features/recipe/api/RecipeIngredient";
+import {
+  EditRecipeProps,
+  EditRecipeSubmit,
+} from "@/features/recipe/components/edit/RecipeEditor";
+import { Progress } from "@/components/ui/progress";
 
 export const EditRecipeIngredients = forwardRef<
   EditRecipeSubmit,
   EditRecipeProps
 >(function EditIngredients(props, ref) {
-  const [result] = useQuery({
-    query: getRecipeIngredients,
-    variables: { id: props.recipeId },
-  });
-
-  const { data, error, fetching } = result;
+  const [step, setStep] = useState<number>(0);
   const ingredients = useFragment(
     RecipeIngredientFragment,
-    data?.recipe.ingredients
+    props.recipe?.ingredients
   );
   useImperativeHandle(ref, () => ({
     submit(postSubmit) {
@@ -37,10 +35,9 @@ export const EditRecipeIngredients = forwardRef<
 
   return (
     <div>
-      <p>Edit Recipe Ingredients</p>
-      <ol className="flex flex-col gap-8">
+      <Progress value={step / (ingredients?.length ?? step)} />
+      <ol className="flex flex-col gap-6">
         {ingredients?.map((ingredient) => {
-          console.log(ingredient?.unit?.id);
           return (
             <EditRecipeIngredientItem
               key={ingredient.id}

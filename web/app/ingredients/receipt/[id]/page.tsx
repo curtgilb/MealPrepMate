@@ -1,7 +1,8 @@
 "use client";
 import { BreadcrumbPath } from "@/components/generics/Breadcrumb";
-import { ReceiptView } from "@/components/receipt/view/ReceiptView";
+
 import { Card, CardContent } from "@/components/ui/card";
+import { ReceiptView } from "@/features/receipt/components/view/ReceiptView";
 import { receiptQuery } from "@/graphql/receipt/queries";
 import { useQuery } from "@urql/next";
 import Image from "next/image";

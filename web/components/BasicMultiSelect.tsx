@@ -1,36 +1,20 @@
-"use client";
-import { graphql } from "@/gql";
-import { FetchUnitsQuery } from "@/gql/graphql";
-import { useMutation, useQuery } from "@urql/next";
+import { GenericCombobox } from "@/components/GenericCombobox";
+import { TagList } from "@/components/TagList";
 import { useState } from "react";
-import { Picker } from "../picker";
-import { ItemPickerProps } from "./Picker";
+import { AnyVariables, TypedDocumentNode } from "urql";
 
-const getUnitsQuery = graphql(`
-  query fetchUnits {
-    units {
-      id
-      name
-      symbol
-      abbreviations
-    }
-  }
-`);
+interface BasicMultiSelectProps<
+  T extends { id: string; name: string },
+  QType,
+  QVariables extends AnyVariables
+> {
+  queryDocument: TypedDocumentNode<QType, QVariables>;
+  listKey: keyof QType;
+  defaultValue: T[];
+  onChange: (value: T[]) => void;
+}
 
-const createUnitMutation = graphql(`
-  mutation createUnit($unit: CreateUnitInput!) {
-    createUnit(input: $unit) {
-      id
-      name
-      symbol
-      abbreviations
-    }
-  }
-`);
-
-type UnitItem = FetchUnitsQuery["units"][number];
-
-export function UnitSelector<
+export function BasicMultiSelect<
   T extends { id: string; name: string },
   QType,
   QVariables extends AnyVariables

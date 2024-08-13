@@ -27,5 +27,5 @@ import "./schemas/RecipeSchema.js";
 import "./schemas/UserSchema.js";
 import "./schemas/UtilitySchema.js";
 import "./schemas/MacroSchema.js";
-
+import "./schemas/RecipeIngredientGroup.js";
 export const schema = builder.toSchema();
