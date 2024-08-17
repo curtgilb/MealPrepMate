@@ -32,7 +32,6 @@ export function WeekSelect({ week, setWeek, maxWeek }: WeekSelectProps) {
       </SelectTrigger>
       <SelectContent>
         {[...Array(maxWeek)].map((item, index) => {
-          console.log(item);
           return (
             <SelectItem key={index} value={(index + 1).toString()}>
               {`Week ${index + 1}`}

@@ -22,7 +22,7 @@ builder.mutationFields((t) => ({
     },
     resolve: async (query, root, args) => {
       const buffer = Buffer.from(await args.photo.arrayBuffer());
-      return db.photo.uploadPhoto(buffer, args.isPrimary, query);
+      return await db.photo.uploadPhoto(buffer, args.isPrimary, query);
     },
   }),
   addPhotoToRecipe: t.prismaField({

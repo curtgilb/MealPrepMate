@@ -233,8 +233,6 @@ model MeasurementUnit {
   ingredientPrice IngredientPrice[]
   servingSizes    NutritionLabel[]
   aggServingSizes AggregateLabel[]
-  fromUnit        MeasurementConversion[] @relation("FromUnit")
-  toUnit          MeasurementConversion[] @relation("ToUnit")
   recieptItems    ReceiptLine[]
   // @@map("measurement_unit")
 }
@@ -249,7 +247,7 @@ model RecipeIngredientGroup {
   importRecords  ImportItem[]
   // @@map("recipe_ingredient_group")
 
-  @@unique(name: "ingredientGroup", [recipeId, name])
+  // @@unique(name: "ingredientGroup", [recipeId, name])
 }
 
 model Ingredient {
@@ -265,21 +263,11 @@ model Ingredient {
   expirationRule      ExpirationRule?         @relation(fields: [expirationRuleId], references: [id], onDelete: SetNull)
   expirationRuleId    String?
   receiptLines        ReceiptLine[]
-  conversionRatio     MeasurementConversion[]
+
   // @@map("ingredient")
 }
 
-model MeasurementConversion {
-  id              String          @id @default(cuid())
-  fromUnit        MeasurementUnit @relation("FromUnit", fields: [fromUnitId], references: [id])
-  fromUnitId      String
-  toUnit          MeasurementUnit @relation("ToUnit", fields: [toUnitId], references: [id])
-  toUnitId        String
-  conversionRatio Float
-  ingredient      Ingredient?     @relation(fields: [ingredientId], references: [id])
-  ingredientId    String?
-  // @@map("measurement_conversion")
-}
+
 
 model IngredientCategory {
   id          String       @id @default(cuid())

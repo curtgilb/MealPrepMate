@@ -1,16 +1,15 @@
 "use client";
 import { MealPlan } from "@/contexts/MealPlanContext";
 import { Meal } from "@/gql/graphql";
-import { toTitleCase } from "@/utils/utils";
-import { useContext } from "react";
-import { Card } from "../../generics/Card";
-import { AddServingDialog } from "../AddServingDialog";
 import { useNutrientSum } from "@/hooks/use-nutrient-sum";
 import { Nutrients } from "@/hooks/use-recipe-label-lookup";
-import { PlanDay, PlanDayProps } from "./DayInterface";
-import { MealPlanServingCard } from "../ServingCard";
-import { SummedNutrients } from "@/utils/nutrients";
 import { cn } from "@/lib/utils";
+import { SummedNutrients } from "@/utils/nutrients";
+import { toTitleCase } from "@/utils/utils";
+import { useContext } from "react";
+import { AddServingDialog } from "../AddServingDialog";
+import { MealPlanServingCard } from "../ServingCard";
+import { PlanDay, PlanDayProps } from "./DayInterface";
 
 export const courses: Meal[] = [
   Meal.Breakfast,

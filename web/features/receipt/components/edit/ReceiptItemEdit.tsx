@@ -147,7 +147,6 @@ export function ReceiptItem({
         router.push("/ingredients");
       }
     });
-    console.log(values);
   }
 
   return (

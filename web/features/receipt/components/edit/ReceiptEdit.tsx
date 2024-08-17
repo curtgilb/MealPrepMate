@@ -31,9 +31,7 @@ export function EditReceipt({ receipt }: GetReceiptQuery) {
     },
   });
 
-  function updateReceipt(values: z.infer<typeof receiptInputSchema>) {
-    console.log(values);
-  }
+  function updateReceipt(values: z.infer<typeof receiptInputSchema>) {}
 
   return (
     <Form {...form}>
@@ -74,7 +72,6 @@ export function EditReceipt({ receipt }: GetReceiptQuery) {
                 <DatePicker
                   date={field.value}
                   onChange={(newDate) => {
-                    console.log(newDate);
                     field.onChange(newDate);
                   }}
                 />

@@ -24,7 +24,6 @@ export function NutritionDay({
     allServingsForDay,
     mealPlan?.labels ?? new Map<string, Nutrients>()
   );
-  console.log(mealPlan?.labels);
 
   return (
     <PlanDay displayNumber={displayNumber}>

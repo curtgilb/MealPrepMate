@@ -1,27 +1,28 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { EditRecipeInfo } from "@/features/recipe/components/edit/EditRecipeInfo";
-import { EditRecipeIngredients } from "@/features/recipe/components/edit/EditRecipeIngredients";
-import { EditRecipeNutritionLabels } from "@/features/recipe/components/edit/EditRecipeNutritionLabels";
+import { getRecipeQuery } from "@/features/recipe/api/Recipe";
+import { EditRecipeInfo } from "@/features/recipe/components/edit/info/EditRecipeInfo";
 import { EditIngredientGroups } from "@/features/recipe/components/edit/ingredient_groups/EditIngredientGroups";
-import { GetRecipeQuery } from "@/gql/graphql";
+import { EditRecipeIngredients } from "@/features/recipe/components/edit/ingredients/EditRecipeIngredients";
+import { EditRecipeNutritionLabels } from "@/features/recipe/components/edit/labels/EditRecipeNutritionLabels";
+import { RecipeFieldsFragment } from "@/gql/graphql";
 
 import { useRouter } from "next/navigation";
 import {
   ForwardRefExoticComponent,
   PropsWithoutRef,
   RefAttributes,
-  useCallback,
   useRef,
   useState,
 } from "react";
+import { useQuery } from "urql";
 
 interface RecipeEditorProps {
-  recipe: GetRecipeQuery["recipe"] | undefined;
+  recipe: RecipeFieldsFragment | undefined;
 }
 
 export interface EditRecipeProps {
-  recipe: GetRecipeQuery["recipe"] | undefined;
+  recipe: RecipeFieldsFragment | undefined;
 }
 
 export interface EditRecipeSubmit {
@@ -48,12 +49,18 @@ export function RecipeEditor({ recipe }: RecipeEditorProps) {
   const { Component, name } = editComponents[editStage];
   const child = useRef<EditRecipeSubmit>(null);
   const isLastStep = editStage === Object.keys(editComponents).length;
+  const [result, executeQuery] = useQuery({
+    query: getRecipeQuery,
+    variables: { id: recipe?.id ?? "" },
+    pause: true,
+  });
 
   function advanceStep() {
     if (child.current?.submit) {
       child.current.submit(() => {
         if (editStage < Object.keys(editComponents).length) {
           setEditStage(editStage + 1);
+          executeQuery();
         } else if (isLastStep) {
           // Redirect to recipe page
           router.push(`/recipes/${recipe?.id}`);
@@ -65,9 +72,8 @@ export function RecipeEditor({ recipe }: RecipeEditorProps) {
   return (
     <div>
       <p className="text-2xl font-bold mb-8">{`${editStage}. ${name}`}</p>
-
       <Component ref={child} recipe={recipe}></Component>
-      <div className="flex justify-end gap-4">
+      <div className="flex justify-end gap-4 mt-6">
         <Button
           variant="outline"
           onClick={() => {

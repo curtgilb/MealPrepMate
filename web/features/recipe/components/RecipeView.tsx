@@ -1,17 +1,16 @@
 import SingleColumnCentered from "@/components/layouts/single-column-centered";
 import { Button } from "@/components/ui/button";
-import { Nutritionlabel } from "@/features/recipe/components/nutrition_label/NutritionLabelDisplay";
 import { RecipeNutritionlabel } from "@/features/recipe/components/nutrition_label/RecipeNutritionLabel";
 import RecipeIngredients from "@/features/recipe/components/view/RecipeIngredients";
 import { RecipeTagList } from "@/features/recipe/components/view/RecipeTagList";
 import { RecipeTimes } from "@/features/recipe/components/view/RecipeTimes";
-import { GetRecipeQuery } from "@/gql/graphql";
+import { RecipeFieldsFragment } from "@/gql/graphql";
 import { Pencil } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 interface RecipeViewProps {
-  recipe: GetRecipeQuery["recipe"];
+  recipe: RecipeFieldsFragment;
 }
 
 export function RecipeView({ recipe }: RecipeViewProps) {

@@ -26,7 +26,6 @@ export function PriceHistoryGroup({ prices }: PriceHistoryGroupProps) {
   const [timeFrame, setTimeframe] = useState<Timeframe>(Timeframe.YEAR3);
   const [unitType, setUnitType] = useState<UnitType>(UnitType.Weight);
   const groupedPrices = usePriceHistory(timeFrame, unitType, prices);
-  console.log(groupedPrices);
 
   return (
     <Card>

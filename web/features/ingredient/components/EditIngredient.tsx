@@ -60,9 +60,7 @@ export function EditIngredient({ ingredient }: EditIngredientProps) {
     control: form.control,
   });
 
-  function onSubmit(values: z.infer<typeof IngredientValidation>) {
-    console.log(values);
-  }
+  function onSubmit(values: z.infer<typeof IngredientValidation>) {}
   return (
     <>
       <h2 className="text-4xl font-black mb-8">

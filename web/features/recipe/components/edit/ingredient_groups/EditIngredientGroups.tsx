@@ -1,7 +1,10 @@
 "use client";
 
 import { useFragment } from "@/gql";
-import { RecipeIngredientFragmentFragment } from "@/gql/graphql";
+import {
+  EditIngredientGroupMutation,
+  RecipeIngredientFieldsFragment,
+} from "@/gql/graphql";
 import { DndContext, DragEndEvent, DragOverEvent } from "@dnd-kit/core";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -20,6 +23,10 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useState } from "react";
+import { useMutation } from "@urql/next";
+import { createRecipeIngredientGroupMutation } from "@/features/recipe/api/RecipeIngredientGroups";
+
+export const DEFAULT_KEY = "$#Default#%";
 
 export const EditIngredientGroups = forwardRef<
   EditRecipeSubmit,
@@ -30,22 +37,25 @@ export const EditIngredientGroups = forwardRef<
     props.recipe?.ingredients
   );
 
+  const [result, addGroup] = useMutation(createRecipeIngredientGroupMutation);
+
   const groupNames = useRef<{ [key: string]: string }>({});
 
   const [groupedIngredients, setGroupedIngredients] = useState(
     ingredients?.reduce((acc, ingredient) => {
-      const groupId = ingredient.group?.id ?? "primary";
+      const groupId = ingredient.group?.id ?? DEFAULT_KEY;
       if (!Object.hasOwn(acc, groupId)) {
-        acc[groupId] = [];
+        acc[groupId] = { name: ingredient.group?.name, ingredients: [] };
       }
-      acc[groupId].push(ingredient);
+      acc[groupId].ingredients.push(ingredient);
 
       if (ingredient.group?.id) {
         groupNames.current[ingredient.group.id] = ingredient.group.name;
       }
       return acc;
-    }, {} as { [key: string]: RecipeIngredientFragmentFragment[] })
+    }, {} as { [key: string]: { name: string | undefined | null; ingredients: RecipeIngredientFieldsFragment[] } })
   );
+  console.log(groupedIngredients);
 
   useImperativeHandle(ref, () => ({
     submit(postSubmit) {
@@ -76,6 +86,7 @@ export const EditIngredientGroups = forwardRef<
   function handleDragOver(event: DragOverEvent) {
     if (groupedIngredients) {
       const { over, active } = event;
+      console.log(event);
       const { containerId: activeContainerId, index: activeIndex } =
         active.data.current?.sortable;
       const { containerId: overContainerId, index: overIndex } =
@@ -83,23 +94,30 @@ export const EditIngredientGroups = forwardRef<
 
       if (active && over && activeContainerId !== overContainerId) {
         // Remove the old item and place it in the new one
+        console.log(groupedIngredients);
         setGroupedIngredients((prev) => {
           if (!prev) return undefined;
           return {
             ...prev,
-            [activeContainerId]: [
-              ...prev[activeContainerId].filter(
-                (item) => item.id !== active.id
-              ),
-            ],
-            [overContainerId]: [
-              ...prev[overContainerId].slice(0, overIndex),
-              groupedIngredients[activeContainerId][activeIndex],
-              ...prev[overContainerId].slice(
-                overIndex,
-                prev[overContainerId].length
-              ),
-            ],
+            [activeContainerId]: {
+              name: prev[activeContainerId].name,
+              ingredients: [
+                ...prev[activeContainerId].ingredients.filter(
+                  (item) => item.id !== active.id
+                ),
+              ],
+            },
+            [overContainerId]: {
+              name: prev[overContainerId].name,
+              ingredients: [
+                ...prev[overContainerId].ingredients.slice(0, overIndex),
+                groupedIngredients[activeContainerId].ingredients[activeIndex],
+                ...prev[overContainerId].ingredients.slice(
+                  overIndex,
+                  prev[overContainerId].ingredients.length
+                ),
+              ],
+            },
           };
         });
       }
@@ -119,19 +137,99 @@ export const EditIngredientGroups = forwardRef<
       activeContainerId === overContainerId &&
       activeIndex !== overIndex
     ) {
-      const items = groupedIngredients[activeContainerId];
+      const items = groupedIngredients[activeContainerId].ingredients;
       const newItems = arrayMove(items, activeIndex, overIndex);
       setGroupedIngredients(() => {
         const newList = { ...groupedIngredients };
-        newList[activeContainerId] = newItems;
+        newList[activeContainerId].ingredients = newItems;
         return newList;
+      });
+    }
+  }
+
+  function handleGroupAdd() {
+    if (props.recipe?.id) {
+      addGroup({ name: "New Group", recipeId: props.recipe.id }).then(
+        (result) => {
+          if (result.data) {
+            const { id, name } = result.data.createRecipeIngredientGroup;
+            setGroupedIngredients((prev) => ({
+              ...prev,
+              [id]: { name, ingredients: [] },
+            }));
+          }
+        }
+      );
+    }
+  }
+
+  function onItemEdit(ingredient: RecipeIngredientFieldsFragment) {
+    console.log("Parent on edit");
+    const groupId = ingredient.group?.id ?? DEFAULT_KEY;
+    if (groupedIngredients) {
+      setGroupedIngredients({
+        ...groupedIngredients,
+        [groupId]: {
+          name: groupedIngredients[groupId].name,
+          ingredients: groupedIngredients[groupId].ingredients.map(
+            (oldIngredient) => {
+              if (ingredient.id === oldIngredient.id) {
+                return ingredient;
+              }
+              return oldIngredient;
+            }
+          ),
+        },
+      });
+    }
+  }
+  function onItemDelete(groupId: string, id: string) {
+    if (groupedIngredients) {
+      setGroupedIngredients({
+        ...groupedIngredients,
+        [groupId]: {
+          name: groupedIngredients[groupId].name,
+          ingredients: groupedIngredients[groupId].ingredients.filter(
+            (ingredient) => ingredient.id !== id
+          ),
+        },
+      });
+    }
+  }
+
+  function onGroupEdit(
+    result: EditIngredientGroupMutation["editRecipeIngredientGroup"]
+  ) {
+    const groupId = result.id;
+    if (groupedIngredients) {
+      setGroupedIngredients({
+        ...groupedIngredients,
+        [groupId]: {
+          name: result.name,
+          ingredients: groupedIngredients[groupId].ingredients,
+        },
+      });
+    }
+  }
+
+  function onGroupDelete(groupId: string) {
+    if (groupedIngredients) {
+      const { [groupId]: _, ...rest } = groupedIngredients;
+      const orphanedIngredients = groupedIngredients[groupId].ingredients;
+      const { name, ingredients } = groupedIngredients[DEFAULT_KEY];
+      setGroupedIngredients({
+        ...rest,
+        [DEFAULT_KEY]: {
+          name,
+          ingredients: [...ingredients, ...orphanedIngredients],
+        },
       });
     }
   }
 
   return (
     <div>
-      <Button>Add New Group</Button>
+      <Button onClick={handleGroupAdd}>Add New Group</Button>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -141,14 +239,18 @@ export const EditIngredientGroups = forwardRef<
         <div className="grid grid-cols-autofit-horizontal gap-6">
           {groupedIngredients &&
             Object.entries(groupedIngredients).map(
-              ([groupId, ingredients], index) => {
+              ([groupId, group], index) => {
                 return (
                   <EditIngredientGroup
                     key={groupId}
                     groupId={groupId}
-                    groupName={groupNames.current["groupId"]}
-                    ingredients={ingredients}
+                    groupName={group.name}
+                    ingredients={group.ingredients}
                     index={index}
+                    onItemEdit={onItemEdit}
+                    onItemDelete={onItemDelete}
+                    onGroupEdit={onGroupEdit}
+                    onGroupDelete={onGroupDelete}
                   />
                 );
               }

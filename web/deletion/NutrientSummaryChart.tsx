@@ -49,7 +49,6 @@ export function NutrientWeekSummary({
   });
 
   const target = nutrientInfo?.customTarget ?? nutrientInfo?.dri?.value;
-  console.log("target", target);
 
   const options = {
     responsive: true,

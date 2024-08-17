@@ -1,6 +1,5 @@
 import { GenericCombobox } from "@/components/GenericCombobox";
 import { TagList } from "@/components/TagList";
-import { useState } from "react";
 import { AnyVariables, TypedDocumentNode } from "urql";
 
 interface BasicMultiSelectProps<
@@ -10,8 +9,9 @@ interface BasicMultiSelectProps<
 > {
   queryDocument: TypedDocumentNode<QType, QVariables>;
   listKey: keyof QType;
-  defaultValue: T[];
+  value: T[];
   onChange: (value: T[]) => void;
+  placeholder: string;
 }
 
 export function BasicMultiSelect<
@@ -21,30 +21,27 @@ export function BasicMultiSelect<
 >({
   queryDocument,
   listKey,
-  defaultValue,
+  value,
+  placeholder,
   onChange,
 }: BasicMultiSelectProps<T, QType, QVariables>) {
-  const [selected, setSelected] = useState<T[]>(defaultValue);
   return (
-    <div>
+    <div className="space-y-2">
       <GenericCombobox<T, QType, QVariables, true, true>
         queryDocument={queryDocument}
         listKey={listKey}
         formatLabel={(item) => item.name}
-        placeholder="Select..."
-        createNewOption={(newValue) => {
-          console.log(newValue);
-        }}
+        placeholder={placeholder}
+        createNewOption={(newValue) => {}}
         autoFilter
         multiSelect={true}
         onSelect={(rule) => {
-          setSelected(rule);
           onChange(rule);
         }}
-        value={selected}
+        value={value}
       />
 
-      <TagList list={selected} />
+      <TagList variant="light" list={value} />
     </div>
   );
 }

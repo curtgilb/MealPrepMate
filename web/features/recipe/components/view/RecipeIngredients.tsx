@@ -1,12 +1,10 @@
 import { RecipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
+import { useGroupedIngredients } from "@/features/recipe/hooks/useGroupedIngredients";
 import { FragmentType, useFragment } from "@/gql/fragment-masking";
-import { RecipeIngredientFragmentFragment } from "@/gql/graphql";
+import { RecipeIngredientFieldsFragment } from "@/gql/graphql";
+
 import { cn } from "@/lib/utils";
 import { HTMLAttributes } from "react";
-
-type GroupedIngredient = {
-  [key: string]: { id: string; lines: RecipeIngredientFragmentFragment[] };
-};
 
 interface RecipeIngredientsProps extends HTMLAttributes<HTMLDivElement> {
   ingredients: FragmentType<typeof RecipeIngredientFragment>[];
@@ -18,16 +16,7 @@ export default function RecipeIngredients({
   ...rest
 }: RecipeIngredientsProps) {
   const ingredientList = useFragment(RecipeIngredientFragment, ingredients);
-  const groupedIngredients = ingredientList.reduce((agg, line) => {
-    const id = line.group?.id ?? "";
-    const group = line.group?.name ?? "";
-    if (!(group in agg)) {
-      agg[group] = { id, lines: [] };
-    }
-    agg[group].lines.push(line);
-
-    return agg;
-  }, {} as GroupedIngredient);
+  const groupedIngredients = useGroupedIngredients(ingredientList);
 
   return (
     <div className={cn("flex flex-col gap-8 w-60", className)} {...rest}>

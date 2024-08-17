@@ -1,76 +1,62 @@
 "use client";
-import { graphql } from "@/gql";
-import { useMutation, useQuery } from "@urql/next";
-import { Dispatch, SetStateAction, useState } from "react";
-import { Label } from "../ui/label";
-import { Picker } from "../picker";
-import { Separator } from "../ui/separator";
-import { FetchIngredientsListQuery } from "@/gql/graphql";
-import { ItemPickerProps } from "./Picker";
+import { GenericCombobox } from "@/components/OriginalGenericBox";
+import {
+  FetchIngredientsListDocument,
+  FetchIngredientsListQuery,
+  FetchIngredientsListQueryVariables,
+  FetchUnitsDocument,
+  FetchUnitsQuery,
+  FetchUnitsQueryVariables,
+} from "@/gql/graphql";
+import { useState } from "react";
 
-const getIngredientList = graphql(`
-  query fetchIngredientsList($search: String, $pagination: OffsetPagination!) {
-    ingredients(search: $search, pagination: $pagination) {
-      ingredients {
-        id
-        name
-      }
-      itemsRemaining
-      nextOffset
-    }
-  }
-`);
+export type PickerIngredient =
+  FetchIngredientsListQuery["ingredients"]["ingredients"][number];
 
-const createIngredientMutation = graphql(`
-  mutation createIngredientInList($ingredient: CreateIngredientInput!) {
-    createIngredient(ingredient: $ingredient) {
-      id
-      name
-    }
-  }
-`);
+type IngredientPickerProps<MultiSelect extends boolean> = {
+  multiSelect: MultiSelect;
+} & (MultiSelect extends true
+  ? { onChange: (value: PickerIngredient[]) => void; value: PickerIngredient[] }
+  : {
+      onChange: (value: PickerIngredient | null) => void;
+      value: PickerIngredient | null;
+    });
 
-export type IngredientItem =
-  FetchIngredientsListQuery["ingredients"]["ingredients"][0];
-
-export function IngredientPicker({
-  select,
-  deselect,
-  selectedIds,
-  placeholder,
-  create,
-  multiselect,
-}: ItemPickerProps<IngredientItem>) {
-  const [search, setSearch] = useState<string>();
-  const [result] = useQuery({
-    query: getIngredientList,
-    variables: { search: search, pagination: { offset: 0, take: 10 } },
-  });
-
-  const [unitMutation, createIngredient] = useMutation(
-    createIngredientMutation
-  );
-  const { data, fetching, error } = result;
-
+export function IngredientPicker<MultiSelect extends boolean>({
+  multiSelect,
+  onChange,
+  value,
+}: IngredientPickerProps<MultiSelect>) {
   return (
-    <Picker<IngredientItem>
-      options={data?.ingredients.ingredients ?? []}
-      id="id"
-      label="name"
+    <GenericCombobox<
+      PickerIngredient,
+      FetchIngredientsListQuery,
+      FetchIngredientsListQueryVariables,
+      false,
+      false
+    >
+      queryDocument={FetchIngredientsListDocument}
+      listKey="ingredients.ingredients"
+      formatLabel={(item) => item.name}
+      placeholder={"Select ingredient..."}
+      createNewOption={(newValue) => {}}
       autoFilter={false}
-      onSearchUpdate={setSearch}
-      placeholder={placeholder}
-      fetching={fetching}
-      multiselect={multiselect}
-      selectedIds={selectedIds}
-      select={select}
-      deselect={deselect}
-      createItem={
-        create
-          ? (name) => {
-              createIngredient({ ingredient: { name } });
-            }
-          : undefined
+      multiSelect={false}
+      onSelect={(ingredient) => {
+        if (multiSelect) {
+          (onChange as (value: PickerIngredient[]) => void)(
+            ingredient as unknown as PickerIngredient[]
+          );
+        } else {
+          (onChange as (value: PickerIngredient | null) => void)(
+            ingredient as PickerIngredient | null
+          );
+        }
+      }}
+      value={
+        multiSelect
+          ? (value as PickerIngredient[])
+          : (value as PickerIngredient | null)
       }
     />
   );

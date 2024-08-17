@@ -1,7 +1,5 @@
 "use client";
-import { graphql } from "@/gql";
-import { useMutation } from "urql";
-import { Card } from "@/components/ui/card";
+import { uploadPhotoMutation } from "@/api/Photo";
 import {
   Form,
   FormControl,
@@ -11,42 +9,32 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
 import { Photo } from "@/gql/graphql";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useMutation } from "urql";
+import { z } from "zod";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 const formSchema = z.object({
-  filePath: z.string().url(),
+  filePath: z.instanceof(File, { message: "Please upload a file" }),
 });
-
-const uploadPhoto = graphql(`
-  mutation uploadPhoto($file: File!) {
-    uploadPhoto(photo: $file, isPrimary: false) {
-      id
-      url
-      isPrimary
-    }
-  }
-`);
 
 interface ImageUploadFormProps {
   onUploadedPhoto: (photo: Photo) => void;
 }
 
 export function ImageUploadForm({ onUploadedPhoto }: ImageUploadFormProps) {
-  const [result, upload] = useMutation(uploadPhoto);
+  const [result, upload] = useMutation(uploadPhotoMutation);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { filePath: "" },
+    defaultValues: { filePath: undefined },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     upload({ file: values.filePath }).then((result) => {
+      console.log("mutation response", result);
       const photo = result.data?.uploadPhoto;
       if (photo) {
         onUploadedPhoto(photo);
@@ -56,28 +44,33 @@ export function ImageUploadForm({ onUploadedPhoto }: ImageUploadFormProps) {
 
   return (
     <div>
-      {result.error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{result.error.message}</AlertDescription>
-        </Alert>
-      )}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <FormField
             control={form.control}
             name="filePath"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>File</FormLabel>
-                <FormControl>
-                  <Input type="file" {...field} />
-                </FormControl>
-                <FormDescription>.jpg, .png, or .tif image</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const { value, ...rest } = field;
+              return (
+                <FormItem>
+                  <FormLabel>File</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...rest}
+                      type="file"
+                      onChange={(e) => {
+                        const newFile = e.target.files;
+                        if (newFile && newFile[0]) {
+                          form.setValue("filePath", newFile[0]);
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormDescription>.jpg, .png, or .tif image</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
           <Button type="submit">Submit</Button>
         </form>

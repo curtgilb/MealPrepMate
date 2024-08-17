@@ -25,7 +25,9 @@ export const photoExtension = Prisma.defineExtension((client) => {
             where: { hash: hashValue },
             ...query,
           });
-          const existingPath = record?.path;
+          if (record) {
+            return record;
+          }
 
           // If not, save to storage. Then return photo record.
           const { bucketPath } = await uploadFileToBucket(
@@ -35,7 +37,7 @@ export const photoExtension = Prisma.defineExtension((client) => {
           );
           return await client.photo.create({
             data: {
-              path: existingPath ? existingPath : bucketPath,
+              path: bucketPath,
               isPrimary,
               hash: hashValue,
             },

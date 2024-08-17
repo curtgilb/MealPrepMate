@@ -38,6 +38,19 @@ const getIngredientQuery = graphql(`
   }
 `);
 
+const getIngredientsQuery = graphql(`
+  query fetchIngredientsList($search: String, $pagination: OffsetPagination!) {
+    ingredients(search: $search, pagination: $pagination) {
+      ingredients {
+        id
+        name
+      }
+      itemsRemaining
+      nextOffset
+    }
+  }
+`);
+
 const editIngredientMutation = graphql(
   `
     mutation EditIngredient($input: EditIngredientInput!) {
@@ -52,6 +65,7 @@ const createIngredientMutation = graphql(`
   mutation CreateIngredient($input: CreateIngredientInput!) {
     createIngredient(ingredient: $input) {
       id
+      name
     }
   }
 `);
@@ -70,4 +84,5 @@ export {
   editIngredientMutation,
   createIngredientMutation,
   deleteIngredientMutation,
+  getIngredientsQuery,
 };

@@ -16,9 +16,9 @@ export default function SingleColumnCentered({
   return (
     <div
       className={cn(
-        "max-w-screen-2xl w-full px-8 pt-6 mx-auto pb-8",
+        "max-w-screen-2xl w-full px-8 py-6 mx-auto",
         {
-          "h-main-full pb-0 overflow-hidden": locked,
+          "h-main-full overflow-hidden": locked,
         },
         className
       )}

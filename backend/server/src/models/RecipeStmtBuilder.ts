@@ -71,7 +71,7 @@ function createConnectManyStmt(
   ids: string[] | undefined | null,
   update: boolean
 ): ConnectManyStmt | undefined {
-  if (!ids || ids.length > 0) return undefined;
+  if (!ids || ids.length === 0) return undefined;
   const idObjs = ids.map((id) => ({ id: id }));
   if (update) {
     return { connect: idObjs };

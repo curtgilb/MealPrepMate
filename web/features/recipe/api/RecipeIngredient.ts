@@ -1,7 +1,7 @@
 import { graphql } from "@/gql";
 
 const RecipeIngredientFragment = graphql(`
-  fragment RecipeIngredientFragment on RecipeIngredients {
+  fragment RecipeIngredientFields on RecipeIngredients {
     id
     sentence
     order
@@ -27,15 +27,31 @@ const getRecipeIngredients = graphql(`
     recipe(recipeId: $id) {
       id
       ingredients {
-        ...RecipeIngredientFragment
+        ...RecipeIngredientFields
       }
+    }
+  }
+`);
+
+const createRecipeIngredientMutation = graphql(`
+  mutation createRecipeIngredient($recipeId: String!, $txt: String!) {
+    addRecipeIngredient(recipeId: $recipeId, ingredientTxt: $txt) {
+      ...RecipeIngredientFields
+    }
+  }
+`);
+
+const editRecipeIngredientMutation = graphql(`
+  mutation editRecipeIngredient($ingredients: [RecipeIngredientInput!]!) {
+    editRecipeIngredients(ingredients: $ingredients) {
+      ...RecipeIngredientFields
     }
   }
 `);
 
 const deleteRecipeIngredientMutation = graphql(`
   mutation deleteRecipeIngredient($id: String!) {
-    deleteRecipeIngredientGroup(groupId: $id) {
+    deleteRecipeIngredients(ingredientId: $id) {
       success
     }
   }
@@ -45,4 +61,6 @@ export {
   RecipeIngredientFragment,
   getRecipeIngredients,
   deleteRecipeIngredientMutation,
+  createRecipeIngredientMutation,
+  editRecipeIngredientMutation,
 };

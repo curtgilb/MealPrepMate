@@ -36,7 +36,6 @@ export default function NutritionSummary() {
     }
     return `${label} ${index + 1}`;
   });
-  console.log("average", average);
 
   return (
     <div>

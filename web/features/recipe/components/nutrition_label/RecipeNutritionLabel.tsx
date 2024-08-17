@@ -1,29 +1,25 @@
 "use client";
-import { NutrientItemProps, NutritionList } from "@/components/NutritionList";
-import { GetRecipeQuery, NutrientFieldsFragment } from "@/gql/graphql";
-import { HTMLAttributes, useMemo, useState } from "react";
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
-import { toTitleCase } from "@/utils/utils";
 import { EnumSelect } from "@/components/EnumSelect";
-import { NutritionDisplayMode } from "@/hooks/use-nutrients";
+import { NutrientItemProps, NutritionList } from "@/components/NutritionList";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  NutritionLabelIndentation,
+  ServingSize,
+  TableGroup,
+} from "@/features/recipe/components/nutrition_label/NutritionLabelTable";
+import { NutrientFieldsFragment, RecipeFieldsFragment } from "@/gql/graphql";
+import { NutritionDisplayMode } from "@/hooks/use-nutrients";
+import { cn } from "@/lib/utils";
+import { HTMLAttributes, useMemo, useState } from "react";
 
-type NutritionValues = GetRecipeQuery["recipe"]["aggregateLabel"];
+type NutritionValues = RecipeFieldsFragment["aggregateLabel"];
 type NutrientValue = NonNullable<NutritionValues>["nutrients"];
-
-export enum ServingSize {
-  Serving = "One Serving",
-  Recipe = "Whole Recipe",
-}
 
 interface NutritionLabelProps extends HTMLAttributes<HTMLDivElement> {
   label: NutritionValues;
@@ -49,39 +45,13 @@ function getValueLabel(
   };
 }
 
-const indentation: { [key: number]: string } = {
-  1: "pl-2",
-  2: "pl-6",
-  3: "pl-8",
-  4: "pl-12",
-};
-
-function Group({
-  name,
-  children,
-}: {
-  name: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <>
-      <TableRow>
-        <TableCell className="text-lg font-bold" colSpan={3}>
-          {toTitleCase(name)}
-        </TableCell>
-      </TableRow>
-      {children}
-    </>
-  );
-}
-
 function Nutrient({ nutrient, depth, value }: NutrientItemProps) {
   const { labelStr, percentage, target } = getValueLabel(nutrient, value);
-  console.log(depth);
+
   return (
     <TableRow key={nutrient.id} className="text-sm">
       <TableCell>
-        <p className={indentation[depth]}>{nutrient.name}</p>
+        <p className={NutritionLabelIndentation[depth]}>{nutrient.name}</p>
       </TableCell>
       <TableCell>
         {value
@@ -145,7 +115,7 @@ export function RecipeNutritionlabel({
         </TableHeader>
         <TableBody>
           <NutritionList
-            group={Group}
+            group={TableGroup}
             mode={mode}
             nutrient={Nutrient}
             values={values}

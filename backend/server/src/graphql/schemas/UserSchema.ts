@@ -37,12 +37,6 @@ const profileInput = builder.inputType("ProfileInput", {
     birthYear: t.int({ required: true }),
     specialCondition: t.field({ type: SpecialCondition, required: true }),
     activityLevel: t.float({ required: true }),
-    targetProteinPecentage: t.float({ required: false }),
-    targetProteinGrams: t.float({ required: false }),
-    targetFatPercentage: t.float({ required: false }),
-    targetFatGrams: t.float({ required: false }),
-    targetCarbsPercentage: t.float({ required: false }),
-    targetCarbsGrams: t.float({ required: false }),
   }),
 });
 
@@ -78,12 +72,6 @@ builder.mutationFields((t) => ({
           yearBorn: args.profile.birthYear,
           specialCondition: args.profile.specialCondition,
           activityLevel: args.profile.activityLevel,
-          targetCarbsGrams: args.profile.targetCarbsGrams,
-          targetCarbsPercentage: args.profile.targetCarbsPercentage,
-          targetFatGrams: args.profile.targetFatGrams,
-          targetFatPercentage: args.profile.targetFatPercentage,
-          targetProteinGrams: args.profile.targetProteinGrams,
-          targetProteinPercentage: args.profile.targetProteinGrams,
         },
         ...query,
       });

@@ -1,66 +1,39 @@
 "use client";
-import { graphql } from "@/gql";
-import { FetchUnitsQuery } from "@/gql/graphql";
-import { useMutation, useQuery } from "@urql/next";
+import { GenericCombobox } from "@/components/OriginalGenericBox";
+import {
+  FetchUnitsDocument,
+  FetchUnitsQuery,
+  FetchUnitsQueryVariables,
+} from "@/gql/graphql";
 import { useState } from "react";
-import { Picker } from "../picker";
-import { ItemPickerProps } from "./Picker";
 
-const getUnitsQuery = graphql(`
-  query fetchUnits {
-    units {
-      id
-      name
-      symbol
-      abbreviations
-    }
-  }
-`);
+export type PickerUnit = FetchUnitsQuery["units"][number];
 
-const createUnitMutation = graphql(`
-  mutation createUnit($unit: CreateUnitInput!) {
-    createUnit(input: $unit) {
-      id
-      name
-      symbol
-      abbreviations
-    }
-  }
-`);
+interface UnitPickerProps {
+  value: PickerUnit | null;
+  onChange: (unit: PickerUnit | null) => void;
+}
 
-type UnitItem = FetchUnitsQuery["units"][number];
-
-export function UnitSelector<
-  T extends { id: string; name: string },
-  QType,
-  QVariables extends AnyVariables
->({
-  queryDocument,
-  listKey,
-  defaultValue,
-  onChange,
-}: BasicMultiSelectProps<T, QType, QVariables>) {
-  const [selected, setSelected] = useState<T[]>(defaultValue);
+export function UnitPicker({ value, onChange }: UnitPickerProps) {
   return (
-    <div>
-      <GenericCombobox<T, QType, QVariables, true, true>
-        queryDocument={queryDocument}
-        listKey={listKey}
-        formatLabel={(item) => item.name}
-        placeholder="Select..."
-        createNewOption={(newValue) => {
-          console.log(newValue);
-        }}
-        autoFilter
-        multiSelect={true}
-        onSelect={(rule) => {
-          setSelected(rule);
-          onChange(rule);
-        }}
-        value={selected}
-      />
-
-      <TagList list={selected} />
-    </div>
+    <GenericCombobox<
+      PickerUnit,
+      FetchUnitsQuery,
+      FetchUnitsQueryVariables,
+      false,
+      true
+    >
+      queryDocument={FetchUnitsDocument}
+      listKey="units"
+      formatLabel={(item) => item.name}
+      placeholder={"Select unit..."}
+      createNewOption={(newValue) => {}}
+      autoFilter={true}
+      multiSelect={false}
+      onSelect={(unit) => {
+        onChange(unit);
+      }}
+      value={value}
+    />
   );
 }

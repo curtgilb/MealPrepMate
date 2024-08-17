@@ -1,6 +1,7 @@
 import { db } from "../../db.js";
 import { RecipeIngredientsValidation } from "../../validations/RecipeValidation.js";
 import { builder } from "../builder.js";
+import { deleteResult } from "./UtilitySchema.js";
 
 // ============================================ Types ===================================
 
@@ -56,20 +57,20 @@ builder.mutationFields((t) => ({
       });
     },
   }),
-  deleteRecipeIngredients: t.prismaField({
-    type: ["RecipeIngredient"],
+  deleteRecipeIngredients: t.field({
+    type: deleteResult,
     args: {
-      recipeId: t.arg.string({ required: true }),
-      ingredientIds: t.arg.stringList({ required: true }),
+      ingredientId: t.arg.string({ required: true }),
     },
-    resolve: async (query, root, args) => {
-      await db.recipeIngredient.deleteMany({
-        where: { recipeId: args.recipeId, id: { in: args.ingredientIds } },
-      });
-      return await db.recipeIngredient.findMany({
-        where: { recipeId: args.recipeId },
-        ...query,
-      });
+    resolve: async (root, args) => {
+      try {
+        await db.recipeIngredient.delete({ where: { id: args.ingredientId } });
+      } catch (e) {
+        return { success: false, message: "Bad luck" };
+      }
+      return {
+        success: true,
+      };
     },
   }),
   editRecipeIngredients: t.prismaField({
@@ -94,7 +95,7 @@ builder.mutationFields((t) => ({
                 : undefined,
               name: ingredient.name ?? undefined,
               ingredient: ingredient.ingredientId
-                ? { connect: { id: ingredient.id } }
+                ? { connect: { id: ingredient.ingredientId } }
                 : undefined,
               group: ingredient.groupId
                 ? { connect: { id: ingredient.groupId } }

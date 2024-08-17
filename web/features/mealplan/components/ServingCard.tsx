@@ -77,7 +77,6 @@ export const MealPlanServingCard = React.forwardRef<
   });
 
   function submitServingEdit(data: z.infer<typeof FormSchema>) {
-    console.log("Submit called");
     editServing({
       serving: {
         meal: data.meal,

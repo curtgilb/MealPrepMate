@@ -37,7 +37,6 @@ export function DatePicker({ date, onChange }: DatePickerProps) {
           mode="single"
           selected={date}
           onSelect={(newDate) => {
-            console.log(newDate);
             if (newDate) {
               onChange(date);
             }

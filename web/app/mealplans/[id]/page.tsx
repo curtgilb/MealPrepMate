@@ -49,7 +49,7 @@ export default function MealPlanPage() {
       }}
     >
       <MealPlanServings.Provider value={servings}>
-        <div className="flex h-full min-w-0 overflow-hidden">
+        <div className="h-main-full overflow-hidden flex">
           <div className="flex flex-col p-4 grow h-full min-w-0 overflow-hidden">
             <div className="flex justify-between mb-6">
               <MealPlanName

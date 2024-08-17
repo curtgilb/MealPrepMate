@@ -51,9 +51,7 @@ function UploadImportFileDialog() {
     defaultValues: { filePath: "", type: "Cronometer" },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-  }
+  function onSubmit(values: z.infer<typeof formSchema>) {}
 
   return (
     <div>

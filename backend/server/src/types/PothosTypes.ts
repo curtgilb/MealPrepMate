@@ -1,5 +1,5 @@
 /* eslint-disable */
-import type { Prisma, Notification, ScheduledPlan, MealPlan, NotificationSetting, MealPlanServing, MealPlanRecipe, Import, ImportItem, ImportDraft, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, MeasurementConversion, IngredientCategory, ExpirationRule, IngredientPrice, GroceryStore, Receipt, ReceiptLine, WebScrapedRecipe, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, AggregateLabel, NutritionLabelNutrient, AggLabelNutrient, Nutrient, RankedNutrient, NutrientTarget, NutrientImportMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
+import type { Prisma, Notification, ScheduledPlan, MealPlan, NotificationSetting, MealPlanServing, MealPlanRecipe, Import, ImportItem, ImportDraft, RecipeIngredient, MeasurementUnit, RecipeIngredientGroup, Ingredient, IngredientCategory, ExpirationRule, IngredientPrice, GroceryStore, Receipt, ReceiptLine, WebScrapedRecipe, Recipe, Course, Category, Cuisine, Photo, NutritionLabel, AggregateLabel, NutritionLabelNutrient, AggLabelNutrient, Nutrient, RankedNutrient, NutrientTarget, NutrientImportMapping, DailyReferenceIntake, HealthProfile } from "@prisma/client";
 export default interface PrismaTypes {
     Notification: {
         Name: "Notification";
@@ -259,8 +259,8 @@ export default interface PrismaTypes {
         Where: Prisma.MeasurementUnitWhereInput;
         Create: {};
         Update: {};
-        RelationName: "ingredients" | "nutrients" | "ingredientPrice" | "servingSizes" | "aggServingSizes" | "fromUnit" | "toUnit" | "recieptItems";
-        ListRelations: "ingredients" | "nutrients" | "ingredientPrice" | "servingSizes" | "aggServingSizes" | "fromUnit" | "toUnit" | "recieptItems";
+        RelationName: "ingredients" | "nutrients" | "ingredientPrice" | "servingSizes" | "aggServingSizes" | "recieptItems";
+        ListRelations: "ingredients" | "nutrients" | "ingredientPrice" | "servingSizes" | "aggServingSizes" | "recieptItems";
         Relations: {
             ingredients: {
                 Shape: RecipeIngredient[];
@@ -285,16 +285,6 @@ export default interface PrismaTypes {
             aggServingSizes: {
                 Shape: AggregateLabel[];
                 Name: "AggregateLabel";
-                Nullable: false;
-            };
-            fromUnit: {
-                Shape: MeasurementConversion[];
-                Name: "MeasurementConversion";
-                Nullable: false;
-            };
-            toUnit: {
-                Shape: MeasurementConversion[];
-                Name: "MeasurementConversion";
                 Nullable: false;
             };
             recieptItems: {
@@ -349,8 +339,8 @@ export default interface PrismaTypes {
         Where: Prisma.IngredientWhereInput;
         Create: {};
         Update: {};
-        RelationName: "recipeIngredient" | "category" | "priceHistory" | "expirationRule" | "receiptLines" | "conversionRatio";
-        ListRelations: "recipeIngredient" | "priceHistory" | "receiptLines" | "conversionRatio";
+        RelationName: "recipeIngredient" | "category" | "priceHistory" | "expirationRule" | "receiptLines";
+        ListRelations: "recipeIngredient" | "priceHistory" | "receiptLines";
         Relations: {
             recipeIngredient: {
                 Shape: RecipeIngredient[];
@@ -376,41 +366,6 @@ export default interface PrismaTypes {
                 Shape: ReceiptLine[];
                 Name: "ReceiptLine";
                 Nullable: false;
-            };
-            conversionRatio: {
-                Shape: MeasurementConversion[];
-                Name: "MeasurementConversion";
-                Nullable: false;
-            };
-        };
-    };
-    MeasurementConversion: {
-        Name: "MeasurementConversion";
-        Shape: MeasurementConversion;
-        Include: Prisma.MeasurementConversionInclude;
-        Select: Prisma.MeasurementConversionSelect;
-        OrderBy: Prisma.MeasurementConversionOrderByWithRelationInput;
-        WhereUnique: Prisma.MeasurementConversionWhereUniqueInput;
-        Where: Prisma.MeasurementConversionWhereInput;
-        Create: {};
-        Update: {};
-        RelationName: "fromUnit" | "toUnit" | "ingredient";
-        ListRelations: never;
-        Relations: {
-            fromUnit: {
-                Shape: MeasurementUnit;
-                Name: "MeasurementUnit";
-                Nullable: false;
-            };
-            toUnit: {
-                Shape: MeasurementUnit;
-                Name: "MeasurementUnit";
-                Nullable: false;
-            };
-            ingredient: {
-                Shape: Ingredient | null;
-                Name: "Ingredient";
-                Nullable: true;
             };
         };
     };

@@ -59,7 +59,7 @@ const recipe = builder.prismaObject("Recipe", {
 });
 
 // ============================================ Inputs ==================================
-const recipeInput = builder.inputType("RecipeInput", {
+const createRecipeInput = builder.inputType("CreateRecipeInput", {
   fields: (t) => ({
     title: t.string({ required: true }),
     source: t.string(),
@@ -226,7 +226,7 @@ builder.mutationFields((t) => ({
     type: "Recipe",
     args: {
       recipe: t.arg({
-        type: recipeInput,
+        type: createRecipeInput,
         required: true,
       }),
     },
@@ -249,12 +249,12 @@ builder.mutationFields((t) => ({
       });
     },
   }),
-  updateRecipe: t.prismaField({
+  editRecipe: t.prismaField({
     type: "Recipe",
     args: {
       recipeId: t.arg.string({ required: true }),
       recipe: t.arg({
-        type: recipeInput,
+        type: createRecipeInput,
         required: true,
       }),
     },

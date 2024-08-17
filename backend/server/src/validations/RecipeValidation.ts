@@ -50,7 +50,7 @@ const RecipeIngredientValidation = z.object({
   order: z.number().nullable().optional(),
   sentence: z.string().nullable().optional(),
   quantity: z.number().nullable().optional(),
-  unitId: z.string().cuid(),
+  unitId: z.string().cuid().optional(),
   name: z.string().nullable().optional(),
   ingredientId: z.string().cuid().nullable().optional(),
   groupId: z.string().cuid().nullable().optional(),

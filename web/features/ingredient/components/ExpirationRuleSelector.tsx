@@ -31,9 +31,7 @@ export function ExpirationRuleSelector() {
             rule.variation ? `${rule.name} (${rule.variation})` : rule.name
           }
           placeholder="Select a rule..."
-          createNewOption={(newValue) => {
-            console.log(newValue);
-          }}
+          createNewOption={(newValue) => {}}
           autoFilter
           multiSelect={false}
           onSelect={(rule) => {

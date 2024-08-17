@@ -87,7 +87,6 @@ export function AddServingDialog({ day }: AddServingDialogProps) {
         servings: data.servings,
       },
     }).then((result) => {
-      console.log(result);
       toast("Servings has been added to plan");
     });
   }

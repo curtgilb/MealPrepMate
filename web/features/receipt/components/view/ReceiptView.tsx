@@ -19,11 +19,10 @@ export function ReceiptView({ receipt }: ReceiptViewProps) {
     receipt.id,
     items
   );
-  console.log(sortedItems);
 
   return (
     <div className="flex flex-col">
-      <h2 className="text-2xl font-bold mb-4">Receipt Verification</h2>
+      <h2 className="text-xl font-bold">Receipt Info</h2>
       <EditReceipt receipt={receipt} />
       <div className="flex flex-col gap-4 mb-4">
         <h2 className="text-xl font-bold">Receipt Line Items</h2>
