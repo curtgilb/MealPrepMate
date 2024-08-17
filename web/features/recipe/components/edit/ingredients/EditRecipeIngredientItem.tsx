@@ -71,7 +71,7 @@ export function EditRecipeIngredientItem({
   }, [ingredient, form]);
 
   return (
-    <div className="p-4  max-w-lg space-y-6">
+    <div className="p-4  max-w-lg space-y-6 my-auto mx-auto">
       <p className="text-lg font-medium mb-4">{ingredient.sentence}</p>
       <div className="flex gap-6">
         <Form {...form}>

@@ -37,10 +37,17 @@ export const EditRecipeIngredients = forwardRef<
   }));
   const ingredient = ingredients?.[step];
   return (
-    <div className="border rounded-md bg-white flex">
+    <div className="border rounded-md bg-white flex px-6 py-4">
       <div>
         <Progress value={step / (ingredients?.length ?? step)} />
-        <IngredientList ingredients={ingredients} />
+        <IngredientList
+          ingredients={ingredients}
+          completedIds={completed}
+          active={ingredient?.id}
+          jumpTo={(index) => {
+            setStep(index);
+          }}
+        />
       </div>
 
       {ingredient && (

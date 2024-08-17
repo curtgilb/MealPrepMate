@@ -6,7 +6,7 @@ type GroupedIngredient = {
 };
 
 export function useGroupedIngredients(
-  ingredients: RecipeIngredientFieldsFragment[] | undefined
+  ingredients: RecipeIngredientFieldsFragment[] | undefined | null
 ) {
   return useMemo(() => {
     return ingredients?.reduce((agg, ingredient) => {
