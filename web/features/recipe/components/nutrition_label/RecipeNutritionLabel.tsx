@@ -1,6 +1,13 @@
 "use client";
 import { EnumSelect } from "@/components/EnumSelect";
-import { NutrientItemProps, NutritionList } from "@/components/NutritionList";
+import {
+  NutritionLabelIndentation,
+  ServingSize,
+} from "@/components/nutrition_label_abstracts/NutritionLabelTable";
+import {
+  NutrientItemProps,
+  NutritionList,
+} from "@/components/nutrition_label_abstracts/NutritionList";
 import {
   Table,
   TableBody,
@@ -8,14 +15,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  NutritionLabelIndentation,
-  ServingSize,
-  TableGroup,
-} from "@/features/recipe/components/nutrition_label/NutritionLabelTable";
 import { NutrientFieldsFragment, RecipeFieldsFragment } from "@/gql/graphql";
 import { NutritionDisplayMode } from "@/hooks/use-nutrients";
 import { cn } from "@/lib/utils";
+import { toTitleCase } from "@/utils/utils";
 import { HTMLAttributes, useMemo, useState } from "react";
 
 type NutritionValues = RecipeFieldsFragment["aggregateLabel"];
@@ -67,6 +70,25 @@ function Nutrient({ nutrient, depth, value }: NutrientItemProps) {
   );
 }
 
+function TableGroup({
+  name,
+  children,
+}: {
+  name: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <>
+      <TableRow>
+        <TableCell className="text-lg font-bold" colSpan={3}>
+          {toTitleCase(name)}
+        </TableCell>
+      </TableRow>
+      {children}
+    </>
+  );
+}
+
 export function RecipeNutritionlabel({
   label,
   className,
@@ -80,6 +102,7 @@ export function RecipeNutritionlabel({
   );
 
   const values = useMemo(() => {
+    if (!label) return {};
     return label?.nutrients.reduce((agg, nutrient) => {
       agg[nutrient.nutrient.id] =
         servingSize === ServingSize.Recipe

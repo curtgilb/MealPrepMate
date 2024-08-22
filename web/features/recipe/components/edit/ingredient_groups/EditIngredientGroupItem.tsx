@@ -1,24 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { Check, GripVertical, Save, Trash2, X } from "lucide-react";
-import { useRef, useState } from "react";
-import { useMutation } from "@urql/next";
-import {
-  deleteIngredientMutation,
-  editIngredientMutation,
-} from "@/features/ingredient/api/Ingredient";
 import {
   deleteRecipeIngredientMutation,
   editRecipeIngredientMutation,
-  RecipeIngredientFragment,
 } from "@/features/recipe/api/RecipeIngredient";
-import {
-  RecipeFieldsFragment,
-  RecipeIngredientFieldsFragment,
-} from "@/gql/graphql";
-import { useFragment } from "@/gql";
+import { RecipeIngredientFieldsFragment } from "@/gql/graphql";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { useMutation } from "@urql/next";
+import { Check, GripVertical, Trash2 } from "lucide-react";
+import { useRef, useState } from "react";
 
 interface EditIngredientGroupItemProps {
   groupId: string;
@@ -48,7 +39,7 @@ export function EditIngredientGroupItem({
   const { fetching: editFetching } = editResult;
   const { fetching: deleteFetching } = deleteResult;
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: id, disabled: edit });
+    useSortable({ id: id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -56,7 +47,6 @@ export function EditIngredientGroupItem({
   };
 
   function handleEdit() {
-    console.log("child edit", inputRef.current?.value);
     editIngredient({
       ingredients: [{ id, sentence: inputRef.current?.value }],
     }).then((result) => {
@@ -73,7 +63,6 @@ export function EditIngredientGroupItem({
     deleteIngredient({
       id: id,
     }).then(() => {
-      console.log(groupId, id);
       onDelete(groupId, id);
       setEdit(false);
     });
@@ -84,52 +73,50 @@ export function EditIngredientGroupItem({
       ref={setNodeRef}
       style={style}
       {...attributes}
+      {...listeners}
       className="bg-white px-4 items-center py-2 flex gap-3 border rounded-md"
-      onClick={(e) => {
-        if (!(e.target as HTMLElement).classList.contains(".drag-handle")) {
-          setEdit(true);
-        }
-      }}
     >
-      {edit ? (
-        <div className="flex gap-2">
-          <div>
-            <Input
-              ref={inputRef}
-              defaultValue={sentence}
-              className="grow w-full h-full"
-              autoFocus
-            />
+      <div>
+        {edit ? (
+          <div className="flex gap-2">
+            <div>
+              <Input
+                ref={inputRef}
+                defaultValue={id}
+                className="grow w-full h-full"
+                autoFocus
+              />
+            </div>
+            <div className="flex shrink w-auto justify-center">
+              <Button
+                size="icon"
+                variant="ghost"
+                disabled={editFetching}
+                onClick={handleEdit}
+                className="hover:text-green-600"
+              >
+                <Check className="h-4 w-4" />
+              </Button>
+              <Button
+                className="hover:text-red-500"
+                size="icon"
+                onClick={handleDelete}
+                variant="ghost"
+                disabled={deleteFetching}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          <div className="flex shrink w-auto justify-center">
-            <Button
-              size="icon"
-              variant="ghost"
-              disabled={editFetching}
-              onClick={handleEdit}
-              className="hover:text-green-600"
-            >
-              <Check className="h-4 w-4" />
-            </Button>
-            <Button
-              className="hover:text-red-500"
-              size="icon"
-              onClick={handleDelete}
-              variant="ghost"
-              disabled={deleteFetching}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+        ) : (
+          <div className="flex gap-2">
+            <div {...listeners} style={{ cursor: "grab" }}>
+              <GripVertical className="h-5 w-5 drag-handle" />
+            </div>
+            <p className="text-sm">{id}</p>
           </div>
-        </div>
-      ) : (
-        <div className="flex gap-2">
-          <div {...listeners} style={{ cursor: "grab" }}>
-            <GripVertical className="h-5 w-5 drag-handle" />
-          </div>
-          <p className="text-sm">{sentence}</p>
-        </div>
-      )}
+        )}
+      </div>
     </li>
   );
 }

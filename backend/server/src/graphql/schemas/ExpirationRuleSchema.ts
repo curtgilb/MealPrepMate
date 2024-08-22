@@ -1,18 +1,11 @@
-import { queryFromInfo } from "@pothos/plugin-prisma";
-import { ExpirationRule, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { db } from "../../db.js";
 import {
   createExpirationRuleValidation,
   editExpirationRuleValidation,
 } from "../../validations/IngredientValidation.js";
-import { offsetPaginationValidation } from "../../validations/UtilityValidation.js";
 import { builder } from "../builder.js";
-import {
-  deleteResult,
-  nextPageInfo,
-  offsetPagination,
-} from "./UtilitySchema.js";
+import { deleteResult } from "./UtilitySchema.js";
 
 const expRule = builder.prismaObject("ExpirationRule", {
   fields: (t) => ({
@@ -37,23 +30,6 @@ const expRule = builder.prismaObject("ExpirationRule", {
     }),
   }),
 });
-
-// const rulesQuery = builder
-//   .objectRef<{
-//     nextOffset: number | null;
-//     itemsRemaining: number;
-//     rules: ExpirationRule[];
-//   }>("ExpirationRulesQuery")
-//   .implement({
-//     fields: (t) => ({
-//       nextOffset: t.exposeInt("nextOffset", { nullable: true }),
-//       itemsRemaining: t.exposeInt("itemsRemaining"),
-//       items: t.field({
-//         type: [expRule],
-//         resolve: (result) => result.rules,
-//       }),
-//     }),
-//   });
 
 // ============================================ Inputs ==================================
 
@@ -97,7 +73,6 @@ builder.queryFields((t) => ({
     resolve: async (query, root, args) => {
       return await db.expirationRule.findUniqueOrThrow({
         where: { id: args.expirationRuleId },
-        ...query,
       });
     },
   }),
@@ -105,37 +80,13 @@ builder.queryFields((t) => ({
     type: ["ExpirationRule"],
     args: {
       search: t.arg.string(),
-      // pagination: t.arg({ type: offsetPagination, required: true }),
     },
     validate: {
       schema: z.object({
         search: z.string().optional(),
-        // pagination: offsetPaginationValidation,
       }),
     },
     resolve: async (query) => {
-      // const where: Prisma.ExpirationRuleWhereInput = args.search
-      //   ? {
-      //       name: { contains: args.search, mode: "insensitive" },
-      //     }
-      //   : {};
-      // const [data, count] = await db.$transaction([
-      //   db.expirationRule.findMany({
-      //     where,
-      //     take: args.pagination.take,
-      //     skip: args.pagination.offset,
-      //     orderBy: { name: "asc" },
-      //     ...queryFromInfo({ context, info, path: ["ingredients"] }),
-      //   }),
-      //   db.expirationRule.count({ where }),
-      // ]);
-      // const { itemsRemaining, nextOffset } = nextPageInfo(
-      //   data.length,
-      //   args.pagination.take,
-      //   args.pagination.offset,
-      //   count
-      // );
-      // return { itemsRemaining, nextOffset, rules: data };
       return await db.expirationRule.findMany({ ...query });
     },
   }),
@@ -219,6 +170,7 @@ builder.mutationFields((t) => ({
           fridgeLife: args.expirationRule.fridgeLife,
           freezerLife: args.expirationRule.freezerLife,
         },
+        ...query,
       });
     },
   }),

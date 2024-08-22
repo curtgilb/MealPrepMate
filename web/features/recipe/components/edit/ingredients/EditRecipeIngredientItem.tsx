@@ -1,10 +1,9 @@
+import {
+  IngredientPicker,
+  PickerIngredient,
+} from "@/components/pickers/IngredientPicker";
 import { PickerUnit, UnitPicker } from "@/components/pickers/UnitPicker";
-import { Input } from "@/components/ui/input";
-import { BasicItem } from "@/features/recipe/components/edit/info/EditRecipeInfo";
-import { RecipeIngredientFieldsFragment } from "@/gql/graphql";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,14 +12,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import {
-  IngredientPicker,
-  PickerIngredient,
-} from "@/components/pickers/IngredientPicker";
-import { useMutation } from "@urql/next";
+import { Input } from "@/components/ui/input";
 import { editRecipeIngredientMutation } from "@/features/recipe/api/RecipeIngredient";
+import { RecipeIngredientFieldsFragment } from "@/gql/graphql";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@urql/next";
 import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 interface EditRecipeIngredientItemProps {
   ingredient: RecipeIngredientFieldsFragment;
@@ -71,11 +70,14 @@ export function EditRecipeIngredientItem({
   }, [ingredient, form]);
 
   return (
-    <div className="p-4  max-w-lg space-y-6 my-auto mx-auto">
-      <p className="text-lg font-medium mb-4">{ingredient.sentence}</p>
+    <div className="p-4 space-y-6 my-auto mx-auto">
+      <p className="text-2xl font-medium mb-4">{ingredient.sentence}</p>
       <div className="flex gap-6">
         <Form {...form}>
-          <form className="w-full" onSubmit={form.handleSubmit(handleSubmit)}>
+          <form
+            className="w-full min-w-lg"
+            onSubmit={form.handleSubmit(handleSubmit)}
+          >
             <div className="flex gap-4">
               <FormField
                 control={form.control}
@@ -98,7 +100,7 @@ export function EditRecipeIngredientItem({
                 control={form.control}
                 name="unit"
                 render={({ field }) => (
-                  <FormItem className="max-w-96">
+                  <FormItem className="max-w-44 w-full">
                     <FormLabel>Unit</FormLabel>
                     <UnitPicker
                       value={field.value}
@@ -115,8 +117,8 @@ export function EditRecipeIngredientItem({
                 control={form.control}
                 name="ingredient"
                 render={({ field }) => (
-                  <FormItem className="max-w-96">
-                    <FormLabel>Unit</FormLabel>
+                  <FormItem className="max-w-60 w-full">
+                    <FormLabel>Ingredient</FormLabel>
                     <IngredientPicker
                       multiSelect={false}
                       value={field.value}

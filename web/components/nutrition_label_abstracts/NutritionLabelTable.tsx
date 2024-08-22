@@ -1,15 +1,5 @@
-import { EnumSelect } from "@/components/EnumSelect";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { NutritionDisplayMode } from "@/hooks/use-nutrients";
-import { cn } from "@/lib/utils";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { toTitleCase } from "@/utils/utils";
-import { HTMLAttributes, ReactElement, ReactNode, useState } from "react";
 
 export enum ServingSize {
   Serving = "One Serving",
@@ -23,7 +13,7 @@ export const NutritionLabelIndentation: { [key: number]: string } = {
   4: "pl-12",
 };
 
-export function TableGroup({
+function TableGroup({
   name,
   children,
   colSpan,

@@ -99,12 +99,6 @@ builder.mutationFields((t) => ({
           height: args.profile.height,
           yearBorn: args.profile.birthYear,
           activityLevel: args.profile.activityLevel,
-          targetCarbsGrams: args.profile.targetCarbsGrams,
-          targetCarbsPercentage: args.profile.targetCarbsPercentage,
-          targetFatGrams: args.profile.targetFatGrams,
-          targetFatPercentage: args.profile.targetFatPercentage,
-          targetProteinGrams: args.profile.targetProteinGrams,
-          targetProteinPercentage: args.profile.targetProteinGrams,
         },
         ...query,
       });

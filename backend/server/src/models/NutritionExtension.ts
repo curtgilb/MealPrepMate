@@ -58,9 +58,6 @@ function createNutritionLabelStmt(
         : undefined,
   };
 
-  // if (label.ingredientGroupId) {
-  //   stmt.ingredientGroup = { connect: { id: label.ingredientGroupId } };
-  // }
   if (recipeId && !nested) {
     (stmt as Prisma.NutritionLabelCreateInput).recipe = {
       connect: { id: recipeId },

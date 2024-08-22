@@ -30,7 +30,7 @@ export function EnumSelect<T extends EnumType>({
       value={value as string}
       onValueChange={(v) => onChange(v as T[keyof T])}
     >
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className="min-w-max h-8 text-sm">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

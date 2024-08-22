@@ -1,30 +1,31 @@
 "use client";
 
-import { useFragment } from "@/gql";
-import {
-  EditIngredientGroupMutation,
-  RecipeIngredientFieldsFragment,
-} from "@/gql/graphql";
-import { DndContext, DragEndEvent, DragOverEvent } from "@dnd-kit/core";
-import { forwardRef, useImperativeHandle, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { RecipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
+import { createRecipeIngredientGroupMutation } from "@/features/recipe/api/RecipeIngredientGroups";
 import {
   EditRecipeProps,
   EditRecipeSubmit,
 } from "@/features/recipe/components/edit/RecipeEditor";
 import { EditIngredientGroup } from "@/features/recipe/components/edit/ingredient_groups/EditIngredientGroup";
+import { useFragment } from "@/gql";
+import {
+  EditIngredientGroupMutation,
+  RecipeIngredientFieldsFragment,
+} from "@/gql/graphql";
 import {
   closestCenter,
+  DndContext,
+  DragEndEvent,
+  DragOverEvent,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { useState } from "react";
 import { useMutation } from "@urql/next";
-import { createRecipeIngredientGroupMutation } from "@/features/recipe/api/RecipeIngredientGroups";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 
 export const DEFAULT_KEY = "$#Default#%";
 
@@ -55,7 +56,6 @@ export const EditIngredientGroups = forwardRef<
       return acc;
     }, {} as { [key: string]: { name: string | undefined | null; ingredients: RecipeIngredientFieldsFragment[] } })
   );
-  console.log(groupedIngredients);
 
   useImperativeHandle(ref, () => ({
     submit(postSubmit) {
@@ -86,46 +86,53 @@ export const EditIngredientGroups = forwardRef<
   function handleDragOver(event: DragOverEvent) {
     if (groupedIngredients) {
       const { over, active } = event;
-      console.log(event);
-      const { containerId: activeContainerId, index: activeIndex } =
-        active.data.current?.sortable;
-      const { containerId: overContainerId, index: overIndex } =
-        over?.data.current?.sortable;
+      console.log("active", active);
+      console.log("over", over);
+      console.log("groupedIngredients", groupedIngredients);
 
-      if (active && over && activeContainerId !== overContainerId) {
-        // Remove the old item and place it in the new one
-        console.log(groupedIngredients);
-        setGroupedIngredients((prev) => {
-          if (!prev) return undefined;
-          return {
-            ...prev,
-            [activeContainerId]: {
-              name: prev[activeContainerId].name,
-              ingredients: [
-                ...prev[activeContainerId].ingredients.filter(
-                  (item) => item.id !== active.id
-                ),
-              ],
-            },
-            [overContainerId]: {
-              name: prev[overContainerId].name,
-              ingredients: [
-                ...prev[overContainerId].ingredients.slice(0, overIndex),
-                groupedIngredients[activeContainerId].ingredients[activeIndex],
-                ...prev[overContainerId].ingredients.slice(
-                  overIndex,
-                  prev[overContainerId].ingredients.length
-                ),
-              ],
-            },
-          };
-        });
-      }
+      // const { containerId: activeContainerId, index: activeIndex } =
+      //   active.data.current?.sortable;
+      // const { containerId: overContainerId, index: overIndex } =
+      //   over?.data.current?.sortable;
+
+      // console.log("active", activeContainerId);
+      // console.log("over", overContainerId);
+
+      // if (active && over && activeContainerId !== overContainerId) {
+      //   // Remove the old item and place it in the new one
+
+      //   setGroupedIngredients((prev) => {
+      //     if (!prev) return undefined;
+      //     return {
+      //       ...prev,
+      //       [activeContainerId]: {
+      //         name: prev[activeContainerId].name,
+      //         ingredients: [
+      //           ...prev[activeContainerId].ingredients.filter(
+      //             (item) => item.id !== active.id
+      //           ),
+      //         ],
+      //       },
+      //       [overContainerId]: {
+      //         name: prev[overContainerId].name,
+      //         ingredients: [
+      //           ...prev[overContainerId].ingredients.slice(0, overIndex),
+      //           groupedIngredients[activeContainerId].ingredients[activeIndex],
+      //           ...prev[overContainerId].ingredients.slice(
+      //             overIndex,
+      //             prev[overContainerId].ingredients.length
+      //           ),
+      //         ],
+      //       },
+      //     };
+      //   });
+      // }
     }
   }
 
   // This will save it in the same container
   function handleDragEnd(event: DragEndEvent) {
+    console.log("drag end");
     const { over, active } = event;
     const { containerId: activeContainerId, index: activeIndex } =
       active.data.current?.sortable;

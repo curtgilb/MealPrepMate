@@ -1,8 +1,5 @@
 import { useGroupedIngredients } from "@/features/recipe/hooks/useGroupedIngredients";
-import {
-  RecipeFieldsFragment,
-  RecipeIngredientFieldsFragment,
-} from "@/gql/graphql";
+import { RecipeIngredientFieldsFragment } from "@/gql/graphql";
 import { cn } from "@/lib/utils";
 import { CircleCheck } from "lucide-react";
 
@@ -23,15 +20,16 @@ export function IngredientList({
   const groupedIngredients = useGroupedIngredients(ingredients);
 
   return (
-    <ol className="space-y-6">
+    <ol className="space-y-6 max-w-72">
       {groupedIngredients &&
         Object.entries(groupedIngredients).map(([name, group]) => {
           return (
             <li key={group.id}>
-              <p className="text-lg font-semibold">{name ?? "Default"}</p>
-              <ol>
+              <p className="font-medium">{name ?? "Default"}</p>
+              <ol className="space-y-1.5">
                 {group.lines.map((line) => {
                   const completed = completedIds.includes(line.id);
+                  const isActive = active === line.id;
                   return (
                     <li
                       key={line.id}
@@ -44,18 +42,20 @@ export function IngredientList({
                         jumpTo(index ?? 0);
                       }}
                     >
+                      <CircleCheck
+                        className={cn("h-4 w-4 shrink-0", {
+                          "stroke-[1px]": !isActive,
+                          "fill-green-300 text-green-700 stroke-[2px]":
+                            completed,
+                        })}
+                      />
                       <p
-                        className={cn("group-hover:underline", {
-                          completed: "text-slate-700",
+                        className={cn("group-hover:underline font-light", {
+                          "font-bold": isActive,
                         })}
                       >
                         {line.sentence}
                       </p>
-                      <CircleCheck
-                        className={cn("h-4 w-4", {
-                          "text-green-500": completed,
-                        })}
-                      />
                     </li>
                   );
                 })}

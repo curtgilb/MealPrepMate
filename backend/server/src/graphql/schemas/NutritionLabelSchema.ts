@@ -62,23 +62,6 @@ builder.prismaObject("NutritionLabelNutrient", {
   }),
 });
 
-// const nutritionLabelQuery = builder
-//   .objectRef<{
-//     nextOffset: number | null;
-//     itemsRemaining: number;
-//     items: NutritionLabel[];
-//   }>("NutritionLabelQuery")
-//   .implement({
-//     fields: (t) => ({
-//       nextOffset: t.exposeInt("nextOffset", { nullable: true }),
-//       itemsRemaining: t.exposeInt("itemsRemaining"),
-//       items: t.field({
-//         type: [nutritionLabel],
-//         resolve: (result) => result.items,
-//       }),
-//     }),
-//   });
-
 // ============================================ Inputs ==================================
 
 const createNutritionLabel = builder.inputType("CreateNutritionLabelInput", {
@@ -138,44 +121,6 @@ builder.queryFields((t) => ({
       });
     },
   }),
-  // nutritionLabels: t.field({
-  //   type: nutritionLabelQuery,
-  //   args: {
-  //     search: t.arg.string(),
-  //     pagination: t.arg({
-  //       type: offsetPagination,
-  //       required: true,
-  //     }),
-  //   },
-  //   validate: {
-  //     schema: z.object({
-  //       pagination: offsetPaginationValidation,
-  //       search: z.string().optional(),
-  //     }),
-  //   },
-  //   resolve: async (parent, args, context, info) => {
-  //     const [data, count] = await db.$transaction([
-  //       db.nutritionLabel.findMany({
-  //         ...queryFromInfo({ context, info, path: ["items"] }),
-  //         where: args.search
-  //           ? { name: { contains: args.search, mode: "insensitive" } }
-  //           : {},
-  //         take: args.pagination.take,
-  //         skip: args.pagination.offset,
-  //         orderBy: { name: "asc" },
-  //       }),
-  //       db.import.count(),
-  //     ]);
-
-  //     const { itemsRemaining, nextOffset } = nextPageInfo(
-  //       data.length,
-  //       args.pagination.take,
-  //       args.pagination.offset,
-  //       count
-  //     );
-  //     return { items: data, nextOffset, itemsRemaining };
-  //   },
-  // }),
 }));
 
 // ============================================ Mutations ===============================

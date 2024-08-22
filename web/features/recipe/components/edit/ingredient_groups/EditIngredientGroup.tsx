@@ -11,11 +11,9 @@ import {
 } from "@/gql/graphql";
 import { useDroppable } from "@dnd-kit/core";
 import {
-  rectSortingStrategy,
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { result } from "lodash";
 import { Trash2 } from "lucide-react";
 import { useMutation } from "urql";
 
@@ -56,24 +54,23 @@ export function EditIngredientGroup({
     });
   }
 
-  console.log(groupId);
   return (
     <div className="bg-muted">
       <div className="flex justify-between items-center">
-        <p className="font-semibold mb-4">{groupName}</p>
+        <p className="font-semibold mb-4">{groupId}</p>
+
         {groupId !== DEFAULT_KEY && (
           <Button size="icon" variant="outline" onClick={handleDelete}>
             <Trash2 className="h-4 w-4" />
           </Button>
         )}
       </div>
-
-      <ol ref={setNodeRef} className="bg-muted grid gap-2 min-h-96  bg-white">
-        <SortableContext
-          id={groupId}
-          items={ingredients}
-          strategy={verticalListSortingStrategy}
-        >
+      <SortableContext
+        id={groupId}
+        items={ingredients}
+        strategy={verticalListSortingStrategy}
+      >
+        <ol ref={setNodeRef} className="bg-muted grid gap-2  bg-white">
           {ingredients.map((ingredient) => (
             <EditIngredientGroupItem
               key={ingredient.id}
@@ -84,8 +81,8 @@ export function EditIngredientGroup({
               sentence={ingredient.sentence}
             />
           ))}
-        </SortableContext>
-      </ol>
+        </ol>
+      </SortableContext>
     </div>
   );
 }

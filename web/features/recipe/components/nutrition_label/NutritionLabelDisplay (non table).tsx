@@ -1,5 +1,8 @@
 "use client";
-import { NutrientItem, NutritionList } from "@/components/NutritionList";
+import {
+  NutrientItem,
+  NutritionList,
+} from "@/components/nutrition_label_abstracts/NutritionList";
 import { GetRecipeQuery, NutrientFieldsFragment } from "@/gql/graphql";
 import { HTMLAttributes, useMemo, useState } from "react";
 import { Progress } from "@/components/ui/progress";

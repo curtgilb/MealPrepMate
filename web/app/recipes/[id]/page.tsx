@@ -1,5 +1,5 @@
 import { getRecipeQuery } from "@/features/recipe/api/Recipe";
-import { RecipeView } from "@/features/recipe/components/RecipeView";
+import { RecipeView } from "@/features/recipe/components/view/Recipe";
 import { getClient } from "@/ssrGraphqlClient";
 
 export default async function Recipe({ params }: { params: { id: string } }) {

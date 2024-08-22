@@ -1,24 +1,4 @@
-import { PrismaObjectRef } from "@pothos/plugin-prisma";
 import { builder } from "../builder.js";
-import { FieldRef } from "@pothos/core";
-
-// function checkIfFieldRequested(
-//   fieldName: string,
-//   info: GraphQLResolveInfo
-// ): boolean {
-//   let found = false;
-//   // if (
-//   //   info &&
-//   //   info.fieldNodes &&
-//   //   info.fieldNodes[0] &&
-//   //   info.fieldNodes[0].selectionSet
-//   // ) {
-//   //   let currentSelectionSet = info.fieldNodes[0].selectionSet;
-//   //   for (const field of info.fieldNodes[0].selectionSet.selections) {
-//   //   }
-//   // }
-//   return found;
-// }
 
 const numericalComparison = builder.inputType("NumericalComparison", {
   fields: (t) => ({
@@ -74,9 +54,9 @@ function nextPageInfo(
 }
 
 export {
+  cursorPagination,
   deleteResult,
+  nextPageInfo,
   numericalComparison,
   offsetPagination,
-  cursorPagination,
-  nextPageInfo,
 };

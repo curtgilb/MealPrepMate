@@ -26,23 +26,6 @@ const measurementUnit = builder.prismaObject("MeasurementUnit", {
   }),
 });
 
-// const unitQuery = builder
-//   .objectRef<{
-//     nextOffset: number | null;
-//     itemsRemaining: number;
-//     items: MeasurementUnit[];
-//   }>("UnitQuery")
-//   .implement({
-//     fields: (t) => ({
-//       nextOffset: t.exposeInt("nextOffset", { nullable: true }),
-//       itemsRemaining: t.exposeInt("itemsRemaining"),
-//       items: t.field({
-//         type: [measurementUnit],
-//         resolve: (result) => result.items,
-//       }),
-//     }),
-//   });
-
 // ============================================ Inputs ==================================
 const createUnitInput = builder.inputType("CreateUnitInput", {
   fields: (t) => ({
