@@ -1,3 +1,4 @@
+import { StackedList } from "@/components/StackedList";
 import { HTMLAttributes } from "react";
 
 interface RecipeTimesProps extends HTMLAttributes<HTMLUListElement> {
@@ -18,29 +19,12 @@ function equalizeTime(mins: number | undefined | null) {
 }
 
 export function RecipeTimes({ prep, marinade, cook, total }: RecipeTimesProps) {
-  return (
-    <ul className="flex gap-8">
-      <li>
-        <p className="text-lg font-medium text-center">{equalizeTime(prep)}</p>
-        <p className="text-sm text-center">Prep Time</p>
-      </li>
+  const list = [
+    { id: "prep", top: equalizeTime(prep), bottom: "Prep Time" },
+    { id: "marinade", top: equalizeTime(marinade), bottom: "Marinade Time" },
+    { id: "cook", top: equalizeTime(cook), bottom: "Cook Time" },
+    { id: "total", top: equalizeTime(total), bottom: "Total Time" },
+  ];
 
-      <li>
-        <p className="text-lg font-medium text-center">
-          {equalizeTime(marinade)}
-        </p>
-        <p className="text-sm text-center">Marinade Time</p>
-      </li>
-
-      <li>
-        <p className="text-lg font-medium text-center">{equalizeTime(cook)}</p>
-        <p className="text-sm text-center">Cook Time</p>
-      </li>
-
-      <li>
-        <p className="text-lg font-medium text-center">{equalizeTime(total)}</p>
-        <p className="text-sm text-center">Total Time</p>
-      </li>
-    </ul>
-  );
+  return <StackedList items={list} />;
 }

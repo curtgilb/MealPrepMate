@@ -1,5 +1,5 @@
 import SingleColumnCentered from "@/components/layouts/single-column-centered";
-import { ingredientQuery } from "@/features/ingredient/api/queries/getIngredientQuery";
+import { getIngredientQuery } from "@/features/ingredient/api/Ingredient";
 import { EditIngredient } from "@/features/ingredient/components/EditIngredient";
 import { getClient } from "@/ssrGraphqlClient";
 
@@ -8,7 +8,7 @@ export default async function EditIngredientPage({
 }: {
   params: { id: string };
 }) {
-  const result = await getClient().query(ingredientQuery, { id: params.id });
+  const result = await getClient().query(getIngredientQuery, { id: params.id });
   const { data, error } = result;
 
   return (

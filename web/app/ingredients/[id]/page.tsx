@@ -55,7 +55,7 @@ export default async function IngredientPage({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-12">
         <div>
           <h2 className="text-2xl font-semibold mb-2">Alternate Names</h2>
-          <TagList list={items} />
+          {/* <TagList list={items} /> */}
         </div>
         <div>
           <h2 className="text-2xl font-semibold mb-2">Storage Instructions</h2>

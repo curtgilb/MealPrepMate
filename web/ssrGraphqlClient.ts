@@ -3,7 +3,7 @@ import { registerUrql } from "@urql/next/rsc";
 
 const makeClient = () => {
   return createClient({
-    url: "http://localhost:3025/graphql",
+    url: process.env.SSR_API_ENDPOINT ?? "",
     exchanges: [cacheExchange, fetchExchange],
     fetchOptions: { cache: "no-store" },
   });

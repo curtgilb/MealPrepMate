@@ -941,12 +941,6 @@ export type ProfileInput = {
   gender: Gender;
   height: Scalars['Float']['input'];
   specialCondition: SpecialCondition;
-  targetCarbsGrams?: InputMaybe<Scalars['Float']['input']>;
-  targetCarbsPercentage?: InputMaybe<Scalars['Float']['input']>;
-  targetFatGrams?: InputMaybe<Scalars['Float']['input']>;
-  targetFatPercentage?: InputMaybe<Scalars['Float']['input']>;
-  targetProteinGrams?: InputMaybe<Scalars['Float']['input']>;
-  targetProteinPecentage?: InputMaybe<Scalars['Float']['input']>;
   weight?: InputMaybe<Scalars['Float']['input']>;
 };
 

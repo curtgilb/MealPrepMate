@@ -66,20 +66,14 @@
 //   // },
 // ];
 
-// export default async function ImportsPage() {
-//   const result = await getClient().query(importsQuery, {});
-//   const { data, error } = result;
-//   if (error) return <p>Oh no... {error.message}</p>;
+export default async function ImportsPage() {
+  //   const result = await getClient().query(importsQuery, {});
+  //   const { data, error } = result;
+  //   if (error) return <p>Oh no... {error.message}</p>;
 
-//   return (
-//     <div>
-//       <div className="mb-8 flex">
-//         <ImportFileUpload />
-//         {/* <Button variant="secondary">
-//           <Plus className="mr-2 h-4 w-4" /> Import file
-//         </Button> */}
-//       </div>
-//       <DataTable columns={columns} data={data?.imports.importJobs ?? []} />
-//     </div>
-//   );
-// }
+  return (
+    <div>
+      <h2>Imports</h2>
+    </div>
+  );
+}

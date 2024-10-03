@@ -19,13 +19,20 @@ import {
   ssrExchange,
 } from "@urql/next";
 import { Menu } from "lucide-react";
-import { Inter } from "next/font/google";
+import { Inter, Merriweather } from "next/font/google";
 import { useMemo, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import Image from "next/image";
 
 const fontSans = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
+});
+
+const fontSerif = Merriweather({
+  weight: ["300", "400", "700", "900"],
+  subsets: ["latin"],
+  variable: "--font-serif",
 });
 
 export default function RootLayout({
@@ -40,7 +47,7 @@ export default function RootLayout({
     });
 
     const client = createClient({
-      url: "http://localhost:3025/graphql",
+      url: process.env.NEXT_PUBLIC_CLIENT_API_URL ?? "",
       fetchOptions: { cache: "no-store" },
       exchanges: [
         cacheExchange({
@@ -120,24 +127,18 @@ export default function RootLayout({
     marginLeft: isCollapsed ? "4.5rem" : "15rem",
   });
 
-  // function handleClick() {
-  //   api.start({
-  //     from: {
-  //       width: "4.5rem",
-  //     },
-  //     to: {
-  //       width: "18rem",
-  //     },
-  //   });
-  // }
-
   return (
     <html lang="en">
       <body
-        className={cn("bg-background font-sans antialiased", fontSans.variable)}
+        className={cn(
+          "bg-background font-sans antialiased",
+          fontSans.variable,
+          fontSerif.variable
+        )}
       >
         <header className="fixed z-50 inset-x-0 top-0 px-3 py-2 flex items-center border-b bg-white">
           <Button
+            className="mr-2"
             onClick={() => {
               setCollapsed(!isCollapsed);
             }}
@@ -145,7 +146,7 @@ export default function RootLayout({
           >
             <Menu />
           </Button>
-          <p className="text-2xl font-bold ml-2">MyPantryPal</p>
+          <p className="font-serif font-bold text-xl">MealPrepMate</p>
         </header>
         <animated.aside
           style={{
@@ -156,7 +157,7 @@ export default function RootLayout({
           <Navigation isCollapsed={isCollapsed} />
         </animated.aside>
         <animated.main
-          className="mt-[3.5rem] bg-muted min-h-main-full"
+          className="mt-[3.5rem] min-h-main-full"
           style={{ ...mainSprings }}
         >
           <UrqlProvider client={client} ssr={ssr}>

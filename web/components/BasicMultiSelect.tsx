@@ -40,8 +40,6 @@ export function BasicMultiSelect<
         }}
         value={value}
       />
-
-      <TagList variant="light" list={value} />
     </div>
   );
 }

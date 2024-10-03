@@ -32,7 +32,7 @@ export default function RecipesPage() {
 
   return (
     <SingleColumnCentered className="flex flex-col gap-10">
-      <h1 className="text-4xl font-black">Recipes</h1>
+      <h1 className="text-4xl font-serif font-black">Recipes</h1>
       <div className="flex justify-between items-center">
         <div className="flex gap-2">
           <InputWithIcon className="w-96" startIcon={Search} />

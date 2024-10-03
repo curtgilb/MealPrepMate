@@ -70,14 +70,14 @@
 //   },
 // ];
 
-// export default async function ItemsImported() {
-//   const result = await getClient().query(itemsImportedQuery, {});
-//   const { data, error } = result;
-//   if (error) return <p>Oh no... {error.message}</p>;
+export default async function ItemsImported() {
+  //   const result = await getClient().query(itemsImportedQuery, {});
+  //   const { data, error } = result;
+  //   if (error) return <p>Oh no... {error.message}</p>;
 
-//   return (
-//     <div>
-//       <DataTable columns={columns} data={data?.importRecords.records ?? []} />
-//     </div>
-//   );
-// }
+  return (
+    <div>
+      <h2>Imports</h2>
+    </div>
+  );
+}

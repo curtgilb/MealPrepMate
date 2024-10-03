@@ -10,7 +10,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   EditRecipeProps,
   EditRecipeSubmit,
@@ -21,16 +20,26 @@ import {
   GetCuisinesDocument,
 } from "@/gql/graphql";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { forwardRef, useImperativeHandle } from "react";
-import { useForm } from "react-hook-form";
+import {
+  forwardRef,
+  useContext,
+  useImperativeHandle,
+  useState,
+  createContext,
+} from "react";
+import { useForm, UseFormReturn } from "react-hook-form";
 import { useMutation } from "@urql/next";
 import { z } from "zod";
 import { editRecipeMutation } from "@/features/recipe/api/Recipe";
+import { RichTextEditor } from "@/components/rich_text/RichTextEditor";
+import { EditRecipeIngredientItem } from "@/features/recipe/components/edit/ingredients/EditRecipeIngredientItem";
+import { EditIngredients } from "@/features/recipe/components/edit/info/ingredients/EditIngredients";
 
 export const BasicItem = z.object({
   id: z.string(),
   name: z.string(),
 });
+
 const PhotoItem = z.object({
   id: z.string(),
   url: z.string(),
@@ -54,9 +63,14 @@ const recipeInputValidation = z.object({
   photos: z.array(PhotoItem),
 });
 
+type RecipeValidation = z.infer<typeof recipeInputValidation>;
+export const FormContext = createContext<
+  UseFormReturn<RecipeValidation> | undefined
+>(undefined);
+
 export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
-  function EditIngredients({ recipe }, ref) {
-    const form = useForm<z.infer<typeof recipeInputValidation>>({
+  function EditeRecipe({ recipe }, ref) {
+    const form = useForm<RecipeValidation>({
       resolver: zodResolver(recipeInputValidation),
       defaultValues: {
         title: recipe?.name ?? "",
@@ -77,7 +91,7 @@ export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
     });
 
     const [result, editRecipe] = useMutation(editRecipeMutation);
-
+    const [directions, setDirections] = useState<string>("Hello World");
     useImperativeHandle(ref, () => ({
       submit(postSubmit) {
         form.handleSubmit(
@@ -104,128 +118,87 @@ export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
     }));
 
     return (
-      <div className="">
-        <Form {...form}>
-          <form className="grid md:grid-cols-3 gap-x-16 gap-y-6">
-            <FormField
-              control={form.control}
-              name="photos"
-              render={({ field }) => (
-                <FormItem className="max-w-96">
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <ImagePicker
-                      value={field.value}
-                      setValue={(images) => {
-                        console.log("set value", images);
-                        form.setValue("photos", images);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+      <div>
+        <FormContext.Provider value={form}>
+          <Form {...form}>
+            <form>
+              <div className="col-span-2 flex flex-col gap-4 max-w-96">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Name of Recipe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <div className="col-span-2 flex flex-col gap-6">
-              <FormField
+                <div className="flex justify-between">
+                  <FormField
+                    control={form.control}
+                    name="prepTime"
+                    render={({ field }) => (
+                      <FormItem className="max-w-20">
+                        <FormLabel>Prep Time</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="marinadeTime"
+                    render={({ field }) => (
+                      <FormItem className="max-w-20">
+                        <FormLabel>Rest Time</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="cookTime"
+                    render={({ field }) => (
+                      <FormItem className="max-w-20">
+                        <FormLabel>Cook Time</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* <FormField
                 control={form.control}
-                name="title"
+                name="photos"
                 render={({ field }) => (
                   <FormItem className="max-w-96">
                     <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Name of Recipe" {...field} />
+                      <ImagePicker
+                        value={field.value}
+                        setValue={(images) => {
+                          console.log("set value", images);
+                          form.setValue("photos", images);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              /> */}
 
-              <FormField
-                control={form.control}
-                name="source"
-                render={({ field }) => (
-                  <FormItem className="max-w-96">
-                    <FormLabel>Source</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex gap-4">
-                <FormField
-                  control={form.control}
-                  name="prepTime"
-                  render={({ field }) => (
-                    <FormItem className="max-w-20">
-                      <FormLabel>Prep Time</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="marinadeTime"
-                  render={({ field }) => (
-                    <FormItem className="max-w-20">
-                      <FormLabel>Rest Time</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="cookTime"
-                  render={({ field }) => (
-                    <FormItem className="max-w-20">
-                      <FormLabel>Cook Time</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="flex gap-x-6">
-                <FormField
-                  control={form.control}
-                  name="leftoverFridgeLife"
-                  render={({ field }) => (
-                    <FormItem className="max-w-20">
-                      <FormLabel>Fridge Life</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="leftoverFreezerLife"
-                  render={({ field }) => (
-                    <FormItem className="max-w-20">
-                      <FormLabel>Freezer Life</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 md:gap-x-6">
                 <FormField
                   control={form.control}
                   name="cuisine"
@@ -290,63 +263,100 @@ export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
                   )}
                 />
               </div>
-            </div>
-            <FormField
-              control={form.control}
-              name="ingredients"
-              render={({ field }) => (
-                <FormItem className="row-span-2 flex flex-col gap-2">
-                  <FormLabel>Ingredients</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Ingredient list"
-                      className="resize-none grow"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
-            <FormField
-              control={form.control}
-              name="directions"
-              render={({ field }) => (
-                <FormItem className="col-span-2">
-                  <FormLabel>Directions</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Tell us a little bit about yourself"
-                      className="resize-none min-h-96"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <div className="flex gap-12">
+                <EditIngredients ingredients={null} />
+                <div className="max-w-prose space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="directions"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Directions</FormLabel>
+                        <FormControl>
+                          <RichTextEditor
+                            value={field.value}
+                            onChange={(v) => form.setValue("directions", v)}
+                            editable
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem className="col-span-2">
-                  <FormLabel>Notes</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Tell us a little bit about yourself"
-                      className="resize-none min-h-72"
-                      {...field}
+                  <FormField
+                    control={form.control}
+                    name="notes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Notes</FormLabel>
+                        <FormControl>
+                          <RichTextEditor
+                            value={field.value}
+                            onChange={(v) => form.setValue("notes", v)}
+                            editable
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex gap-x-6">
+                    <FormField
+                      control={form.control}
+                      name="leftoverFridgeLife"
+                      render={({ field }) => (
+                        <FormItem className="max-w-20">
+                          <FormLabel>Fridge Life</FormLabel>
+                          <FormControl>
+                            <Input type="number" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </form>
-        </Form>
+                    <FormField
+                      control={form.control}
+                      name="leftoverFreezerLife"
+                      render={({ field }) => (
+                        <FormItem className="max-w-20">
+                          <FormLabel>Freezer Life</FormLabel>
+                          <FormControl>
+                            <Input type="number" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="source"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Source</FormLabel>
+                        <FormControl>
+                          <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </form>
+          </Form>
+        </FormContext.Provider>
       </div>
     );
   }
 );
+
+// <RichTextEditor
+// value={directions}
+// onChange={(v) => setDirections(v)}
+// editable
+// />

@@ -31,7 +31,7 @@ export function MealPlans() {
   const { data, fetching, error } = result;
 
   return (
-    <div className="grid  grid-cols-grid-52">
+    <div className="grid grid-cols-grid-52">
       {data?.mealPlans.map((mealPlan) => {
         const photos = mealPlan.planRecipes
           .map((recipe) => {
