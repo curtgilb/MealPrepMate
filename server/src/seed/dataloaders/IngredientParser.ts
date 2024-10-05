@@ -1,12 +1,9 @@
 import { Prisma } from "@prisma/client";
-import { readCSV } from "../../services/io/Readers.js";
-import { toTitleCase } from "../../util/utils.js";
+import { readCSV } from "@/features/io/Readers.js";
+import { toTitleCase } from "@/util/utils.js";
 import { z } from "zod";
-import { cleanedStringSchema } from "../../validations/RecipeValidation.js";
-import {
-  nullableString,
-  stringArray,
-} from "../../validations/utilValidations.js";
+import { cleanedStringSchema } from "@/validations/RecipeValidation.js";
+import { nullableString, stringArray } from "@/validations/utilValidations.js";
 
 type IngredientParserInput = {
   ingredientCsvPath: string;

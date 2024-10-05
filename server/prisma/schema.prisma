@@ -3,7 +3,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearch"]
+  previewFeatures = ["postgresqlExtensions", "typedSql"]
 }
 
 generator json {
@@ -19,6 +19,7 @@ generator pothos {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  extensions = [pg_trgm]
 }
 
 enum ImportType {
@@ -204,6 +205,7 @@ model RecipeIngredient {
   maxQty            Float?
   name              String?
   order             Int
+  verified          Boolean @default(false)
   unit              MeasurementUnit?       @relation(fields: [measurementUnitId], references: [id])
   measurementUnitId String?
   recipe            Recipe                 @relation(fields: [recipeId], references: [id], onDelete: Cascade)

@@ -1,8 +1,8 @@
 import { Job, Queue } from "bullmq";
 import { Worker } from "bullmq";
-import { db } from "./db.js";
+import { db } from "./infrastructure/repository/db.js";
 import { DateTime } from "luxon";
-import { connection } from "./Redis.js";
+import { connection } from "./infrastructure/Redis.js";
 
 interface NotificationMessage {
   message: string;

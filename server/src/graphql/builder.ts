@@ -3,8 +3,8 @@ import SchemaBuilder from "@pothos/core";
 import PrismaPlugin from "@pothos/plugin-prisma";
 import ValidationPlugin from "@pothos/plugin-validation";
 import { DateTimeResolver } from "graphql-scalars";
-import { db } from "../db.js";
-import type PrismaTypes from "../types/PothosTypes.js";
+import { db } from "@/infrastructure/repository/db.js";
+import type PrismaTypes from "@/types/PothosTypes.js";
 
 const builder = new SchemaBuilder<{
   PrismaTypes: PrismaTypes;

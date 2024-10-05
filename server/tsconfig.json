@@ -12,6 +12,10 @@
     "rootDirs": ["src"],
     "outDir": "dist",
     "types": ["node"],
-    "noEmitOnError": false
+    "noEmitOnError": false,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   }
 }

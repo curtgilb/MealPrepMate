@@ -1,15 +1,15 @@
 import { MeasurementSystem, PrismaClient } from "@prisma/client";
 import { DateTime } from "luxon";
-import { createChickenGyro } from "../../data/test_data/ChickenGyroRecipe.js";
-import { createHalalChicken } from "../../data/test_data/HalalChickenRecipe.js";
+import { createChickenGyro } from "@/data/test_data/ChickenGyroRecipe.js";
+import { createHalalChicken } from "@/data/test_data/HalalChickenRecipe.js";
 import {
   createScheduledInstance,
   mealPlanCreateStmt,
-} from "../../data/test_data/MealPlan.js";
-import { db } from "../db.js";
+} from "@/data/test_data/MealPlan.js";
+import { db } from "../infrastructure/repository/db.js";
 // import { RecipeKeeperImport } from "../services/import/importers/RecipeKeeperImport.js";
-import { readCSV } from "../services/io/Readers.js";
-import { storage } from "../storage.js";
+import { readCSV } from "../features/io/Readers.js";
+import { storage } from "../infrastructure/storage.js";
 import { toMeasurementUnitTypeEnum } from "../util/Cast.js";
 import { IngredientLoader } from "./dataloaders/IngredientParser.js";
 import { NutrientLoader } from "./dataloaders/NutrientParser.js";
@@ -65,7 +65,7 @@ async function seedDb() {
 //     },
 //   });
 //   const importer = new RecipeKeeperImport({
-//     source: "../../../data/RecipeKeeper.zip",
+//     source: "@/../data/RecipeKeeper.zip",
 //     import: recipeKeeperImport,
 //   });
 //   await importer.processImport();

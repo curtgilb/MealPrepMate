@@ -5,16 +5,16 @@ import {
   SpecialCondition,
   TargetPreference,
 } from "@prisma/client";
-import { readCSV } from "../../services/io/Readers.js";
-import { db } from "../../db.js";
+import { readCSV } from "@/features/io/Readers.js";
+import { db } from "@/infrastructure/repository/db.js";
 import { z } from "zod";
 import {
   cleanedStringSchema,
   nullableString,
   stringArray,
-} from "../../validations/utilValidations.js";
-import { toTitleCase } from "../../util/utils.js";
-import { UnitSearch } from "../../services/search/UnitSearch.js";
+} from "@/validations/utilValidations.js";
+import { toTitleCase } from "@/util/utils.js";
+import { UnitSearch } from "@/features/search/UnitSearch.js";
 import { NutrientType } from "@prisma/client";
 
 type NutrientParseInput = {

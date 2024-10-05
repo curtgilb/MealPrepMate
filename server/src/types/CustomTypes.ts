@@ -1,7 +1,7 @@
 import { Prisma, RecordStatus } from "@prisma/client";
 import { MealPlanRecipeWithServing } from "../../data/test_data/MealPlan.js";
-import { SummedNutrients } from "../services/nutrition/LabelAggregator.js";
-import { AggregateNutritionLabel } from "../services/nutrition/LabelMaker.js";
+import { SummedNutrients } from "../features/nutrition/LabelAggregator.js";
+import { AggregateNutritionLabel } from "../features/nutrition/LabelMaker.js";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
