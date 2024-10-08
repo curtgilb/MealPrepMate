@@ -10,13 +10,13 @@ lerna-debug.log*
 *.DS_Store
 
 # Storage
-backend/storage/
+/storage/
+/storage/.minio.sys/
 
-cloudbeaver/
+/cloudbeaver/
 
-backend/pgadmin/
 
-backend/redis/
+/redis/
 
 *.env
 
@@ -307,3 +307,4 @@ cython_debug/
 .DS_Store
 .env
 web/package-lock.json
+

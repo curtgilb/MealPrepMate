@@ -201,8 +201,6 @@ model RecipeIngredient {
   id                String                 @id @default(cuid())
   sentence          String
   quantity          Float?
-  minQty            Float?
-  maxQty            Float?
   name              String?
   order             Int
   verified          Boolean @default(false)
@@ -364,7 +362,7 @@ enum EntityType {
 }
 
 model WebScrapedRecipe {
-  id         String   @id @default(cuid())
+  id         String   @id @default(uuid())
   url        String
   isBookmark Boolean  @default(false)
   scraped    Boolean  @default(false)
@@ -374,19 +372,16 @@ model WebScrapedRecipe {
 }
 
 model Recipe {
-  id                  String                  @id @default(cuid())
+  id                  String                  @id @default(uuid())
   type                EntityType              @default(RECIPE)
   name                String
   source              String?
   preparationTime     Int?
   cookingTime         Int?
   marinadeTime        Int?
-  totalTime           Int?
-  ingredientsTxt      String?
   directions          String?
   notes               String?
   photos              Photo[]
-  isFavorite          Boolean                 @default(false)
   course              Course[]
   category            Category[]
   cuisine             Cuisine[]
@@ -407,7 +402,7 @@ model Recipe {
 
 // BREAKFAST, LUNCH, DINNER, SNACK
 model Course {
-  id      String   @id @default(cuid())
+  id      String   @id @default(uuid())
   name    String   @unique
   recipes Recipe[]
   // @@map("course")
@@ -415,21 +410,21 @@ model Course {
 
 // Main Dish, Side Dish, Dessert, Appetizer, Salad, Soup, Bread, Beverage, Sauce or Condiment, Seasoning or Spice, Marinade, Fingerfood, Snack, Drink
 model Category {
-  id      String   @id @default(cuid())
+  id      String   @id @default(uuid())
   name    String   @unique
   recipes Recipe[]
   // @@map("category")
 }
 
 model Cuisine {
-  id      String   @id @default(cuid())
+  id      String   @id @default(uuid())
   name    String   @unique
   recipes Recipe[]
   // @@map("cuisine")
 }
 
 model Photo {
-  id        String  @id @default(cuid())
+  id        String  @id @default(uuid())
   path      String
   isPrimary Boolean @default(false)
   hash      String  @unique
@@ -439,7 +434,7 @@ model Photo {
 }
 
 model NutritionLabel {
-  id                String                   @id @default(cuid())
+  id                String                   @id @default(uuid())
   type              EntityType               @default(LABEL)
   recipe            Recipe                   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId          String
@@ -461,7 +456,7 @@ model NutritionLabel {
 }
 
 model AggregateLabel {
-  id                 String             @id @default(cuid())
+  id                 String             @id @default(uuid())
   recipe             Recipe             @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId           String             @unique
   nutrients          AggLabelNutrient[]
@@ -500,7 +495,7 @@ model AggLabelNutrient {
 }
 
 model Nutrient {
-  id                      String                   @id @default(cuid())
+  id                      String                   @id @default(uuid())
   name                    String                   @unique
   isMacro                 Boolean         
   alternateNames          String[]
@@ -523,14 +518,14 @@ model Nutrient {
 }
 
 model RankedNutrient {
-  id         String   @id @default(cuid())
+  id         String   @id @default(uuid())
   rank       Int
   nutrient   Nutrient @relation(fields: [nutrientId], references: [id])
   nutrientId String   @unique
 }
 
 model NutrientTarget {
-  id          String           @id @default(cuid())
+  id          String           @id @default(uuid())
   targetValue Float
   preference  TargetPreference
   threshold   Float?
@@ -545,7 +540,7 @@ enum TargetPreference {
 }
 
 model NutrientImportMapping {
-  id         String     @id @default(cuid())
+  id         String     @id @default(uuid())
   importType ImportType
   nutrient   Nutrient   @relation(fields: [nutrientId], references: [id])
   nutrientId String
@@ -555,7 +550,7 @@ model NutrientImportMapping {
 }
 
 model DailyReferenceIntake {
-  id               String           @id @default(cuid())
+  id               String           @id @default(uuid())
   value            Float
   upperLimit       Float?
   gender           Gender
@@ -579,7 +574,7 @@ enum SpecialCondition {
 }
 
 model HealthProfile {
-  id                      String           @id @default(cuid())
+  id                      String           @id @default(uuid())
   weight                  Float?
   gender                  Gender
   bodyFatPercentage       Float?

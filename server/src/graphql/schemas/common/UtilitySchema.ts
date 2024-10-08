@@ -1,12 +1,5 @@
 import { builder } from "@/graphql/builder.js";
-
-const numericalComparison = builder.inputType("NumericalComparison", {
-  fields: (t) => ({
-    lte: t.int(),
-    eq: t.int(),
-    gte: t.int(),
-  }),
-});
+import { NumericalFilter } from "@/infrastructure/repository/extensions/RecipeExtension.js";
 
 const offsetPagination = builder.inputType("OffsetPagination", {
   fields: (t) => ({

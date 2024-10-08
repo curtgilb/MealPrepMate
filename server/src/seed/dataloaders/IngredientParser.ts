@@ -1,9 +1,10 @@
 import { Prisma } from "@prisma/client";
-import { readCSV } from "@/features/io/Readers.js";
+
 import { toTitleCase } from "@/util/utils.js";
 import { z } from "zod";
 import { cleanedStringSchema } from "@/validations/RecipeValidation.js";
 import { nullableString, stringArray } from "@/validations/utilValidations.js";
+import { readCSV } from "@/infrastructure/Readers.js";
 
 type IngredientParserInput = {
   ingredientCsvPath: string;
@@ -44,10 +45,10 @@ export class IngredientLoader {
   constructor(input?: IngredientParserInput) {
     this.ingredientPaths = input?.ingredientCsvPath
       ? input.ingredientCsvPath
-      : "../../../data/seed_data/Ingredients.csv";
+      : "../../data/seed_data/Ingredients.csv";
     this.expirationRulesPath = input?.expirationRulePath
       ? input.expirationRulePath
-      : "../../../data/seed_data/ExpirationRules.csv";
+      : "../../data/seed_data/ExpirationRules.csv";
   }
 
   async parseIngredients(): Promise<Prisma.IngredientCreateInput[]> {

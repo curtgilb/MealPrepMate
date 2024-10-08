@@ -5,7 +5,7 @@ import { measurementSystem } from "@/graphql/schemas/common/EnumSchema.js";
 
 const unitType = builder.enumType(UnitType, { name: "UnitType" });
 
-const measurementUnit = builder.prismaObject("MeasurementUnit", {
+export const measurementUnit = builder.prismaObject("MeasurementUnit", {
   name: "MeasurementUnit",
   fields: (t) => ({
     id: t.exposeString("id"),
@@ -78,5 +78,3 @@ builder.mutationFields((t) => ({
     },
   }),
 }));
-
-export { measurementUnit };

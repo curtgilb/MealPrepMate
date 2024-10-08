@@ -1,18 +1,17 @@
 import { MeasurementSystem, PrismaClient } from "@prisma/client";
 import { DateTime } from "luxon";
-import { createChickenGyro } from "@/data/test_data/ChickenGyroRecipe.js";
-import { createHalalChicken } from "@/data/test_data/HalalChickenRecipe.js";
+import { createChickenGyro } from "data/test_data/ChickenGyroRecipe.js";
+import { createHalalChicken } from "data/test_data/HalalChickenRecipe.js";
+import { storage } from "@/infrastructure/storage.js";
+import { toMeasurementUnitTypeEnum } from "@/util/Cast.js";
+import { IngredientLoader } from "./dataloaders/IngredientParser.js";
+import { NutrientLoader } from "./dataloaders/NutrientParser.js";
+import { db } from "@/infrastructure/repository/db.js";
 import {
   createScheduledInstance,
   mealPlanCreateStmt,
-} from "@/data/test_data/MealPlan.js";
-import { db } from "../infrastructure/repository/db.js";
-// import { RecipeKeeperImport } from "../services/import/importers/RecipeKeeperImport.js";
-import { readCSV } from "../features/io/Readers.js";
-import { storage } from "../infrastructure/storage.js";
-import { toMeasurementUnitTypeEnum } from "../util/Cast.js";
-import { IngredientLoader } from "./dataloaders/IngredientParser.js";
-import { NutrientLoader } from "./dataloaders/NutrientParser.js";
+} from "data/test_data/MealPlan.js";
+import { readCSV } from "@/infrastructure/Readers.js";
 const prisma = new PrismaClient();
 const bucketPolicy = `{
     "Version": "2012-10-17",
@@ -236,7 +235,7 @@ async function deleteBuckets() {
 }
 
 async function loadUnits() {
-  const data = await readCSV("../../../data/seed_data/units.csv");
+  const data = await readCSV("../../data/seed_data/units.csv");
   await db.measurementUnit.createMany({
     data: data.map(({ record }) => ({
       id: record.id,

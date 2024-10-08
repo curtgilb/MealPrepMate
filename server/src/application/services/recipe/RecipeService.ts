@@ -21,6 +21,4 @@ async function scrapeRecipeFromWeb(
   return bookmark;
 }
 
-async function parseIngredientLines() {}
-
 export { scrapeRecipeFromWeb };

@@ -1,8 +1,8 @@
+import { toCamelCase } from "@/util/utils.js";
 import { parse } from "csv-parse";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { toCamelCase } from "../../util/utils.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

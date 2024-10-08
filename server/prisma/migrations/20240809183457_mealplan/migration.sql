@@ -1,4 +1,0 @@
--- AlterTable
-ALTER TABLE "MealPlan" ADD COLUMN     "endDay" INTEGER,
-ADD COLUMN     "numOfWeeks" INTEGER NOT NULL DEFAULT 1,
-ADD COLUMN     "startDay" INTEGER;

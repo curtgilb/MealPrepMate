@@ -1,3 +1,12 @@
+import { searchRecipes } from "@/application/services/recipe/RecipeSearch.js";
+import { builder } from "@/graphql/builder.js";
+import {
+  nextPageInfo,
+  offsetPagination,
+} from "@/graphql/schemas/common/UtilitySchema.js";
+import { recipeIngredientInput } from "@/graphql/schemas/recipe/RecipeIngredientSchema.js";
+import { db } from "@/infrastructure/repository/db.js";
+import { RecipeInputValidation } from "@/validations/RecipeValidation.js";
 import { queryFromInfo } from "@pothos/plugin-prisma";
 import {
   parseResolveInfo,
@@ -5,21 +14,6 @@ import {
   simplifyParsedResolveInfoFragmentWithType,
 } from "graphql-parse-resolve-info";
 import { z } from "zod";
-import { db } from "@/infrastructure/repository/db.js";
-import { IngredientMatcher } from "@/domain/extensions/IngredientMatcher.js";
-import { createRecipeCreateStmt } from "@/domain/extensions/RecipeExtension.js";
-import { getIngredientMaxFreshness } from "@/application/services/ingredient/IngredientService.js";
-import {
-  RecipeWithFreshness,
-  searchRecipes,
-} from "@/application/services/recipe/RecipeSearch.js";
-import { RecipeInputValidation } from "@/validations/RecipeValidation.js";
-import { builder } from "@/graphql/builder.js";
-import {
-  nextPageInfo,
-  numericalComparison,
-  offsetPagination,
-} from "@/graphql/schemas/common/UtilitySchema.js";
 
 // ============================================ Types ===================================
 const recipe = builder.prismaObject("Recipe", {
@@ -31,7 +25,6 @@ const recipe = builder.prismaObject("Recipe", {
     cookTime: t.exposeInt("cookingTime", { nullable: true }),
     marinadeTime: t.exposeInt("marinadeTime", { nullable: true }),
     notes: t.exposeString("notes", { nullable: true }),
-    isFavorite: t.exposeBoolean("isFavorite"),
     verified: t.exposeBoolean("verified"),
     leftoverFridgeLife: t.exposeInt("leftoverFridgeLife", { nullable: true }),
     totalTime: t.exposeInt("totalTime", { nullable: true }),
@@ -44,17 +37,7 @@ const recipe = builder.prismaObject("Recipe", {
     photos: t.relation("photos"),
     nutritionLabels: t.relation("nutritionLabels", { nullable: true }),
     aggregateLabel: t.relation("aggregateLabel", { nullable: true }),
-    ingredientFreshness: t.int({
-      nullable: true,
-      resolve: async (recipe) => {
-        if (
-          Object.prototype.hasOwnProperty.call(recipe, "ingredientFreshness")
-        ) {
-          return (recipe as RecipeWithFreshness).ingredientFreshness;
-        }
-        return (await getIngredientMaxFreshness(recipe.id)).maxLife;
-      },
-    }),
+    ingredientFreshness: t.exposeInt("maxFreshness"),
   }),
 });
 
@@ -65,159 +48,20 @@ const createRecipeInput = builder.inputType("CreateRecipeInput", {
     source: t.string(),
     prepTime: t.int(),
     cookTime: t.int(),
-    marinadeTime: t.int({}),
+    marinadeTime: t.int(),
     directions: t.string(),
     notes: t.string(),
     photoIds: t.stringList(),
-    isFavorite: t.boolean(),
     courseIds: t.stringList(),
     categoryIds: t.stringList(),
     cuisineIds: t.stringList(),
-    ingredients: t.string(),
+    ingredients: t.field({ type: [recipeIngredientInput] }),
     leftoverFridgeLife: t.int(),
     leftoverFreezerLife: t.int(),
   }),
 });
 
-const nutritionFilter = builder.inputType("NutritionFilter", {
-  fields: (t) => ({
-    nutrientId: t.string({ required: true }),
-    perServing: t.boolean(),
-    target: t.field({ type: numericalComparison, required: true }),
-  }),
-});
-
-const ingredientFilter = builder.inputType("IngredientFilter", {
-  fields: (t) => ({
-    ingredientID: t.string({ required: true }),
-    amount: t.field({ type: numericalComparison }),
-    unitId: t.string(),
-  }),
-});
-
-const macroFilter = builder.inputType("MacroFilter", {
-  fields: (t) => ({
-    caloriePerServing: t.field({ type: numericalComparison, required: false }),
-    carbPerServing: t.field({ type: numericalComparison, required: false }),
-    fatPerServing: t.field({ type: numericalComparison, required: false }),
-    protienPerServing: t.field({ type: numericalComparison, required: false }),
-    alcoholPerServing: t.field({ type: numericalComparison, required: false }),
-  }),
-});
-// Filter by nutrient (calroies or any nutrient per serving or per recipe)
-// Filter by ingredient
-const recipeFilter = builder.inputType("RecipeFilter", {
-  fields: (t) => ({
-    searchString: t.string({ required: false }), // Searches recipe titles
-    numOfServings: t.field({ type: numericalComparison }),
-    courseIds: t.stringList({ required: false }),
-    cuisineId: t.stringList({ required: false }),
-    categoryIds: t.stringList({ required: false }),
-    prepTime: t.field({ type: numericalComparison, required: false }),
-    cookTime: t.field({ type: numericalComparison, required: false }),
-    marinadeTime: t.field({ type: numericalComparison, required: false }),
-    totalPrepTime: t.field({ type: numericalComparison, required: false }),
-    leftoverFridgeLife: t.field({ type: numericalComparison, required: false }),
-    leftoverFreezerLife: t.field({
-      type: numericalComparison,
-      required: false,
-    }),
-    isFavorite: t.boolean({ required: false }),
-    macroFilter: t.field({ type: macroFilter, required: false }),
-    nutrientFilters: t.field({ type: [nutritionFilter], required: false }),
-    ingredientFilter: t.field({ type: [ingredientFilter], required: false }),
-    ingredientFreshDays: t.field({
-      type: numericalComparison,
-      required: false,
-    }),
-  }),
-});
-
-const recipeQuery = builder
-  .objectRef<{
-    nextOffset: number | null;
-    itemsRemaining: number;
-    recipes: RecipeWithFreshness[];
-  }>("RecipesQuery")
-  .implement({
-    fields: (t) => ({
-      nextOffset: t.exposeInt("nextOffset", { nullable: true }),
-      itemsRemaining: t.exposeInt("itemsRemaining"),
-      recipes: t.field({
-        type: [recipe],
-        resolve: (result) => result.recipes,
-      }),
-    }),
-  });
-
 // ============================================ Queries =================================
-builder.queryFields((t) => ({
-  recipe: t.prismaField({
-    type: "Recipe",
-    args: {
-      recipeId: t.arg.string({ required: true }),
-    },
-    validate: {
-      schema: z.object({ recipeId: z.string().cuid() }),
-    },
-    resolve: async (query, root, args) => {
-      return await db.recipe.findUniqueOrThrow({
-        where: { id: args.recipeId },
-        ...query,
-      });
-    },
-  }),
-  recipes: t.field({
-    type: recipeQuery,
-    args: {
-      filter: t.arg({ type: recipeFilter }),
-      pagination: t.arg({
-        type: offsetPagination,
-        required: true,
-      }),
-    },
-    resolve: async (root, args, context, info) => {
-      const query = queryFromInfo({ context, info, path: ["recipes"] });
-      const parsedResolveInfoFragment = parseResolveInfo(info);
-      const request = simplifyParsedResolveInfoFragmentWithType(
-        parsedResolveInfoFragment as ResolveTree,
-        info.returnType
-      );
-      const requestedFreshDays =
-        (Object.prototype.hasOwnProperty.call(request.args, "filter") &&
-          Object.prototype.hasOwnProperty.call(
-            request.args.filter,
-            "ingredientFreshDays"
-          )) ||
-        Object.prototype.hasOwnProperty.call(
-          request.fields,
-          "ingredientFreshness"
-        );
-
-      const results = await searchRecipes(
-        args.filter,
-        requestedFreshDays,
-        query
-      );
-      const paginatedResult = results.slice(
-        args.pagination.offset,
-        args.pagination.offset + args.pagination.take
-      );
-
-      const { itemsRemaining, nextOffset } = nextPageInfo(
-        paginatedResult.length,
-        args.pagination.take,
-        args.pagination.offset,
-        results.length
-      );
-      return {
-        nextOffset,
-        itemsRemaining,
-        recipes: paginatedResult,
-      };
-    },
-  }),
-}));
 
 // ============================================ Mutations ===============================
 

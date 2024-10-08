@@ -5,7 +5,7 @@ import {
   SpecialCondition,
   TargetPreference,
 } from "@prisma/client";
-import { readCSV } from "@/features/io/Readers.js";
+
 import { db } from "@/infrastructure/repository/db.js";
 import { z } from "zod";
 import {
@@ -16,6 +16,7 @@ import {
 import { toTitleCase } from "@/util/utils.js";
 import { UnitSearch } from "@/features/search/UnitSearch.js";
 import { NutrientType } from "@prisma/client";
+import { readCSV } from "@/infrastructure/Readers.js";
 
 type NutrientParseInput = {
   nutrientPath: string;
@@ -81,13 +82,13 @@ export class NutrientLoader {
   constructor(input?: NutrientParseInput) {
     this.nutrientPath = input?.nutrientPath
       ? input.nutrientPath
-      : "../../../data/seed_data/nutrients.csv";
+      : "../../data/seed_data/nutrients.csv";
     this.vitaminDriPath = input?.nutrientPath
       ? input.nutrientPath
-      : "../../../data/seed_data/vitamins_dri.csv";
+      : "../../data/seed_data/vitamins_dri.csv";
     this.mineralDriPath = input?.mineralDriPath
       ? input.mineralDriPath
-      : "../../../data/seed_data/minerals_dri.csv";
+      : "../../data/seed_data/minerals_dri.csv";
   }
 
   async parseNutrients(): Promise<{
