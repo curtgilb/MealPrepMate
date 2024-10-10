@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { db } from "@/infrastructure/repository/db.js";
-import { uploadReceipt } from "@/application/services/ingredient/receipt/ReceiptScan.js";
+import { uploadReceipt } from "@/application/services/receipt/ReceiptScan.js";
 import { builder } from "@/graphql/builder.js";
 
 builder.prismaObject("Receipt", {
@@ -35,6 +35,7 @@ builder.queryFields((t) => ({
     },
     type: "Receipt",
     resolve: async (query, root, args) => {
+      // @ts-ignore
       return await db.receipt.findUniqueOrThrow({
         where: { id: args.id },
         ...query,

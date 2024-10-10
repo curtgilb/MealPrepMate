@@ -123,16 +123,10 @@ async function deleteRecipeIngredient(id: string) {
   await db.recipeIngredient.delete({ where: { id } });
 }
 
-async function updateAggregateLabel(
-  recipeId: string,
-  db: DbTransactionClient
-) {}
-
 export {
   tagIngredients,
   addRecipeIngredient,
   addRecipeIngredients,
   editRecipeIngredient,
   deleteRecipeIngredient,
-  getIngredientFreshness,
 };

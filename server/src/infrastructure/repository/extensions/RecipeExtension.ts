@@ -54,7 +54,9 @@ export const recipeExtension = Prisma.defineExtension((client) => {
     model: {
       recipe: {
         async search(filter: RecipeFilter | undefined, query?: RecipeQuery) {
+          // @ts-ignore
           return await client.recipe.findMany({
+            ...query,
             where: {
               name: filter?.searchTerm,
               course: filter?.courseIds
@@ -86,10 +88,8 @@ export const recipeExtension = Prisma.defineExtension((client) => {
                 : undefined,
               cookingTime: filter?.cookTime,
               marinadeTime: filter?.marinadeTime,
-              totalTime: filter?.totalPrepTime,
               leftoverFridgeLife: filter?.leftoverFridgeLife,
               leftoverFreezerLife: filter?.leftoverFreezerLife,
-              maxFreshness: filter?.ingredientFreshDays,
               AND:
                 filter?.ingredientFilters &&
                 filter.ingredientFilters.map((ingredient) => ({

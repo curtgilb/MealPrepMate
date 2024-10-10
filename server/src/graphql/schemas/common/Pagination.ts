@@ -1,5 +1,4 @@
 import { builder } from "@/graphql/builder.js";
-import { NumericalFilter } from "@/infrastructure/repository/extensions/RecipeExtension.js";
 
 const offsetPagination = builder.inputType("OffsetPagination", {
   fields: (t) => ({
@@ -14,21 +13,6 @@ const cursorPagination = builder.inputType("CursorPagination", {
     take: t.int(),
   }),
 });
-
-const deleteResult = builder
-  .objectRef<{
-    success: boolean;
-    message?: string | undefined | null;
-  }>("DeleteResult")
-  .implement({
-    fields: (t) => ({
-      success: t.boolean({ resolve: (parent) => parent.success }),
-      message: t.string({
-        nullable: true,
-        resolve: (parent) => parent.message,
-      }),
-    }),
-  });
 
 function nextPageInfo(
   dataLength: number,
@@ -46,10 +30,4 @@ function nextPageInfo(
   };
 }
 
-export {
-  cursorPagination,
-  deleteResult,
-  nextPageInfo,
-  numericalComparison,
-  offsetPagination,
-};
+export { cursorPagination, nextPageInfo, offsetPagination };

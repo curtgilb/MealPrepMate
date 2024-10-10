@@ -4,7 +4,7 @@ import {
   RecipeIngredientUpdateInput,
   RecipeInput,
 } from "@/types/gql.js";
-import { LabelAggregator } from "@/application/services/nutrition/LabelAggregator.js";
+import { LabelAggregator } from "@/application/services/nutrition/aggregate_label/LabelAggregator.js";
 
 type RecipeQuery = {
   include?: Prisma.RecipeInclude | undefined;

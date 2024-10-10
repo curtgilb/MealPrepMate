@@ -5,7 +5,7 @@ import {
   editExpirationRuleValidation,
 } from "@/validations/IngredientValidation.js";
 import { builder } from "../../builder.js";
-import { deleteResult } from "../common/UtilitySchema.js";
+import { deleteResult } from "../common/Pagination.js";
 
 builder.prismaObject("ExpirationRule", {
   fields: (t) => ({

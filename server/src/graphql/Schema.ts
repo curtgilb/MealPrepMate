@@ -24,7 +24,7 @@ import "@/graphql/schemas/common/PhotoSchema.js";
 import "@/graphql/schemas/receipt/ReceiptSchema.js";
 import "@/graphql/schemas/recipe/RecipeSchema.js";
 import "@/graphql/schemas/user/UserSchema.js";
-import "@/graphql/schemas/common/UtilitySchema.js";
+import "@/graphql/schemas/common/Pagination.js";
 import "@/graphql/schemas/nutrition/MacroSchema.js";
 import "@/graphql/schemas/recipe/RecipeIngredientGroupSchema.js";
 

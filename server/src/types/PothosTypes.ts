@@ -713,9 +713,9 @@ export default interface PrismaTypes {
         ListRelations: "nutrients" | "importRecords";
         Relations: {
             recipe: {
-                Shape: Recipe;
+                Shape: Recipe | null;
                 Name: "Recipe";
-                Nullable: false;
+                Nullable: true;
             };
             ingredientGroup: {
                 Shape: RecipeIngredientGroup | null;

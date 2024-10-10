@@ -2,7 +2,7 @@ import { MeasurementSystem, PrismaClient } from "@prisma/client";
 import { DateTime } from "luxon";
 import { createChickenGyro } from "data/test_data/ChickenGyroRecipe.js";
 import { createHalalChicken } from "data/test_data/HalalChickenRecipe.js";
-import { storage } from "@/infrastructure/storage.js";
+import { storage } from "@/infrastructure/bucket/storage.js";
 import { toMeasurementUnitTypeEnum } from "@/util/Cast.js";
 import { IngredientLoader } from "./dataloaders/IngredientParser.js";
 import { NutrientLoader } from "./dataloaders/NutrientParser.js";

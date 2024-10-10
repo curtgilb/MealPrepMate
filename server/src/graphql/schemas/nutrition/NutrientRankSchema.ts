@@ -1,15 +1,21 @@
 import { db } from "@/infrastructure/repository/db.js";
 import { builder } from "@/graphql/builder.js";
+import {
+  RankedNutrientInput,
+  setRankedNutrients,
+} from "@/application/services/nutrition/NutrientService.js";
 
 // ============================================ Types ===================================
 
 // ============================================ Inputs ==================================
-const rankedNutrientInput = builder.inputType("RankedNutrientInput", {
-  fields: (t) => ({
-    nutrientId: t.string({ required: true }),
-    rank: t.int({ required: true }),
-  }),
-});
+const rankedNutrientInput = builder
+  .inputRef<RankedNutrientInput>("RankedNutrientInput")
+  .implement({
+    fields: (t) => ({
+      nutrientId: t.string({ required: true }),
+      rank: t.int({ required: true }),
+    }),
+  });
 
 // ============================================ Queries =================================
 builder.queryFields((t) => ({
@@ -33,23 +39,7 @@ builder.mutationFields((t) => ({
       nutrients: t.arg({ type: [rankedNutrientInput], required: true }),
     },
     resolve: async (query, root, args) => {
-      const [deleted, createMany, created] = await db.$transaction([
-        db.rankedNutrient.deleteMany({}),
-        db.rankedNutrient.createMany({
-          data: args.nutrients.map((ingredient) => ({
-            rank: ingredient.rank,
-            nutrientId: ingredient.nutrientId,
-          })),
-        }),
-        db.nutrient.findMany({
-          where: {
-            ranking: { isNot: null },
-          },
-          orderBy: { ranking: { rank: "desc" } },
-          ...query,
-        }),
-      ]);
-      return created;
+      return setRankedNutrients(args.nutrients, query);
     },
   }),
 }));

@@ -13,7 +13,7 @@ import {
   deleteResult,
   nextPageInfo,
   offsetPagination,
-} from "@/graphql/schemas/common/UtilitySchema.js";
+} from "@/graphql/schemas/common/Pagination.js";
 
 // ============================================ Types ===================================
 

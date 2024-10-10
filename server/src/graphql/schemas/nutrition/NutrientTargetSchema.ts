@@ -5,9 +5,13 @@ import { builder } from "@/graphql/builder.js";
 import { db } from "@/infrastructure/repository/db.js";
 import { editNutrientTargetValidation } from "@/validations/NutritionValidation.js";
 import { z } from "zod";
+import {
+  NutrientTargetInput,
+  setNutrientTarget,
+} from "@/application/services/nutrition/NutrientService.js";
 
-// // ============================================ Types ===================================
-const nutrientTarget = builder.prismaObject("NutrientTarget", {
+// ============================================ Types ===================================
+builder.prismaObject("NutrientTarget", {
   fields: (t) => ({
     id: t.exposeString("id"),
     nutrientTarget: t.exposeFloat("targetValue"),
@@ -23,23 +27,22 @@ const nutrientTargetEnum = builder.enumType(TargetPreference, {
   name: "TargetPreference",
 });
 
-// // ============================================ Inputs ==================================
-// builder.inputType("", {});
+// ============================================ Inputs ==================================
 
-const nutrientTargetInput = builder.inputType("NutrientTargetInput", {
-  fields: (t) => ({
-    nutrientId: t.string({ required: true }),
-    target: t.float({ required: true }),
-    threshold: t.float(),
-    preference: t.field({ type: nutrientTargetEnum, required: true }),
-  }),
-});
+const nutrientTargetInput = builder
+  .inputRef<NutrientTargetInput>("NutrientTargetInput")
+  .implement({
+    fields: (t) => ({
+      nutrientId: t.string({ required: true }),
+      value: t.float({ required: true }),
+      threshold: t.float(),
+      preference: t.field({ type: nutrientTargetEnum, required: true }),
+    }),
+  });
 
-// // ============================================ Queries =================================
-// builder.queryFields((t) => ({}));
+// ============================================ Queries =================================
 
-// // ============================================ Mutations ===============================
-// builder.mutationFields((t) => ({}));
+// ============================================ Mutations ===============================
 
 builder.mutationFields((t) => ({
   setNutritionTarget: t.prismaField({
@@ -47,30 +50,8 @@ builder.mutationFields((t) => ({
     args: {
       target: t.arg({ type: nutrientTargetInput, required: true }),
     },
-    validate: {
-      schema: z.object({
-        target: editNutrientTargetValidation,
-      }),
-    },
     resolve: async (query, root, args) => {
-      await db.nutrientTarget.upsert({
-        where: { id: args.target.nutrientId },
-        update: {
-          targetValue: args.target.target,
-          preference: args.target.preference,
-          threshold: args.target.threshold,
-        },
-        create: {
-          targetValue: args.target.target,
-          preference: args.target.preference,
-          threshold: args.target.threshold,
-          nutrient: { connect: { id: args.target.nutrientId } },
-        },
-      });
-      return await db.nutrient.findUniqueOrThrow({
-        where: { id: args.target.nutrientId },
-        ...query,
-      });
+      return setNutrientTarget(args.target, query);
     },
   }),
 }));

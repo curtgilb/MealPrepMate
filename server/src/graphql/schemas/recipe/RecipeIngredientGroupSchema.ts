@@ -1,6 +1,6 @@
 import { db } from "@/infrastructure/repository/db.js";
 import { builder } from "@/graphql/builder.js";
-import { deleteResult } from "@/graphql/schemas/common/UtilitySchema.js";
+import { deleteResult } from "@/graphql/schemas/common/Pagination.js";
 
 // ============================================ Types ===================================
 builder.prismaObject("RecipeIngredientGroup", {

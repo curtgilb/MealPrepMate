@@ -1,19 +1,14 @@
-import { searchRecipes } from "@/application/services/recipe/RecipeSearch.js";
+import {
+  createRecipe,
+  CreateRecipeInput,
+  deleteRecipes,
+  editRecipe,
+  EditRecipeInput,
+  getIngredientFreshness,
+} from "@/features/recipe/RecipeService.js";
 import { builder } from "@/graphql/builder.js";
-import {
-  nextPageInfo,
-  offsetPagination,
-} from "@/graphql/schemas/common/UtilitySchema.js";
+import { DeleteResult } from "@/graphql/schemas/common/MutationResult.js";
 import { recipeIngredientInput } from "@/graphql/schemas/recipe/RecipeIngredientSchema.js";
-import { db } from "@/infrastructure/repository/db.js";
-import { RecipeInputValidation } from "@/validations/RecipeValidation.js";
-import { queryFromInfo } from "@pothos/plugin-prisma";
-import {
-  parseResolveInfo,
-  ResolveTree,
-  simplifyParsedResolveInfoFragmentWithType,
-} from "graphql-parse-resolve-info";
-import { z } from "zod";
 
 // ============================================ Types ===================================
 const recipe = builder.prismaObject("Recipe", {
@@ -27,7 +22,6 @@ const recipe = builder.prismaObject("Recipe", {
     notes: t.exposeString("notes", { nullable: true }),
     verified: t.exposeBoolean("verified"),
     leftoverFridgeLife: t.exposeInt("leftoverFridgeLife", { nullable: true }),
-    totalTime: t.exposeInt("totalTime", { nullable: true }),
     leftoverFreezerLife: t.exposeInt("leftoverFreezerLife", { nullable: true }),
     directions: t.exposeString("directions", { nullable: true }),
     cuisine: t.relation("cuisine"),
@@ -37,29 +31,56 @@ const recipe = builder.prismaObject("Recipe", {
     photos: t.relation("photos"),
     nutritionLabels: t.relation("nutritionLabels", { nullable: true }),
     aggregateLabel: t.relation("aggregateLabel", { nullable: true }),
-    ingredientFreshness: t.exposeInt("maxFreshness"),
+    ingredientFreshness: t.int({
+      nullable: true,
+      resolve: async (recipe) => {
+        return await getIngredientFreshness(recipe.id);
+      },
+    }),
   }),
 });
 
 // ============================================ Inputs ==================================
-const createRecipeInput = builder.inputType("CreateRecipeInput", {
-  fields: (t) => ({
-    title: t.string({ required: true }),
-    source: t.string(),
-    prepTime: t.int(),
-    cookTime: t.int(),
-    marinadeTime: t.int(),
-    directions: t.string(),
-    notes: t.string(),
-    photoIds: t.stringList(),
-    courseIds: t.stringList(),
-    categoryIds: t.stringList(),
-    cuisineIds: t.stringList(),
-    ingredients: t.field({ type: [recipeIngredientInput] }),
-    leftoverFridgeLife: t.int(),
-    leftoverFreezerLife: t.int(),
-  }),
-});
+const createRecipeInput = builder
+  .inputRef<CreateRecipeInput>("CreateRecipeInput")
+  .implement({
+    fields: (t) => ({
+      title: t.string({ required: true }),
+      source: t.string(),
+      prepTime: t.int(),
+      cookTime: t.int(),
+      marinadeTime: t.int(),
+      directions: t.string(),
+      notes: t.string(),
+      photoIds: t.stringList(),
+      courseIds: t.stringList(),
+      categoryIds: t.stringList(),
+      cuisineIds: t.stringList(),
+      ingredients: t.field({ type: [recipeIngredientInput] }),
+      leftoverFridgeLife: t.int(),
+      leftoverFreezerLife: t.int(),
+    }),
+  });
+
+const editRecipeInput = builder
+  .inputRef<EditRecipeInput>("EditRecipeInput")
+  .implement({
+    fields: (t) => ({
+      title: t.string({ required: true }),
+      source: t.string(),
+      prepTime: t.int(),
+      cookTime: t.int(),
+      marinadeTime: t.int(),
+      directions: t.string(),
+      notes: t.string(),
+      photoIds: t.stringList(),
+      courseIds: t.stringList(),
+      categoryIds: t.stringList(),
+      cuisineIds: t.stringList(),
+      leftoverFridgeLife: t.int(),
+      leftoverFreezerLife: t.int(),
+    }),
+  });
 
 // ============================================ Queries =================================
 
@@ -74,23 +95,8 @@ builder.mutationFields((t) => ({
         required: true,
       }),
     },
-    validate: {
-      schema: z.object({
-        recipe: RecipeInputValidation,
-      }),
-    },
     resolve: async (query, root, args) => {
-      const matcher = new IngredientMatcher();
-      const stmt = await createRecipeCreateStmt({
-        recipe: args.recipe,
-        verified: true,
-        ingredientMatcher: matcher,
-        update: false,
-      });
-      return await db.recipe.create({
-        data: stmt,
-        ...query,
-      });
+      return await createRecipe(args.recipe as CreateRecipeInput, query);
     },
   }),
   editRecipe: t.prismaField({
@@ -98,35 +104,30 @@ builder.mutationFields((t) => ({
     args: {
       recipeId: t.arg.string({ required: true }),
       recipe: t.arg({
-        type: createRecipeInput,
+        type: editRecipeInput,
         required: true,
       }),
     },
-    validate: {
-      schema: z.object({
-        recipe: RecipeInputValidation,
-        recipeId: z.string().cuid(),
-      }),
-    },
     resolve: async (query, root, args) => {
-      return await db.recipe.updateRecipe(args.recipeId, args.recipe, query);
+      return await editRecipe(
+        args.recipeId,
+        args.recipe as EditRecipeInput,
+        query
+      );
     },
   }),
-  deleteRecipes: t.prismaField({
-    type: ["Recipe"],
+  deleteRecipes: t.field({
+    type: DeleteResult,
     args: {
       recipeIds: t.arg.stringList({ required: true }),
     },
-    validate: {
-      schema: z.object({
-        recipeIds: z.string().cuid().array(),
-      }),
-    },
-    resolve: async (query, root, args) => {
-      await db.recipe.deleteMany({
-        where: { id: { in: args.recipeIds } },
-      });
-      return db.recipe.findMany({});
+    resolve: async (root, args) => {
+      try {
+        await deleteRecipes(args.recipeIds);
+        return { success: true };
+      } catch (e) {
+        return { success: false, message: e.message };
+      }
     },
   }),
 }));

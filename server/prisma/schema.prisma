@@ -90,9 +90,6 @@ model MealPlan {
   mealPrepInstructions String?
   planRecipes          MealPlanRecipe[]
   mealPlanServings     MealPlanServing[]
-  numOfWeeks           Int @default(1)
-  startDay             Int?
-  endDay               Int?
   shoppingDays         Int[]
   draft                Boolean           @default(true)
   schedules            ScheduledPlan[]
@@ -436,7 +433,8 @@ model Photo {
 model NutritionLabel {
   id                String                   @id @default(uuid())
   type              EntityType               @default(LABEL)
-  recipe            Recipe                   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  name              String?     
+  recipe            Recipe?                   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId          String
   ingredientGroup   RecipeIngredientGroup?   @relation(fields: [ingredientGroupId], references: [id], onDelete: Cascade)
   ingredientGroupId String?                  @unique

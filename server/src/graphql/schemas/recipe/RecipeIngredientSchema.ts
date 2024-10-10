@@ -9,7 +9,7 @@ import {
 } from "@/application/services/recipe/RecipeIngredientService.js";
 import { builder } from "@/graphql/builder.js";
 import { measurementUnit } from "@/graphql/schemas/common/MeasurementUnitSchema.js";
-import { deleteResult } from "@/graphql/schemas/common/UtilitySchema.js";
+import { DeleteResult } from "@/graphql/schemas/common/MutationResult.js";
 import { ingredient } from "@/graphql/schemas/ingredient/IngredientSchema.js";
 import { db } from "@/infrastructure/repository/db.js";
 import { z } from "zod";
@@ -119,7 +119,7 @@ builder.mutationFields((t) => ({
     },
   }),
   deleteRecipeIngredients: t.field({
-    type: deleteResult,
+    type: DeleteResult,
     args: {
       ingredientId: t.arg.string({ required: true }),
     },

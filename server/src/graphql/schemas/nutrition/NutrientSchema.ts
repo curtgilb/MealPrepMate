@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { db } from "@/infrastructure/repository/db.js";
 import { builder } from "@/graphql/builder.js";
+import { getDriValues } from "@/application/services/nutrition/NutrientService.js";
 
-// // ============================================ Types ===================================
+// ============================================ Types ===================================
 const nutrient = builder.prismaObject("Nutrient", {
   include: {
     ranking: true,
@@ -21,18 +22,7 @@ const nutrient = builder.prismaObject("Nutrient", {
       type: "DailyReferenceIntake",
       nullable: true,
       resolve: async (query, root) => {
-        const profile = await db.healthProfile.findFirstOrThrow({});
-        const age = new Date().getFullYear() - profile.yearBorn;
-        return await db.dailyReferenceIntake.findFirst({
-          where: {
-            nutrientId: root.id,
-            gender: profile.gender,
-            ageMin: { lte: age },
-            ageMax: { gte: age },
-            specialCondition: profile.specialCondition,
-          },
-          ...query,
-        });
+        return getDriValues(root.id, query);
       },
     }),
     parentNutrientId: t.exposeString("parentNutrientId", { nullable: true }),
@@ -49,9 +39,9 @@ builder.prismaObject("DailyReferenceIntake", {
   }),
 });
 
-// // ============================================ Inputs ==================================
+// ============================================ Inputs ==================================
 
-// // ============================================ Queries =================================
+// ============================================ Queries =================================
 builder.queryFields((t) => ({
   nutrients: t.prismaField({
     type: ["Nutrient"],
@@ -78,4 +68,4 @@ builder.queryFields((t) => ({
   }),
 }));
 
-// // ============================================ Mutations ===============================
+// ============================================ Mutations ===============================

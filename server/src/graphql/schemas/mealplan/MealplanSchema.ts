@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { db } from "@/infrastructure/repository/db.js";
-import { scheduleMealPlan } from "@/application/services/mealplan/MealPlanService.js";
 import { toTitleCase } from "@/util/utils.js";
 import { editMealPlanValidation } from "@/validations/MealPlanValidation.js";
 import { cleanedStringSchema } from "@/validations/utilValidations.js";
@@ -14,9 +13,6 @@ builder.prismaObject("MealPlan", {
     mealPrepInstructions: t.exposeString("mealPrepInstructions", {
       nullable: true,
     }),
-    numOfWeeks: t.exposeInt("numOfWeeks"),
-    startDay: t.exposeInt("startDay", { nullable: true }),
-    endDay: t.exposeInt("endDay", { nullable: true }),
     planRecipes: t.relation("planRecipes"),
     mealPlanServings: t.relation("mealPlanServings"),
     shopppingDays: t.exposeIntList("shoppingDays"),
@@ -141,17 +137,17 @@ builder.mutationFields((t) => ({
       return updatedMealPlan.shoppingDays;
     },
   }),
-  scheduleMealPlan: t.prismaField({
-    type: "ScheduledPlan",
-    args: {
-      mealPlanId: t.arg.string({ required: true }),
-      startDate: t.arg({ type: "DateTime", required: true }),
-    },
-    validate: {
-      schema: z.object({ mealPlanId: z.string().cuid(), startDate: z.date() }),
-    },
-    resolve: async (query, root, args) => {
-      return await scheduleMealPlan(args.mealPlanId, args.startDate, query);
-    },
-  }),
+  // scheduleMealPlan: t.prismaField({
+  //   type: "ScheduledPlan",
+  //   args: {
+  //     mealPlanId: t.arg.string({ required: true }),
+  //     startDate: t.arg({ type: "DateTime", required: true }),
+  //   },
+  //   validate: {
+  //     schema: z.object({ mealPlanId: z.string().cuid(), startDate: z.date() }),
+  //   },
+  //   resolve: async (query, root, args) => {
+  //     return await scheduleMealPlan(args.mealPlanId, args.startDate, query);
+  //   },
+  // }),
 }));

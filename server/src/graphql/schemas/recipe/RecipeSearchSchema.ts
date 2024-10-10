@@ -7,7 +7,6 @@ import {
   NumericalFilter,
   NutrientFilter,
 } from "@/infrastructure/repository/extensions/RecipeExtension.js";
-
 import { z } from "zod";
 
 // ============================================ Types ===================================
@@ -106,7 +105,7 @@ builder.queryFields((t) => ({
       filter: t.arg({ type: recipeFilter, required: true }),
     },
     resolve: async (query, root, args) => {
-      return await db.recipe.search(args.filter as RecipeFilter);
+      return await db.recipe.search(args.filter as RecipeFilter, query);
     },
   }),
 }));
