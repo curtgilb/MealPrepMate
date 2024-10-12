@@ -1,4 +1,4 @@
-import { replaceVulgarFractions } from "@/util/fractionToDecimal.js";
+import { replaceVulgarFractions } from "@/application/util/fractionToDecimal.js";
 
 export type RecipeNlpResponse = {
   sentence: string;

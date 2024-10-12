@@ -9,7 +9,7 @@ import {
   PROTIEN_ID,
   ALCOHOL_ID,
 } from "@/config.js";
-import { round } from "@/util/utils.js";
+import { round } from "@/application/util/utils.js";
 
 const nutritionLabelWithNutrients =
   Prisma.validator<Prisma.NutritionLabelDefaultArgs>()({

@@ -1,6 +1,6 @@
 import { MeasurementUnit } from "@prisma/client";
 import { NutrientSumOfLabels } from "./LabelAggregator.js";
-import { round } from "../../../../util/utils.js";
+import { round } from "../../../util/utils.js";
 import {
   ALCOHOL_ID,
   CALORIE_ID,

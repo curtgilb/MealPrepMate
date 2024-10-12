@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { uploadFileToBucket } from "../../io/FileStorage.js";
-import { hash } from "../../../util/utils.js";
+import { hash } from "../../util/utils.js";
 import { db } from "../../../infrastructure/db.js";
 import { ReceiptScanningQueue } from "./ReceiptScanJob.js";
 

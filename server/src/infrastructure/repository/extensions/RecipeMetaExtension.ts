@@ -1,5 +1,5 @@
 import { Prisma, Course, Cuisine, Category } from "@prisma/client";
-import { toTitleCase } from "@/util/utils.js";
+import { toTitleCase } from "@/application/util/utils.js";
 import { cleanedStringSchema } from "@/validations/utilValidations.js";
 
 type CourseQuery = {

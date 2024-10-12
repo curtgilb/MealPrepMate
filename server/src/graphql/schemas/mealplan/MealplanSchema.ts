@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { db } from "@/infrastructure/repository/db.js";
-import { toTitleCase } from "@/util/utils.js";
+import { toTitleCase } from "@/application/util/utils.js";
 import { editMealPlanValidation } from "@/validations/MealPlanValidation.js";
 import { cleanedStringSchema } from "@/validations/utilValidations.js";
 import { builder } from "@/graphql/builder.js";

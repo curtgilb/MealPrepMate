@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 
-import { toTitleCase } from "@/util/utils.js";
+import { toTitleCase } from "@/application/util/utils.js";
 import { z } from "zod";
 import { cleanedStringSchema } from "@/validations/RecipeValidation.js";
 import { nullableString, stringArray } from "@/validations/utilValidations.js";

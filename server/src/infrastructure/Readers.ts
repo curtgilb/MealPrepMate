@@ -1,4 +1,4 @@
-import { toCamelCase } from "@/util/utils.js";
+import { toCamelCase } from "@/application/util/utils.js";
 import { parse } from "csv-parse";
 import fs from "fs";
 import path from "path";

@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { FileMetaData } from "../types/CustomTypes.js";
+import { FileMetaData } from "../../types/CustomTypes.js";
 import path from "path";
 import fs from "fs";
 
@@ -68,32 +68,6 @@ function compareTwoStrings(first: string, second: string): number {
   return (2.0 * intersectionSize) / (first.length + second.length - 2);
 }
 
-function getFileExtension(fileName: string): string {
-  const lastDotIndex = fileName.lastIndexOf(".");
-  return fileName.substring(lastDotIndex + 1);
-}
-
-function getFileMetaData(path: string): FileMetaData {
-  if (path) {
-    const pathSplit = path.split("/");
-    const name = pathSplit.pop() as string; // .pop() only return undefined if the array is empty. Array should not be empty if the string is not empty.
-    const ext = getFileExtension(name);
-
-    return {
-      path,
-      name, //: fileName.replace(fileExt, ""),
-      ext,
-    };
-  }
-  throw Error(`Path "${path}" is invalid.`);
-}
-
-function hash(input: Buffer | string): string {
-  const hash = crypto.createHash("sha256");
-  hash.update(input);
-  return hash.digest("hex");
-}
-
 function round(num: number): number {
   if (typeof num === "number") {
     return Math.round((num + Number.EPSILON) * 100) / 100;
@@ -101,12 +75,4 @@ function round(num: number): number {
   return num;
 }
 
-export {
-  toTitleCase,
-  toCamelCase,
-  compareTwoStrings,
-  getFileExtension,
-  getFileMetaData,
-  hash,
-  round,
-};
+export { toTitleCase, toCamelCase, compareTwoStrings, round };

@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { db } from "../../src/infrastructure/repository/db.js";
-import { replaceVulgarFractions } from "../../src/util/fractionToDecimal.js";
+import { replaceVulgarFractions } from "../../src/application/util/fractionToDecimal.js";
 
 const RECIPE_ID = "cltp0k2yi000008la6ybr3shp";
 

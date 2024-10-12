@@ -1,7 +1,8 @@
 import { Client } from "minio";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
-import { fileTypeFromBuffer } from "file-type";
+import { openFileBuffer } from "@/infrastructure/Readers.js";
+import { getFileMetadata } from "@/infrastructure/file_io/common.js";
 
 export const storage = new Client({
   endPoint: process.env.MINIO_HOST ?? "localhost",
@@ -15,14 +16,6 @@ function generateFileName(ext: string) {
   return `${uuidv4()}.${ext}`;
 }
 
-async function checkFileType(buffer: Buffer, acceptedFileExtension: string[]) {
-  const meta = await fileTypeFromBuffer(buffer);
-  if (!meta || !acceptedFileExtension.includes(meta.ext)) {
-    throw new Error("Unaccepted file format");
-  }
-  return meta;
-}
-
 async function uploadFile(
   file: File | string | ArrayBuffer | Buffer,
   acceptedFileTypes: string[],
@@ -30,20 +23,23 @@ async function uploadFile(
 ) {
   const buffer = await convertFile(file);
 
-  const meta = await checkFileType(buffer, acceptedFileTypes);
-  const newFileName = generateFileName(meta.ext);
-  await storage.putObject(bucket, newFileName, buffer, buffer.byteLength, {
-    "Content-Type": meta?.mime,
-  });
-  const seperator = bucket.endsWith("/") ? "" : "/";
-  const bucketPath = [bucket, seperator, newFileName].join("");
+  const meta = await getFileMetadata(buffer);
+  if (meta.auto?.ext && acceptedFileTypes.includes(meta.auto.ext)) {
+    const newFileName = generateFileName(meta.auto?.ext);
+    await storage.putObject(bucket, newFileName, buffer, buffer.byteLength, {
+      "Content-Type": meta.auto.mime,
+    });
+    const seperator = bucket.endsWith("/") ? "" : "/";
+    const bucketPath = [bucket, seperator, newFileName].join("");
 
-  return {
-    mime: meta.mime,
-    ext: meta.ext,
-    newFileName,
-    bucketPath,
-  };
+    return {
+      mime: meta.auto.mime,
+      ext: meta.auto.ext,
+      newFileName,
+      bucketPath,
+    };
+  }
+  throw Error("Could not validate file type.");
 }
 
 async function downloadFile(bucketPath: string): Promise<File> {

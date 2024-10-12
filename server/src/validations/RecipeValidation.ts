@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { toTitleCase } from "../util/utils.js";
+import { toTitleCase } from "../application/util/utils.js";
 import { schemaForType } from "./utilValidations.js";
 import { RecipeInput } from "../types/gql.js";
 

@@ -13,8 +13,7 @@ import {
   nullableString,
   stringArray,
 } from "@/validations/utilValidations.js";
-import { toTitleCase } from "@/util/utils.js";
-import { UnitSearch } from "@/features/search/UnitSearch.js";
+import { toTitleCase } from "@/application/util/utils.js";
 import { NutrientType } from "@prisma/client";
 import { readCSV } from "@/infrastructure/Readers.js";
 
@@ -101,11 +100,11 @@ export class NutrientLoader {
     // Use mapping to map DRI to nutrient,
     const createNutrientsStmt: Prisma.NutrientCreateInput[] = [];
     const updateNutrientsStmt: Prisma.NutrientUpdateArgs[] = [];
-    const units = new UnitSearch(await db.measurementUnit.findMany({}));
+
     for (const { record } of data) {
       // Validate the record
       const cleanedRecord = nutrientSchema.parse(record);
-      const matchedUnit = units.search(cleanedRecord.unit);
+      const matchedUnit = await db.measurementUnit.match(cleanedRecord.unit);
 
       //   Create stmts for creating nutrients
       const createStmt: Prisma.NutrientCreateInput = {

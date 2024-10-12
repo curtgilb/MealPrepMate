@@ -14,7 +14,7 @@ export type CreateNutritionLabelInput = {
   servingSizeUnitId: string | undefined | null;
   servingsUsed: number | undefined | null;
   isPrimary: boolean;
-  nutrients: CreateNutrientInput[];
+  nutrients: CreateNutrientInput[] | undefined | null;
   ingredientGroupId: string | undefined | null;
 };
 

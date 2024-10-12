@@ -2,8 +2,8 @@ import { MeasurementSystem, PrismaClient } from "@prisma/client";
 import { DateTime } from "luxon";
 import { createChickenGyro } from "data/test_data/ChickenGyroRecipe.js";
 import { createHalalChicken } from "data/test_data/HalalChickenRecipe.js";
-import { storage } from "@/infrastructure/bucket/storage.js";
-import { toMeasurementUnitTypeEnum } from "@/util/Cast.js";
+import { storage } from "@/infrastructure/object_storage/storage.js";
+import { toMeasurementUnitTypeEnum } from "@/application/util/Cast.js";
 import { IngredientLoader } from "./dataloaders/IngredientParser.js";
 import { NutrientLoader } from "./dataloaders/NutrientParser.js";
 import { db } from "@/infrastructure/repository/db.js";
@@ -45,7 +45,7 @@ async function seedDb() {
   await loadIngredients();
   await loadHealthProfile();
   await loadNotificationSettings();
-  await loadRecipes();
+  // await loadRecipes();
   await loadMealPlan();
   // await loadImport();
   await loadGroceryStores();
@@ -192,12 +192,12 @@ async function loadMealPlan() {
   });
 }
 
-async function loadRecipes() {
-  const halal = await createHalalChicken();
-  const gyro = await createChickenGyro();
-  await db.recipe.updateAggregateLabel(halal.id);
-  await db.recipe.updateAggregateLabel(gyro.id);
-}
+// async function loadRecipes() {
+//   const halal = await createHalalChicken();
+//   const gyro = await createChickenGyro();
+//   await db.recipe.updateAggregateLabel(halal.id);
+//   await db.recipe.updateAggregateLabel(gyro.id);
+// }
 
 async function loadNotificationSettings() {
   await db.notificationSetting.create({
@@ -371,6 +371,4 @@ async function deleteAllRecords() {
   }
 }
 
-await seedDb();
-
-export { deleteAllRecords, deleteBuckets, seedDb };
+export { deleteAllRecords, deleteBuckets, seedDb, createBuckets };

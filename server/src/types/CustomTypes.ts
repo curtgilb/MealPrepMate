@@ -140,12 +140,6 @@ type Mappings = {
   nutrientName: { [key: string]: string };
 };
 
-type FileMetaData = {
-  path: string;
-  name: string;
-  ext: string;
-};
-
 const recordWithImport = Prisma.validator<Prisma.ImportItemDefaultArgs>()({
   include: {
     import: true,

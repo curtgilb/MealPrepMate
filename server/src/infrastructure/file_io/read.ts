@@ -1,4 +1,5 @@
-import { toCamelCase } from "@/util/utils.js";
+import { getPath } from "@/infrastructure/file_io/common.js";
+import { toCamelCase } from "@/application/util/utils.js";
 import { parse } from "csv-parse";
 import fs from "fs";
 import path from "path";
@@ -6,11 +7,14 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-function readFileContentByStream(filePath: string) {
+function getFileContentsFromStream(
+  filePath: string,
+  encoding: BufferEncoding = "utf-8"
+): Promise<string> {
   return new Promise((resolve, reject) => {
     let fileData = "";
 
-    const readStream = fs.createReadStream(filePath, { encoding: "utf8" });
+    const readStream = fs.createReadStream(filePath, { encoding });
 
     readStream.on("data", (chunk) => {
       fileData += chunk;
@@ -60,20 +64,24 @@ async function readCSV(
   return records;
 }
 
-function readJSON<T>(relativePath: string): T {
-  return JSON.parse(
-    fs.readFileSync(path.join(__dirname, relativePath), "utf8")
-  ) as T;
+async function readJSON<T>(
+  path: string,
+  encoding: BufferEncoding = "utf-8"
+): Promise<T> {
+  const validatedPath = getPath(path);
+  const fileData = await getFileContentsFromStream(validatedPath, encoding);
+  return JSON.parse(fileData) as T;
 }
 
-function readFile(
+async function readFile(
   filePath: string,
   encoding: BufferEncoding = "utf-8"
-): string {
-  return fs.readFileSync(path.join(__dirname, filePath), encoding);
+): Promise<string> {
+  const validatedPath = getPath(filePath);
+  return await getFileContentsFromStream(validatedPath, encoding);
 }
 
-function openFileBuffer(sourcePath: string): Buffer {
+function openFileAsBuffer(sourcePath: string): Buffer {
   if (typeof sourcePath === "string") {
     try {
       const newPath = path.isAbsolute(sourcePath)
@@ -88,4 +96,4 @@ function openFileBuffer(sourcePath: string): Buffer {
   throw new Error("Wrong type");
 }
 
-export { openFileBuffer, readCSV, readFile, readJSON };
+export { openFileAsBuffer as openFileBuffer, readCSV, readFile, readJSON };
