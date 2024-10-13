@@ -1,10 +1,10 @@
-import { TransformedRecord } from "@/application/services/import/transformers/TransformedRecord.js";
+import {
+  TransformedRecord,
+  TransformMapping,
+} from "@/application/services/import/transformers/TransformedRecord.js";
 import {
   FileSource,
-  PropertyMap,
-  TargetType,
   Transformer,
-  TransformerMap,
 } from "@/application/services/import/transformers/Transformer.js";
 import { CreateNutrientInput } from "@/application/services/nutrition/NutritionLabelService.js";
 import { uploadPhoto } from "@/application/services/PhotoService.js";
@@ -13,51 +13,52 @@ import { getFileMetadata } from "@/infrastructure/file_io/common.js";
 import { HTMLElement, parse as parseHTML } from "node-html-parser";
 
 export class RecipeKeeperTransformer extends Transformer {
-  recipeKeeperMapping: TransformerMap = {
+  recipeKeeperMapping: { [key: string]: TransformMapping | null } = {
     recipeId: {
-      target: TargetType.ID,
+      type: "meta",
+      key: "externalId",
     },
     recipeShareId: null,
     recipeIsFavourite: null,
     recipeRating: null,
-    name: { target: TargetType.Recipe, prop: "title" },
+    name: { type: "recipe", key: "title" },
     recipeCourse: {
-      target: TargetType.Recipe,
-      prop: "courseIds",
+      type: "recipe",
+      key: "courseIds",
       isArray: true,
       processValue: Transformer.matchCourse,
     },
     recipeCategory: {
-      target: TargetType.Recipe,
-      prop: "cuisineIds",
+      type: "recipe",
+      key: "cuisineIds",
       isArray: true,
       processValue: Transformer.matchCategory,
     },
     recipeCollection: {
-      target: TargetType.Recipe,
-      prop: "categoryIds",
+      type: "recipe",
+      key: "categoryIds",
       isArray: true,
       processValue: Transformer.matchCategory,
     },
-    recipeSource: { target: TargetType.Recipe, prop: "source", isArray: true },
+    recipeSource: { type: "recipe", key: "source", isArray: true },
     recipeYield: {
       target: TargetType.Label,
-      prop: "servings",
+      key: "servings",
       processValue: this.extractServingSize.bind(this),
     },
     prepTime: {
-      target: TargetType.Recipe,
-      prop: "prepTime",
+      type: "recipe",
+      key: "prepTime",
       processValue: this.getTime.bind(this),
     },
     cookTime: {
-      target: TargetType.Recipe,
-      prop: "cookTime",
+      type: "recipe",
+      key: "cookTime",
       processValue: this.getTime.bind(this),
     },
-    recipeIngredients: { target: TargetType.Recipe, prop: "ingredients" },
-    recipeDirections: { target: TargetType.Recipe, prop: "directions" },
-    recipeNotes: { target: TargetType.Recipe, prop: "notes" },
+    recipeIngredients: { type: "recipe", key: "ingredients" },
+    recipeDirections: { type: "recipe", key: "directions" },
+    recipeNotes: { type: "recipe", key: "notes" },
     recipeNutServingSize: {
       target: TargetType.Label,
       prop: "servingSize",
@@ -99,7 +100,7 @@ export class RecipeKeeperTransformer extends Transformer {
       target: TargetType.Nutrient,
       processValue: this.getNutrientId.bind(this),
     },
-    photo: { target: TargetType.Recipe, prop: "photoIds" },
+    photo: { type: "recipe", prop: "photoIds" },
   };
 
   nutrientMapping = {

@@ -15,50 +15,6 @@ export type FileSource =
   | { type: "remote"; bucketPath: string }
   | { type: "upload"; file: File };
 
-export enum TargetType {
-  Recipe,
-  Label,
-  Nutrient,
-  ID,
-}
-
-type RecipeProperty<
-  K extends keyof CreateRecipeInput = keyof CreateRecipeInput,
-> = {
-  target: TargetType.Recipe;
-  isArray?: boolean;
-  prop: K;
-  processValue?: (value: string, key?: string) => CreateRecipeInput[K];
-};
-
-type LabelProperty<
-  K extends keyof CreateNutritionLabelInput = keyof CreateNutritionLabelInput,
-> = {
-  target: TargetType.Label;
-  prop: K;
-  processValue?: (value: string, key?: string) => CreateNutritionLabelInput[K];
-};
-
-type NutrientProperty = {
-  target: TargetType.Nutrient;
-  processValue?: (value: string, key?: string) => CreateNutrientInput;
-};
-
-type IDProperty = {
-  target: TargetType.ID;
-  processValue?: (value: string, key?: string) => string;
-};
-
-export type PropertyMap =
-  | RecipeProperty
-  | LabelProperty
-  | NutrientProperty
-  | IDProperty;
-
-export type TransformerMap = {
-  [key: string]: PropertyMap | null;
-};
-
 export abstract class Transformer {
   static cuisines: Cuisine[] | undefined;
   static courses: Course[] | undefined;

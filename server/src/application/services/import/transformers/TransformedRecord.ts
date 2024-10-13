@@ -3,40 +3,60 @@ import {
   CreateNutrientInput,
   CreateNutritionLabelInput,
 } from "@/application/services/nutrition/NutritionLabelService.js";
-import {
-  ProcessValueType,
-  PropertyMap,
-  TargetType,
-} from "@/application/services/import/transformers/Transformer.js";
+
+import { CreateRecipeIngredientInput } from "@/application/services/recipe/RecipeIngredientService.js";
+
+type TransformedRecordData = {
+  meta: {
+    externalId: string | undefined;
+  };
+  recipe: CreateRecipeInput;
+  label: CreateNutritionLabelInput;
+};
+
+type UnwrapArray<T> = T extends (infer U)[] ? U : T;
+
+export type TransformMapping = {
+  [T in keyof TransformedRecordData]: {
+    type: T;
+    key: keyof TransformedRecordData[T];
+    isList?: boolean;
+    processValue?: (
+      value: unknown,
+      key?: string
+    ) => UnwrapArray<TransformedRecordData[T][keyof TransformedRecordData[T]]>;
+  };
+}[keyof TransformedRecordData];
 
 export class TransformedRecord {
-  externalId: string | undefined = undefined;
-  recipe: CreateRecipeInput = {
-    title: "",
-    source: undefined,
-    prepTime: 0,
-    cookTime: 0,
-    marinadeTime: 0,
-    directions: undefined,
-    notes: undefined,
-    photoIds: undefined,
-    courseIds: undefined,
-    categoryIds: undefined,
-    cuisineIds: undefined,
-    ingredients: undefined,
-    leftoverFridgeLife: 0,
-    leftoverFreezerLife: 0,
-    nutrition: undefined,
-  };
-
-  label: CreateNutritionLabelInput = {
-    servings: 1,
-    servingSize: undefined,
-    servingSizeUnitId: undefined,
-    servingsUsed: undefined,
-    isPrimary: true,
-    nutrients: undefined,
-    ingredientGroupId: undefined,
+  data: TransformedRecordData = {
+    meta: { externalId: undefined },
+    recipe: {
+      title: "",
+      source: undefined,
+      prepTime: 0,
+      cookTime: 0,
+      marinadeTime: 0,
+      directions: undefined,
+      notes: undefined,
+      photoIds: undefined,
+      courseIds: undefined,
+      categoryIds: undefined,
+      cuisineIds: undefined,
+      ingredients: undefined,
+      leftoverFridgeLife: 0,
+      leftoverFreezerLife: 0,
+      nutrition: undefined,
+    },
+    label: {
+      servings: 1,
+      servingSize: undefined,
+      servingSizeUnitId: undefined,
+      servingsUsed: undefined,
+      isPrimary: true,
+      nutrients: undefined,
+      ingredientGroupId: undefined,
+    },
   };
 
   addProperty<T extends PropertyMap>(prop: T, value: ProcessValueType<T>) {
