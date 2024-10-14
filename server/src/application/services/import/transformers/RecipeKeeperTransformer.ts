@@ -25,24 +25,24 @@ export class RecipeKeeperTransformer extends Transformer {
     recipeCourse: {
       type: "recipe",
       key: "courseIds",
-      isArray: true,
+      isList: true,
       processValue: Transformer.matchCourse,
     },
     recipeCategory: {
       type: "recipe",
       key: "cuisineIds",
-      isArray: true,
+      isList: true,
       processValue: Transformer.matchCategory,
     },
     recipeCollection: {
       type: "recipe",
       key: "categoryIds",
-      isArray: true,
+      isList: true,
       processValue: Transformer.matchCategory,
     },
-    recipeSource: { type: "recipe", key: "source", isArray: true },
+    recipeSource: { type: "recipe", key: "source", isList: true },
     recipeYield: {
-      target: TargetType.Label,
+      type: "label",
       key: "servings",
       processValue: this.extractServingSize.bind(this),
     },
@@ -60,47 +60,56 @@ export class RecipeKeeperTransformer extends Transformer {
     recipeDirections: { type: "recipe", key: "directions" },
     recipeNotes: { type: "recipe", key: "notes" },
     recipeNutServingSize: {
-      target: TargetType.Label,
-      prop: "servingSize",
+      type: "label",
+      key: "servingSize",
       processValue: this.extractServingSize.bind(this),
     },
     recipeNutCalories: {
-      target: TargetType.Nutrient,
+      type: "label",
+      key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
     recipeNutTotalFat: {
-      target: TargetType.Nutrient,
+      type: "label",
+      key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
     recipeNutSaturatedFat: {
-      target: TargetType.Nutrient,
+      type: "label",
+      key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
     recipeNuteCholesterol: {
-      target: TargetType.Nutrient,
+      type: "label",
+      key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
     recipeNutSodium: {
-      target: TargetType.Nutrient,
+      type: "label",
+      key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
     recipeNutTotalCarbohydrate: {
-      target: TargetType.Nutrient,
+      type: "label",
+      key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
     recipeNutDietaryFiber: {
-      target: TargetType.Nutrient,
+      type: "label",
+      key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
     recipeNutSugars: {
-      target: TargetType.Nutrient,
+      type: "label",
+      key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
     recipeNutProtein: {
-      target: TargetType.Nutrient,
+      type: "label",
+      key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
-    photo: { type: "recipe", prop: "photoIds" },
+    photo: { type: "recipe", key: "photoIds" },
   };
 
   nutrientMapping = {
@@ -177,28 +186,15 @@ export class RecipeKeeperTransformer extends Transformer {
         property.key = property.key.startsWith("photo")
           ? "photo"
           : property.key;
-        if (
-          property.key in this.recipeKeeperMapping &&
-          this.recipeKeeperMapping[property.key]
-        ) {
-          const map = this.recipeKeeperMapping[property.key] as PropertyMap;
-          const newValue = this.processValue(map, property.key, property.value);
-          if (newValue) {
-            record.addProperty(map, newValue);
-          }
+
+        const map = this.recipeKeeperMapping[property.key];
+        if (map) {
+          record.addProperty(map, property.value);
         }
       }
     }
 
     return record;
-  }
-
-  private processValue(map: PropertyMap, key: string, value: string) {
-    return map.processValue
-      ? map.target === TargetType.Nutrient
-        ? map.processValue(value, key)
-        : map.processValue(value)
-      : value;
   }
 
   private getPropertyKeyValuePair(prop: HTMLElement): {

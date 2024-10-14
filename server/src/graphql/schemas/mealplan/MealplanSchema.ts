@@ -1,9 +1,14 @@
-import { z } from "zod";
-import { db } from "@/infrastructure/repository/db.js";
-import { toTitleCase } from "@/application/util/utils.js";
-import { editMealPlanValidation } from "@/validations/MealPlanValidation.js";
-import { cleanedStringSchema } from "@/validations/utilValidations.js";
+import {
+  createMealPlan,
+  CreateMealPlanInput,
+  editMealPlan,
+  EditMealPlanInput,
+  getMealPlan,
+  getMealPlans,
+} from "@/application/services/mealplan/MealPlanService.js";
 import { builder } from "@/graphql/builder.js";
+import { db } from "@/infrastructure/repository/db.js";
+import { z } from "zod";
 
 // ============================================ Types ===================================
 builder.prismaObject("MealPlan", {
@@ -34,13 +39,25 @@ builder.prismaObject("ScheduledPlan", {
 
 // ============================================ Inputs ==================================
 
-const editMealPlanInput = builder.inputType("EditMealPlanInput", {
-  fields: (t) => ({
-    id: t.string({ required: true }),
-    name: t.string(),
-    mealPrepInstructions: t.string(),
-  }),
-});
+const createMealPlanInput = builder
+  .inputRef<CreateMealPlanInput>("CreateMealPlanInput")
+  .implement({
+    fields: (t) => ({
+      name: t.string({ required: true }),
+      mealPrepInstructions: t.string(),
+      shoppingDays: t.intList(),
+    }),
+  });
+
+const editMealPlanInput = builder
+  .inputRef<EditMealPlanInput>("EditMealPlanInput")
+  .implement({
+    fields: (t) => ({
+      name: t.string(),
+      mealPrepInstructions: t.string(),
+      shoppingDays: t.intList(),
+    }),
+  });
 
 // ============================================ Queries =================================
 builder.queryFields((t) => ({
@@ -49,22 +66,14 @@ builder.queryFields((t) => ({
     args: {
       id: t.arg.string({ required: true }),
     },
-    validate: {
-      schema: z.object({ id: z.string().cuid() }),
-    },
     resolve: async (query, root, args) => {
-      // @ts-ignore
-      const mealPlan = await db.mealPlan.findUniqueOrThrow({
-        where: { id: args.id },
-        ...query,
-      });
-      return mealPlan;
+      return await getMealPlan(args.id, query);
     },
   }),
   mealPlans: t.prismaField({
     type: ["MealPlan"],
     resolve: async (query) => {
-      return await db.mealPlan.findMany({ ...query });
+      return await getMealPlans(query);
     },
   }),
 }));
@@ -73,34 +82,23 @@ builder.mutationFields((t) => ({
   createMealPlan: t.prismaField({
     type: "MealPlan",
     args: {
-      name: t.arg.string({ required: true }),
-    },
-    validate: {
-      schema: z.object({ name: cleanedStringSchema(20, toTitleCase) }),
+      mealPlan: t.arg({ type: createMealPlanInput, required: true }),
     },
     resolve: async (query, root, args) => {
-      return await db.mealPlan.create({ data: { name: args.name }, ...query });
+      return await createMealPlan(args.mealPlan, query);
     },
   }),
   editMealPlan: t.prismaField({
     type: "MealPlan",
     args: {
+      id: t.arg.string({ required: true }),
       mealPlan: t.arg({
         type: editMealPlanInput,
         required: true,
       }),
     },
-    validate: {
-      schema: z.object({ mealPlan: editMealPlanValidation }),
-    },
     resolve: async (query, root, args) => {
-      return await db.mealPlan.update({
-        where: { id: args.mealPlan.id },
-        data: {
-          name: args.mealPlan.name ?? undefined,
-          mealPrepInstructions: args.mealPlan.mealPrepInstructions,
-        },
-      });
+      return await editMealPlan(args.id, args.mealPlan, query);
     },
   }),
   deleteMealPlan: t.prismaField({
@@ -116,38 +114,4 @@ builder.mutationFields((t) => ({
       return await db.mealPlan.findMany({});
     },
   }),
-
-  updateShoppingDays: t.field({
-    type: ["Int"],
-    args: {
-      mealPlanId: t.arg.string({ required: true }),
-      days: t.arg.intList({ required: true }),
-    },
-    validate: {
-      schema: z.object({
-        mealPlanId: z.string().cuid(),
-        days: z.number().gte(1).array(),
-      }),
-    },
-    resolve: async (root, args) => {
-      const updatedMealPlan = await db.mealPlan.update({
-        where: { id: args.mealPlanId },
-        data: { shoppingDays: args.days },
-      });
-      return updatedMealPlan.shoppingDays;
-    },
-  }),
-  // scheduleMealPlan: t.prismaField({
-  //   type: "ScheduledPlan",
-  //   args: {
-  //     mealPlanId: t.arg.string({ required: true }),
-  //     startDate: t.arg({ type: "DateTime", required: true }),
-  //   },
-  //   validate: {
-  //     schema: z.object({ mealPlanId: z.string().cuid(), startDate: z.date() }),
-  //   },
-  //   resolve: async (query, root, args) => {
-  //     return await scheduleMealPlan(args.mealPlanId, args.startDate, query);
-  //   },
-  // }),
 }));

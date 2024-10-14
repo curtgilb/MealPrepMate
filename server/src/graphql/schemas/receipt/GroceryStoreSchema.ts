@@ -1,9 +1,13 @@
-import { z } from "zod";
-import { db } from "@/infrastructure/repository/db.js";
+import {
+  createGroceryStore,
+  deleteGroceryStore,
+  getGroceryStores,
+} from "@/application/services/receipt/GroceryStoreService.js";
 import { builder } from "@/graphql/builder.js";
+import { DeleteResult } from "@/graphql/schemas/common/MutationResult.js";
 
 // ============================================ Types ===================================
-const store = builder.prismaObject("GroceryStore", {
+builder.prismaObject("GroceryStore", {
   fields: (t) => ({
     id: t.exposeString("id"),
     name: t.exposeString("name"),
@@ -20,19 +24,8 @@ builder.queryFields((t) => ({
     args: {
       search: t.arg.string(),
     },
-    validate: {
-      schema: z.object({
-        search: z.string().optional(),
-      }),
-    },
     resolve: async (query, root, args) => {
-      return await db.groceryStore.findMany({
-        where: {
-          name: { contains: args.search ?? undefined, mode: "insensitive" },
-        },
-        orderBy: { name: "asc" },
-        ...query,
-      });
+      return await getGroceryStores(args?.search ?? undefined, query);
     },
   }),
 }));
@@ -45,10 +38,17 @@ builder.mutationFields((t) => ({
       name: t.arg.string({ required: true }),
     },
     resolve: async (query, root, args) => {
-      return await db.groceryStore.create({
-        data: { name: args.name },
-        ...query,
-      });
+      return createGroceryStore(args.name, query);
+    },
+  }),
+  deleteGroceryStore: t.field({
+    type: DeleteResult,
+    args: {
+      id: t.arg.string({ required: true }),
+    },
+    resolve: async (query, root, args) => {
+      await deleteGroceryStore(args.id);
+      return { success: true };
     },
   }),
 }));

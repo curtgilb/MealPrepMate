@@ -1,10 +1,5 @@
+import { CreateNutritionLabelInput } from "@/application/services/nutrition/NutritionLabelService.js";
 import { CreateRecipeInput } from "@/application/services/recipe/RecipeService.js";
-import {
-  CreateNutrientInput,
-  CreateNutritionLabelInput,
-} from "@/application/services/nutrition/NutritionLabelService.js";
-
-import { CreateRecipeIngredientInput } from "@/application/services/recipe/RecipeIngredientService.js";
 
 type TransformedRecordData = {
   meta: {
@@ -59,28 +54,15 @@ export class TransformedRecord {
     },
   };
 
-  addProperty<T extends PropertyMap>(prop: T, value: ProcessValueType<T>) {
-    switch (prop.target) {
-      case TargetType.Recipe:
-        const test = value;
-        if ("prop" in prop) {
-          this.recipe[prop.prop] = value;
-        }
-        break;
-      case TargetType.Label:
-        this.label[prop.prop] = value;
-        break;
-      case TargetType.Nutrient:
-        if (!Array.isArray(this.label.nutrients)) {
-          this.label.nutrients = [];
-        }
-        this.label.nutrients.push(value as CreateNutrientInput);
-        break;
+  addProperty(map: TransformMapping, value: string | undefined) {
+    const processedValue = map?.processValue ? map.processValue(value) : value;
+    if (processedValue) {
+      this.data[map.type][map.key] = processedValue;
     }
   }
 
   updatePhotos(origToId: { [key: string]: string }) {
-    this.recipe.photoIds = this.recipe.photoIds?.map((old) => {
+    this.data.recipe.photoIds = this.data.recipe.photoIds?.map((old) => {
       if (old in origToId) {
         return origToId[old];
       }
@@ -89,9 +71,9 @@ export class TransformedRecord {
   }
 
   multiplyNutrientsByServings() {
-    this.label.nutrients = this.label.nutrients?.map((nutrient) => ({
+    this.data.label.nutrients = this.data.label.nutrients?.map((nutrient) => ({
       nutrientId: nutrient.nutrientId,
-      value: this.label.servings * nutrient.value,
+      value: this.data.label.servings * nutrient.value,
     }));
   }
 }

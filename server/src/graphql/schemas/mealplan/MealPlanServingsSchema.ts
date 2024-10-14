@@ -1,10 +1,13 @@
-import { z } from "zod";
-import { db } from "@/infrastructure/repository/db.js";
 import {
-  addRecipeServingValidation,
-  editRecipeServingValidation,
-} from "@/validations/MealPlanValidation.js";
+  AddRecipeServingInput,
+  addServingToPlan,
+  deleteMealPlanServing,
+  editMealPlanServing,
+  EditRecipeServingInput,
+  getMealPlanServings,
+} from "@/application/services/mealplan/MealPlanServingsService.js";
 import { builder } from "@/graphql/builder.js";
+import { DeleteResult } from "@/graphql/schemas/common/MutationResult.js";
 import { meal } from "../common/EnumSchema.js";
 
 // ============================================ Types ===================================
@@ -22,24 +25,27 @@ builder.prismaObject("MealPlanServing", {
   }),
 });
 // ============================================ Inputs ==================================
-const addRecipeServingInput = builder.inputType("AddRecipeServingInput", {
-  fields: (t) => ({
-    day: t.int({ required: true }),
-    mealPlanRecipeId: t.string({ required: true }),
-    mealPlanId: t.string({ required: true }),
-    servings: t.int({ required: true }),
-    meal: t.field({ type: meal, required: true }),
-  }),
-});
+const addRecipeServingInput = builder
+  .inputRef<AddRecipeServingInput>("AddRecipeServingInput")
+  .implement({
+    fields: (t) => ({
+      day: t.int({ required: true }),
+      mealPlanRecipeId: t.string({ required: true }),
+      mealPlanId: t.string({ required: true }),
+      servings: t.int({ required: true }),
+      meal: t.field({ type: meal, required: true }),
+    }),
+  });
 
-const editRecipeServingInput = builder.inputType("EditRecipeServingInput", {
-  fields: (t) => ({
-    id: t.string({ required: true }),
-    day: t.int({ required: true }),
-    servings: t.int({ required: true }),
-    meal: t.field({ type: meal, required: true }),
-  }),
-});
+const editRecipeServingInput = builder
+  .inputRef<EditRecipeServingInput>("EditRecipeServingInput")
+  .implement({
+    fields: (t) => ({
+      day: t.int({ required: true }),
+      servings: t.int({ required: true }),
+      meal: t.field({ type: meal, required: true }),
+    }),
+  });
 
 // ============================================ Queries =================================
 builder.queryFields((t) => ({
@@ -51,14 +57,12 @@ builder.queryFields((t) => ({
       maxDay: t.arg.int(),
     },
     resolve: async (query, root, args) => {
-      // @ts-ignore
-      return await db.mealPlanServing.findMany({
-        where: {
-          mealPlan: { id: args.mealPlanId },
-          day: { lte: args.maxDay ?? undefined, gte: args.minDay ?? undefined },
-        },
-        ...query,
-      });
+      return await getMealPlanServings(
+        args.mealPlanId,
+        args.minDay ?? undefined,
+        args.maxDay ?? undefined,
+        query
+      );
     },
   }),
 }));
@@ -73,92 +77,32 @@ builder.mutationFields((t) => ({
         required: true,
       }),
     },
-    validate: { schema: z.object({ serving: addRecipeServingValidation }) },
     resolve: async (query, root, args) => {
-      return await db.mealPlanServing.create({
-        data: {
-          day: args.serving.day,
-          meal: args.serving.meal,
-          numberOfServings: args.serving.servings,
-          mealPlan: {
-            connect: { id: args.serving.mealPlanId },
-          },
-          recipe: {
-            connect: { id: args.serving.mealPlanRecipeId },
-          },
-        },
-        ...query,
-      });
+      return addServingToPlan(args.serving, query);
     },
   }),
   deleteRecipeServing: t.field({
-    type: "Boolean",
+    type: DeleteResult,
     args: {
       id: t.arg.string({ required: true }),
     },
-    validate: { schema: z.object({ id: z.string().cuid() }) },
     resolve: async (root, args) => {
       try {
-        await db.mealPlanServing.delete({
-          where: { id: args.id },
-        });
-        return true;
+        await deleteMealPlanServing(args.id);
+        return { success: true };
       } catch {
-        return false;
+        return { success: false };
       }
     },
   }),
   editRecipeServing: t.prismaField({
     type: ["MealPlanServing"],
     args: {
+      id: t.arg.string({ required: true }),
       serving: t.arg({ type: editRecipeServingInput, required: true }),
     },
-    validate: { schema: z.object({ serving: editRecipeServingValidation }) },
     resolve: async (query, root, args) => {
-      if (args.serving.servings) {
-        const mealRecipe = await db.mealPlanServing.findUniqueOrThrow({
-          where: { id: args.serving.id },
-          select: { mealPlanRecipeId: true },
-        });
-        await canChangeServings(
-          mealRecipe.mealPlanRecipeId,
-          args.serving.servings,
-          args.serving.id
-        );
-      }
-      await db.mealPlanServing.update({
-        where: { id: args.serving.id },
-        data: {
-          day: args.serving.day,
-          meal: args.serving.meal,
-          numberOfServings: args.serving.servings ?? undefined,
-        },
-      });
-      return await db.mealPlanServing.findMany({ ...query });
+      return await editMealPlanServing(args.id, args.serving, query);
     },
   }),
 }));
-
-async function canChangeServings(
-  mealRecipeId: string,
-  servingAmount: number,
-  servingId?: string
-) {
-  const meal = await db.mealPlanRecipe.findUniqueOrThrow({
-    where: { id: mealRecipeId },
-    include: { servings: true },
-  });
-  let originalAmount = 0;
-  const servingsAlreadyAdded =
-    meal?.servings.reduce((total, serving) => {
-      if (serving.id === servingId) {
-        originalAmount = serving.numberOfServings;
-      }
-      return total + serving.numberOfServings;
-    }, 0) ?? 0;
-
-  const newServingTotal = servingsAlreadyAdded - originalAmount + servingAmount;
-  if (newServingTotal > meal.totalServings) {
-    throw new Error("Servings must not exceed the total available");
-  }
-}

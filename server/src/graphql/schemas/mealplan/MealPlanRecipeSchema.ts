@@ -1,7 +1,14 @@
-import { z } from "zod";
-import { db } from "@/infrastructure/repository/db.js";
-import { addRecipeToMealPlanValidation } from "@/validations/MealPlanValidation.js";
+import {
+  addRecipeToPlan,
+  AddRecipeToPlanInput,
+  EditMealPlanRecipeInput,
+  editRecipeOnPlan,
+  getMealPlanRecipes,
+  getMealPlanRecipeServings,
+  removeRecipeFromPlan,
+} from "@/application/services/mealplan/MealPlanRecipeService.js";
 import { builder } from "@/graphql/builder.js";
+import { DeleteResult } from "@/graphql/schemas/common/MutationResult.js";
 
 // ============================================ Types ===================================
 builder.prismaObject("MealPlanRecipe", {
@@ -15,36 +22,32 @@ builder.prismaObject("MealPlanRecipe", {
     cookDayOffset: t.exposeInt("cookDayOffset"),
     servingsOnPlan: t.int({
       resolve: async (recipe) => {
-        const result = await db.mealPlanServing.aggregate({
-          where: { mealPlanId: recipe.mealPlanId, mealPlanRecipeId: recipe.id },
-          _sum: {
-            numberOfServings: true,
-          },
-        });
-        return result._sum.numberOfServings ?? 0;
+        return await getMealPlanRecipeServings(recipe);
       },
     }),
   }),
 });
 
 // ============================================ Inputs ==================================
-const editMealPlanRecipeInput = builder.inputType("EditMealPlanRecipeInput", {
-  fields: (t) => ({
-    factor: t.float(),
-    servings: t.int(),
-    cookDayOffset: t.int(),
-  }),
-});
+const editMealPlanRecipeInput = builder
+  .inputRef<EditMealPlanRecipeInput>("EditMealPlanRecipeInput")
+  .implement({
+    fields: (t) => ({
+      factor: t.float({ required: true }),
+      servings: t.int({ required: true }),
+    }),
+  });
 
-const addRecipeToMealPlanInput = builder.inputType("AddRecipeInput", {
-  fields: (t) => ({
-    mealPlanId: t.string({ required: true }),
-    recipeId: t.string({ required: true }),
-    scaleFactor: t.float({ required: true }),
-    servings: t.int({ required: true }),
-    cookDay: t.int(),
-  }),
-});
+const addRecipeToMealPlanInput = builder
+  .inputRef<AddRecipeToPlanInput>("AddRecipeToPlanInput")
+  .implement({
+    fields: (t) => ({
+      mealPlanId: t.string({ required: true }),
+      recipeId: t.string({ required: true }),
+      scaleFactor: t.float({ required: true }),
+      servings: t.int({ required: true }),
+    }),
+  });
 
 // ============================================ Queries =================================
 builder.queryFields((t) => ({
@@ -54,11 +57,7 @@ builder.queryFields((t) => ({
       mealPlanId: t.arg.string({ required: true }),
     },
     resolve: async (query, root, args) => {
-      // @ts-ignore
-      return await db.mealPlanRecipe.findMany({
-        where: { mealPlanId: args.mealPlanId },
-        ...query,
-      });
+      return getMealPlanRecipes(args.mealPlanId, query);
     },
   }),
 }));
@@ -68,27 +67,18 @@ builder.mutationFields((t) => ({
   addRecipeToMealPlan: t.prismaField({
     type: "MealPlanRecipe",
     args: {
+      mealPlanId: t.arg.string({ required: true }),
       recipe: t.arg({
         type: addRecipeToMealPlanInput,
         required: true,
       }),
     },
-    validate: { schema: z.object({ recipe: addRecipeToMealPlanValidation }) },
     resolve: async (query, root, args) => {
-      return await db.mealPlanRecipe.create({
-        data: {
-          mealPlan: { connect: { id: args.recipe.mealPlanId } },
-          recipe: { connect: { id: args.recipe.recipeId } },
-          factor: args.recipe.scaleFactor,
-          totalServings: args.recipe.servings,
-          cookDayOffset: args.recipe.cookDay ?? 0,
-        },
-        ...query,
-      });
+      return await addRecipeToPlan(args.mealPlanId, args.recipe, query);
     },
   }),
   editMealPlanRecipe: t.prismaField({
-    type: ["MealPlanRecipe"],
+    type: "MealPlanRecipe",
     args: {
       id: t.arg.string({ required: true }),
       recipe: t.arg({
@@ -97,30 +87,17 @@ builder.mutationFields((t) => ({
       }),
     },
     resolve: async (query, root, args) => {
-      const updated = await db.mealPlanRecipe.update({
-        where: { id: args.id },
-        data: {
-          totalServings: args.recipe.servings ?? undefined,
-          factor: args.recipe.factor ?? undefined,
-        },
-        ...query,
-      });
-      return await db.mealPlanRecipe.findMany({
-        where: { mealPlanId: updated.mealPlanId },
-      });
+      return await editRecipeOnPlan(args.id, args.recipe, query);
     },
   }),
-  removeMealPlanRecipe: t.prismaField({
-    type: ["MealPlanRecipe"],
+  removeMealPlanRecipe: t.field({
+    type: DeleteResult,
     args: {
       id: t.arg.string({ required: true }),
     },
-    validate: { schema: z.object({ id: z.string().cuid() }) },
-    resolve: async (query, root, args) => {
-      await db.mealPlanRecipe.delete({
-        where: { id: args.id },
-      });
-      return await db.mealPlanRecipe.findMany({ ...query });
+    resolve: async (root, args) => {
+      await removeRecipeFromPlan(args.id);
+      return { success: true };
     },
   }),
 }));
