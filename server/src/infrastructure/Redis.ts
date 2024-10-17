@@ -1,4 +1,4 @@
-export const connection = {
+export const redis_connection = {
   connection: {
     host: process.env.REDIS_HOST as string,
     port: process.env.REDIS_PORT

@@ -5,15 +5,15 @@ import {
   editRecipe,
   EditRecipeInput,
   getIngredientFreshness,
-} from "@/features/recipe/RecipeService.js";
+} from "@/application/services/recipe/RecipeService.js";
 import { builder } from "@/graphql/builder.js";
 import { DeleteResult } from "@/graphql/schemas/common/MutationResult.js";
 import { recipeIngredientInput } from "@/graphql/schemas/recipe/RecipeIngredientSchema.js";
 
 // ============================================ Types ===================================
-const recipe = builder.prismaObject("Recipe", {
+const recipe = builder.prismaNode("Recipe", {
+  id: { field: "id" },
   fields: (t) => ({
-    id: t.exposeID("id"),
     name: t.exposeString("name"),
     source: t.exposeString("source", { nullable: true }),
     prepTime: t.exposeInt("preparationTime", { nullable: true }),

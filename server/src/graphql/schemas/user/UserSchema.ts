@@ -1,7 +1,7 @@
 import { Gender, SpecialCondition } from "@prisma/client";
 import { builder } from "@/graphql/builder.js";
 import { db } from "@/infrastructure/repository/db.js";
-import { profileInputValidation } from "@/validations/UserValidation.js";
+import { profileInputValidation } from "@/application/validations/UserValidation.js";
 import { z } from "zod";
 
 const specialCondition = builder.enumType(SpecialCondition, {
@@ -59,9 +59,6 @@ builder.mutationFields((t) => ({
     args: {
       profile: t.arg({ type: profileInput, required: true }),
     },
-    validate: {
-      schema: z.object({ profile: profileInputValidation }),
-    },
     resolve: async (query, root, args) => {
       return await db.healthProfile.create({
         data: {
@@ -82,12 +79,6 @@ builder.mutationFields((t) => ({
     args: {
       id: t.arg.string({ required: true }),
       profile: t.arg({ type: profileInput, required: true }),
-    },
-    validate: {
-      schema: z.object({
-        id: z.string().cuid(),
-        profile: profileInputValidation,
-      }),
     },
     resolve: async (query, root, args) => {
       return await db.healthProfile.update({

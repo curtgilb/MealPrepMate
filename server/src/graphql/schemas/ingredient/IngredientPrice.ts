@@ -3,7 +3,7 @@ import { db } from "@/infrastructure/repository/db.js";
 import {
   createPriceHistoryValidation,
   editPriceHistoryValidation,
-} from "@/validations/IngredientValidation.js";
+} from "@/application/validations/IngredientValidation.js";
 import { builder } from "@/graphql/builder.js";
 import { foodTypeEnum } from "../common/EnumSchema.js";
 
@@ -65,9 +65,6 @@ builder.queryFields((t) => ({
     args: {
       ingredientPriceId: t.arg.string({ required: true }),
     },
-    validate: {
-      schema: z.object({ ingredientPriceId: z.string().cuid() }),
-    },
     resolve: async (query, root, args) => {
       return await db.ingredientPrice.findUniqueOrThrow({
         where: { id: args.ingredientPriceId },
@@ -79,11 +76,6 @@ builder.queryFields((t) => ({
     type: ["IngredientPrice"],
     args: {
       ingredientId: t.arg.string({ required: true }),
-    },
-    validate: {
-      schema: z.object({
-        ingredientId: z.string().cuid(),
-      }),
     },
     resolve: async (query, root, args) => {
       return await db.ingredientPrice.findMany({
@@ -102,9 +94,6 @@ builder.mutationFields((t) => ({
     type: "IngredientPrice",
     args: {
       price: t.arg({ type: createPriceHistory, required: true }),
-    },
-    validate: {
-      schema: z.object({ price: createPriceHistoryValidation }),
     },
     resolve: async (query, root, args) => {
       return await db.ingredientPrice.create({
@@ -142,12 +131,6 @@ builder.mutationFields((t) => ({
     args: {
       priceId: t.arg.string({ required: true }),
       price: t.arg({ type: editPriceHistory, required: true }),
-    },
-    validate: {
-      schema: z.object({
-        priceId: z.string().cuid(),
-        price: editPriceHistoryValidation,
-      }),
     },
     resolve: async (query, root, args) => {
       return await db.ingredientPrice.update({
@@ -189,12 +172,6 @@ builder.mutationFields((t) => ({
     args: {
       ingredientId: t.arg.string({ required: true }),
       ingredientPriceId: t.arg.string({ required: true }),
-    },
-    validate: {
-      schema: z.object({
-        ingredientId: z.string().cuid(),
-        ingredientPriceId: z.string().cuid(),
-      }),
     },
     resolve: async (query, root, args) => {
       await db.ingredientPrice.deleteMany({

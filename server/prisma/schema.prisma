@@ -17,8 +17,8 @@ generator pothos {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
   extensions = [pg_trgm]
 }
 
@@ -64,7 +64,7 @@ enum NotificationStatus {
 }
 
 model Notification {
-  id           String             @id @default(cuid())
+  id           String             @id @default(uuid())
   deliveryDate DateTime
   message      String
   status       NotificationStatus
@@ -73,7 +73,7 @@ model Notification {
 }
 
 model ScheduledPlan {
-  id            String         @id @default(cuid())
+  id            String         @id @default(uuid())
   startDate     DateTime       @db.Date
   duration      Int
   notifications Notification[]
@@ -85,7 +85,7 @@ model ScheduledPlan {
 }
 
 model MealPlan {
-  id                   String            @id @default(cuid())
+  id                   String            @id @default(uuid())
   name                 String
   mealPrepInstructions String?
   planRecipes          MealPlanRecipe[]
@@ -97,7 +97,7 @@ model MealPlan {
 }
 
 model NotificationSetting {
-  id                 String  @id @default(cuid())
+  id                 String  @id @default(uuid())
   timeZone           String
   defrostWarning     Boolean @default(true)
   defrostWarningTime Int     @default(19)
@@ -110,7 +110,7 @@ model NotificationSetting {
 }
 
 model MealPlanServing {
-  id               String         @id @default(cuid())
+  id               String         @id @default(uuid())
   mealPlan         MealPlan       @relation(fields: [mealPlanId], references: [id])
   mealPlanId       String
   day              Int
@@ -124,7 +124,7 @@ model MealPlanServing {
 }
 
 model MealPlanRecipe {
-  id            String            @id @default(cuid())
+  id            String            @id @default(uuid())
   mealPlan      MealPlan          @relation(fields: [mealPlanId], references: [id])
   mealPlanId    String
   recipe        Recipe            @relation(fields: [recipeId], references: [id])
@@ -137,7 +137,7 @@ model MealPlanRecipe {
 }
 
 model Import {
-  id            String       @id @default(cuid())
+  id            String       @id @default(uuid())
   fileName      String?
   fileHash      String?
   type          ImportType
@@ -151,7 +151,7 @@ model Import {
 }
 
 model ImportItem {
-  id                String                 @id @default(cuid())
+  id                String                 @id @default(uuid())
   import            Import                 @relation(fields: [importId], references: [id])
   importId          String
   hash              String?
@@ -171,7 +171,7 @@ model ImportItem {
 }
 
 model ImportDraft {
-  id      String     @id @default(cuid())
+  id      String     @id @default(uuid())
   draftId String
   type    EntityType
 }
@@ -195,20 +195,21 @@ enum RecordStatus {
 }
 
 model RecipeIngredient {
-  id                String                 @id @default(cuid())
-  sentence          String
-  quantity          Float?
-  name              String?
-  order             Int
-  verified          Boolean @default(false)
-  unit              MeasurementUnit?       @relation(fields: [measurementUnitId], references: [id])
-  measurementUnitId String?
-  recipe            Recipe                 @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  recipeId          String // relation scalar field (used in the `@relation` attribute above)
-  ingredient        Ingredient?            @relation(fields: [ingredientId], references: [id])
-  ingredientId      String? // relation scalar field (used in the `@relation` attribute above)
-  group             RecipeIngredientGroup? @relation(fields: [groupId], references: [id])
-  groupId           String?
+  id                 String                 @id @default(uuid())
+  sentence           String
+  quantity           Float?
+  name               String?
+  order              Int
+  verified           Boolean                @default(false)
+  mealPrepIngredient Boolean                @default(false)
+  unit               MeasurementUnit?       @relation(fields: [measurementUnitId], references: [id])
+  measurementUnitId  String?
+  recipe             Recipe                 @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId           String // relation scalar field (used in the `@relation` attribute above)
+  ingredient         Ingredient?            @relation(fields: [ingredientId], references: [id])
+  ingredientId       String? // relation scalar field (used in the `@relation` attribute above)
+  group              RecipeIngredientGroup? @relation(fields: [groupId], references: [id])
+  groupId            String?
   // @@map("recipe_ingredient")
 }
 
@@ -218,8 +219,8 @@ enum MeasurementSystem {
 }
 
 model MeasurementUnit {
-  id              String                  @id @default(cuid())
-  name            String                  @unique
+  id              String             @id @default(uuid())
+  name            String             @unique
   conversionName  String?
   abbreviations   String[]
   symbol          String?
@@ -235,7 +236,7 @@ model MeasurementUnit {
 }
 
 model RecipeIngredientGroup {
-  id             String             @id @default(cuid())
+  id             String             @id @default(uuid())
   name           String
   recipe         Recipe             @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId       String
@@ -248,33 +249,31 @@ model RecipeIngredientGroup {
 }
 
 model Ingredient {
-  id                  String                  @id @default(cuid())
+  id                  String              @id @default(uuid())
   recipeIngredient    RecipeIngredient[]
-  name                String                  @unique
+  name                String              @unique
   alternateNames      String[]
   variant             String?
-  category            IngredientCategory?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  category            IngredientCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   categoryId          String?
   storageInstructions String?
   priceHistory        IngredientPrice[]
-  expirationRule      ExpirationRule?         @relation(fields: [expirationRuleId], references: [id], onDelete: SetNull)
+  expirationRule      ExpirationRule?     @relation(fields: [expirationRuleId], references: [id], onDelete: SetNull)
   expirationRuleId    String?
   receiptLines        ReceiptLine[]
 
   // @@map("ingredient")
 }
 
-
-
 model IngredientCategory {
-  id          String       @id @default(cuid())
+  id          String       @id @default(uuid())
   name        String       @unique
   ingredients Ingredient[]
   // @@map("ingredient_category")
 }
 
 model ExpirationRule {
-  id          String       @id @default(cuid())
+  id          String       @id @default(uuid())
   name        String
   variant     String?
   defrostTime Int?
@@ -287,7 +286,7 @@ model ExpirationRule {
 }
 
 model IngredientPrice {
-  id             String          @id @default(cuid())
+  id             String          @id @default(uuid())
   date           DateTime
   groceryStore   GroceryStore    @relation(fields: [groceryStoreId], references: [id])
   groceryStoreId String
@@ -305,14 +304,14 @@ model IngredientPrice {
 }
 
 model GroceryStore {
-  id               String            @id @default(cuid())
+  id               String            @id @default(uuid())
   name             String            @unique
   receipts         Receipt[]
   ingredientPrices IngredientPrice[]
 }
 
 model Receipt {
-  id              String        @id @default(cuid())
+  id              String        @id @default(uuid())
   merchantName    String?
   matchingStore   GroceryStore? @relation(fields: [storeId], references: [id])
   storeId         String?
@@ -326,8 +325,9 @@ model Receipt {
 }
 
 model ReceiptLine {
-  id                 String           @id @default(cuid())
+  id                 String           @id @default(uuid())
   totalPrice         Float?
+  ignore             Boolean          @default(false)
   description        String?
   quantity           Float?
   perUnitPrice       Float?
@@ -343,7 +343,8 @@ model ReceiptLine {
   ingredientId       String?
   /// [BoundingBoxes]
   boundingBoxes      Json?
-  order            Int
+  order              Int
+  verifed            Boolean          @default(false)
 }
 
 enum FoodType {
@@ -433,8 +434,8 @@ model Photo {
 model NutritionLabel {
   id                String                   @id @default(uuid())
   type              EntityType               @default(LABEL)
-  name              String?     
-  recipe            Recipe?                   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  name              String?
+  recipe            Recipe?                  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId          String
   ingredientGroup   RecipeIngredientGroup?   @relation(fields: [ingredientGroupId], references: [id], onDelete: Cascade)
   ingredientGroupId String?                  @unique
@@ -495,7 +496,7 @@ model AggLabelNutrient {
 model Nutrient {
   id                      String                   @id @default(uuid())
   name                    String                   @unique
-  isMacro                 Boolean         
+  isMacro                 Boolean
   alternateNames          String[]
   type                    NutrientType
   advancedView            Boolean
@@ -558,6 +559,8 @@ model DailyReferenceIntake {
   nutrient         Nutrient         @relation(fields: [nutrientId], references: [id])
   nutrientId       String
   // @@map("daily_reference_intake")
+
+  @@unique([nutrientId, specialCondition, gender, ageMin, ageMax], map: "unique_fields")
 }
 
 enum Gender {
@@ -572,13 +575,13 @@ enum SpecialCondition {
 }
 
 model HealthProfile {
-  id                      String           @id @default(uuid())
-  weight                  Float?
-  gender                  Gender
-  bodyFatPercentage       Float?
-  height                  Float?
-  yearBorn                Int
-  activityLevel           Float?
-  specialCondition        SpecialCondition
+  id                String           @id @default(uuid())
+  weight            Float?
+  gender            Gender
+  bodyFatPercentage Float?
+  height            Float?
+  yearBorn          Int
+  activityLevel     Float?
+  specialCondition  SpecialCondition
   // @@map("health_profile")
 }

@@ -1,7 +1,8 @@
-import { Prisma, RecordStatus } from "@prisma/client";
-import { MealPlanRecipeWithServing } from "../../data/test_data/MealPlan.js";
-import { SummedNutrients } from "../features/nutrition/LabelAggregator.js";
-import { AggregateNutritionLabel } from "../features/nutrition/LabelMaker.js";
+import { Prisma } from "@prisma/client";
+
+export type AllowUndefinedOrNull<T> = {
+  [K in keyof T]: T[K] | undefined | null;
+};
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -14,6 +15,8 @@ declare global {
     type AggregateLabelJson = AggregateNutritionLabel;
   }
 }
+
+type MaybePromise<T> = T | Promise<T>;
 
 type PolygonCoordinate = {
   x: number;
@@ -181,4 +184,5 @@ export {
   NutrientValue,
   MatchArgs,
   BoundingBox,
+  MaybePromise,
 };

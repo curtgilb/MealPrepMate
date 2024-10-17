@@ -8,6 +8,7 @@ import {
 } from "@/application/services/import/transformers/Transformer.js";
 import { CreateNutrientInput } from "@/application/services/nutrition/NutritionLabelService.js";
 import { uploadPhoto } from "@/application/services/PhotoService.js";
+import { tagIngredients } from "@/application/services/recipe/RecipeIngredientService.js";
 import { toNumber } from "@/application/util/TypeCast.js";
 import { getFileMetadata } from "@/infrastructure/file_io/common.js";
 import { HTMLElement, parse as parseHTML } from "node-html-parser";
@@ -40,7 +41,7 @@ export class RecipeKeeperTransformer extends Transformer {
       isList: true,
       processValue: Transformer.matchCategory,
     },
-    recipeSource: { type: "recipe", key: "source", isList: true },
+    recipeSource: { type: "recipe", key: "source" },
     recipeYield: {
       type: "label",
       key: "servings",
@@ -56,7 +57,11 @@ export class RecipeKeeperTransformer extends Transformer {
       key: "cookTime",
       processValue: this.getTime.bind(this),
     },
-    recipeIngredients: { type: "recipe", key: "ingredients" },
+    recipeIngredients: {
+      type: "recipe",
+      key: "ingredients",
+      processValue: tagIngredients,
+    },
     recipeDirections: { type: "recipe", key: "directions" },
     recipeNotes: { type: "recipe", key: "notes" },
     recipeNutServingSize: {
@@ -66,50 +71,59 @@ export class RecipeKeeperTransformer extends Transformer {
     },
     recipeNutCalories: {
       type: "label",
+      isList: true,
       key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
     recipeNutTotalFat: {
       type: "label",
+      isList: true,
       key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
     recipeNutSaturatedFat: {
       type: "label",
+      isList: true,
       key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
     recipeNuteCholesterol: {
       type: "label",
+      isList: true,
       key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
     recipeNutSodium: {
       type: "label",
+      isList: true,
       key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
     recipeNutTotalCarbohydrate: {
       type: "label",
+      isList: true,
       key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
     recipeNutDietaryFiber: {
       type: "label",
+      isList: true,
       key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
     recipeNutSugars: {
       type: "label",
+      isList: true,
       key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
     recipeNutProtein: {
       type: "label",
+      isList: true,
       key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
-    photo: { type: "recipe", key: "photoIds" },
+    photo: { type: "recipe", isList: true, key: "photoIds" },
   };
 
   nutrientMapping = {
@@ -135,13 +149,13 @@ export class RecipeKeeperTransformer extends Transformer {
         const metaData = await getFileMetadata(fileBuffer, file.path);
 
         if (metaData.path.ext === "html") {
-          records = this.processHtmlFile(fileBuffer);
+          records = await this.processHtmlFile(fileBuffer);
         } else if (
           ["jpg", "png", "bmp", "tif", "heic"].includes(
             metaData.auto?.ext ?? ""
           )
         ) {
-          this.processImage(file.path, fileBuffer, imageLookup);
+          await this.processImage(file.path, fileBuffer, imageLookup);
         }
       }
     }
@@ -164,19 +178,19 @@ export class RecipeKeeperTransformer extends Transformer {
     imageLookup[path] = photo.id;
   }
 
-  private processHtmlFile(file: Buffer): TransformedRecord[] {
+  private async processHtmlFile(file: Buffer): Promise<TransformedRecord[]> {
     const parsedRecipes: TransformedRecord[] = [];
 
     const html = parseHTML(file.toString());
     const recipes = html.querySelectorAll(".recipe-details");
     for (const recipe of recipes) {
-      const record = this.parseRecipe(recipe);
+      const record = await this.parseRecipe(recipe);
       parsedRecipes.push(record);
     }
     return parsedRecipes;
   }
 
-  private parseRecipe(html: HTMLElement): TransformedRecord {
+  private async parseRecipe(html: HTMLElement): Promise<TransformedRecord> {
     const record = new TransformedRecord();
     const tags = html.querySelectorAll("*[itemProp]");
     for (const tag of tags) {
@@ -189,7 +203,7 @@ export class RecipeKeeperTransformer extends Transformer {
 
         const map = this.recipeKeeperMapping[property.key];
         if (map) {
-          record.addProperty(map, property.value);
+          await record.addProperty(map, property.key, property.value);
         }
       }
     }

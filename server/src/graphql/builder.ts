@@ -1,7 +1,7 @@
 // Setup for your schema builder. Does not contain any definitions for types in your schema
 import SchemaBuilder from "@pothos/core";
 import PrismaPlugin from "@pothos/plugin-prisma";
-import ValidationPlugin from "@pothos/plugin-validation";
+import RelayPlugin from "@pothos/plugin-relay";
 import { DateTimeResolver } from "graphql-scalars";
 import { db } from "@/infrastructure/repository/db.js";
 import type PrismaTypes from "@/types/PothosTypes.js";
@@ -13,7 +13,7 @@ const builder = new SchemaBuilder<{
     DateTime: { Input: Date; Output: Date };
   };
 }>({
-  plugins: [ValidationPlugin, PrismaPlugin],
+  plugins: [PrismaPlugin, RelayPlugin],
   prisma: {
     client: db,
     // defaults to false, uses /// comments from prisma schema as descriptions
@@ -24,13 +24,6 @@ const builder = new SchemaBuilder<{
     filterConnectionTotalCount: true,
     // warn when not using a query parameter correctly
     onUnusedQuery: process.env.NODE_ENV === "production" ? null : "warn",
-  },
-  validationOptions: {
-    // optionally customize how errors are formatted
-    validationError: (zodError, args, context, info) => {
-      // the default behavior is to just throw the zod error directly
-      return zodError.message;
-    },
   },
 });
 

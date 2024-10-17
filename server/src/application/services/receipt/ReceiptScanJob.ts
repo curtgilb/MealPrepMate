@@ -1,32 +1,29 @@
 import { Queue, Worker } from "bullmq";
-
 import {
   AzureKeyCredential,
   DocumentAnalysisClient,
 } from "@azure/ai-form-recognizer";
 import { Prisma } from "@prisma/client";
-import { db } from "../../../infrastructure/db.js";
-import { BoundingBox } from "../../../types/CustomTypes.js";
-import { downloadFileFromBucket } from "../../io/FileStorage.js";
+import { BoundingBox } from "@/application/types/CustomTypes.js";
 import {
   PrebuiltReceiptModel,
   ReceiptRetailMealFields,
 } from "./PrebuiltReceipt.js";
-import { IngredientSearch } from "../../search/IngredientSearch.js";
-import { UnitSearch } from "../../search/UnitSearch.js";
-import { connection } from "../../../infrastructure/Redis.js";
+import { db } from "@/infrastructure/repository/db.js";
+import { redis_connection } from "@/infrastructure/Redis.js";
+import { downloadFile } from "@/infrastructure/object_storage/storage.js";
 
 async function searchIngredients(
-  store: string | undefined,
+  storeId: string | undefined,
   desc: string | undefined,
-  productCode: string | undefined,
-  matcher: IngredientSearch
+  productCode: string | undefined
 ) {
   if (!desc && !productCode) return undefined;
+  // Check previous receipts to see if there is a match that has been previously made
   const matchingIngredient = await db.receiptLine.findFirst({
     where: {
       OR: [{ description: desc }, { productCode: productCode }],
-      receipt: { verified: true, matchingStore: { name: store } },
+      receipt: { verified: true, storeId: storeId },
     },
     include: { matchingIngredient: true },
   });
@@ -34,11 +31,11 @@ async function searchIngredients(
     return matchingIngredient.id;
   }
   if (desc) {
-    return matcher.search(desc)?.id;
+    return (await db.ingredient.match(desc))?.id;
   }
 }
 
-const ReceiptScanningQueue = new Queue("receipts", connection);
+const ReceiptScanningQueue = new Queue("receipts", redis_connection);
 
 const worker = new Worker(
   "receipts",
@@ -48,7 +45,7 @@ const worker = new Worker(
     const receipt = await db.receipt.findUniqueOrThrow({
       where: { id: job.name },
     });
-    const receiptFile = await downloadFileFromBucket(receipt.path);
+    const receiptFile = await downloadFile(receipt.path);
 
     if (!process.env.AZURE_ENDPOINT || !process.env.AZURE_KEY) {
       throw new Error("Missing azure credentials");
@@ -76,10 +73,6 @@ const worker = new Worker(
             },
           })
         : undefined;
-      const ingredientMatcher = new IngredientSearch();
-      const unitMatcher = new UnitSearch();
-      await ingredientMatcher.init();
-      await unitMatcher.init();
 
       const itemsCreateStmt: Prisma.ReceiptLineCreateManyReceiptInput[] = [];
       if (items) {
@@ -88,14 +81,17 @@ const worker = new Worker(
             (region) => region.polygon
           );
           const matchingIngredientId = await searchIngredients(
-            matchingStore?.name,
+            matchingStore?.id,
             receiptItem.properties.description?.value,
-            receiptItem.properties.productCode?.value,
-            ingredientMatcher
+            receiptItem.properties.productCode?.value
           );
 
           const matchingUnitId = receiptItem.properties.quantityUnit?.value
-            ? unitMatcher.search(receiptItem.properties.quantityUnit?.value)?.id
+            ? (
+                await db.measurementUnit.match(
+                  receiptItem.properties.quantityUnit?.value
+                )
+              )?.id
             : undefined;
 
           itemsCreateStmt.push({
@@ -123,17 +119,7 @@ const worker = new Worker(
       });
     }
   },
-  connection
+  redis_connection
 );
-
-worker.on("failed", (job, err) => {
-  console.log(err);
-  // db.receipt
-  //   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-  //   .update({ where: { id: job.name }, data: { scanned: false } })
-  //   .catch((err) => {
-  //     console.log(err);
-  //   });
-});
 
 export { ReceiptScanningQueue };

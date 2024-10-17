@@ -1,4 +1,3 @@
-import { db } from "@/infrastructure/repository/db.js";
 import { Ingredient, Prisma } from "@prisma/client";
 import { searchIngredients } from "@prisma/client/sql";
 
@@ -8,7 +7,7 @@ export const ingredientExtension = Prisma.defineExtension((client) => {
       ingredient: {
         async match(search: string): Promise<Ingredient | null> {
           // Check previous matches that have been verified
-          const firstAttempt = await db.recipeIngredient.findFirst({
+          const firstAttempt = await client.recipeIngredient.findFirst({
             where: {
               verified: true,
               name: { equals: search, mode: "insensitive" },
@@ -21,7 +20,7 @@ export const ingredientExtension = Prisma.defineExtension((client) => {
           }
           // Search for best match
           else {
-            const finalAttempt = await db.$queryRawTyped(
+            const finalAttempt = await client.$queryRawTyped(
               searchIngredients(search, 1)
             );
             return finalAttempt.length > 0
@@ -31,7 +30,7 @@ export const ingredientExtension = Prisma.defineExtension((client) => {
         },
         async search(search: string): Promise<Ingredient[] | null> {
           // Check previous matches that have been verified
-          const searchResult = await db.$queryRawTyped(
+          const searchResult = await client.$queryRawTyped(
             searchIngredients(search, 10)
           );
           return searchResult.length > 0

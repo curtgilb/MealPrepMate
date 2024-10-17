@@ -106,7 +106,6 @@ builder.mutationFields((t) => ({
     args: {
       id: t.arg.string({ required: true }),
     },
-    validate: { schema: z.object({ id: z.string().cuid() }) },
     resolve: async (query, root, args) => {
       await db.mealPlan.delete({
         where: { id: args.id },

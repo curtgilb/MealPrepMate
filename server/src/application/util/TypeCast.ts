@@ -15,6 +15,8 @@ function toNumber(x: unknown): number {
       }
     case "undefined":
       return 0;
+    case "object":
+      return 0;
     case "boolean":
       return +x;
     default:

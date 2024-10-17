@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { db } from "@/infrastructure/repository/db.js";
 import { toTitleCase } from "@/application/util/utils.js";
-import { cleanedStringSchema } from "@/validations/utilValidations.js";
 import { builder } from "@/graphql/builder.js";
 
 // ============================================ Types ===================================
@@ -22,9 +21,6 @@ builder.queryFields((t) => ({
     type: ["Cuisine"],
     args: {
       searchString: t.arg.string(),
-    },
-    validate: {
-      schema: z.object({ searchString: z.string().optional() }),
     },
     resolve: async (query, root, args) => {
       //@ts-ignore
@@ -51,9 +47,6 @@ builder.mutationFields((t) => ({
     args: {
       name: t.arg.string({ required: true }),
     },
-    validate: {
-      schema: z.object({ name: cleanedStringSchema(30, toTitleCase) }),
-    },
     resolve: async (query, root, args) => {
       await db.cuisine.create({ data: { name: args.name } });
       return db.cuisine.findMany({ ...query, orderBy: { name: "asc" } });
@@ -63,9 +56,6 @@ builder.mutationFields((t) => ({
     type: ["Cuisine"],
     args: {
       cuisineId: t.arg.string({ required: true }),
-    },
-    validate: {
-      schema: z.object({ cuisineId: z.string().cuid() }),
     },
     resolve: async (query, root, args) => {
       await db.cuisine.delete({ where: { id: args.cuisineId } });

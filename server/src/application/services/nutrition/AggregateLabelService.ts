@@ -1,7 +1,7 @@
 import {
   LabelAggregator,
   LabelWithNutrients,
-} from "@/application/services/nutrition/aggregate_label/LabelAggregator.js";
+} from "@/application/services/nutrition/LabelAggregator.js";
 import { db, DbTransactionClient } from "@/infrastructure/repository/db.js";
 
 async function updateAggregateLabel(

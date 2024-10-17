@@ -1,13 +1,12 @@
 import { builder } from "@/graphql/builder.js";
 import { db } from "@/infrastructure/repository/db.js";
 import {
-  RecipeFilter,
   IngredientFilter,
   MacroFilter,
   NumericalFilter,
   NutrientFilter,
+  RecipeFilter,
 } from "@/infrastructure/repository/extensions/RecipeExtension.js";
-import { z } from "zod";
 
 // ============================================ Types ===================================
 
@@ -87,20 +86,19 @@ builder.queryFields((t) => ({
   recipe: t.prismaField({
     type: "Recipe",
     args: {
-      recipeId: t.arg.string({ required: true }),
-    },
-    validate: {
-      schema: z.object({ recipeId: z.string().cuid() }),
+      recipeId: t.arg.id({ required: true }),
     },
     resolve: async (query, root, args) => {
+      console.log(args.recipeId);
       return await db.recipe.findUniqueOrThrow({
         where: { id: args.recipeId },
         ...query,
       });
     },
   }),
-  recipes: t.prismaField({
-    type: ["Recipe"],
+  recipes: t.prismaConnection({
+    type: "Recipe",
+    cursor: "id",
     args: {
       filter: t.arg({ type: recipeFilter, required: true }),
     },

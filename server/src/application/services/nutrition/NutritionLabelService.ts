@@ -1,5 +1,6 @@
 import { updateAggregateLabel } from "@/application/services/nutrition/AggregateLabelService.js";
-import { AllowUndefinedOrNull } from "@/features/recipe/RecipeService.js";
+import { AllowUndefinedOrNull } from "@/application/types/CustomTypes.js";
+
 import { db } from "@/infrastructure/repository/db.js";
 import { Prisma } from "@prisma/client";
 

@@ -2,10 +2,9 @@ import "dotenv/config";
 import { createYoga, Plugin } from "graphql-yoga";
 import { createServer } from "node:http";
 import { createLogger, format, transports } from "winston";
-import { schema } from "./graphql/Schema.js";
+import { schema } from "@/graphql/Schema.js";
 
 const PORT = 3025;
-console.log(process.env);
 
 const { combine, timestamp, colorize, align, json } = format;
 const logger = createLogger({

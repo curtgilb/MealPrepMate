@@ -1,15 +1,13 @@
-import { Prisma } from "@prisma/client";
-import { DbTransactionClient } from "@/infrastructure/repository/db.js";
-import { AggregateLabelFormatter } from "@/application/services/nutrition/aggregate_label/AggregateLabelFormatter.js";
-import { MeasurementUnit } from "@prisma/client";
 import {
+  ALCOHOL_ID,
   CALORIE_ID,
   CARB_ID,
   FAT_ID,
   PROTIEN_ID,
-  ALCOHOL_ID,
-} from "@/config.js";
+} from "@/application/config.js";
 import { round } from "@/application/util/utils.js";
+import { DbTransactionClient } from "@/infrastructure/repository/db.js";
+import { MeasurementUnit, Prisma } from "@prisma/client";
 
 const nutritionLabelWithNutrients =
   Prisma.validator<Prisma.NutritionLabelDefaultArgs>()({

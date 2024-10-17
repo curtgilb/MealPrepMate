@@ -1,4 +1,4 @@
-import { Prisma, Recipe } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 export type NumericalFilter = {
   lte: number | undefined;

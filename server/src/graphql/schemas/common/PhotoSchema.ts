@@ -31,12 +31,6 @@ builder.mutationFields((t) => ({
       recipeId: t.arg.string({ required: true }),
       photoId: t.arg.stringList({ required: true }),
     },
-    validate: {
-      schema: z.object({
-        recipeId: z.string().cuid(),
-        photoId: z.string().cuid().array(),
-      }),
-    },
     resolve: async (query, root, args) => {
       return await db.recipe.update({
         where: { id: args.recipeId },
@@ -54,12 +48,6 @@ builder.mutationFields((t) => ({
     args: {
       recipeId: t.arg.string({ required: true }),
       photoIds: t.arg.stringList({ required: true }),
-    },
-    validate: {
-      schema: z.object({
-        recipeId: z.string().cuid(),
-        photoIds: z.string().cuid().array(),
-      }),
     },
     resolve: async (query, root, args) => {
       return await db.recipe.update({

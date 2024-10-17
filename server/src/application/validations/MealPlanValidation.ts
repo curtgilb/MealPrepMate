@@ -1,11 +1,10 @@
 import { Meal } from "@prisma/client";
 import { z } from "zod";
-import { cleanedStringSchema } from "./utilValidations.js";
-import { toTitleCase } from "../application/util/utils.js";
+import { toTitleCase } from "../util/utils.js";
 
 const editMealPlanValidation = z.object({
   id: z.string().cuid(),
-  name: cleanedStringSchema(20, toTitleCase).optional().nullish(),
+  name: z.string(),
   mealPrepInstructions: z.string().optional().nullish(),
 });
 

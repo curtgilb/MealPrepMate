@@ -4,7 +4,7 @@ import {
   CARB_ID,
   FAT_ID,
   PROTIEN_ID,
-} from "@/config.js";
+} from "@/application/config.js";
 import { db } from "@/infrastructure/repository/db.js";
 import { builder } from "@/graphql/builder.js";
 

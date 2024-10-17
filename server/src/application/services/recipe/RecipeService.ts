@@ -1,6 +1,7 @@
 import { updateAggregateLabel } from "@/application/services/nutrition/AggregateLabelService.js";
 import { CreateNutritionLabelInput } from "@/application/services/nutrition/NutritionLabelService.js";
 import { CreateRecipeIngredientInput } from "@/application/services/recipe/RecipeIngredientService.js";
+import { AllowUndefinedOrNull } from "@/application/types/CustomTypes.js";
 import { db } from "@/infrastructure/repository/db.js";
 import { Prisma } from "@prisma/client";
 
@@ -12,10 +13,6 @@ type WebRecipeQuery = {
 type RecipeQuery = {
   include?: Prisma.RecipeInclude | undefined;
   select?: Prisma.RecipeSelect | undefined;
-};
-
-export type AllowUndefinedOrNull<T> = {
-  [K in keyof T]: T[K] | undefined | null;
 };
 
 export type CreateRecipeInput = {
@@ -80,10 +77,10 @@ async function createRecipe(recipe: CreateRecipeInput, query?: RecipeQuery) {
               createMany: {
                 data: recipe.ingredients.map((ingredient) => ({
                   sentence: ingredient.sentence,
-                  quantity: ingredient.quantity,
+                  quantity: ingredient?.quantity,
                   order: ingredient.order,
-                  unit: { connect: { id: ingredient.unitId } },
-                  ingredient: { connect: { id: ingredient.ingredientId } },
+                  measurementUnitId: ingredient?.unitId,
+                  ingredientId: ingredient?.ingredientId,
                 })),
               },
             }

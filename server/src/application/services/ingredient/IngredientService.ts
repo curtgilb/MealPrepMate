@@ -1,5 +1,5 @@
+import { db } from "@/infrastructure/repository/db.js";
 import { ExpirationRule } from "@prisma/client";
-import { db } from "../../infrastructure/db.js";
 
 type RecipeMaxFreshness = {
   maxTableLife: number;

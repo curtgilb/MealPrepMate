@@ -3,8 +3,10 @@ import { FileMetaData } from "../../types/CustomTypes.js";
 import path from "path";
 import fs from "fs";
 
-function toTitleCase(str: string): string {
-  return str
+function toTitleCase(str: unknown): string | undefined {
+  if (!str) return undefined;
+
+  return new String(str)
     .toLowerCase()
     .replace(
       /\w\S*/g,

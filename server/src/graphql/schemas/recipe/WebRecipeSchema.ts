@@ -29,9 +29,6 @@ builder.mutationFields((t) => ({
     args: {
       url: t.arg.string({ required: true }),
     },
-    validate: {
-      schema: z.object({ url: z.string().url() }),
-    },
     resolve: async (query, root, args) => {
       return await scrapeRecipeFromWeb(args.url, false, query);
     },
@@ -40,9 +37,6 @@ builder.mutationFields((t) => ({
     type: "WebScrapedRecipe",
     args: {
       url: t.arg.string({ required: true }),
-    },
-    validate: {
-      schema: z.object({ url: z.string().url() }),
     },
     resolve: async (query, root, args) => {
       return await scrapeRecipeFromWeb(args.url, true, query);

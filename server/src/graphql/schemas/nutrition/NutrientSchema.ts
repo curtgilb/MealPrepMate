@@ -49,12 +49,6 @@ builder.queryFields((t) => ({
       search: t.arg.string(),
       advanced: t.arg.boolean({ required: true }),
     },
-    validate: {
-      schema: z.object({
-        advanced: z.boolean(),
-        search: z.string().optional(),
-      }),
-    },
     resolve: async (query, root, args) => {
       return await db.nutrient.findMany({
         where: {

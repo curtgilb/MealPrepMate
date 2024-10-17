@@ -18,10 +18,12 @@ export type TaggedIngredient = Omit<
 export type CreateRecipeIngredientInput = {
   order: number;
   sentence: string;
-  quantity: number;
-  unitId: string;
-  ingredientId: string;
-  groupId: string;
+  quantity: number | undefined | null;
+  unitId: string | undefined | null;
+  ingredientId: string | undefined | null;
+  groupId: string | undefined | null;
+  mealPrepIngredient: boolean;
+  verified: boolean;
 };
 
 export type EditRecipeIngredientInput = {
@@ -39,23 +41,29 @@ type RecipeIngredientQuery = {
   select?: Prisma.RecipeIngredientSelect<DefaultArgs> | undefined;
 };
 
-async function tagIngredients(ingredientList: string) {
-  const matchedIngredients: TaggedIngredient[] = [];
+async function tagIngredients(
+  ingredientList: string
+): Promise<CreateRecipeIngredientInput[]> {
+  const matchedIngredients: CreateRecipeIngredientInput[] = [];
   const parsedIngredients = await parseIngredients(ingredientList);
 
   for (const [index, ingredient] of parsedIngredients.entries()) {
-    const cleanedSentence = z.coerce.string().parse(ingredient.sentence);
-    const bestIngredientMatch = await db.ingredient.match(ingredient.name);
-    const bestUnitMatch = await db.measurementUnit.match(ingredient.unit);
+    const bestIngredientMatch = ingredient?.name
+      ? await db.ingredient.match(ingredient.name)
+      : undefined;
+    const bestUnitMatch = ingredient?.unit
+      ? await db.measurementUnit.match(ingredient.unit)
+      : undefined;
 
     matchedIngredients.push({
-      name: ingredient.name,
-      sentence: cleanedSentence,
-      quantity: ingredient.quantity ?? null,
+      sentence: ingredient.sentence,
+      quantity: ingredient?.quantity ? ingredient.quantity : 1,
       order: index,
       verified: false,
-      unit: bestUnitMatch,
-      ingredient: bestIngredientMatch,
+      unitId: bestUnitMatch?.id,
+      ingredientId: bestIngredientMatch?.id,
+      mealPrepIngredient: false,
+      groupId: undefined,
     });
   }
 
@@ -70,11 +78,15 @@ async function addRecipeIngredient(
   return await db.recipeIngredient.create({
     data: {
       sentence: ingredient.sentence,
-      quantity: ingredient.quantity,
+      quantity: ingredient?.quantity ? ingredient.quantity : 1,
       order: ingredient.order,
       recipe: { connect: { id: recipeId } },
-      unit: { connect: { id: ingredient.unitId } },
-      ingredient: { connect: { id: ingredient.ingredientId } },
+      unit: ingredient.unitId
+        ? { connect: { id: ingredient.unitId } }
+        : undefined,
+      ingredient: ingredient.ingredientId
+        ? { connect: { id: ingredient.ingredientId } }
+        : undefined,
     },
     ...query,
   });

@@ -1,12 +1,16 @@
-import { z } from "zod";
-import { db } from "@/infrastructure/repository/db.js";
-import { uploadReceipt } from "@/application/services/receipt/ReceiptScan.js";
+import {
+  editReceipt,
+  EditReceiptInput,
+  finalizeReceipt,
+  getReceipt,
+  uploadReceipt,
+} from "@/application/services/receipt/ReceiptService.js";
 import { builder } from "@/graphql/builder.js";
 
-builder.prismaObject("Receipt", {
+builder.prismaNode("Receipt", {
+  id: { field: "id" },
   name: "Receipt",
   fields: (t) => ({
-    id: t.exposeString("id"),
     total: t.exposeFloat("total", { nullable: true }),
     merchantName: t.exposeString("merchantName", { nullable: true }),
     matchingStore: t.relation("matchingStore", { nullable: true }),
@@ -17,26 +21,24 @@ builder.prismaObject("Receipt", {
   }),
 });
 
-const updateReceipt = builder.inputType("UpdateReceipt", {
-  fields: (t) => ({
-    store: t.string(),
-    date: t.field({ type: "DateTime" }),
-  }),
-});
+const updateReceipt = builder
+  .inputRef<EditReceiptInput>("UpdateReceipt")
+  .implement({
+    fields: (t) => ({
+      groceryStoreId: t.string({ required: true }),
+      date: t.field({ type: "DateTime", required: true }),
+    }),
+  });
 
 // ============================================ Queries =================================
 builder.queryFields((t) => ({
   receipt: t.prismaField({
     args: {
-      id: t.arg.string({ required: true }),
+      id: t.arg.id({ required: true }),
     },
     type: "Receipt",
     resolve: async (query, root, args) => {
-      // @ts-ignore
-      return await db.receipt.findUniqueOrThrow({
-        where: { id: args.id },
-        ...query,
-      });
+      return await getReceipt(args.id, query);
     },
   }),
 }));
@@ -55,69 +57,23 @@ builder.mutationFields((t) => ({
       return await uploadReceipt(args.file, query);
     },
   }),
-  updateReceipt: t.prismaField({
+  editReceipt: t.prismaField({
     type: "Receipt",
     args: {
-      receiptId: t.arg.string({ required: true }),
+      receiptId: t.arg.id({ required: true }),
       receipt: t.arg({ type: updateReceipt, required: true }),
     },
     resolve: async (query, root, args) => {
-      return await db.receipt.update({
-        where: { id: args.receiptId },
-        data: {
-          merchantName: args.receipt.store,
-          transactionDate: args.receipt.date,
-        },
-        ...query,
-      });
+      return editReceipt(args.receiptId, args.receipt, query);
     },
   }),
   finalizeReceipt: t.prismaField({
     type: "Receipt",
     args: {
-      receiptId: t.arg.string({ required: true }),
+      receiptId: t.arg.id({ required: true }),
     },
     resolve: async (query, root, args) => {
-      const receipt = await db.receipt.findUniqueOrThrow({
-        where: { id: args.receiptId },
-        include: { lineItems: true },
-      });
-
-      if (!(receipt.transactionDate && receipt.storeId))
-        throw new Error("Date and store must be completed before finalizing");
-
-      for (const item of receipt.lineItems) {
-        if (
-          item.ingredientId &&
-          item.perUnitPrice &&
-          item.quantity &&
-          item.totalPrice &&
-          item.unitId
-        ) {
-          const size = z.coerce.number().parse(item.unitQuantity);
-          await db.ingredientPrice.create({
-            data: {
-              date: receipt.transactionDate,
-              groceryStoreId: receipt.storeId,
-              price: item.perUnitPrice,
-              size: size,
-              unitId: item.unitId,
-              pricePerUnit: item.perUnitPrice / size,
-              ingredientId: item.ingredientId,
-              foodType: item.foodType,
-              receiptLineId: item.id,
-            },
-          });
-        }
-      }
-
-      return await db.receipt.update({
-        where: { id: args.receiptId },
-        data: {
-          verified: true,
-        },
-        ...query,
-      });
+      return finalizeReceipt(args.receiptId, query);
     },
   }),
 }));

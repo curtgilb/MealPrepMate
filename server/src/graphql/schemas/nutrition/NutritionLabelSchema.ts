@@ -4,7 +4,7 @@ import { db } from "@/infrastructure/repository/db.js";
 import {
   createNutritionLabelValidation,
   editNutritionLabelValidation,
-} from "@/validations/NutritionValidation.js";
+} from "@/application/validations/NutritionValidation.js";
 import { builder } from "@/graphql/builder.js";
 
 // ============================================ Types ===================================
@@ -111,9 +111,6 @@ builder.queryFields((t) => ({
     args: {
       labelId: t.arg.string({ required: true }),
     },
-    validate: {
-      schema: z.object({ labelId: z.string().cuid() }),
-    },
     resolve: async (query, root, args) => {
       return await db.nutritionLabel.findUniqueOrThrow({
         where: { id: args.labelId },
@@ -132,13 +129,6 @@ builder.mutationFields((t) => ({
       ingredientGroupId: t.arg.string(),
       nutritionLabel: t.arg({ type: createNutritionLabel, required: true }),
     },
-    validate: {
-      schema: z.object({
-        recipeId: z.string().cuid(),
-        ingredientGroupId: z.string().cuid().optional(),
-        nutritionLabel: createNutritionLabelValidation,
-      }),
-    },
     resolve: async (query, root, args) => {
       return await db.nutritionLabel.createNutritionLabel(
         args.nutritionLabel,
@@ -154,9 +144,6 @@ builder.mutationFields((t) => ({
     args: {
       label: t.arg({ type: editNutritionLabelInput, required: true }),
     },
-    validate: {
-      schema: z.object({ label: editNutritionLabelValidation }),
-    },
     resolve: async (query, root, args) => {
       return await db.nutritionLabel.editNutritionLabel(args.label, query);
     },
@@ -166,7 +153,6 @@ builder.mutationFields((t) => ({
     args: {
       id: t.arg.string({ required: true }),
     },
-    validate: { schema: z.object({ id: z.string().cuid() }) },
     resolve: async (query, root, args) => {
       await db.nutritionLabel.delete({ where: { id: args.id } });
       return db.nutritionLabel.findMany({ ...query });

@@ -1,13 +1,9 @@
-import { z } from "zod";
+import { builder } from "@/graphql/builder.js";
 import { db } from "@/infrastructure/repository/db.js";
-import {
-  createExpirationRuleValidation,
-  editExpirationRuleValidation,
-} from "@/validations/IngredientValidation.js";
-import { builder } from "../../builder.js";
-import { deleteResult } from "../common/Pagination.js";
+import { DeleteResult } from "@/graphql/schemas/common/MutationResult.js";
 
-builder.prismaObject("ExpirationRule", {
+builder.prismaNode("ExpirationRule", {
+  id: { field: "id" },
   fields: (t) => ({
     id: t.exposeID("id"),
     name: t.exposeString("name"),
@@ -65,10 +61,7 @@ builder.queryFields((t) => ({
   expirationRule: t.prismaField({
     type: "ExpirationRule",
     args: {
-      expirationRuleId: t.arg.string({ required: true }),
-    },
-    validate: {
-      schema: z.object({ expirationRuleId: z.string().cuid() }),
+      expirationRuleId: t.arg.id({ required: true }),
     },
     resolve: async (query, root, args) => {
       //@ts-ignore
@@ -78,15 +71,11 @@ builder.queryFields((t) => ({
       });
     },
   }),
-  expirationRules: t.prismaField({
-    type: ["ExpirationRule"],
+  expirationRules: t.prismaConnection({
+    type: "ExpirationRule",
+    cursor: "id",
     args: {
       search: t.arg.string(),
-    },
-    validate: {
-      schema: z.object({
-        search: z.string().optional(),
-      }),
     },
     resolve: async (query) => {
       //@ts-ignore
@@ -101,12 +90,6 @@ builder.mutationFields((t) => ({
     type: "ExpirationRule",
     args: {
       rule: t.arg({ type: createExpirationRule, required: true }),
-    },
-    validate: {
-      schema: z.object({
-        ingredientId: z.string().cuid(),
-        rule: createExpirationRuleValidation,
-      }),
     },
     resolve: async (query, root, args) => {
       return await db.expirationRule.create({
@@ -129,12 +112,6 @@ builder.mutationFields((t) => ({
       ingredientId: t.arg.string({ required: true }),
       expirationRuleId: t.arg.string({ required: true }),
     },
-    validate: {
-      schema: z.object({
-        ingredientId: z.string().cuid(),
-        expirationRuleId: z.string().cuid(),
-      }),
-    },
     resolve: async (query, root, args) => {
       return await db.ingredient.update({
         where: {
@@ -156,11 +133,6 @@ builder.mutationFields((t) => ({
     args: {
       expirationRule: t.arg({ type: editExpirationRule, required: true }),
     },
-    validate: {
-      schema: z.object({
-        expirationRule: editExpirationRuleValidation,
-      }),
-    },
     resolve: async (query, root, args) => {
       return await db.expirationRule.update({
         where: {
@@ -178,12 +150,9 @@ builder.mutationFields((t) => ({
     },
   }),
   deleteExpirationRule: t.field({
-    type: deleteResult,
+    type: DeleteResult,
     args: {
       expirationRuleId: t.arg.string({ required: true }),
-    },
-    validate: {
-      schema: z.object({ expirationRuleId: z.string().cuid() }),
     },
     resolve: async (root, args) => {
       try {

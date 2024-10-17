@@ -1,8 +1,9 @@
 import { ReceiptScanningQueue } from "@/application/services/receipt/ReceiptScanJob.js";
+import { toNumber } from "@/application/util/TypeCast.js";
 import { hash } from "@/infrastructure/file_io/common.js";
 import { uploadFile } from "@/infrastructure/object_storage/storage.js";
 import { db } from "@/infrastructure/repository/db.js";
-import { FoodType, Prisma } from "@prisma/client";
+import { Prisma, Receipt, ReceiptLine } from "@prisma/client";
 
 type ReceiptQuery = {
   include?: Prisma.ReceiptInclude | undefined;
@@ -10,24 +11,9 @@ type ReceiptQuery = {
 };
 
 type EditReceiptInput = {
-  groceryStoreId: string | undefined;
-  date: Date | undefined;
-  verified: boolean | undefined;
+  groceryStoreId: string;
+  date: Date;
 };
-
-type CreateReceiptLineItemInput = {
-  totalPrice: number;
-  description: string;
-  quantity: number;
-  perUnitPrice: number;
-  productCode: string;
-  unitQuantity: string;
-  unitId: string;
-  ingredientId: string;
-  foodType: FoodType;
-};
-
-type EditReceiptLineItemInput = {};
 
 const ACCEPTED_RECEIPT_EXT = ["jpg", "png", "bmp", "tif", "heic"];
 
@@ -79,4 +65,82 @@ async function addScanJobToQueue(
   return newRecord;
 }
 
-export { uploadReceipt };
+async function getReceipt(id: string, query?: ReceiptQuery) {
+  // @ts-ignore
+  return await db.receipt.findUniqueOrThrow({
+    // @ts-ignore
+    where: { id: id },
+    ...query,
+  });
+}
+
+async function editReceipt(
+  id: string,
+  receipt: EditReceiptInput,
+  query?: ReceiptQuery
+) {
+  return await db.receipt.update({
+    where: { id: id },
+    data: {
+      matchingStore: { connect: { id: receipt.groceryStoreId } },
+      transactionDate: receipt.date,
+    },
+    ...query,
+  });
+}
+
+async function finalizeReceipt(receiptId: string, query?: ReceiptQuery) {
+  const receipt = await db.receipt.findUniqueOrThrow({
+    where: { id: receiptId },
+    include: { lineItems: true },
+  });
+  checkIfVerified(receipt);
+
+  for (const item of receipt.lineItems) {
+    const size = toNumber(item.unitQuantity);
+    await db.ingredientPrice.create({
+      data: {
+        date: receipt.transactionDate as Date,
+        groceryStoreId: receipt.storeId as string,
+        price: item.perUnitPrice as number,
+        size: size,
+        unitId: item.unitId as string,
+        pricePerUnit: (item.perUnitPrice as number) / size,
+        ingredientId: item.ingredientId as string,
+        foodType: item.foodType,
+        receiptLineId: item.id,
+      },
+    });
+  }
+
+  return await db.receipt.update({
+    // @ts-ignore
+    where: { id: receiptId },
+    data: {
+      verified: true,
+    },
+    ...query,
+  });
+}
+
+function checkIfVerified(receipt: Receipt & { lineItems: ReceiptLine[] }) {
+  // Check for both grocery store and date
+  // Check that all line items have been verified
+  if (
+    !receipt.storeId ||
+    !receipt.transactionDate ||
+    !receipt.lineItems.every((item) => item.verifed)
+  ) {
+    throw new Error(
+      "Receipt and line items must be completed before finalizing"
+    );
+  }
+}
+
+export {
+  editReceipt,
+  EditReceiptInput,
+  finalizeReceipt,
+  getReceipt,
+  uploadReceipt,
+};

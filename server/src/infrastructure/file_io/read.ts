@@ -1,9 +1,10 @@
-import { getPath } from "@/infrastructure/file_io/common.js";
+import { getPath, project_root } from "@/infrastructure/file_io/common.js";
 import { toCamelCase } from "@/application/util/utils.js";
 import { parse } from "csv-parse";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { z, ZodTypeAny } from "zod";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -13,8 +14,9 @@ function getFileContentsFromStream(
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     let fileData = "";
+    const fullPath = getPath(filePath);
 
-    const readStream = fs.createReadStream(filePath, { encoding });
+    const readStream = fs.createReadStream(fullPath, { encoding });
 
     readStream.on("data", (chunk) => {
       fileData += chunk;
@@ -30,16 +32,19 @@ function getFileContentsFromStream(
   });
 }
 
-export type CsvOutput = {
-  record: { [key: string]: string };
-  raw: string;
-};
+interface ReadCSVParameters<T extends ZodTypeAny> {
+  path?: string;
+  camelCaseHeaders: boolean;
+  source?: string;
+  schema: T;
+}
 
-async function readCSV(
-  source: string,
-  isPath: boolean = true,
-  camelCaseHeaders = true
-): Promise<CsvOutput[]> {
+async function readCSV<T extends ZodTypeAny>({
+  path,
+  camelCaseHeaders,
+  source,
+  schema,
+}: ReadCSVParameters<T>): Promise<z.infer<T>[]> {
   const parserOptions = {
     delimiter: ",",
     columns: camelCaseHeaders
@@ -49,16 +54,16 @@ async function readCSV(
     raw: true,
   };
   let parser;
-  if (isPath) {
-    const fullPath = path.join(__dirname, source);
+  if (path) {
+    const fullPath = getPath(path);
     parser = fs.createReadStream(fullPath).pipe(parse(parserOptions));
-  } else {
+  } else if (source) {
     parser = parse(source, parserOptions);
   }
 
-  const records: CsvOutput[] = [];
-  for await (const record of parser) {
-    const typedRecord = record as CsvOutput;
+  const records: z.infer<T>[] = [];
+  for await (const { record } of parser) {
+    const typedRecord = schema.parse(record);
     records.push(typedRecord);
   }
   return records;
@@ -84,11 +89,8 @@ async function readFile(
 function openFileAsBuffer(sourcePath: string): Buffer {
   if (typeof sourcePath === "string") {
     try {
-      const newPath = path.isAbsolute(sourcePath)
-        ? sourcePath
-        : path.join(__dirname, sourcePath);
-      fs.accessSync(newPath);
-      return fs.readFileSync(newPath);
+      const fullPath = getPath(sourcePath);
+      return fs.readFileSync(fullPath);
     } catch {
       throw Error(`File at ${sourcePath} could not be opened.`);
     }

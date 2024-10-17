@@ -50,6 +50,7 @@ builder.mutationFields((t) => ({
       line: t.arg({ type: updateReceiptLine, required: true }),
     },
     resolve: async (query, root, args) => {
+      // @ts-ignore
       return await db.receiptLine.create({
         data: {
           order: 0,

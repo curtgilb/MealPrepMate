@@ -1,6 +1,6 @@
 import { db } from "@/infrastructure/repository/db.js";
 import { builder } from "@/graphql/builder.js";
-import { deleteResult } from "@/graphql/schemas/common/Pagination.js";
+import { DeleteResult } from "@/graphql/schemas/common/MutationResult.js";
 
 // ============================================ Types ===================================
 builder.prismaObject("RecipeIngredientGroup", {
@@ -52,7 +52,7 @@ builder.mutationFields((t) => ({
     },
   }),
   deleteRecipeIngredientGroup: t.field({
-    type: deleteResult,
+    type: DeleteResult,
     args: {
       groupId: t.arg.string({ required: true }),
     },

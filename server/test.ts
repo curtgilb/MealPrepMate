@@ -1,13 +1,18 @@
 import "dotenv/config";
+import { createBuckets, nukeData, seedDb } from "@/seed/db_init.js";
 import { RecipeKeeperTransformer } from "@/application/services/import/transformers/RecipeKeeperTransformer.js";
-import { createBuckets, deleteBuckets } from "@/seed/seed.js";
+import { createRecipe } from "@/application/services/recipe/RecipeService.js";
 
-await deleteBuckets();
+await nukeData();
 await createBuckets();
+await seedDb();
 
-const transformer = new RecipeKeeperTransformer();
-const records = await transformer.transform({
+const recipeKeeper = new RecipeKeeperTransformer();
+const recipes = await recipeKeeper.transform({
   type: "local",
   filePath: "C:\\Users\\cgilb\\Desktop\\RecipeKeeper_20241010_135410.zip",
 });
-console.log(records);
+
+for (const recipe of recipes) {
+  await createRecipe(recipe.getRecipe(true));
+}

@@ -1,5 +1,7 @@
 import { CreateNutritionLabelInput } from "@/application/services/nutrition/NutritionLabelService.js";
+import { tagIngredients } from "@/application/services/recipe/RecipeIngredientService.js";
 import { CreateRecipeInput } from "@/application/services/recipe/RecipeService.js";
+import { MaybePromise } from "@/application/types/CustomTypes.js";
 
 type TransformedRecordData = {
   meta: {
@@ -9,7 +11,11 @@ type TransformedRecordData = {
   label: CreateNutritionLabelInput;
 };
 
-type UnwrapArray<T> = T extends (infer U)[] ? U : T;
+type UnwrapArray<T> = T extends (infer U)[]
+  ? T | U
+  : T extends null | undefined
+    ? T
+    : T;
 
 export type TransformMapping = {
   [T in keyof TransformedRecordData]: {
@@ -19,12 +25,14 @@ export type TransformMapping = {
     processValue?: (
       value: unknown,
       key?: string
-    ) => UnwrapArray<TransformedRecordData[T][keyof TransformedRecordData[T]]>;
+    ) => MaybePromise<
+      UnwrapArray<TransformedRecordData[T][keyof TransformedRecordData[T]]>
+    >;
   };
 }[keyof TransformedRecordData];
 
 export class TransformedRecord {
-  data: TransformedRecordData = {
+  private data: TransformedRecordData = {
     meta: { externalId: undefined },
     recipe: {
       title: "",
@@ -54,26 +62,58 @@ export class TransformedRecord {
     },
   };
 
-  addProperty(map: TransformMapping, value: string | undefined) {
-    const processedValue = map?.processValue ? map.processValue(value) : value;
+  getRecipe(includeLabel: boolean) {
+    if (includeLabel) {
+      return { ...this.data.recipe, nutrition: this.data.label };
+    }
+
+    return this.data.recipe;
+  }
+
+  getLabel() {
+    return this.data.label;
+  }
+
+  async addProperty<T extends TransformMapping>(
+    map: T,
+    origKey: string,
+    value: ReturnType<NonNullable<T["processValue"]>>
+  ) {
+    const processedValue = map?.processValue
+      ? await Promise.resolve(map.processValue(value, origKey))
+      : value;
+
     if (processedValue) {
-      this.data[map.type][map.key] = processedValue;
+      if (map.isList) {
+        if (!Array.isArray(this.data[map.type][map.key])) {
+          this.data[map.type][map.key] = [];
+        }
+        this.data[map.type][map.key].push(processedValue);
+      } else {
+        this.data[map.type][map.key] = processedValue;
+      }
     }
   }
 
   updatePhotos(origToId: { [key: string]: string }) {
-    this.data.recipe.photoIds = this.data.recipe.photoIds?.map((old) => {
-      if (old in origToId) {
-        return origToId[old];
-      }
-      return old;
-    });
+    if (Array.isArray(this.data.recipe.photoIds)) {
+      this.data.recipe.photoIds = this.data.recipe.photoIds?.map((old) => {
+        if (old in origToId) {
+          return origToId[old];
+        }
+        return old;
+      });
+    }
   }
 
   multiplyNutrientsByServings() {
-    this.data.label.nutrients = this.data.label.nutrients?.map((nutrient) => ({
-      nutrientId: nutrient.nutrientId,
-      value: this.data.label.servings * nutrient.value,
-    }));
+    if (Array.isArray(this.data.label.nutrients)) {
+      this.data.label.nutrients = this.data.label.nutrients?.map(
+        (nutrient) => ({
+          nutrientId: nutrient.nutrientId,
+          value: this.data.label.servings * nutrient.value,
+        })
+      );
+    }
   }
 }

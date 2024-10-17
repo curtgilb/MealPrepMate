@@ -3,7 +3,7 @@
 import { TargetPreference } from "@prisma/client";
 import { builder } from "@/graphql/builder.js";
 import { db } from "@/infrastructure/repository/db.js";
-import { editNutrientTargetValidation } from "@/validations/NutritionValidation.js";
+import { editNutrientTargetValidation } from "@/application/validations/NutritionValidation.js";
 import { z } from "zod";
 import {
   NutrientTargetInput,

@@ -2,14 +2,14 @@ import { Job, Queue } from "bullmq";
 import { Worker } from "bullmq";
 import { db } from "./infrastructure/repository/db.js";
 import { DateTime } from "luxon";
-import { connection } from "./infrastructure/Redis.js";
+import { redis_connection } from "./infrastructure/Redis.js";
 
 interface NotificationMessage {
   message: string;
 }
 const notificationsQueue = new Queue<NotificationMessage>(
   "notifications",
-  connection
+  redis_connection
 );
 
 const worker = new Worker(
@@ -26,7 +26,7 @@ const worker = new Worker(
       }
     );
   },
-  connection
+  redis_connection
 );
 
 export { notificationsQueue };

@@ -14,7 +14,7 @@ services:
     volumes:
       - ./redis:/data
   cloudbeaver:
-    image: dbeaver/cloudbeaver
+    image: dbeaver/cloudbeaver:latest
     ports:
       - 8080:8978
     volumes:

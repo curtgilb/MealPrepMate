@@ -1,4 +1,4 @@
-import { AllowUndefinedOrNull } from "@/application/services/recipe/RecipeService.js";
+import { AllowUndefinedOrNull } from "@/application/types/CustomTypes.js";
 import { db } from "@/infrastructure/repository/db.js";
 import { Prisma } from "@prisma/client";
 

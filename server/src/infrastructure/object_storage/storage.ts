@@ -1,8 +1,8 @@
 import { Client } from "minio";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
-import { openFileBuffer } from "@/infrastructure/Readers.js";
 import { getFileMetadata } from "@/infrastructure/file_io/common.js";
+import { openFileBuffer } from "@/infrastructure/file_io/read.js";
 
 export const storage = new Client({
   endPoint: process.env.MINIO_HOST ?? "localhost",

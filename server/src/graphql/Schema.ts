@@ -27,5 +27,6 @@ import "@/graphql/schemas/user/UserSchema.js";
 import "@/graphql/schemas/common/Pagination.js";
 import "@/graphql/schemas/nutrition/MacroSchema.js";
 import "@/graphql/schemas/recipe/RecipeIngredientGroupSchema.js";
+import "@/graphql/schemas/recipe/RecipeSearchSchema.js";
 
 export const schema = builder.toSchema();

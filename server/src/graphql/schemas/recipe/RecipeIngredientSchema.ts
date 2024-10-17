@@ -31,22 +31,15 @@ const recipeIngredient = builder.prismaObject("RecipeIngredient", {
 });
 
 const taggedIngredient = builder
-  .objectRef<TaggedIngredient>("TaggedIngredient")
+  .objectRef<CreateRecipeIngredientInput>("TaggedIngredient")
   .implement({
     fields: (t) => ({
-      name: t.exposeString("name"),
       sentence: t.exposeString("sentence"),
       quantity: t.exposeFloat("quantity"),
       order: t.exposeInt("order"),
       verified: t.exposeBoolean("verified"),
-      unit: t.field({
-        type: measurementUnit,
-        resolve: (ingredient) => ingredient.unit,
-      }),
-      ingredient: t.field({
-        type: ingredient,
-        resolve: (ingredient) => ingredient.ingredient,
-      }),
+      unitId: t.exposeString("unitId"),
+      ingredientId: t.exposeString("ingredientId"),
     }),
   });
 
@@ -85,9 +78,6 @@ builder.queryFields((t) => ({
     type: [taggedIngredient],
     args: {
       ingredientTxt: t.arg.string({ required: true }),
-    },
-    validate: {
-      schema: z.object({ ingredientTxt: z.string() }),
     },
     resolve: async (root, args) => {
       return await tagIngredients(args.ingredientTxt);

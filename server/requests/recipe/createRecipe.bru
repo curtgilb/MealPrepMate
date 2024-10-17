@@ -11,7 +11,18 @@ post {
 }
 
 body:graphql {
-  mutation createRecipe{
-    	
+  mutation createRecipe($recipe: CreateRecipeInput!){
+    createRecipe(recipe: $recipe) {
+      id
+      name
+    }
+  }
+}
+
+body:graphql:vars {
+  {
+    "recipe": {
+      "title": "Teriayki Chicken"
+    }
   }
 }

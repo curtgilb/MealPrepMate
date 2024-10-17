@@ -1,19 +1,15 @@
-import { queryFromInfo } from "@pothos/plugin-prisma";
-import { Ingredient, Prisma, RecipeIngredient } from "@prisma/client";
-import { z } from "zod";
-import { db } from "@/infrastructure/repository/db.js";
-import {
-  createIngredientValidation,
-  editIngredientValidation,
-} from "@/validations/IngredientValidation.js";
-import { offsetPaginationValidation } from "@/validations/UtilityValidation.js";
+import { offsetPaginationValidation } from "@/application/validations/UtilityValidation.js";
 import { builder } from "@/graphql/builder.js";
-import { recipeIngredient } from "@/graphql/schemas/recipe/RecipeIngredientSchema.js";
+import { DeleteResult } from "@/graphql/schemas/common/MutationResult.js";
 import {
-  deleteResult,
   nextPageInfo,
   offsetPagination,
 } from "@/graphql/schemas/common/Pagination.js";
+import { recipeIngredient } from "@/graphql/schemas/recipe/RecipeIngredientSchema.js";
+import { db } from "@/infrastructure/repository/db.js";
+import { queryFromInfo } from "@pothos/plugin-prisma";
+import { Ingredient, Prisma, RecipeIngredient } from "@prisma/client";
+import { z } from "zod";
 
 // ============================================ Types ===================================
 
@@ -96,9 +92,6 @@ builder.queryFields((t) => ({
     args: {
       ingredientId: t.arg.string({ required: true }),
     },
-    validate: {
-      schema: z.object({ ingredientId: z.string().cuid() }),
-    },
     resolve: async (query, root, args) => {
       return await db.ingredient.findUniqueOrThrow({
         where: { id: args.ingredientId },
@@ -114,12 +107,6 @@ builder.queryFields((t) => ({
         required: true,
       }),
       search: t.arg.string(),
-    },
-    validate: {
-      schema: z.object({
-        search: z.string().optional(),
-        pagination: offsetPaginationValidation,
-      }),
     },
     resolve: async (root, args, context, info) => {
       const where: Prisma.IngredientWhereInput = args.search
@@ -154,9 +141,6 @@ builder.queryFields((t) => ({
     type: [groupedIngredients],
     args: {
       recipeIds: t.arg.stringList({ required: true }),
-    },
-    validate: {
-      schema: z.object({ recipeIds: z.string().cuid().array() }),
     },
     resolve: async (root, args) => {
       const ingredients = await db.recipeIngredient.findMany({
@@ -202,7 +186,6 @@ builder.mutationFields((t) => ({
     args: {
       ingredient: t.arg({ type: createIngredientInput, required: true }),
     },
-    validate: { schema: z.object({ ingredient: createIngredientValidation }) },
     resolve: async (query, root, args) => {
       return await db.ingredient.create({
         data: {
@@ -222,11 +205,6 @@ builder.mutationFields((t) => ({
     type: "Ingredient",
     args: {
       ingredient: t.arg({ type: editIngredientInput, required: true }),
-    },
-    validate: {
-      schema: z.object({
-        ingredient: editIngredientValidation,
-      }),
     },
     resolve: async (query, root, args) => {
       return db.ingredient.update({
@@ -253,12 +231,6 @@ builder.mutationFields((t) => ({
     args: {
       ingredientIdToKeep: t.arg.string({ required: true }),
       ingredientIdToDelete: t.arg.string({ required: true }),
-    },
-    validate: {
-      schema: z.object({
-        ingredientIdToKeep: z.string().cuid(),
-        ingredientIdToDelete: z.string().cuid(),
-      }),
     },
     resolve: async (query, root, args) => {
       return await db.$transaction(async (tx) => {
@@ -289,11 +261,10 @@ builder.mutationFields((t) => ({
     },
   }),
   deleteIngredient: t.field({
-    type: deleteResult,
+    type: DeleteResult,
     args: {
       ingredientId: t.arg.string({ required: true }),
     },
-    validate: { schema: z.object({ ingredientId: z.string().cuid() }) },
     resolve: async (root, args) => {
       try {
         await db.ingredient.delete({
