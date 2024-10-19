@@ -10,7 +10,6 @@ import { DeleteResult } from "@/graphql/schemas/common/MutationResult.js";
 builder.prismaNode("GroceryStore", {
   id: { field: "id" },
   fields: (t) => ({
-    id: t.exposeString("id"),
     name: t.exposeString("name"),
   }),
 });

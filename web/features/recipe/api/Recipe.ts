@@ -21,7 +21,6 @@ const recipeFragment = graphql(`
     leftoverFridgeLife
     leftoverFreezerLife
     marinadeTime
-    totalTime
     verified
     notes
     photos {
@@ -83,7 +82,7 @@ const recipeFragment = graphql(`
 `);
 
 const getRecipeQuery = graphql(`
-  query getRecipe($id: String!) {
+  query getRecipe($id: ID!) {
     recipe(recipeId: $id) {
       ...RecipeFields
     }
@@ -91,7 +90,7 @@ const getRecipeQuery = graphql(`
 `);
 
 const editRecipeMutation = graphql(`
-  mutation editRecipe($recipe: CreateRecipeInput!, $id: String!) {
+  mutation editRecipe($recipe: EditRecipeInput!, $id: String!) {
     editRecipe(recipeId: $id, recipe: $recipe) {
       ...RecipeFields
     }
@@ -99,7 +98,7 @@ const editRecipeMutation = graphql(`
 `);
 
 const getRecipeBaiscInfo = graphql(`
-  query getRecipeBaiscInfo($id: String!) {
+  query getRecipeBaiscInfo($id: ID!) {
     recipe(recipeId: $id) {
       id
       name
@@ -120,7 +119,6 @@ const getRecipeBaiscInfo = graphql(`
       leftoverFridgeLife
       leftoverFreezerLife
       marinadeTime
-      totalTime
       verified
       notes
       photos {
@@ -135,7 +133,7 @@ const getRecipeBaiscInfo = graphql(`
 `);
 
 const getRecipeLabels = graphql(`
-  query getRecipeLabels($id: String!) {
+  query getRecipeLabels($id: ID!) {
     recipe(recipeId: $id) {
       id
       nutritionLabels {
@@ -196,12 +194,17 @@ const recipeSearchFragment = graphql(`
 `);
 
 const searchRecipes = graphql(`
-  query searchRecipes($filters: RecipeFilter, $pagination: OffsetPagination!) {
-    recipes(filter: $filters, pagination: $pagination) {
-      itemsRemaining
-      nextOffset
-      recipes {
-        ...RecipeSearchFields
+  query searchRecipes($filters: RecipeFilter!, $after: String, $first: Int) {
+    recipes(filter: $filters, after: $after, first: $first) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          ...RecipeSearchFields
+        }
       }
     }
   }

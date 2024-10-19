@@ -41,9 +41,11 @@ type RecipeIngredientQuery = {
   select?: Prisma.RecipeIngredientSelect<DefaultArgs> | undefined;
 };
 
-async function tagIngredients(
-  ingredientList: string
-): Promise<CreateRecipeIngredientInput[]> {
+async function tagIngredients<T extends boolean = false>(
+  ingredientList: string,
+  onlyMatchingIds?: T,
+): T ? Promise<TaggedIngredient[]> : Promise<CreateRecipeIngredientInput[]> {
+
   const matchedIngredients: CreateRecipeIngredientInput[] = [];
   const parsedIngredients = await parseIngredients(ingredientList);
 

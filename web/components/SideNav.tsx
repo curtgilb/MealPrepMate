@@ -1,25 +1,16 @@
 "use client";
-import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 import {
   Apple,
   CalendarDays,
   FolderInput,
-  Home,
-  HomeIcon,
   Library,
-  LucideIcon,
-  Package2,
-  Settings,
   Target,
   UtensilsCrossed,
 } from "lucide-react";
 import Link from "next/link";
-import { Button, buttonVariants } from "./ui/button";
-import { cn } from "@/lib/utils";
-import Icon from "./Icon";
-import dynamicIconImports from "lucide-react/dynamicIconImports";
+import { usePathname } from "next/navigation";
 
-import { motion } from "framer-motion";
 import {
   Tooltip,
   TooltipContent,
@@ -99,8 +90,9 @@ function NavigationItem({ title, icon, link, collapsed }: NavLink) {
         <TooltipTrigger asChild>
           <Link
             className={cn(
-              " flex gap-2 w-full items-center whitespace-nowrap text-sm font-medium justify-items-start  px-2.5 py-2.5 rounded-lg hover:bg-accent text-accent-foreground transition-all hover:text-foreground overflow-hidden",
-              { "bg-primary text-primary-foreground": activeLink }
+              "flex gap-2 w-full items-center whitespace-nowrap text-sm font-medium justify-items-start  px-2.5 py-2.5 rounded-lg  text-accent-foreground transition-all  overflow-hidden",
+              { "bg-primary text-primary-foreground": activeLink },
+              { "hover:bg-accent hover:text-foreground": !activeLink }
             )}
             href={link}
           >

@@ -19,6 +19,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { RecipeFilter } from "@/features/recipe/components/RecipeFilter";
+import { InfiniteScroll } from "@/components/PaginatedResults";
 
 export default function RecipesPage() {
   const [filter, setFilter] = useState<RecipeSearchFilter>({
@@ -66,10 +67,16 @@ export default function RecipesPage() {
         </div>
       </div>
 
-      <RecipeSearchResults
+      {/* <RecipeSearchResults
         filters={{}}
         vertical={true}
         Component={ClickableRecipeCard}
+      /> */}
+      <InfiniteScroll
+        query={}
+        variables={{}}
+        renderItem={(recipe) => {}}
+        getConnection={(data) => {}}
       />
     </SingleColumnCentered>
   );

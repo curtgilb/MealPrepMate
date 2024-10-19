@@ -23,7 +23,7 @@ const RecipeIngredientFragment = graphql(`
 `);
 
 const getRecipeIngredients = graphql(`
-  query getRecipeIngredients($id: String!) {
+  query getRecipeIngredients($id: ID!) {
     recipe(recipeId: $id) {
       id
       ingredients {

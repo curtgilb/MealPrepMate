@@ -5,7 +5,6 @@ import { DeleteResult } from "@/graphql/schemas/common/MutationResult.js";
 builder.prismaNode("ExpirationRule", {
   id: { field: "id" },
   fields: (t) => ({
-    id: t.exposeID("id"),
     name: t.exposeString("name"),
     variation: t.exposeString("variant", { nullable: true }),
     defrostTime: t.exposeInt("defrostTime", { nullable: true }),
