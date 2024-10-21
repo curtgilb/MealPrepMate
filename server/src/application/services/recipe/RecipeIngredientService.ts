@@ -1,19 +1,20 @@
 import { parseIngredients } from "@/infrastructure/IngredientParserClient.js";
-import { db, DbTransactionClient } from "@/infrastructure/repository/db.js";
+import { db } from "@/infrastructure/repository/db.js";
 import {
   Ingredient,
   MeasurementUnit,
   Prisma,
-  Recipe,
   RecipeIngredient,
 } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
-import { z } from "zod";
 
 export type TaggedIngredient = Omit<
   RecipeIngredient,
   "id" | "groupId" | "recipeId" | "measurementUnitId" | "ingredientId"
-> & { unit: MeasurementUnit | null; ingredient: Ingredient | null };
+> & {
+  unit: MeasurementUnit | null | undefined;
+  ingredient: Ingredient | null | undefined;
+};
 
 export type CreateRecipeIngredientInput = {
   order: number;
@@ -41,12 +42,16 @@ type RecipeIngredientQuery = {
   select?: Prisma.RecipeIngredientSelect<DefaultArgs> | undefined;
 };
 
+// TODO: FIX the typescripting on this function
 async function tagIngredients<T extends boolean = false>(
   ingredientList: string,
-  onlyMatchingIds?: T,
-): T ? Promise<TaggedIngredient[]> : Promise<CreateRecipeIngredientInput[]> {
+  onlyMatchingIds?: T
+): Promise<
+  T extends true ? CreateRecipeIngredientInput[] : TaggedIngredient[]
+> {
+  const taggedIngredients: TaggedIngredient[] = [];
+  const createInputIngredients: CreateRecipeIngredientInput[] = [];
 
-  const matchedIngredients: CreateRecipeIngredientInput[] = [];
   const parsedIngredients = await parseIngredients(ingredientList);
 
   for (const [index, ingredient] of parsedIngredients.entries()) {
@@ -57,19 +62,34 @@ async function tagIngredients<T extends boolean = false>(
       ? await db.measurementUnit.match(ingredient.unit)
       : undefined;
 
-    matchedIngredients.push({
-      sentence: ingredient.sentence,
-      quantity: ingredient?.quantity ? ingredient.quantity : 1,
-      order: index,
-      verified: false,
-      unitId: bestUnitMatch?.id,
-      ingredientId: bestIngredientMatch?.id,
-      mealPrepIngredient: false,
-      groupId: undefined,
-    });
+    if (onlyMatchingIds) {
+      createInputIngredients.push({
+        sentence: ingredient.sentence,
+        quantity: ingredient?.quantity ? ingredient.quantity : 1,
+        order: index,
+        verified: false,
+        unitId: bestUnitMatch?.id,
+        ingredientId: bestIngredientMatch?.id,
+        mealPrepIngredient: false,
+        groupId: undefined,
+      });
+    } else {
+      taggedIngredients.push({
+        sentence: ingredient.sentence,
+        quantity: ingredient?.quantity ? ingredient.quantity : 1,
+        order: index,
+        verified: false,
+        unit: bestUnitMatch,
+        ingredient: bestIngredientMatch,
+        mealPrepIngredient: false,
+        name: ingredient.name ?? null,
+      });
+    }
   }
 
-  return matchedIngredients;
+  return (
+    onlyMatchingIds ? createInputIngredients : taggedIngredients
+  ) as T extends true ? CreateRecipeIngredientInput[] : TaggedIngredient[];
 }
 
 async function addRecipeIngredient(
@@ -138,9 +158,9 @@ async function deleteRecipeIngredient(id: string) {
 }
 
 export {
-  tagIngredients,
   addRecipeIngredient,
   addRecipeIngredients,
-  editRecipeIngredient,
   deleteRecipeIngredient,
+  editRecipeIngredient,
+  tagIngredients,
 };

@@ -1,0 +1,28 @@
+meta {
+  name: createMealPlan
+  type: graphql
+  seq: 2
+}
+
+post {
+  url: http://localhost:3025/graphql
+  body: graphql
+  auth: none
+}
+
+body:graphql {
+    mutation createMealPlan($input: CreateMealPlanInput!) {
+      createMealPlan(mealPlan: $input) {
+        id
+      }
+    }
+}
+
+body:graphql:vars {
+  {
+    "input": {
+        "name": "New meal plan"
+    }
+  
+  }
+}

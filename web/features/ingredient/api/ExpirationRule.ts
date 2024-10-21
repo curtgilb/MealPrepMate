@@ -16,7 +16,15 @@ const expirationRuleFragment = graphql(`
 const getExpirationRulesQuery = graphql(`
   query GetExpirationRules {
     expirationRules {
-      ...ExpirationRuleFields
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        node {
+          ...ExpirationRuleFields
+        }
+      }
     }
   }
 `);

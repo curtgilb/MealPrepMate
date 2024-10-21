@@ -73,7 +73,7 @@ export default function RecipesPage() {
         Component={ClickableRecipeCard}
       /> */}
       <InfiniteScroll
-        query={}
+        query={searchRecipes}
         variables={{}}
         renderItem={(recipe) => {}}
         getConnection={(data) => {}}

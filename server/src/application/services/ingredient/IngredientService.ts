@@ -1,5 +1,10 @@
 import { db } from "@/infrastructure/repository/db.js";
-import { ExpirationRule } from "@prisma/client";
+import { ExpirationRule, Prisma } from "@prisma/client";
+
+type IngredientQuery = {
+  include?: Prisma.IngredientInclude | undefined;
+  select?: Prisma.IngredientSelect | undefined;
+};
 
 type RecipeMaxFreshness = {
   maxTableLife: number;
@@ -51,4 +56,26 @@ async function getIngredientMaxFreshness(
   return maxLife;
 }
 
-export { getIngredientMaxFreshness };
+// Disconnect whatever an ingredient is linked to and reconnect to new expiration rule.
+async function connectIngredientToExpirationRule(
+  ruleId: string,
+  ingredientId: string,
+  query?: IngredientQuery
+) {
+  //@ts-ignore
+  return await db.ingredient.update({
+    where: {
+      id: ingredientId,
+    },
+    data: {
+      expirationRule: {
+        connect: {
+          id: ruleId,
+        },
+      },
+    },
+    ...query,
+  });
+}
+
+export { getIngredientMaxFreshness, connectIngredientToExpirationRule };

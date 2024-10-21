@@ -1,24 +1,16 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { graphql } from "@/gql";
-import { Plus } from "lucide-react";
-import { useMutation } from "@urql/next";
-import { useState } from "react";
-import { MealPlans as MealPlanList } from "@/components/pagination/MealPlans";
 import SingleColumnCentered from "@/components/layouts/single-column-centered";
-
-const createMutation = graphql(`
-  mutation createMealPlan {
-    createMealPlan(name: "Untitled Meal Plan") {
-      id
-    }
-  }
-`);
+import { MealPlans as MealPlanList } from "@/components/pagination/MealPlans";
+import { Button } from "@/components/ui/button";
+import { createMealPlanMutation } from "@/features/mealplan/api/MealPlan";
+import { useMutation } from "@urql/next";
+import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function MealPlans() {
   const router = useRouter();
-  const [createResult, createMealPlan] = useMutation(createMutation);
+  // const [createResult, createMealPlan] = useMutation(createMealPlanMutation);
   const [redirecting, setRedirecting] = useState<boolean>(false);
 
   return (
@@ -27,12 +19,12 @@ export default function MealPlans() {
         <h1 className="text-5xl font-black">Meal plans</h1>
         <Button
           disabled={redirecting}
-          onClick={() => {
-            setRedirecting(true);
-            createMealPlan({}).then((result) =>
-              router.push(`/mealplans/${result.data?.createMealPlan.id}`)
-            );
-          }}
+          // onClick={() => {
+          //   setRedirecting(true);
+          //   createMealPlan({}).then((result) =>
+          //     router.push(`/mealplans/${result.data?.createMealPlan.id}`)
+          //   );
+          // }}
         >
           <Plus className="mr-2 h-4 w-4" />
           New meal plan

@@ -4,6 +4,10 @@ export type AllowUndefinedOrNull<T> = {
   [K in keyof T]: T[K] | undefined | null;
 };
 
+export type AllowUndefined<T> = {
+  [K in keyof T]: T[K] | undefined;
+};
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace PrismaJson {

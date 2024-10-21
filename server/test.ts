@@ -10,9 +10,11 @@ await seedDb();
 const recipeKeeper = new RecipeKeeperTransformer();
 const recipes = await recipeKeeper.transform({
   type: "local",
-  filePath: "C:\\Users\\cgilb\\Desktop\\RecipeKeeper_20241010_135410.zip",
+  filePath: "/Users/curtgilbert/MealPrepMate/server/data/RecipeKeeper.zip",
 });
 
 for (const recipe of recipes) {
   await createRecipe(recipe.getRecipe(true));
 }
+// /Users/curtgilbert/MealPrepMate/server/data/RecipeKeeper.zip
+// C:\\Users\\cgilb\\Desktop\\RecipeKeeper_20241010_135410.zip

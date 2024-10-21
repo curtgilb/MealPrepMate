@@ -60,7 +60,7 @@ export class RecipeKeeperTransformer extends Transformer {
     recipeIngredients: {
       type: "recipe",
       key: "ingredients",
-      processValue: tagIngredients,
+      processValue: this.parseIngredient.bind(this),
     },
     recipeDirections: { type: "recipe", key: "directions" },
     recipeNotes: { type: "recipe", key: "notes" },
@@ -123,7 +123,12 @@ export class RecipeKeeperTransformer extends Transformer {
       key: "nutrients",
       processValue: this.getNutrientId.bind(this),
     },
-    photo: { type: "recipe", isList: true, key: "photoIds" },
+    photo: {
+      type: "recipe",
+      isList: true,
+      key: "photoIds",
+      processValue: this.getPhotIdFromPath.bind(this),
+    },
   };
 
   nutrientMapping = {
@@ -175,7 +180,18 @@ export class RecipeKeeperTransformer extends Transformer {
     imageLookup: { [key: string]: string }
   ) {
     const photo = await uploadPhoto(file);
-    imageLookup[path] = photo.id;
+    imageLookup[this.getPhotIdFromPath(path)] = photo.id;
+  }
+
+  private getPhotIdFromPath(path: string) {
+    // Replace all backslashes with forward slashes for consistency
+    const normalizedPath = path.replace(/\\/g, "/");
+
+    // Split the path by forward slashes and get the last element
+    const parts = normalizedPath.split("/");
+
+    // Return the last part (which should be the file name)
+    return parts[parts.length - 1] || "";
   }
 
   private async processHtmlFile(file: Buffer): Promise<TransformedRecord[]> {
@@ -232,6 +248,10 @@ export class RecipeKeeperTransformer extends Transformer {
 
   private getNutrientId(value: string, key: string): CreateNutrientInput {
     return { nutrientId: this.nutrientMapping[key], value: toNumber(value) };
+  }
+
+  private async parseIngredient(txt: string) {
+    await tagIngredients(txt, true);
   }
 
   private getTime(input: string) {
