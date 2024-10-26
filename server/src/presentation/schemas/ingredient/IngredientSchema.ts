@@ -1,15 +1,18 @@
-import { offsetPaginationValidation } from "@/application/validations/UtilityValidation.js";
+import {
+  createIngredient,
+  CreateIngredientInput,
+  deleteIngredient,
+  editIngredient,
+  EditIngredientInput,
+  getIngredient,
+  getIngredients,
+} from "@/application/services/ingredient/IngredientService.js";
+import { db } from "@/infrastructure/repository/db.js";
 import { builder } from "@/presentation/builder.js";
 import { DeleteResult } from "@/presentation/schemas/common/MutationResult.js";
-import {
-  nextPageInfo,
-  offsetPagination,
-} from "@/presentation/schemas/common/Pagination.js";
 import { recipeIngredient } from "@/presentation/schemas/recipe/RecipeIngredientSchema.js";
-import { db } from "@/infrastructure/repository/db.js";
-import { queryFromInfo } from "@pothos/plugin-prisma";
-import { Ingredient, Prisma, RecipeIngredient } from "@prisma/client";
-import { z } from "zod";
+import { encodeGlobalID } from "@pothos/plugin-relay";
+import { RecipeIngredient } from "@prisma/client";
 
 // ============================================ Types ===================================
 
@@ -46,26 +49,44 @@ export const ingredient = builder.prismaNode("Ingredient", {
 });
 
 // ============================================ Inputs ===================================
-const createIngredientInput = builder.inputType("CreateIngredientInput", {
-  fields: (t) => ({
-    name: t.string({ required: true }),
-    alternateNames: t.stringList(),
-    storageInstructions: t.string(),
-    categoryId: t.string({ required: true }),
-    expirationRuleId: t.string(),
-  }),
-});
+const createIngredientInput = builder
+  .inputRef<CreateIngredientInput>("CreateIngredientInput")
+  .implement({
+    fields: (t) => ({
+      name: t.string({ required: true }),
+      alternateNames: t.stringList({ required: true }),
+      storageInstructions: t.string({ required: true }),
+      variant: t.string({ required: true }),
+      categoryId: t.string({ required: true }),
+      expirationRuleId: t.string({ required: true }),
+    }),
+  });
 
-const editIngredientInput = builder.inputType("EditIngredientInput", {
-  fields: (t) => ({
-    ingredientId: t.string({ required: true }),
-    name: t.string(),
-    alternateNames: t.stringList(),
-    storageInstructions: t.string(),
-    categoryId: t.string(),
-    expirationRuleId: t.string(),
-  }),
-});
+const editIngredientInput = builder
+  .inputRef<EditIngredientInput>("EditIngredientInput")
+  .implement({
+    fields: (t) => ({
+      ingredientId: t.string({ required: true }),
+      variant: t.string({ required: false }),
+      name: t.string({ required: true }),
+      alternateNames: t.stringList(),
+      storageInstructions: t.string(),
+      categoryId: t.string(),
+      expirationRuleId: t.string(),
+    }),
+  });
+
+// const editIngredientInput = builder.inputType("EditIngredientInput", {
+//   fields: (t) => ({
+//     ingredientId: t.string({ required: true }),
+//     variant: t.string({ required: false }),
+//     name: t.string({ required: false }),
+//     alternateNames: t.stringList(),
+//     storageInstructions: t.string(),
+//     categoryId: t.string(),
+//     expirationRuleId: t.string(),
+//   }),
+// });
 
 // ============================================ Queries ===================================
 
@@ -73,92 +94,63 @@ builder.queryFields((t) => ({
   ingredient: t.prismaField({
     type: "Ingredient",
     args: {
-      ingredientId: t.arg.string({ required: true }),
+      ingredientId: t.arg.globalID({ required: true }),
     },
     resolve: async (query, root, args) => {
-      return await db.ingredient.findUniqueOrThrow({
-        where: { id: args.ingredientId },
-        ...query,
-      });
+      return await getIngredient(args.ingredientId.id, query);
     },
   }),
-  ingredients: t.field({
-    type: ingredientsQuery,
+  ingredients: t.prismaConnection({
+    type: "Ingredient",
+    cursor: "id",
+    edgesNullable: false,
+    nodeNullable: false,
     args: {
-      pagination: t.arg({
-        type: offsetPagination,
-        required: true,
-      }),
       search: t.arg.string(),
     },
-    resolve: async (root, args, context, info) => {
-      const where: Prisma.IngredientWhereInput = args.search
-        ? {
-            OR: [
-              { name: { contains: args.search, mode: "insensitive" } },
-              { alternateNames: { has: args.search } },
-            ],
-          }
-        : {};
-      const [data, count] = await db.$transaction([
-        db.ingredient.findMany({
-          where,
-          take: args.pagination.take,
-          skip: args.pagination.offset,
-          orderBy: { name: "asc" },
-          ...queryFromInfo({ context, info, path: ["ingredients"] }),
-        }),
-        db.ingredient.count({ where }),
-      ]);
-      const { itemsRemaining, nextOffset } = nextPageInfo(
-        data.length,
-        args.pagination.take,
-        args.pagination.offset,
-        count
-      );
-      return { itemsRemaining, nextOffset, ingredients: data };
+    resolve: async (query, root, args) => {
+      return await getIngredients(args.search ?? undefined, query);
     },
   }),
+  // groupedRecipeIngredients: t.field({
+  //   type: [groupedIngredients],
+  //   args: {
+  //     recipeIds: t.arg.stringList({ required: true }),
+  //   },
+  //   resolve: async (root, args) => {
+  //     const ingredients = await db.recipeIngredient.findMany({
+  //       where: { recipeId: { in: args.recipeIds } },
+  //       include: {
+  //         recipe: true,
+  //         ingredient: true,
+  //       },
+  //     });
 
-  groupedRecipeIngredients: t.field({
-    type: [groupedIngredients],
-    args: {
-      recipeIds: t.arg.stringList({ required: true }),
-    },
-    resolve: async (root, args) => {
-      const ingredients = await db.recipeIngredient.findMany({
-        where: { recipeId: { in: args.recipeIds } },
-        include: {
-          recipe: true,
-          ingredient: true,
-        },
-      });
+  //     const grouped = ingredients.reduce((acc, cur) => {
+  //       const key = cur.ingredientId
+  //         ? `${cur.ingredientId}###${cur.ingredient?.name}`
+  //         : "";
+  //       if (!acc.has(key)) {
+  //         acc.set(key, []);
+  //       }
+  //       acc.get(key)?.push(cur);
+  //       return acc;
+  //     }, new Map<string, RecipeIngredient[]>());
 
-      const grouped = ingredients.reduce((acc, cur) => {
-        const key = cur.ingredientId
-          ? `${cur.ingredientId}###${cur.ingredient?.name}`
-          : "";
-        if (!acc.has(key)) {
-          acc.set(key, []);
-        }
-        acc.get(key)?.push(cur);
-        return acc;
-      }, new Map<string, RecipeIngredient[]>());
-
-      const results: GroupedRecipeIngredient[] = [];
-      for (const [key, value] of grouped.entries()) {
-        const splitKey = key.split("###");
-        const ingredientId = splitKey.length > 0 ? splitKey[0] : null;
-        const ingredientName = splitKey.length > 0 ? splitKey[1] : null;
-        results.push({
-          ingredientId,
-          ingredientName,
-          recipeIngredients: value,
-        });
-      }
-      return results;
-    },
-  }),
+  //     const results: GroupedRecipeIngredient[] = [];
+  //     for (const [key, value] of grouped.entries()) {
+  //       const splitKey = key.split("###");
+  //       const ingredientId = splitKey.length > 0 ? splitKey[0] : null;
+  //       const ingredientName = splitKey.length > 0 ? splitKey[1] : null;
+  //       results.push({
+  //         ingredientId,
+  //         ingredientName,
+  //         recipeIngredients: value,
+  //       });
+  //     }
+  //     return results;
+  //   },
+  // }),
 }));
 
 // ============================================ Mutations ===================================
@@ -170,107 +162,31 @@ builder.mutationFields((t) => ({
       ingredient: t.arg({ type: createIngredientInput, required: true }),
     },
     resolve: async (query, root, args) => {
-      return await db.ingredient.create({
-        data: {
-          name: args.ingredient.name,
-          storageInstructions: args.ingredient.storageInstructions,
-          alternateNames: args.ingredient.alternateNames ?? undefined,
-          category: { connect: { id: args.ingredient.categoryId } },
-          expirationRule: args.ingredient.expirationRuleId
-            ? { connect: { id: args.ingredient.expirationRuleId } }
-            : undefined,
-        },
-        ...query,
-      });
+      return await createIngredient(args.ingredient, query);
     },
   }),
   editIngredient: t.prismaField({
     type: "Ingredient",
     args: {
+      id: t.arg.globalID({ required: true }),
       ingredient: t.arg({ type: editIngredientInput, required: true }),
     },
     resolve: async (query, root, args) => {
-      return db.ingredient.update({
-        where: { id: args.ingredient.ingredientId },
-        data: {
-          name: args.ingredient.name ?? undefined,
-          storageInstructions: args.ingredient.storageInstructions,
-          alternateNames: args.ingredient.alternateNames
-            ? { set: args.ingredient.alternateNames }
-            : undefined,
-          category: args.ingredient.categoryId
-            ? { connect: { id: args.ingredient.categoryId } }
-            : undefined,
-          expirationRule: args.ingredient.expirationRuleId
-            ? { connect: { id: args.ingredient.expirationRuleId } }
-            : undefined,
-        },
-        ...query,
-      });
-    },
-  }),
-  // connectExpirationRule: t.prismaField({
-  //   type: "Ingredient",
-  //   args: {
-  //     ingredientId: t.arg.string({ required: true }),
-  //     expirationRuleId: t.arg.string({ required: true }),
-  //   },
-  //   resolve: async (query, root, args) => {
-  //     return await connectIngredientToExpirationRule(
-  //       args.expirationRuleId,
-  //       args.ingredientId,
-  //       query
-  //     );
-  //   },
-  // }),
-  mergeIngredients: t.prismaField({
-    type: "Ingredient",
-    args: {
-      ingredientIdToKeep: t.arg.string({ required: true }),
-      ingredientIdToDelete: t.arg.string({ required: true }),
-    },
-    resolve: async (query, root, args) => {
-      return await db.$transaction(async (tx) => {
-        // Find the old record
-        const old = await tx.ingredient.findUnique({
-          where: { id: args.ingredientIdToDelete },
-          select: {
-            name: true,
-            alternateNames: true,
-          },
-        });
-        // Upsert new names on the merged record
-        const names = [old?.name, old?.alternateNames].filter(
-          (name) => name
-        ) as string[];
-        await tx.ingredient.update({
-          where: { id: args.ingredientIdToKeep },
-          data: { alternateNames: names },
-        });
-        // Delete the old record
-        await tx.ingredient.delete({
-          where: { id: args.ingredientIdToDelete },
-        });
-        return await tx.ingredient.findUniqueOrThrow({
-          where: { id: args.ingredientIdToKeep },
-        });
-      });
+      args.ingredient?.name;
+      return await editIngredient(args.id.id, args.ingredient, query);
     },
   }),
   deleteIngredient: t.field({
     type: DeleteResult,
     args: {
-      ingredientId: t.arg.string({ required: true }),
+      ingredientId: t.arg.globalID({ required: true }),
     },
     resolve: async (root, args) => {
-      try {
-        await db.ingredient.delete({
-          where: { id: args.ingredientId },
-        });
-      } catch (e) {
-        return { success: false, message: e instanceof Error ? e.message : "" };
-      }
-      return { success: true };
+      await deleteIngredient(args.ingredientId.id);
+      return {
+        success: true,
+        id: encodeGlobalID(args.ingredientId.typename, args.ingredientId.id),
+      };
     },
   }),
 }));

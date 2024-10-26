@@ -1,6 +1,7 @@
 import { toTitleCase } from "@/application/util/utils.js";
 import {
   cleanString,
+  stringToBoolean,
   toStringList,
 } from "@/application/validations/Formatters.js";
 import { readCSV } from "@/infrastructure/file_io/read.js";
@@ -11,17 +12,17 @@ import { z } from "zod";
 const nutrientSchema = z.object({
   id: z.string().uuid(),
   nutrient: z.preprocess(cleanString, z.string()).transform(toTitleCase),
-  isMacro: z.coerce.boolean(),
+  isMacro: stringToBoolean,
   unit: z.preprocess(cleanString, z.string()),
-  advancedView: z.coerce.boolean(),
-  important: z.coerce.boolean(),
+  advancedView: stringToBoolean,
+  important: stringToBoolean,
   order: z.coerce.number().int().positive(),
-  notes: z.preprocess(cleanString, z.string().optional()),
-  alternateNames: z.preprocess(toStringList, z.string().array().optional()),
+  notes: z.preprocess(cleanString, z.string().nullish()),
+  alternateNames: z.preprocess(toStringList, z.string().array().nullish()),
   type: z.preprocess((val) => {
     return String(val).toUpperCase();
   }, z.nativeEnum(NutrientType)),
-  parentNutrient: z.preprocess(cleanString, z.string().optional()),
+  parentNutrient: z.preprocess(cleanString, z.string().nullish()),
 });
 
 export async function loadNutrients() {

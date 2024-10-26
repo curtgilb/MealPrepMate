@@ -1,7 +1,7 @@
 meta {
   name: Parse ingredients
   type: graphql
-  seq: 2
+  seq: 5
 }
 
 post {
@@ -16,8 +16,14 @@ body:graphql {
       order
       quantity
       sentence
-      unitId
-      ingredientId
+      unit{
+        id
+        name
+      }
+      ingredient {
+        id
+        name
+      }
     }
   }
 }

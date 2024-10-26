@@ -1,5 +1,12 @@
 import { Prisma } from "@prisma/client";
 
+export type AllOptionalPartiallyNullable<
+  T,
+  NullableKeys extends keyof T = never,
+> = {
+  [K in keyof T]: T[K] | undefined | (K extends NullableKeys ? null : never);
+};
+
 export type AllowUndefinedOrNull<T> = {
   [K in keyof T]: T[K] | undefined | null;
 };

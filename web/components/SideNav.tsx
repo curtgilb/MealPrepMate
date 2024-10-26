@@ -57,7 +57,7 @@ interface SideNavProps {
 
 function Navigation({ isCollapsed }: SideNavProps) {
   return (
-    <nav className="flex flex-col z-10 h-full border-r bg-card p-4 gap-y-2">
+    <nav className="flex flex-col z-10 h-full border-r bg-sidebar p-4 gap-y-2">
       {navigationLinks.map((link) => {
         return (
           <NavigationItem

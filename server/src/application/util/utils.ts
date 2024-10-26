@@ -3,9 +3,7 @@ import { FileMetaData } from "../../types/CustomTypes.js";
 import path from "path";
 import fs from "fs";
 
-function toTitleCase(str: unknown): string | undefined {
-  if (!str) return undefined;
-
+function toTitleCase(str: unknown): string {
   return new String(str)
     .toLowerCase()
     .replace(

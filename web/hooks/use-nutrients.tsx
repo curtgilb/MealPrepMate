@@ -3,7 +3,7 @@ import {
   getNutrientsQuery,
   nutritionFieldsFragment,
 } from "@/features/nutrition/api/Nutrient";
-import { useFragment } from "@/gql";
+import { getFragmentData } from "@/gql";
 import { NutrientFieldsFragment } from "@/gql/graphql";
 import { useQuery } from "@urql/next";
 import { useMemo } from "react";
@@ -27,7 +27,9 @@ export function useNutrients(type: NutritionDisplayMode) {
     },
   });
   const { data, fetching, error } = result;
-  const nutrients = useFragment(nutritionFieldsFragment, data?.nutrients);
+  const nutrients = getFragmentData(nutritionFieldsFragment, data?.nutrients);
+
+  console.log(nutrients);
 
   return useMemo(() => {
     if (!nutrients) return {};

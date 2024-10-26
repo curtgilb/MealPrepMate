@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -8,13 +9,30 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+import { tagIngredientsQuery } from "@/features/recipe/api/RecipeIngredient";
 import { FormContext } from "@/features/recipe/components/edit/info/EditRecipeInfo";
+import { ParseIngredientsQuery } from "@/gql/graphql";
+import { useQuery } from "@urql/next";
 import { useContext } from "react";
 
-interface ParseIngredientsProps {}
+interface ParseIngredientsProps {
+  updateIngredients: (
+    ingredients: ParseIngredientsQuery["tagIngredients"]
+  ) => void;
+}
 
-export function ParseIngredients() {
+export function ParseIngredients({ updateIngredients }: ParseIngredientsProps) {
   const form = useContext(FormContext);
+  const [result, executeQuery] = useQuery({
+    query: tagIngredientsQuery,
+    variables: { lines: "" },
+    pause: true,
+  });
+
+  function handleSubmit() {
+    const ingredients = form?.getValues("ingredients");
+    executeQuery({ variables: { lines: ingredients } });
+  }
 
   return (
     <div className="space-y-4">
@@ -38,6 +56,7 @@ export function ParseIngredients() {
       <Button
         onClick={(e) => {
           e.preventDefault();
+          handleSubmit();
         }}
         variant="secondary"
       >

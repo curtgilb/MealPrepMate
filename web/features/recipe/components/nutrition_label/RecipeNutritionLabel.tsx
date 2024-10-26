@@ -42,7 +42,7 @@ function getValueLabel(
     : String(nutrientValue);
 
   return {
-    labelStr: `${valueString} ${nutrient.unit.symbol}`,
+    labelStr: `${valueString} ${nutrient?.unit?.symbol}`,
     percentage,
     target,
   };
@@ -59,7 +59,7 @@ function Nutrient({ nutrient, depth, value }: NutrientItemProps) {
       <TableCell>
         {value
           ? `${Math.round((value + Number.EPSILON) * 100) / 100} ${
-              nutrient.unit.symbol
+              nutrient.unit?.symbol
             }`
           : ""}
       </TableCell>
@@ -94,6 +94,7 @@ export function RecipeNutritionlabel({
   className,
   ...rest
 }: NutritionLabelProps) {
+  console.log(label);
   const [servingSize, setServingSize] = useState<ServingSize>(
     ServingSize.Serving
   );
@@ -103,7 +104,7 @@ export function RecipeNutritionlabel({
 
   const values = useMemo(() => {
     if (!label) return {};
-    return label?.nutrients.reduce((agg, nutrient) => {
+    return label?.nutrients?.reduce((agg, nutrient) => {
       agg[nutrient.nutrient.id] =
         servingSize === ServingSize.Recipe
           ? nutrient.value

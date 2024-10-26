@@ -11,16 +11,16 @@ import { z } from "zod";
 const unitValidationSchema = z.object({
   id: z.string().uuid(),
   name: z.string().transform(toTitleCase),
-  lookupNames: z.preprocess(toStringList, z.string().array().optional()),
-  symbol: z.preprocess(cleanString, z.string().optional()),
-  conversionName: z.preprocess(cleanString, z.string().optional()),
+  lookupNames: z.preprocess(toStringList, z.string().array().nullish()),
+  symbol: z.preprocess(cleanString, z.string().nullish()),
+  conversionName: z.preprocess(cleanString, z.string().nullish()),
   type: z.preprocess((val) => {
     return String(val).toUpperCase();
   }, z.nativeEnum(UnitType)),
   system: z.preprocess((val) => {
     if (!val) return undefined;
     return String(val).toUpperCase();
-  }, z.nativeEnum(MeasurementSystem).optional()),
+  }, z.nativeEnum(MeasurementSystem).nullish()),
 });
 
 export async function loadUnits() {
@@ -37,7 +37,7 @@ export async function loadUnits() {
         create: {
           id: unit.id,
           name: unit.name as string,
-          abbreviations: unit.lookupNames,
+          abbreviations: unit.lookupNames ? unit.lookupNames : undefined,
           symbol: unit.symbol,
           conversionName: unit.conversionName,
           type: unit.type,
@@ -46,7 +46,7 @@ export async function loadUnits() {
         update: {
           id: unit.id,
           name: unit.name as string,
-          abbreviations: unit.lookupNames,
+          abbreviations: unit.lookupNames ? unit.lookupNames : undefined,
           symbol: unit.symbol,
           conversionName: unit.conversionName,
           type: unit.type,

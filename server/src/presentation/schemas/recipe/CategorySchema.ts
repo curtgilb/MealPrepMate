@@ -19,14 +19,14 @@ builder.queryFields((t) => ({
   categories: t.prismaField({
     type: ["Category"],
     args: {
-      searchString: t.arg.string(),
+      search: t.arg.string(),
     },
     resolve: async (query, root, args) => {
       //@ts-ignore
       return await db.category.findMany({
         where: {
-          name: args.searchString
-            ? { contains: args.searchString, mode: "insensitive" }
+          name: args.search
+            ? { contains: args.search, mode: "insensitive" }
             : undefined,
         },
         orderBy: {

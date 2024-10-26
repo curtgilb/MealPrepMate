@@ -6,15 +6,6 @@ import { graphql } from "@/gql";
 import { useMutation } from "@urql/next";
 import { cn } from "@/lib/utils";
 
-const changeNameMutation = graphql(`
-  mutation changeName($id: String!, $name: String!) {
-    editMealPlan(mealPlan: { id: $id, name: $name }) {
-      id
-      name
-    }
-  }
-`);
-
 export function MealPlanName({
   name,
   mealPlanId,

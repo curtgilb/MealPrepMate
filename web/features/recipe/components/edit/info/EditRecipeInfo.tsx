@@ -34,6 +34,7 @@ import { editRecipeMutation } from "@/features/recipe/api/Recipe";
 import { RichTextEditor } from "@/components/rich_text/RichTextEditor";
 import { EditRecipeIngredientItem } from "@/features/recipe/components/edit/ingredients/EditRecipeIngredientItem";
 import { EditIngredients } from "@/features/recipe/components/edit/info/ingredients/EditIngredients";
+import { CategoryPicker } from "@/components/pickers/CategoryPicker";
 
 export const BasicItem = z.object({
   id: z.string(),
@@ -69,7 +70,8 @@ export const FormContext = createContext<
 >(undefined);
 
 export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
-  function EditeRecipe({ recipe }, ref) {
+  function EditRecipe({ recipe }, ref) {
+    console.log(recipe);
     const form = useForm<RecipeValidation>({
       resolver: zodResolver(recipeInputValidation),
       defaultValues: {
@@ -136,6 +138,8 @@ export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
                     </FormItem>
                   )}
                 />
+
+                <CategoryPicker />
 
                 <div className="flex justify-between">
                   <FormField
@@ -266,6 +270,7 @@ export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
 
               <div className="flex gap-12">
                 <EditIngredients ingredients={null} />
+
                 <div className="max-w-prose space-y-4">
                   <FormField
                     control={form.control}

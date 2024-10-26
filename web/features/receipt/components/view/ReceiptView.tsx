@@ -1,5 +1,5 @@
 "use client";
-import { graphql, useFragment } from "@/gql";
+import { graphql, getFragmentData } from "@/gql";
 import { GetReceiptQuery } from "@/gql/graphql";
 import { ReceiptItem, ReceiptItemFragment } from "../edit/ReceiptItemEdit";
 
@@ -14,7 +14,7 @@ interface ReceiptViewProps {
 }
 
 export function ReceiptView({ receipt }: ReceiptViewProps) {
-  const items = useFragment(ReceiptItemFragment, receipt.items);
+  const items = getFragmentData(ReceiptItemFragment, receipt.items);
   const { index, setIndex, isClient, sortedItems } = useReceiptItems(
     receipt.id,
     items

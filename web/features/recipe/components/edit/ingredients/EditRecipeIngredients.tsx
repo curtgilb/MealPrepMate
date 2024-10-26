@@ -1,6 +1,6 @@
 "use client";
 import { forwardRef, useImperativeHandle, useState } from "react";
-import { useFragment } from "@/gql";
+import { getFragmentData } from "@/gql";
 import { Progress } from "@/components/ui/progress";
 import { RecipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
 import { EditRecipeIngredientItem } from "@/features/recipe/components/edit/ingredients/EditRecipeIngredientItem";
@@ -16,7 +16,7 @@ export const EditRecipeIngredients = forwardRef<
 >(function EditIngredients(props, ref) {
   const [step, setStep] = useState<number>(0);
   const [completed, setCompleted] = useState<string[]>([]);
-  const ingredients = useFragment(
+  const ingredients = getFragmentData(
     RecipeIngredientFragment,
     props.recipe?.ingredients
   );

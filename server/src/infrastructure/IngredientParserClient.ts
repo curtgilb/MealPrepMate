@@ -1,5 +1,6 @@
 import { replaceVulgarFractions } from "@/application/util/fractionToDecimal.js";
 import { toNumber } from "@/application/util/TypeCast.js";
+import { cleanString } from "@/application/validations/Formatters.js";
 import { z } from "zod";
 
 export type RecipeNlpResponse = {
@@ -13,7 +14,7 @@ export type RecipeNlpResponse = {
 };
 
 const responseValidation = z.object({
-  sentence: z.string(),
+  sentence: z.preprocess(cleanString, z.string()),
   quantity: z.preprocess(toNumber, z.number().nullish()),
   quantityMax: z.preprocess(toNumber, z.number().nullish()),
   unit: z.string().nullish(),

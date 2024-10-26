@@ -91,24 +91,24 @@ builder.mutationFields((t) => ({
   editMealPlan: t.prismaField({
     type: "MealPlan",
     args: {
-      id: t.arg.string({ required: true }),
+      id: t.arg.globalID({ required: true }),
       mealPlan: t.arg({
         type: editMealPlanInput,
         required: true,
       }),
     },
     resolve: async (query, root, args) => {
-      return await editMealPlan(args.id, args.mealPlan, query);
+      return await editMealPlan(args.id.id, args.mealPlan, query);
     },
   }),
   deleteMealPlan: t.prismaField({
     type: ["MealPlan"],
     args: {
-      id: t.arg.string({ required: true }),
+      id: t.arg.globalID({ required: true }),
     },
     resolve: async (query, root, args) => {
       await db.mealPlan.delete({
-        where: { id: args.id },
+        where: { id: args.id.id },
       });
       return await db.mealPlan.findMany({});
     },

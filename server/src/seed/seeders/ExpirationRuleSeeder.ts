@@ -8,7 +8,7 @@ const expirationRuleSchema = z.object({
   id: z.string().uuid(),
   name: z.preprocess(cleanString, z.string()).transform(toTitleCase),
   variant: z
-    .preprocess(cleanString, z.string().optional())
+    .preprocess(cleanString, z.string().nullish())
     .transform(toTitleCase),
   tableDays: z.coerce.number().int().nullish(),
   fridgeDays: z.coerce.number().int().nullish(),

@@ -29,22 +29,6 @@ import { ModalDrawer } from "@/components/ModalDrawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-const addServingMutation = graphql(`
-  mutation addServingToPlan($serving: AddRecipeServingInput!) {
-    addRecipeServing(serving: $serving) {
-      day
-      id
-      meal
-      mealPlanRecipeId
-      numberOfServings
-      mealRecipe {
-        id
-        servingsOnPlan
-      }
-    }
-  }
-`);
-
 interface AddServingDialogProps {
   day: number;
 }

@@ -1,9 +1,18 @@
 import { updateAggregateLabel } from "@/application/services/nutrition/AggregateLabelService.js";
-import { CreateNutritionLabelInput } from "@/application/services/nutrition/NutritionLabelService.js";
-import { CreateRecipeIngredientInput } from "@/application/services/recipe/RecipeIngredientService.js";
+import {
+  CreateNutritionLabelInput,
+  nutritionLabelValidation,
+} from "@/application/services/nutrition/NutritionLabelService.js";
+import {
+  CreateRecipeIngredientInput,
+  recipeIngredientValidation,
+} from "@/application/services/recipe/RecipeIngredientService.js";
 import { AllowUndefinedOrNull } from "@/application/types/CustomTypes.js";
+import { toTitleCase } from "@/application/util/utils.js";
+import { cleanString } from "@/application/validations/Formatters.js";
 import { db } from "@/infrastructure/repository/db.js";
 import { Prisma } from "@prisma/client";
+import { z } from "zod";
 
 type WebRecipeQuery = {
   include?: Prisma.WebScrapedRecipeInclude | undefined;
@@ -14,6 +23,24 @@ type RecipeQuery = {
   include?: Prisma.RecipeInclude | undefined;
   select?: Prisma.RecipeSelect | undefined;
 };
+
+const recipeValidation = z.object({
+  title: z.preprocess(cleanString, z.string()).transform(toTitleCase),
+  source: z.preprocess(cleanString, z.string().nullish()),
+  prepTime: z.number().nonnegative().nullish(),
+  cookTime: z.number().nonnegative().nullish(),
+  marinadeTime: z.number().nonnegative().nullish(),
+  directions: z.preprocess(cleanString, z.string().nullish()),
+  notes: z.preprocess(cleanString, z.string().nullish()),
+  photoIds: z.string().uuid().array().nullish(),
+  courseIds: z.string().uuid().array().nullish(),
+  categoryIds: z.string().uuid().array().nullish(),
+  cuisineIds: z.string().uuid().array().nullish(),
+  ingredients: recipeIngredientValidation.array().nullish(),
+  leftoverFridgeLife: z.number().nonnegative().nullish(),
+  leftoverFreezerLife: z.number().nonnegative().nullish(),
+  nutrition: nutritionLabelValidation.nullish(),
+});
 
 export type CreateRecipeInput = {
   title: string;
@@ -39,6 +66,7 @@ export type EditRecipeInput = Omit<
 >;
 
 async function createRecipe(recipe: CreateRecipeInput, query?: RecipeQuery) {
+  const cleanedRecipe = await recipeValidation.parseAsync(recipe);
   return await db.$transaction(async (tx) => {
     const createdRecipe = await db.recipe.create({
       include: {
@@ -47,35 +75,35 @@ async function createRecipe(recipe: CreateRecipeInput, query?: RecipeQuery) {
         },
       },
       data: {
-        name: recipe.title,
-        source: recipe.source,
-        preparationTime: recipe.prepTime,
-        cookingTime: recipe.cookTime,
-        marinadeTime: recipe.marinadeTime,
-        directions: recipe.directions,
-        notes: recipe.notes,
-        photos: recipe.photoIds
-          ? { connect: recipe.photoIds?.map((id) => ({ id })) }
+        name: cleanedRecipe.title,
+        source: cleanedRecipe.source,
+        preparationTime: cleanedRecipe.prepTime,
+        cookingTime: cleanedRecipe.cookTime,
+        marinadeTime: cleanedRecipe.marinadeTime,
+        directions: cleanedRecipe.directions,
+        notes: cleanedRecipe.notes,
+        photos: cleanedRecipe.photoIds
+          ? { connect: cleanedRecipe.photoIds?.map((id) => ({ id })) }
           : undefined,
-        course: recipe.courseIds
+        course: cleanedRecipe.courseIds
           ? {
-              connect: recipe.courseIds.map((id) => ({
+              connect: cleanedRecipe.courseIds.map((id) => ({
                 id,
               })),
             }
           : undefined,
-        category: recipe.categoryIds
-          ? { connect: recipe.categoryIds.map((id) => ({ id })) }
+        category: cleanedRecipe.categoryIds
+          ? { connect: cleanedRecipe.categoryIds.map((id) => ({ id })) }
           : undefined,
-        cuisine: recipe.cuisineIds
-          ? { connect: recipe.cuisineIds.map((id) => ({ id })) }
+        cuisine: cleanedRecipe.cuisineIds
+          ? { connect: cleanedRecipe.cuisineIds.map((id) => ({ id })) }
           : undefined,
-        leftoverFridgeLife: recipe.leftoverFridgeLife,
-        leftoverFreezerLife: recipe.leftoverFreezerLife,
-        ingredients: recipe.ingredients
+        leftoverFridgeLife: cleanedRecipe.leftoverFridgeLife,
+        leftoverFreezerLife: cleanedRecipe.leftoverFreezerLife,
+        ingredients: cleanedRecipe.ingredients
           ? {
               createMany: {
-                data: recipe.ingredients.map((ingredient) => ({
+                data: cleanedRecipe.ingredients.map((ingredient) => ({
                   sentence: ingredient.sentence,
                   quantity: ingredient?.quantity,
                   order: ingredient.order,
@@ -85,23 +113,29 @@ async function createRecipe(recipe: CreateRecipeInput, query?: RecipeQuery) {
               },
             }
           : undefined,
-        nutritionLabels: recipe.nutrition
+        nutritionLabels: cleanedRecipe.nutrition
           ? {
               create: {
-                servings: recipe.nutrition.servings,
-                servingSize: recipe.nutrition.servingSize,
-                servingSizeUnit: recipe.nutrition.servingSizeUnitId
-                  ? { connect: { id: recipe.nutrition.servingSizeUnitId } }
+                servings: cleanedRecipe.nutrition.servings,
+                servingSize: cleanedRecipe.nutrition.servingSize,
+                servingSizeUnit: cleanedRecipe.nutrition.servingSizeUnitId
+                  ? {
+                      connect: {
+                        id: cleanedRecipe.nutrition.servingSizeUnitId,
+                      },
+                    }
                   : undefined,
-                servingsUsed: recipe.nutrition.servingsUsed,
+                servingsUsed: cleanedRecipe.nutrition.servingsUsed,
                 isPrimary: true,
-                nutrients: recipe.nutrition.nutrients
+                nutrients: cleanedRecipe.nutrition.nutrients
                   ? {
                       createMany: {
-                        data: recipe.nutrition?.nutrients?.map((nutrient) => ({
-                          value: nutrient.value,
-                          nutrientId: nutrient.nutrientId,
-                        })),
+                        data: cleanedRecipe.nutrition?.nutrients?.map(
+                          (nutrient) => ({
+                            value: nutrient.value,
+                            nutrientId: nutrient.nutrientId,
+                          })
+                        ),
                       },
                     }
                   : undefined,

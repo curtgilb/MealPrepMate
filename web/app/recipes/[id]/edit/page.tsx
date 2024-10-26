@@ -1,6 +1,6 @@
 import { getRecipeQuery, recipeFragment } from "@/features/recipe/api/Recipe";
 import { RecipeEditor } from "@/features/recipe/components/edit/RecipeEditor";
-import { useFragment } from "@/gql";
+import { getFragmentData } from "@/gql";
 import { getClient } from "@/ssrGraphqlClient";
 
 export default async function EditRecipe({
@@ -8,12 +8,17 @@ export default async function EditRecipe({
 }: {
   params: { id: string };
 }) {
-  const result = await getClient().query(getRecipeQuery, { id: params.id });
-  const recipe = useFragment(recipeFragment, result.data?.recipe);
+  const { id } = await params;
+  const result = await getClient().query(getRecipeQuery, {
+    id: decodeURIComponent(id),
+  });
+  const recipe = getFragmentData(recipeFragment, result.data?.recipe);
 
   return (
     <>
-      <h1 className="text-3xl font-bold mb-6">Edit {recipe?.name}</h1>
+      <h1 className="text-3xl font-serif font-bold mb-6">
+        Edit {recipe?.name}
+      </h1>
       <RecipeEditor recipe={recipe} />
     </>
   );

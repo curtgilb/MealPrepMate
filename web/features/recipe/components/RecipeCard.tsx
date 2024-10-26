@@ -1,4 +1,4 @@
-import { Card } from "@/components/generics/Card";
+import { Card } from "@/components/Card";
 import { MacroCardDisplay } from "@/features/recipe/components/recipe_search/MacroCardDisplay";
 import { RecipeSearchFieldsFragment } from "@/gql/graphql";
 import Link from "next/link";

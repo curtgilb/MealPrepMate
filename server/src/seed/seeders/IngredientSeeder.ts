@@ -12,11 +12,11 @@ const ingredientSchema = z.object({
   name: z.preprocess(cleanString, z.string()).transform(toTitleCase),
   category: z.preprocess(cleanString, z.string()).transform(toTitleCase),
   variant: z
-    .preprocess(cleanString, z.string().optional())
+    .preprocess(cleanString, z.string().nullish())
     .transform(toTitleCase),
   storageInstruction: z.preprocess(cleanString, z.string().optional()),
-  alternativeNames: z.preprocess(toStringList, z.string().array().optional()),
-  expirationRule: z.preprocess(cleanString, z.string().uuid().optional()),
+  alternativeNames: z.preprocess(toStringList, z.string().array().nullish()),
+  expirationRule: z.preprocess(cleanString, z.string().uuid().nullish()),
 });
 
 export async function loadIngredients() {

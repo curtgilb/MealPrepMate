@@ -34,7 +34,6 @@ builder.prismaNode("DailyReferenceIntake", {
   id: { field: "id" },
   name: "DailyReferenceIntake",
   fields: (t) => ({
-    id: t.exposeString("id"),
     value: t.exposeFloat("value"),
     upperLimit: t.exposeFloat("upperLimit", { nullable: true }),
   }),
@@ -51,14 +50,18 @@ builder.queryFields((t) => ({
       advanced: t.arg.boolean({ required: true }),
     },
     resolve: async (query, root, args) => {
-      return await db.nutrient.findMany({
+      const nutrients = await db.nutrient.findMany({
         where: {
-          name: { contains: args.search ?? undefined, mode: "insensitive" },
+          name: args.search
+            ? { contains: args.search ?? undefined, mode: "insensitive" }
+            : undefined,
           advancedView: args.advanced ? undefined : false,
         },
         orderBy: { order: "asc" },
         ...query,
       });
+      console.log(nutrients);
+      return nutrients;
     },
   }),
 }));

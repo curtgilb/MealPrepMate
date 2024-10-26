@@ -1,0 +1,36 @@
+meta {
+  name: ParserecipeIngredietns
+  type: graphql
+  seq: 3
+}
+
+post {
+  url: http://localhost:3025/graphql
+  body: graphql
+  auth: none
+}
+
+body:graphql {
+  query tagIngredients($lines: String!) {
+    tagIngredients(ingredientTxt: $lines) {
+      ingredient {
+        id
+        name
+      }
+      order
+      quantity
+      sentence
+      unit {
+        id
+        name
+      }
+      verified
+    }
+  }
+}
+
+body:graphql:vars {
+  {
+    "lines": "2 large boneless skinless chicken breasts\r\n¼ cup cornstarch (or other flour)\r\n1 teaspoon kosher salt\r\n½ teaspoon ground black pepper\r\n2 tablespoons extra-virgin olive oil\r\n1 tablespoon unsalted butter\r\n"
+  }
+}

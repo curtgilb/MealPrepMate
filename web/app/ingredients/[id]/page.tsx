@@ -7,14 +7,17 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { graphql } from "@/gql";
+import { getFragmentData, graphql } from "@/gql";
 import { ExpirationRule } from "@/features/ingredient/components/ExpirationRule";
 import { getClient } from "@/ssrGraphqlClient";
 import { PriceHistory } from "@/features/ingredient/components/PriceHistory";
 import SingleColumnCentered from "@/components/layouts/single-column-centered";
 import { PriceHistoryGroup } from "@/features/ingredient/components/PriceHistoryGroup";
 import { FoodType, MeasurementSystem, UnitType } from "@/gql/graphql";
-import { getIngredientQuery } from "@/features/ingredient/api/Ingredient";
+import {
+  getIngredientQuery,
+  ingredientFieldsFragment,
+} from "@/features/ingredient/api/Ingredient";
 
 const items = [
   { id: "1", name: "Hass Avocado" },
@@ -29,25 +32,21 @@ export default async function IngredientPage({
 }: {
   params: { id: string };
 }) {
+  const { id } = await params;
   const { data, error } = await getClient().query(getIngredientQuery, {
-    id: params.id,
+    id: decodeURIComponent(id),
   });
+  const ingredient = getFragmentData(
+    ingredientFieldsFragment,
+    data?.ingredient
+  );
 
   return (
     <SingleColumnCentered>
-      <Breadcrumb className="mb-10">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/ingredients">Ingredients</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{data?.ingredient.name}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
       <div className="mb-12">
-        <h1 className="text-5xl font-black mb-2">{data?.ingredient.name}</h1>
+        <h1 className="text-4xl font-serif font-black mb-2">
+          {ingredient?.name}
+        </h1>
         <p className="font-light uppercase tracking-[.25em]">
           {data?.ingredient.category?.name}
         </p>

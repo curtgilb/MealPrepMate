@@ -11,9 +11,9 @@ import { builder } from "@/presentation/builder.js";
 import { DeleteResult } from "@/presentation/schemas/common/MutationResult.js";
 
 // ============================================ Types ===================================
-builder.prismaObject("MealPlanRecipe", {
+builder.prismaNode("MealPlanRecipe", {
+  id: { field: "id" },
   fields: (t) => ({
-    id: t.exposeID("id"),
     originalRecipe: t.relation("recipe"),
     mealPlan: t.relation("mealPlan"),
     factor: t.exposeFloat("factor"),
@@ -67,36 +67,36 @@ builder.mutationFields((t) => ({
   addRecipeToMealPlan: t.prismaField({
     type: "MealPlanRecipe",
     args: {
-      mealPlanId: t.arg.string({ required: true }),
+      mealPlanId: t.arg.globalID({ required: true }),
       recipe: t.arg({
         type: addRecipeToMealPlanInput,
         required: true,
       }),
     },
     resolve: async (query, root, args) => {
-      return await addRecipeToPlan(args.mealPlanId, args.recipe, query);
+      return await addRecipeToPlan(args.mealPlanId.id, args.recipe, query);
     },
   }),
   editMealPlanRecipe: t.prismaField({
     type: "MealPlanRecipe",
     args: {
-      id: t.arg.string({ required: true }),
+      id: t.arg.globalID({ required: true }),
       recipe: t.arg({
         type: editMealPlanRecipeInput,
         required: true,
       }),
     },
     resolve: async (query, root, args) => {
-      return await editRecipeOnPlan(args.id, args.recipe, query);
+      return await editRecipeOnPlan(args.id.id, args.recipe, query);
     },
   }),
   removeMealPlanRecipe: t.field({
     type: DeleteResult,
     args: {
-      id: t.arg.string({ required: true }),
+      id: t.arg.globalID({ required: true }),
     },
     resolve: async (root, args) => {
-      await removeRecipeFromPlan(args.id);
+      await removeRecipeFromPlan(args.id.id);
       return { success: true };
     },
   }),

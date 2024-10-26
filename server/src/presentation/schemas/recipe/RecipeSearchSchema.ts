@@ -86,19 +86,23 @@ builder.queryFields((t) => ({
   recipe: t.prismaField({
     type: "Recipe",
     args: {
-      recipeId: t.arg.id({ required: true }),
+      recipeId: t.arg.globalID({ required: true }),
     },
     resolve: async (query, root, args) => {
-      console.log(args.recipeId);
-      return await db.recipe.findUniqueOrThrow({
-        where: { id: args.recipeId },
+      const recipe = await db.recipe.findUniqueOrThrow({
+        where: { id: args.recipeId.id },
         ...query,
       });
+
+      console.log(recipe);
+      return recipe;
     },
   }),
   recipes: t.prismaConnection({
     type: "Recipe",
     cursor: "id",
+    edgesNullable: false,
+    nodeNullable: false,
     args: {
       filter: t.arg({ type: recipeFilter, required: true }),
     },

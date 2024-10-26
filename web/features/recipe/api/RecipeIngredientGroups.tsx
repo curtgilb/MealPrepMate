@@ -1,8 +1,8 @@
 import { graphql } from "@/gql";
 
 const createRecipeIngredientGroupMutation = graphql(`
-  mutation createIngredientGroup($name: String!, $recipeId: String!) {
-    createRecipeIngredientGroup(name: $name, recipeId: $recipeId) {
+  mutation createIngredientGroup($name: String!, $recipeId: ID!) {
+    createIngredientGroup(name: $name, recipeId: $recipeId) {
       id
       name
     }
@@ -10,7 +10,7 @@ const createRecipeIngredientGroupMutation = graphql(`
 `);
 
 const deleteRecipeIngredientGroupMutation = graphql(`
-  mutation deleteIngredientGroup($groupId: String!) {
+  mutation deleteIngredientGroup($groupId: ID!) {
     deleteRecipeIngredientGroup(groupId: $groupId) {
       success
     }
@@ -18,7 +18,7 @@ const deleteRecipeIngredientGroupMutation = graphql(`
 `);
 
 const editRecipeIngredientGroupMutation = graphql(`
-  mutation editIngredientGroup($name: String!, $groupId: String!) {
+  mutation editIngredientGroup($name: String!, $groupId: ID!) {
     editRecipeIngredientGroup(name: $name, groupId: $groupId) {
       id
       name

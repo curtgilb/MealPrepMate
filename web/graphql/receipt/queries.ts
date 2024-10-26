@@ -1,7 +1,7 @@
 import { graphql } from "@/gql";
 
 export const receiptQuery = graphql(`
-  query getReceipt($id: String!) {
+  query getReceipt($id: ID!) {
     receipt(id: $id) {
       id
       imagePath

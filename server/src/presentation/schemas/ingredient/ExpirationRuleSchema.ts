@@ -90,7 +90,7 @@ builder.queryFields((t) => ({
 
 // ============================================ Mutations =================================
 builder.mutationFields((t) => ({
-  createRule: t.prismaField({
+  createExpirationRule: t.prismaField({
     type: "ExpirationRule",
     args: {
       rule: t.arg({ type: createExpirationRuleInput, required: true }),

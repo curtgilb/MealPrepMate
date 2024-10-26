@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FragmentType, graphql, useFragment } from "@/gql";
+import { FragmentType, graphql, getFragmentData } from "@/gql";
 import { NutrientFieldsFragment } from "@/gql/graphql";
 
 import { isNumeric, toTitleCase } from "@/utils/utils";

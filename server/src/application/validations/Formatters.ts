@@ -1,10 +1,12 @@
 import { toString } from "@/application/util/TypeCast.js";
 import { z } from "zod";
+import { decode } from "html-entities";
 
-function cleanString(value: unknown) {
+function cleanString(value: unknown): string | undefined | null {
+  if (value === null || value === undefined) return value;
+  if (value === "") return null;
   const inputStr = toString(value).trim().replace(/\s\s+/g, " ");
-  if (!inputStr) return undefined;
-  return inputStr;
+  return decode(inputStr);
 }
 
 const stringToBoolean = z
@@ -52,4 +54,4 @@ function toStringList(val: unknown) {
 //   })
 //   .pipe(z.string().array());
 
-export { cleanString, toStringList };
+export { cleanString, toStringList, stringToBoolean };

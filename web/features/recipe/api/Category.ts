@@ -2,7 +2,7 @@ import { graphql } from "@/gql";
 
 const getCategoriesQuery = graphql(`
   query getCategories($search: String) {
-    categories(searchString: $search) {
+    categories(search: $search) {
       id
       name
     }

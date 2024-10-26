@@ -72,7 +72,7 @@ const editReceiptItem = graphql(
 );
 
 const finalizeReceiptMutation = graphql(`
-  mutation finalizeReceipt($receiptId: String!) {
+  mutation finalizeReceipt($receiptId: ID!) {
     finalizeReceipt(receiptId: $receiptId) {
       id
       imagePath

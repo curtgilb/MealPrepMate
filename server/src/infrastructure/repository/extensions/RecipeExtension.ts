@@ -57,6 +57,7 @@ export const recipeExtension = Prisma.defineExtension((client) => {
           // @ts-ignore
           return await client.recipe.findMany({
             ...query,
+            orderBy: { name: "asc" },
             where: {
               name: filter?.searchTerm,
               course: filter?.courseIds

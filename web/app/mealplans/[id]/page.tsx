@@ -1,6 +1,6 @@
 "use client";
 import { MealPlanName } from "@/features/mealplan/components/PlanName";
-import { graphql, useFragment } from "@/gql";
+import { graphql, getFragmentData } from "@/gql";
 import { mealPlanQuery } from "@/graphql/mealplan/mealplan";
 import { mealRecipeFragment } from "@/graphql/mealplan/mealrecipes";
 import { mealServingsFragment } from "@/graphql/mealplan/mealservings";
@@ -32,8 +32,11 @@ export default function MealPlanPage() {
 
   const { data, fetching, error } = mealPlanResult;
   const labels = useRecipeLabelLookup(data?.mealPlan.planRecipes);
-  const recipes = useFragment(mealRecipeFragment, data?.mealPlan.planRecipes);
-  const servings = useFragment(
+  const recipes = getFragmentData(
+    mealRecipeFragment,
+    data?.mealPlan.planRecipes
+  );
+  const servings = getFragmentData(
     mealServingsFragment,
     data?.mealPlan.mealPlanServings
   );

@@ -246,12 +246,22 @@ export class RecipeKeeperTransformer extends Transformer {
     return { key, value };
   }
 
-  private getNutrientId(value: string, key: string): CreateNutrientInput {
-    return { nutrientId: this.nutrientMapping[key], value: toNumber(value) };
+  private getNutrientId(
+    value: string,
+    key: string
+  ): CreateNutrientInput | undefined {
+    const input = {
+      nutrientId: this.nutrientMapping[key],
+      value: toNumber(value),
+    };
+    if (!input.nutrientId || !input.value) {
+      return undefined;
+    }
+    return input;
   }
 
   private async parseIngredient(txt: string) {
-    await tagIngredients(txt, true);
+    return await tagIngredients(txt, true);
   }
 
   private getTime(input: string) {

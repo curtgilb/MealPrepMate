@@ -1,11 +1,12 @@
 import { db } from "@/infrastructure/repository/db.js";
 import { builder } from "@/presentation/builder.js";
 import { DeleteResult } from "@/presentation/schemas/common/MutationResult.js";
+import { encodeGlobalID } from "@pothos/plugin-relay";
 
 // ============================================ Types ===================================
-builder.prismaObject("RecipeIngredientGroup", {
+builder.prismaNode("RecipeIngredientGroup", {
+  id: { field: "id" },
   fields: (t) => ({
-    id: t.exposeString("id"),
     name: t.exposeString("name"),
     recipe: t.relation("recipe"),
     ingredients: t.relation("ingredients"),
@@ -24,13 +25,13 @@ builder.mutationFields((t) => ({
   createIngredientGroup: t.prismaField({
     type: "RecipeIngredientGroup",
     args: {
-      recipeId: t.arg.string({ required: true }),
+      recipeId: t.arg.globalID({ required: true }),
       name: t.arg.string({ required: true }),
     },
     resolve: async (query, root, args) => {
       return await db.recipeIngredientGroup.create({
         data: {
-          recipe: { connect: { id: args.recipeId } },
+          recipe: { connect: { id: args.recipeId.id } },
           name: args.name,
         },
         ...query,
@@ -40,12 +41,12 @@ builder.mutationFields((t) => ({
   editRecipeIngredientGroup: t.prismaField({
     type: "RecipeIngredientGroup",
     args: {
-      groupId: t.arg.string({ required: true }),
+      groupId: t.arg.globalID({ required: true }),
       name: t.arg.string({ required: true }),
     },
     resolve: async (query, root, args) => {
       return await db.recipeIngredientGroup.update({
-        where: { id: args.groupId },
+        where: { id: args.groupId.id },
         data: { name: args.name },
         ...query,
       });
@@ -54,15 +55,14 @@ builder.mutationFields((t) => ({
   deleteRecipeIngredientGroup: t.field({
     type: DeleteResult,
     args: {
-      groupId: t.arg.string({ required: true }),
+      groupId: t.arg.globalID({ required: true }),
     },
     resolve: async (root, args) => {
-      try {
-        await db.recipeIngredientGroup.delete({ where: { id: args.groupId } });
-      } catch (e) {
-        return { success: false };
-      }
-      return { success: true };
+      await db.recipeIngredientGroup.delete({ where: { id: args.groupId.id } });
+      return {
+        success: true,
+        id: encodeGlobalID(args.groupId.typename, args.groupId.id),
+      };
     },
   }),
 }));

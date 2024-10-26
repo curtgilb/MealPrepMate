@@ -5,10 +5,10 @@ import { measurementSystem } from "@/presentation/schemas/common/EnumSchema.js";
 
 const unitType = builder.enumType(UnitType, { name: "UnitType" });
 
-export const measurementUnit = builder.prismaObject("MeasurementUnit", {
+export const measurementUnit = builder.prismaNode("MeasurementUnit", {
+  id: { field: "id" },
   name: "MeasurementUnit",
   fields: (t) => ({
-    id: t.exposeString("id"),
     name: t.exposeString("name"),
     abbreviations: t.exposeStringList("abbreviations"),
     symbol: t.exposeString("symbol", { nullable: true }),

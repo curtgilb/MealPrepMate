@@ -1,5 +1,5 @@
 import { InView } from "react-intersection-observer";
-import { Card } from "./Card";
+import { Card } from "../Card";
 
 interface LoadingCardsProps {
   onView?: () => void;

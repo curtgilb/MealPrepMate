@@ -1,5 +1,4 @@
 import {
-  FoodType,
   Gender,
   ImportStatus,
   ImportType,

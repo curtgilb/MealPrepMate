@@ -193,7 +193,7 @@ const recipeSearchFragment = graphql(`
   }
 `);
 
-const searchRecipes = graphql(`
+const searchRecipesQuery = graphql(`
   query searchRecipes($filters: RecipeFilter!, $after: String, $first: Int) {
     recipes(filter: $filters, after: $after, first: $first) {
       pageInfo {
@@ -215,7 +215,7 @@ export {
   getRecipeBaiscInfo,
   getRecipeLabels,
   recipeSearchFragment,
-  searchRecipes,
+  searchRecipesQuery,
   recipeFragment,
   editRecipeMutation,
 };

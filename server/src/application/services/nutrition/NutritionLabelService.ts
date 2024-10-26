@@ -1,8 +1,23 @@
 import { updateAggregateLabel } from "@/application/services/nutrition/AggregateLabelService.js";
 import { AllowUndefinedOrNull } from "@/application/types/CustomTypes.js";
-
 import { db } from "@/infrastructure/repository/db.js";
 import { Prisma } from "@prisma/client";
+import { z } from "zod";
+
+const nutrientValidation = z.object({
+  nutrientId: z.string().uuid(),
+  value: z.number().positive(),
+});
+
+export const nutritionLabelValidation = z.object({
+  servings: z.number().nonnegative(),
+  servingSize: z.number().nonnegative().nullish(),
+  servingSizeUnitId: z.string().uuid().nullish(),
+  servingsUsed: z.number().nonnegative().nullish(),
+  isPrimary: z.boolean(),
+  nutrients: nutrientValidation.array().nullish(),
+  ingredientGroupId: z.string().uuid().nullish(),
+});
 
 export type CreateNutrientInput = {
   nutrientId: string;

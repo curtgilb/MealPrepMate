@@ -1,10 +1,5 @@
 // import { NutritionLabel } from "@prisma/client";
-import { z } from "zod";
 import { db } from "@/infrastructure/repository/db.js";
-import {
-  createNutritionLabelValidation,
-  editNutritionLabelValidation,
-} from "@/application/validations/NutritionValidation.js";
 import { builder } from "@/presentation/builder.js";
 
 // ============================================ Types ===================================

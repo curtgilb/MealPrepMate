@@ -1,21 +1,10 @@
 "use client";
-
+import { editorExtensions } from "@/components/rich_text/CustomExtensions";
 import { RichTextEditorMenuBar } from "@/components/rich_text/RichTextEditorMenuBar";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import Underline from "@tiptap/extension-underline";
-import { CustomHeading } from "@/components/rich_text/CustomHeading";
-import BulletList from "@tiptap/extension-bullet-list";
-import ListItem from "@tiptap/extension-list-item";
-import Paragraph from "@tiptap/extension-paragraph";
-import Text from "@tiptap/extension-text";
-import Document from "@tiptap/extension-document";
-import OrderedList from "@tiptap/extension-ordered-list";
-import Bold from "@tiptap/extension-bold";
-import Italic from "@tiptap/extension-italic";
+import { EditorContent, useEditor } from "@tiptap/react";
 
 interface RichTextEditorProps {
-  value: string | undefined;
+  value: string | undefined | null;
   editable: boolean;
   onChange: (value: string) => void;
 }
@@ -28,38 +17,11 @@ export function RichTextEditor({
   const editor = useEditor({
     editorProps: {
       attributes: {
-        class: "focus-visible:outline-none text-sm",
+        class: "focus-visible:outline-none",
       },
     },
     editable,
-    extensions: [
-      Bold,
-      Italic.configure({
-        HTMLAttributes: {
-          class: "my-custom-class",
-        },
-      }),
-      CustomHeading,
-      BulletList.configure({
-        HTMLAttributes: {
-          class: "list-disc pl-4",
-        },
-      }),
-      ListItem,
-      Paragraph,
-      OrderedList.configure({
-        HTMLAttributes: {
-          class: "list-decimal pl-4",
-        },
-      }),
-      Text,
-      Document,
-      Underline.configure({
-        HTMLAttributes: {
-          class: "underline",
-        },
-      }),
-    ],
+    extensions: editorExtensions,
     immediatelyRender: false,
     content: value,
     onUpdate: ({ editor }) => {
@@ -70,13 +32,22 @@ export function RichTextEditor({
   if (editable) {
     return (
       editor && (
-        <div className="border rounded-md focus-within:ring-2 ring-offset-2 ring-ring min-h-[30rem]">
+        <div
+          className={
+            "border rounded-md focus-within:ring-2 ring-offset-2 ring-ring"
+          }
+        >
           <RichTextEditorMenuBar editor={editor} />
           <EditorContent className="px-4 py-3" editor={editor} />
         </div>
       )
     );
   } else {
-    return <EditorContent className="px-4 py-3" editor={editor} />;
+    return (
+      <EditorContent
+        className="text-base leading-relaxed max-w-prose"
+        editor={editor}
+      />
+    );
   }
 }

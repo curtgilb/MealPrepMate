@@ -4,11 +4,14 @@ import {
   CreateRecipeIngredientInput,
   editRecipeIngredient,
   EditRecipeIngredientInput,
+  TaggedIngredient,
   tagIngredients,
 } from "@/application/services/recipe/RecipeIngredientService.js";
 import { builder } from "@/presentation/builder.js";
 import { DeleteResult } from "@/presentation/schemas/common/MutationResult.js";
 import { db } from "@/infrastructure/repository/db.js";
+import { measurementUnit } from "@/presentation/schemas/common/MeasurementUnitSchema.js";
+import { ingredient } from "@/presentation/schemas/ingredient/IngredientSchema.js";
 
 // ============================================ Types ===================================
 
@@ -27,15 +30,21 @@ const recipeIngredient = builder.prismaObject("RecipeIngredient", {
 });
 
 const taggedIngredient = builder
-  .objectRef<CreateRecipeIngredientInput>("TaggedIngredient")
+  .objectRef<TaggedIngredient>("TaggedIngredient")
   .implement({
     fields: (t) => ({
       sentence: t.exposeString("sentence"),
       quantity: t.exposeFloat("quantity"),
       order: t.exposeInt("order"),
       verified: t.exposeBoolean("verified"),
-      unitId: t.exposeString("unitId"),
-      ingredientId: t.exposeString("ingredientId"),
+      unit: t.field({
+        type: measurementUnit,
+        resolve: (parent) => parent.unit,
+      }),
+      ingredient: t.field({
+        type: ingredient,
+        resolve: (parent) => parent.ingredient,
+      }),
     }),
   });
 
@@ -76,7 +85,7 @@ builder.queryFields((t) => ({
       ingredientTxt: t.arg.string({ required: true }),
     },
     resolve: async (root, args) => {
-      return await tagIngredients(args.ingredientTxt);
+      return await tagIngredients(args.ingredientTxt, false);
     },
   }),
 }));
@@ -87,31 +96,37 @@ builder.mutationFields((t) => ({
   addRecipeIngredient: t.prismaField({
     type: "RecipeIngredient",
     args: {
-      recipeId: t.arg.string({ required: true }),
+      recipeId: t.arg.globalID({ required: true }),
       ingredient: t.arg({ type: recipeIngredientInput, required: true }),
     },
     resolve: async (query, root, args) => {
-      return await addRecipeIngredient(args.recipeId, args.ingredient);
+      return await addRecipeIngredient(args.recipeId.id, args.ingredient);
     },
   }),
   addRecipeIngredients: t.prismaField({
     type: ["RecipeIngredient"],
     args: {
-      recipeId: t.arg.string({ required: true }),
+      recipeId: t.arg.globalID({ required: true }),
       ingredients: t.arg({ type: [recipeIngredientInput], required: true }),
     },
     resolve: async (query, root, args) => {
-      return await addRecipeIngredients(args.recipeId, args.ingredients, query);
+      return await addRecipeIngredients(
+        args.recipeId.id,
+        args.ingredients,
+        query
+      );
     },
   }),
   deleteRecipeIngredients: t.field({
     type: DeleteResult,
     args: {
-      ingredientId: t.arg.string({ required: true }),
+      ingredientId: t.arg.globalID({ required: true }),
     },
     resolve: async (root, args) => {
       try {
-        await db.recipeIngredient.delete({ where: { id: args.ingredientId } });
+        await db.recipeIngredient.delete({
+          where: { id: args.ingredientId.id },
+        });
         return {
           success: true,
         };

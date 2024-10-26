@@ -1,3 +1,4 @@
+import { cleanString } from "@/application/validations/Formatters.js";
 import { parseIngredients } from "@/infrastructure/IngredientParserClient.js";
 import { db } from "@/infrastructure/repository/db.js";
 import {
@@ -7,6 +8,7 @@ import {
   RecipeIngredient,
 } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
+import { z } from "zod";
 
 export type TaggedIngredient = Omit<
   RecipeIngredient,
@@ -15,6 +17,17 @@ export type TaggedIngredient = Omit<
   unit: MeasurementUnit | null | undefined;
   ingredient: Ingredient | null | undefined;
 };
+
+export const recipeIngredientValidation = z.object({
+  order: z.number().nonnegative(),
+  sentence: z.preprocess(cleanString, z.string()),
+  quantity: z.number().nonnegative().nullish(),
+  unitId: z.string().uuid().nullish(),
+  ingredientId: z.string().uuid().nullish(),
+  groupId: z.string().uuid().nullish(),
+  mealPrepIngredient: z.boolean(),
+  verified: z.boolean(),
+});
 
 export type CreateRecipeIngredientInput = {
   order: number;

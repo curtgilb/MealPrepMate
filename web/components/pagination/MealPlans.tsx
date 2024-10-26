@@ -1,38 +1,18 @@
 "use client";
 import { graphql } from "@/gql";
 import { useQuery } from "@urql/next";
-import { Card } from "../generics/Card";
+import { Card } from "../Card";
 import Link from "next/link";
-
-const getMealPlans = graphql(`
-  query GetMealPlans {
-    mealPlans {
-      id
-      name
-      planRecipes {
-        id
-        originalRecipe {
-          id
-          name
-          photos {
-            id
-            isPrimary
-            url
-          }
-        }
-      }
-    }
-  }
-`);
+import { getMealPlansQuery } from "@/features/mealplan/api/MealPlan";
 
 export function MealPlans() {
-  const [result] = useQuery({ query: getMealPlans });
+  const [result] = useQuery({ query: getMealPlansQuery });
 
   const { data, fetching, error } = result;
 
   return (
     <div className="grid grid-cols-grid-52">
-      {data?.mealPlans.map((mealPlan) => {
+      {data?.edges.map((mealPlan) => {
         const photos = mealPlan.planRecipes
           .map((recipe) => {
             return recipe.originalRecipe.photos

@@ -11,7 +11,7 @@ import "@/presentation/schemas/nutrition/NutrientTargetSchema.js";
 import "@/presentation/schemas/receipt/ReceiptLineSchema.js";
 import "@/presentation/schemas/recipe/RecipeIngredientSchema.js";
 import "@/presentation/schemas/ingredient/IngredientCategorySchema.js";
-import "@/presentation/schemas/ingredient/IngredientPrice.js";
+import "@/presentation/schemas/ingredient/IngredientPriceSchema.js";
 import "@/presentation/schemas/ingredient/IngredientSchema.js";
 import "@/presentation/schemas/mealplan/MealPlanIngredientsSchema.js";
 import "@/presentation/schemas/mealplan/MealPlanRecipeSchema.js";

@@ -1,5 +1,11 @@
-interface VerifyIngredientsProps {}
+import { ParseIngredientsQuery, RecipeFieldsFragment } from "@/gql/graphql";
 
-export function VerifyIngredients() {
-  return;
+interface VerifyIngredientsProps {
+  ingredients:
+    | NonNullable<RecipeFieldsFragment["ingredients"]>
+    | NonNullable<ParseIngredientsQuery["tagIngredients"]>;
+}
+
+export function VerifyIngredients({ ingredients }: VerifyIngredientsProps) {
+  return null;
 }

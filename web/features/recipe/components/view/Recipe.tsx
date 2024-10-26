@@ -1,6 +1,9 @@
 "use client";
+import { FilledImage } from "@/components/images/FilledImage";
 import SingleColumnCentered from "@/components/layouts/single-column-centered";
+import { RichTextEditor } from "@/components/rich_text/RichTextEditor";
 import { Button } from "@/components/ui/button";
+import { recipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
 import { RecipeNutritionlabel } from "@/features/recipe/components/nutrition_label/RecipeNutritionLabel";
 import { LeftoverLifespan } from "@/features/recipe/components/view/LeftoverLifespan";
 import RecipeIngredients from "@/features/recipe/components/view/RecipeIngredients";
@@ -9,34 +12,34 @@ import { RecipeTagList } from "@/features/recipe/components/view/RecipeTagList";
 import { RecipeTimes } from "@/features/recipe/components/view/RecipeTimes";
 import { ServingsAjuster } from "@/features/recipe/components/view/ServingsAdjuster";
 import { SourceLink } from "@/features/recipe/components/view/SourceLink";
+import { getFragmentData } from "@/gql";
 import { RecipeFieldsFragment } from "@/gql/graphql";
 import { Pencil } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 interface Recipe {
-  recipe: RecipeFieldsFragment | undefined;
+  recipe: RecipeFieldsFragment | undefined | null;
 }
 
 export function Recipe({ recipe }: Recipe) {
-  let primaryImage = recipe?.photos.find((photo) => {
-    photo.isPrimary;
-  });
+  let imageUrl =
+    recipe?.photos && recipe.photos.length > 0
+      ? `${process.env.NEXT_PUBLIC_STORAGE_URL}${recipe.photos[0].url}`
+      : "/placeholder_recipe.jpg";
 
   const tags = [recipe?.cuisine, recipe?.category, recipe?.course].flat();
+  const ingredients = getFragmentData(
+    recipeIngredientFragment,
+    recipe?.ingredients
+  );
 
   return (
     <SingleColumnCentered className="grid grid-cols-1 md:grid-cols-3 gap-14">
-      <Image
-        src={primaryImage ? primaryImage.url : "/pot.jpg"}
-        className="rounded-md"
-        alt="recipe photo"
-        style={{
-          width: "100%",
-          height: "auto",
-        }}
-        width={400}
-        height={400}
+      <FilledImage
+        url={imageUrl}
+        altText={`Image of ${recipe?.name}`}
+        containerCss="w-96 h-96"
       />
 
       <div className="flex flex-col gap-8 justify-between md:col-span-2 max-w-prose">
@@ -81,7 +84,6 @@ export function Recipe({ recipe }: Recipe) {
               prep={recipe?.prepTime}
               marinade={recipe?.marinadeTime}
               cook={recipe?.cookTime}
-              total={recipe?.totalTime}
             />
           </div>
           <div>
@@ -97,12 +99,16 @@ export function Recipe({ recipe }: Recipe) {
 
       <div>
         <h2 className="text-xl font-serif font-bold mb-2">Ingredients</h2>
-        <RecipeIngredients ingredients={recipe?.ingredients} />
+        <RecipeIngredients ingredients={ingredients} />
       </div>
 
       <div className="col-span-2">
         <h2 className="text-xl font-serif font-bold mb-2 ">Directions</h2>
-        <p className="max-w-prose">{recipe?.directions}</p>
+        <RichTextEditor
+          value={recipe?.directions}
+          editable={false}
+          onChange={() => {}}
+        />
 
         <h2 className="text-xl font-serif font-bold mt-8 mb-2">Notes</h2>
         <p className="max-w-prose">{recipe?.notes}</p>

@@ -1,6 +1,6 @@
 "use client";
 import { RecipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
-import { useFragment } from "@/gql";
+import { getFragmentData } from "@/gql";
 import { RecipeFieldsFragment } from "@/gql/graphql";
 import { useMemo } from "react";
 
@@ -13,7 +13,10 @@ export function useLabelsByGroup(
   ingredients: RecipeFieldsFragment["ingredients"] | undefined | null,
   selectedGroup: string
 ) {
-  const typedIngredients = useFragment(RecipeIngredientFragment, ingredients);
+  const typedIngredients = getFragmentData(
+    RecipeIngredientFragment,
+    ingredients
+  );
   const groupToLabel = useMemo(() => {
     const lookup = labels?.reduce((agg, label) => {
       if (label?.ingredientGroup && !agg.has(label.ingredientGroup.id)) {

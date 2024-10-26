@@ -1,62 +1,67 @@
 import { graphql } from "@/gql";
 
-export const mealPlanRecipeFragment = graphql(`
-    fragment MealPlanRecipeFields on MealPlanRecipe {
+const mealPlanRecipeFragment = graphql(`
+  fragment MealPlanRecipeFields on MealPlanRecipe {
+    id
+    totalServings
+    factor
+    servingsOnPlan
+    originalRecipe {
       id
-      totalServings
-      factor
-      servingsOnPlan
-      originalRecipe {
+      name
+      photos {
         id
-        name
-        photos {
+        url
+        isPrimary
+      }
+      ingredientFreshness
+      ingredients {
+        id
+        quantity
+        sentence
+        baseIngredient {
           id
-          url
-          isPrimary
+          name
         }
-        ingredientFreshness
-        ingredients {
+        unit {
           id
-          quantity
-          sentence
-          baseIngredient {
+          name
+          symbol
+        }
+      }
+      aggregateLabel {
+        id
+        totalCalories
+        fat
+        alcohol
+        carbs
+        protein
+        nutrients {
+          id
+          perServing
+          value
+          nutrient {
             id
-            name
-          }
-          unit {
-            id
-            name
-            symbol
           }
         }
-        aggregateLabel {
+        servings
+        servingSize
+        servingSizeUnit {
           id
-          totalCalories
-          fat
-          alcohol
-          carbs
-          protein
-          nutrients {
-            id
-            perServing
-            value
-            nutrient {
-              id
-            }
-          }
-          servings
-          servingSize
-          servingSizeUnit {
-            id
-            name
-            symbol
-          }
+          name
+          symbol
         }
       }
     }
-  `);
+  }
+`);
 
+const addRecipeToMealPlanMutation = graphql(`
+  mutation addRecipeToPlan($mealPlanId: ID!, $recipe: AddRecipeToPlanInput!) {
+    addRecipeToMealPlan(mealPlanId: $mealPlanId, recipe: $recipe) {
+      ...MealPlanRecipeFields
+    }
+  }
+`);
 
-const addRecipeToMealPlanMutation = graphql(
-    mutation addRecipeToPlan
-)
+export { mealPlanRecipeFragment, addRecipeToMealPlanMutation };

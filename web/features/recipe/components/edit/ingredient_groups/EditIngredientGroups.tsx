@@ -8,7 +8,7 @@ import {
   EditRecipeSubmit,
 } from "@/features/recipe/components/edit/RecipeEditor";
 import { EditIngredientGroup } from "@/features/recipe/components/edit/ingredient_groups/EditIngredientGroup";
-import { useFragment } from "@/gql";
+import { getFragmentData } from "@/gql";
 import {
   EditIngredientGroupMutation,
   RecipeIngredientFieldsFragment,
@@ -33,7 +33,7 @@ export const EditIngredientGroups = forwardRef<
   EditRecipeSubmit,
   EditRecipeProps
 >(function EditIngredientGroups(props, ref) {
-  const ingredients = useFragment(
+  const ingredients = getFragmentData(
     RecipeIngredientFragment,
     props.recipe?.ingredients
   );

@@ -6,24 +6,10 @@ import { useMutation, useQuery } from "@urql/next";
 import { useState } from "react";
 import { GetGroceryStoresQuery } from "@/gql/graphql";
 import { Picker } from "../../../components/picker";
-
-const getGroceryStores = graphql(`
-  query getGroceryStores {
-    stores {
-      id
-      name
-    }
-  }
-`);
-
-const createStoreMutation = graphql(`
-  mutation createStore($name: String!) {
-    createGroceryStore(name: $name) {
-      id
-      name
-    }
-  }
-`);
+import {
+  createStoreMutation,
+  getGroceryStoresQuery,
+} from "@/features/ingredient/api/GroceryStore";
 
 export type Store = GetGroceryStoresQuery["stores"][number];
 
@@ -36,7 +22,7 @@ export function GroceryStorePicker({
 }: ItemPickerProps<Store>) {
   const [search, setSearch] = useState<string>();
   const [result] = useQuery({
-    query: getGroceryStores,
+    query: getGroceryStoresQuery,
   });
   const { data, fetching } = result;
 

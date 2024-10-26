@@ -7,12 +7,14 @@ import { db } from "@/infrastructure/repository/db.js";
 import type PrismaTypes from "@/types/PothosTypes.js";
 
 const builder = new SchemaBuilder<{
+  DefaultFieldNullability: false;
   PrismaTypes: PrismaTypes;
   Scalars: {
     File: { Input: File; Output: never };
     DateTime: { Input: Date; Output: Date };
   };
 }>({
+  defaultFieldNullability: false,
   plugins: [PrismaPlugin, RelayPlugin],
   prisma: {
     client: db,

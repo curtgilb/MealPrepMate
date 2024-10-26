@@ -11,12 +11,12 @@ import { DeleteResult } from "@/presentation/schemas/common/MutationResult.js";
 import { meal } from "../common/EnumSchema.js";
 
 // ============================================ Types ===================================
-builder.prismaObject("MealPlanServing", {
+builder.prismaNode("MealPlanServing", {
+  id: { field: "id" },
   include: {
     recipe: true,
   },
   fields: (t) => ({
-    id: t.exposeID("id"),
     day: t.exposeInt("day"),
     meal: t.exposeString("meal"),
     numberOfServings: t.exposeInt("numberOfServings"),
@@ -84,11 +84,11 @@ builder.mutationFields((t) => ({
   deleteRecipeServing: t.field({
     type: DeleteResult,
     args: {
-      id: t.arg.string({ required: true }),
+      id: t.arg.globalID({ required: true }),
     },
     resolve: async (root, args) => {
       try {
-        await deleteMealPlanServing(args.id);
+        await deleteMealPlanServing(args.id.id);
         return { success: true };
       } catch {
         return { success: false };
@@ -98,11 +98,11 @@ builder.mutationFields((t) => ({
   editRecipeServing: t.prismaField({
     type: ["MealPlanServing"],
     args: {
-      id: t.arg.string({ required: true }),
+      id: t.arg.globalID({ required: true }),
       serving: t.arg({ type: editRecipeServingInput, required: true }),
     },
     resolve: async (query, root, args) => {
-      return await editMealPlanServing(args.id, args.serving, query);
+      return await editMealPlanServing(args.id.id, args.serving, query);
     },
   }),
 }));

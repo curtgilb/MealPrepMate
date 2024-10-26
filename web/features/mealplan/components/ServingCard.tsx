@@ -16,11 +16,15 @@ import { meals } from "./AddServingDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Meal } from "@/gql/graphql";
 import { toast } from "sonner";
-import { Card } from "@/components/generics/Card";
+import { Card } from "@/components/Card";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { ModalDrawer } from "@/components/ModalDrawer";
+import {
+  deleteServingMutation,
+  editServingMutation,
+} from "@/features/mealplan/api/MealPlanServings";
 
 interface MealPlanServingCardProps {
   id: string;
@@ -31,27 +35,6 @@ interface MealPlanServingCardProps {
   name: string;
   photoUrl: string;
 }
-
-const deleteServingMutation = graphql(`
-  mutation removeServing($id: String!) {
-    deleteRecipeServing(id: $id)
-  }
-`);
-
-const editServingMutation = graphql(`
-  mutation editServing($serving: EditRecipeServingInput!) {
-    editRecipeServing(serving: $serving) {
-      id
-      day
-      meal
-      numberOfServings
-      mealRecipe {
-        id
-        servingsOnPlan
-      }
-    }
-  }
-`);
 
 export const MealPlanServingCard = React.forwardRef<
   HTMLDivElement,

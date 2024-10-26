@@ -6,14 +6,7 @@ import { NumberInput } from "../ui/number-input";
 import { Button } from "../ui/button";
 import { RecipeSearchFieldsFragment } from "@/gql/graphql";
 import { MealPlan } from "@/contexts/MealPlanContext";
-
-const addRecipeMutation = graphql(`
-  mutation addRecipeToPlan($recipe: AddRecipeInput!) {
-    addRecipeToMealPlan(recipe: $recipe) {
-      ...MealRecipeFields
-    }
-  }
-`);
+import { addRecipeToMealPlanMutation } from "@/features/mealplan/api/MealPlanRecipe";
 
 interface AddRecipeDialogProps {
   recipe: RecipeSearchFieldsFragment;
@@ -23,7 +16,7 @@ export function AddRecipeDialog({ recipe }: AddRecipeDialogProps) {
   const intialServings = recipe.aggregateLabel?.servings ?? 1;
   const [servings, setServings] = useState<number>(intialServings);
   const [scale, setScale] = useState<number>(1);
-  const [result, addRecipe] = useMutation(addRecipeMutation);
+  const [result, addRecipe] = useMutation(addRecipeToMealPlanMutation);
   const mealPlan = useContext(MealPlan);
   const { fetching } = result;
 

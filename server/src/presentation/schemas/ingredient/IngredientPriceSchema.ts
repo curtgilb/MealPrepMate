@@ -1,18 +1,21 @@
-import { builder } from "@/presentation/builder.js";
-import { db } from "@/infrastructure/repository/db.js";
-
 import {
+  createPriceHistory,
   CreatePriceHistoryInput,
+  deletePriceHistory,
+  editPriceHistory,
   EditPriceHistoryInput,
   getIngredientPrice,
   getIngredientPrices,
   IngredientPriceFilter,
 } from "@/application/services/ingredient/IngredientPriceService.js";
+import { builder } from "@/presentation/builder.js";
+import { DeleteResult } from "@/presentation/schemas/common/MutationResult.js";
+import { encodeGlobalID } from "@pothos/plugin-relay";
 import { FoodType } from "@prisma/client";
 
 // ============================================ Types ===================================
 
-const foodTypeEnum = builder.enumType(FoodType, { name: "FoodType" });
+export const foodTypeEnum = builder.enumType(FoodType, { name: "FoodType" });
 
 builder.prismaNode("IngredientPrice", {
   id: { field: "id" },
@@ -35,7 +38,7 @@ builder.prismaNode("IngredientPrice", {
 });
 
 // ============================================ Inputs ==================================
-const createPriceHistory = builder
+const createPriceHistoryInput = builder
   .inputRef<CreatePriceHistoryInput>("CreatePriceHistoryInput")
   .implement({
     fields: (t) => ({
@@ -51,7 +54,7 @@ const createPriceHistory = builder
     }),
   });
 
-const editPriceHistory = builder
+const editPriceHistoryInput = builder
   .inputRef<EditPriceHistoryInput>("EditPriceHistoryInput")
   .implement({
     fields: (t) => ({
@@ -67,7 +70,7 @@ const editPriceHistory = builder
     }),
   });
 
-const ingredientPriceFilter = builder
+const ingredientPriceFilterInput = builder
   .inputRef<IngredientPriceFilter>("IngredientPriceFilter")
   .implement({
     fields: (t) => ({
@@ -95,7 +98,7 @@ builder.queryFields((t) => ({
     cursor: "id",
     args: {
       ingredientId: t.arg.globalID({ required: true }),
-      filter: t.arg({ type: ingredientPriceFilter }),
+      filter: t.arg({ type: ingredientPriceFilterInput }),
     },
     resolve: async (query, root, args) => {
       return getIngredientPrices(args.ingredientId.id, args.filter, query);
@@ -107,67 +110,36 @@ builder.mutationFields((t) => ({
   addPriceHistory: t.prismaField({
     type: "IngredientPrice",
     args: {
-      price: t.arg({ type: createPriceHistory, required: true }),
+      price: t.arg({ type: createPriceHistoryInput, required: true }),
     },
-    resolve: async (query, root, args) => {},
+    resolve: async (query, root, args) => {
+      return await createPriceHistory(args.price, query);
+    },
   }),
   editPriceHistory: t.prismaField({
     type: "IngredientPrice",
     args: {
-      priceId: t.arg.string({ required: true }),
-      price: t.arg({ type: editPriceHistory, required: true }),
+      priceId: t.arg.globalID({ required: true }),
+      price: t.arg({ type: editPriceHistoryInput, required: true }),
     },
     resolve: async (query, root, args) => {
-      return await db.ingredientPrice.update({
-        where: {
-          id: args.priceId,
-        },
-        data: {
-          ingredient: args.price.ingredientId
-            ? { connect: { id: args.price.ingredientId } }
-            : undefined,
-          receiptLine: args.price.recieptLineId
-            ? { connect: { id: args.price.recieptLineId } }
-            : undefined,
-          date: args.price.date ? args.price.date : undefined,
-          foodType: args.price.foodType,
-          groceryStore: args.price.groceryStore
-            ? {
-                connectOrCreate: {
-                  where: { name: args.price.groceryStore },
-                  create: { name: args.price.groceryStore },
-                },
-              }
-            : undefined,
-          price: args.price.price ? args.price.price : undefined,
-          size: args.price.quantity ? args.price.quantity : undefined,
-          unit: args.price.unitId
-            ? { connect: { id: args.price.unitId } }
-            : undefined,
-          pricePerUnit: args.price.pricePerUnit
-            ? args.price.pricePerUnit
-            : undefined,
-        },
-        ...query,
-      });
+      return await editPriceHistory(args.priceId.id, args.price, query);
     },
   }),
-  deletePriceHistory: t.prismaField({
-    type: ["IngredientPrice"],
+  deletePriceHistory: t.field({
+    type: DeleteResult,
     args: {
-      ingredientId: t.arg.string({ required: true }),
-      ingredientPriceId: t.arg.string({ required: true }),
+      ingredientPriceId: t.arg.globalID({ required: true }),
     },
-    resolve: async (query, root, args) => {
-      await db.ingredientPrice.deleteMany({
-        where: {
-          id: args.ingredientPriceId,
-        },
-      });
-      return await db.ingredientPrice.findMany({
-        where: { ingredientId: args.ingredientId },
-        ...query,
-      });
+    resolve: async (root, args) => {
+      await deletePriceHistory(args.ingredientPriceId.id);
+      return {
+        success: true,
+        id: encodeGlobalID(
+          args.ingredientPriceId.typename,
+          args.ingredientPriceId.id
+        ),
+      };
     },
   }),
 }));

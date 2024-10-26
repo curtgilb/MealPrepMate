@@ -5,7 +5,7 @@ import {
   expirationRuleFragment,
   getExpirationRulesQuery,
 } from "@/features/ingredient/api/ExpirationRule";
-import { useFragment } from "@/gql";
+import { getFragmentData } from "@/gql";
 import {
   ExpirationRuleFieldsFragment,
   GetExpirationRulesQuery,
@@ -28,7 +28,7 @@ export function ExpirationRulePicker({
   });
 
   const { data, fetching, error } = result;
-  const rules = useFragment(expirationRuleFragment, data?.expirationRules);
+  const rules = getFragmentData(expirationRuleFragment, data?.expirationRules);
 
   return (
     <Picker<ExpirationRuleFieldsFragment>

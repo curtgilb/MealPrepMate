@@ -1,7 +1,7 @@
 import { graphql } from "@/gql";
 
-const RecipeIngredientFragment = graphql(`
-  fragment RecipeIngredientFields on RecipeIngredients {
+const recipeIngredientFragment = graphql(`
+  fragment RecipeIngredientFields on RecipeIngredient {
     id
     sentence
     order
@@ -22,6 +22,24 @@ const RecipeIngredientFragment = graphql(`
   }
 `);
 
+const tagIngredientsQuery = graphql(`
+  query parseIngredients($lines: String!) {
+    tagIngredients(ingredientTxt: $lines) {
+      order
+      quantity
+      sentence
+      unit {
+        id
+        name
+      }
+      ingredient {
+        id
+        name
+      }
+    }
+  }
+`);
+
 const getRecipeIngredients = graphql(`
   query getRecipeIngredients($id: ID!) {
     recipe(recipeId: $id) {
@@ -34,23 +52,26 @@ const getRecipeIngredients = graphql(`
 `);
 
 const createRecipeIngredientMutation = graphql(`
-  mutation createRecipeIngredient($recipeId: String!, $txt: String!) {
-    addRecipeIngredient(recipeId: $recipeId, ingredientTxt: $txt) {
+  mutation createRecipeIngredient(
+    $recipeId: ID!
+    $ingredient: CreateRecipeIngredientInput!
+  ) {
+    addRecipeIngredient(recipeId: $recipeId, ingredient: $ingredient) {
       ...RecipeIngredientFields
     }
   }
 `);
 
 const editRecipeIngredientMutation = graphql(`
-  mutation editRecipeIngredient($ingredients: [RecipeIngredientInput!]!) {
-    editRecipeIngredients(ingredients: $ingredients) {
+  mutation editRecipeIngredient($ingredient: EditRecipeIngredientInput!) {
+    editRecipeIngredients(ingredient: $ingredient) {
       ...RecipeIngredientFields
     }
   }
 `);
 
 const deleteRecipeIngredientMutation = graphql(`
-  mutation deleteRecipeIngredient($id: String!) {
+  mutation deleteRecipeIngredient($id: ID!) {
     deleteRecipeIngredients(ingredientId: $id) {
       success
     }
@@ -58,9 +79,10 @@ const deleteRecipeIngredientMutation = graphql(`
 `);
 
 export {
-  RecipeIngredientFragment,
+  recipeIngredientFragment,
   getRecipeIngredients,
   deleteRecipeIngredientMutation,
   createRecipeIngredientMutation,
   editRecipeIngredientMutation,
+  tagIngredientsQuery,
 };

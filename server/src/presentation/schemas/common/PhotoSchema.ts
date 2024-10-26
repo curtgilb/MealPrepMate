@@ -3,10 +3,10 @@ import { db } from "@/infrastructure/repository/db.js";
 import { builder } from "@/presentation/builder.js";
 
 // ============================================ Types ===================================
-builder.prismaObject("Photo", {
+builder.prismaNode("Photo", {
+  id: { field: "id" },
   name: "Photo",
   fields: (t) => ({
-    id: t.exposeID("id"),
     url: t.exposeString("path"),
     isPrimary: t.exposeBoolean("isPrimary"),
   }),

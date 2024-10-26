@@ -1,6 +1,6 @@
 import { db } from "@/infrastructure/repository/db.js";
 import { builder } from "@/presentation/builder.js";
-import { foodTypeEnum } from "@/presentation/schemas/common/EnumSchema.js";
+import { foodTypeEnum } from "@/presentation/schemas/ingredient/IngredientPriceSchema.js";
 
 // ============================================ Types ===================================
 builder.prismaNode("ReceiptLine", {

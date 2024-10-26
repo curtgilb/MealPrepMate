@@ -1,4 +1,4 @@
-// import { FragmentType, graphql, useFragment } from "@/gql";
+// import { FragmentType, graphql, getFragmentData } from "@/gql";
 // import {
 //   FetchCategoriesQueryVariables,
 //   FetchIngredientsListQuery,

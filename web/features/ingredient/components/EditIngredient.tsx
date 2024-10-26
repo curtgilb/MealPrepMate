@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { expirationRuleFragment } from "@/features/ingredient/api/ExpirationRule";
 import { ExpirationRuleSelector } from "@/features/ingredient/components/ExpirationRuleSelector";
-import { useFragment } from "@/gql";
+import { getFragmentData } from "@/gql";
 import { GetIngredientQuery } from "@/gql/graphql";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Save, X, XIcon } from "lucide-react";
@@ -40,7 +40,7 @@ interface EditIngredientProps {
 export function EditIngredient({ ingredient }: EditIngredientProps) {
   const router = useRouter();
   const addRef = useRef<HTMLInputElement>(null);
-  const expirationRule = useFragment(
+  const expirationRule = getFragmentData(
     expirationRuleFragment,
     ingredient?.expiration
   );

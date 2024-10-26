@@ -17,12 +17,8 @@ import {
 } from "react";
 import { useQuery } from "urql";
 
-interface RecipeEditorProps {
-  recipe: RecipeFieldsFragment | undefined;
-}
-
 export interface EditRecipeProps {
-  recipe: RecipeFieldsFragment | undefined;
+  recipe: RecipeFieldsFragment | undefined | null;
 }
 
 export interface EditRecipeSubmit {
@@ -43,24 +39,23 @@ const editComponents: {
   4: { Component: EditRecipeNutritionLabels, name: "Nutrition Labels" },
 };
 
-export function RecipeEditor({ recipe }: RecipeEditorProps) {
+export function RecipeEditor({ recipe }: EditRecipeProps) {
   const router = useRouter();
   const [editStage, setEditStage] = useState<number>(1);
   const { Component, name } = editComponents[editStage];
   const child = useRef<EditRecipeSubmit>(null);
   const isLastStep = editStage === Object.keys(editComponents).length;
-  const [result, executeQuery] = useQuery({
-    query: getRecipeQuery,
-    variables: { id: recipe?.id ?? "" },
-    pause: true,
-  });
+  // const [result, executeQuery] = useQuery({
+  //   query: getRecipeQuery,
+  //   variables: { id: recipe?.id ?? "" },
+  //   pause: true,
+  // });
 
   function advanceStep() {
     if (child.current?.submit) {
       child.current.submit(() => {
         if (editStage < Object.keys(editComponents).length) {
           setEditStage(editStage + 1);
-          executeQuery();
         } else if (isLastStep) {
           // Redirect to recipe page
           router.push(`/recipes/${recipe?.id}`);
@@ -77,9 +72,12 @@ export function RecipeEditor({ recipe }: RecipeEditorProps) {
         <Button
           variant="outline"
           onClick={() => {
-            setEditStage(editStage - 1);
+            if (editStage === 1) {
+              router.back();
+            } else {
+              setEditStage(editStage - 1);
+            }
           }}
-          disabled={editStage === 0}
         >
           Back
         </Button>

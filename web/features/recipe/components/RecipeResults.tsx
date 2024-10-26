@@ -1,4 +1,4 @@
-import { useFragment } from "@/gql";
+import { getFragmentData } from "@/gql";
 import { RecipeFilter, RecipeSearchFieldsFragment } from "@/gql/graphql";
 import { useQuery } from "@urql/next";
 import { LoadingCards } from "@/components/generics/LoadingCards";
@@ -25,7 +25,7 @@ export function RecipeSearchResults({
     variables: { filters, pagination: { take: 50, offset: 0 } },
   });
   const { data, fetching, error } = result;
-  const recipes = useFragment(recipeSearchFragment, data?.recipes.recipes);
+  const recipes = getFragmentData(recipeSearchFragment, data?.recipes.recipes);
 
   if (fetching) return <LoadingCards vertical={vertical} />;
 
@@ -79,7 +79,7 @@ function SearchPage({
       pagination: { offset: skip ?? 0, take: take },
     },
   });
-  const recipes = useFragment(
+  const recipes = getFragmentData(
     recipeSearchFragment,
     results.data?.recipes.recipes
   );

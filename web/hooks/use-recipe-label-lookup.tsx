@@ -1,4 +1,4 @@
-import { FragmentType, useFragment } from "@/gql/fragment-masking";
+import { FragmentType, getFragmentData } from "@/gql/fragment-masking";
 import { mealRecipeFragment } from "@/graphql/mealplan/mealrecipes";
 import { useMemo } from "react";
 
@@ -35,7 +35,7 @@ function scaleNutrient(
 export function useRecipeLabelLookup(
   recipes: FragmentType<typeof mealRecipeFragment>[] | undefined
 ): RecipeNutrientLookup {
-  const planRecipes = useFragment(mealRecipeFragment, recipes);
+  const planRecipes = getFragmentData(mealRecipeFragment, recipes);
   return useMemo(() => {
     if (planRecipes) {
       return planRecipes.reduce((lookup, recipe) => {
