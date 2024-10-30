@@ -5,5 +5,5 @@ export default function RecipeLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <SingleColumnCentered>{children}</SingleColumnCentered>;
+  return <SingleColumnCentered condensed>{children}</SingleColumnCentered>;
 }

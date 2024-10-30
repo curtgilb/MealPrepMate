@@ -6,6 +6,8 @@ const recipeIngredientFragment = graphql(`
     sentence
     order
     quantity
+    verified
+    mealPrepIngredient
     baseIngredient {
       id
       name
@@ -51,12 +53,20 @@ const getRecipeIngredients = graphql(`
   }
 `);
 
+// const createRecipeIngredientMutation = graphql(`
+//   mutation createRecipeIngredient(
+//     $recipeId: ID!
+//     $ingredient: CreateRecipeIngredientInput!
+//   ) {
+//     addRecipeIngredient(recipeId: $recipeId, ingredient: $ingredient) {
+//       ...RecipeIngredientFields
+//     }
+//   }
+// `);
+
 const createRecipeIngredientMutation = graphql(`
-  mutation createRecipeIngredient(
-    $recipeId: ID!
-    $ingredient: CreateRecipeIngredientInput!
-  ) {
-    addRecipeIngredient(recipeId: $recipeId, ingredient: $ingredient) {
+  mutation createRecipeIngredient($recipeId: ID!, $ingredient: String!) {
+    addRecipeIngredientsFromTxt(recipeId: $recipeId, ingredients: $ingredient) {
       ...RecipeIngredientFields
     }
   }

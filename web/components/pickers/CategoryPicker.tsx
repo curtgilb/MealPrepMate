@@ -13,7 +13,7 @@ export function CategoryPicker() {
   return (
     <GenericCombobox
       query={getCategoriesQuery}
-      variables={{ first: 10, search: "" }}
+      variables={{ search: "" }}
       unwrapDataList={(query) => {
         return query?.categories;
       }}
@@ -25,7 +25,7 @@ export function CategoryPicker() {
       selectedItems={categories}
       onChange={setCategories}
       multiSelect={true}
-      autoFilter={false}
+      autoFilter={true}
     />
   );
 }

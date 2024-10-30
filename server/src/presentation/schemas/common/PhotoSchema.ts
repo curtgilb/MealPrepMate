@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { db } from "@/infrastructure/repository/db.js";
 import { builder } from "@/presentation/builder.js";
+import { uploadPhoto } from "@/application/services/PhotoService.js";
 
 // ============================================ Types ===================================
 builder.prismaNode("Photo", {
@@ -22,7 +23,7 @@ builder.mutationFields((t) => ({
     },
     resolve: async (query, root, args) => {
       const buffer = Buffer.from(await args.photo.arrayBuffer());
-      return await db.photo.uploadPhoto(buffer, args.isPrimary, query);
+      return await uploadPhoto(buffer, query);
     },
   }),
   addPhotoToRecipe: t.prismaField({

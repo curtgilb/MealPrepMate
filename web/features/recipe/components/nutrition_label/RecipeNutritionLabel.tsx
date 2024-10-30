@@ -114,7 +114,7 @@ export function RecipeNutritionlabel({
   }, [label, servingSize]);
 
   return (
-    <div className={cn("max-w-lg", className)} {...rest}>
+    <div className={cn("w-full", className)} {...rest}>
       <div className="flex justify-end">
         <div className="flex gap-2">
           <EnumSelect

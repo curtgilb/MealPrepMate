@@ -3,8 +3,8 @@ import {
   deleteRecipeIngredientGroupMutation,
   editRecipeIngredientGroupMutation,
 } from "@/features/recipe/api/RecipeIngredientGroups";
-import { EditIngredientGroupItem } from "@/features/recipe/components/edit/ingredient_groups/EditIngredientGroupItem";
-import { DEFAULT_KEY } from "@/features/recipe/components/edit/ingredient_groups/EditIngredientGroups";
+import { EditIngredientGroupItem } from "@/features/recipe/components/edit/ingredients/ingredient_groups/EditIngredientGroupItem";
+import { DEFAULT_KEY } from "@/features/recipe/components/edit/ingredients/ingredient_groups/EditIngredientGroups";
 import {
   EditIngredientGroupMutation,
   RecipeIngredientFieldsFragment,

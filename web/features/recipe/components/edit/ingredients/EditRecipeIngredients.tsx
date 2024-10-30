@@ -1,72 +1,53 @@
 "use client";
-import { forwardRef, useImperativeHandle, useState } from "react";
-import { getFragmentData } from "@/gql";
-import { Progress } from "@/components/ui/progress";
-import { RecipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
-import { EditRecipeIngredientItem } from "@/features/recipe/components/edit/ingredients/EditRecipeIngredientItem";
-import { IngredientList } from "@/features/recipe/components/edit/ingredients/IngredientList";
+import { recipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
+import { IngredientList } from "@/features/recipe/components/edit/ingredients/list/IngredientList";
+
 import {
   EditRecipeProps,
   EditRecipeSubmit,
 } from "@/features/recipe/components/edit/RecipeEditor";
+import {
+  IngredientsContext,
+  useGroupedRecipeIngredients,
+} from "@/features/recipe/hooks/useGroupedRecipeIngredients";
+import { getFragmentData } from "@/gql";
+import { forwardRef, useImperativeHandle } from "react";
 
 export const EditRecipeIngredients = forwardRef<
   EditRecipeSubmit,
   EditRecipeProps
->(function EditIngredients(props, ref) {
-  const [step, setStep] = useState<number>(0);
-  const [completed, setCompleted] = useState<string[]>([]);
+>(function EditRecipeIngredients(props, ref) {
   const ingredients = getFragmentData(
-    RecipeIngredientFragment,
+    recipeIngredientFragment,
     props.recipe?.ingredients
   );
+
+  const groupedIngredients = useGroupedRecipeIngredients(ingredients);
+
   useImperativeHandle(ref, () => ({
     submit(postSubmit) {
       postSubmit();
     },
   }));
-  const ingredient = ingredients?.[step];
-  const percent = ingredients
-    ? (completed.length / ingredients.length) * 100
-    : 0;
-  return (
-    <div className="border rounded-md bg-white flex gap-16 px-6 py-4">
-      <div>
-        <p className="text-lg font-semibold">Ingredients List</p>
-        <div className="my-6">
-          <Progress className="h-2.5" value={percent} />
-          <p className="text-xs font-light text-right">
-            Verified {completed.length} of {ingredients?.length ?? 0}
-          </p>
-        </div>
-        <IngredientList
-          ingredients={ingredients}
-          completedIds={completed}
-          active={ingredient?.id}
-          jumpTo={(index) => {
-            setStep(index);
-          }}
-        />
-      </div>
 
-      {ingredient && (
-        <div>
-          <EditRecipeIngredientItem
-            ingredient={ingredient}
-            advance={() => {
-              if (!completed.includes(ingredient.id)) {
-                setCompleted([...completed, ingredient.id]);
-                setStep(step + 1);
-              }
-            }}
-            back={() => {
-              if (step > 0) {
-                setStep(step - 1);
-              }
-            }}
-          />
-        </div>
-      )}
-    </div>
+  return (
+    <>
+      <IngredientsContext.Provider value={groupedIngredients}>
+        {props.recipe?.id && (
+          <div className="flex">
+            <IngredientList recipeId={props.recipe.id} />
+          </div>
+        )}
+      </IngredientsContext.Provider>
+    </>
   );
 });
+
+{
+  /* <div className="my-6">
+<Progress className="h-2" value={percent} />
+<p className="text-xs font-light text-right">
+  Verified {completed.length} of {ingredients?.length ?? 0}
+</p>
+</div> */
+}

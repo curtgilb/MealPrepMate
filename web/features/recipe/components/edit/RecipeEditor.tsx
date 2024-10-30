@@ -1,8 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { getRecipeQuery } from "@/features/recipe/api/Recipe";
 import { EditRecipeInfo } from "@/features/recipe/components/edit/info/EditRecipeInfo";
-import { EditIngredientGroups } from "@/features/recipe/components/edit/ingredient_groups/EditIngredientGroups";
 import { EditRecipeIngredients } from "@/features/recipe/components/edit/ingredients/EditRecipeIngredients";
 import { EditRecipeNutritionLabels } from "@/features/recipe/components/edit/labels/EditRecipeNutritionLabels";
 import { RecipeFieldsFragment } from "@/gql/graphql";
@@ -15,7 +13,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { useQuery } from "urql";
 
 export interface EditRecipeProps {
   recipe: RecipeFieldsFragment | undefined | null;
@@ -33,10 +30,9 @@ const editComponents: {
     name: string;
   };
 } = {
-  1: { Component: EditRecipeInfo, name: "Basic info" },
-  2: { Component: EditIngredientGroups, name: "Ingredient groups" },
-  3: { Component: EditRecipeIngredients, name: "Match Ingredients" },
-  4: { Component: EditRecipeNutritionLabels, name: "Nutrition Labels" },
+  1: { Component: EditRecipeInfo, name: "basic info" },
+  2: { Component: EditRecipeIngredients, name: "ingredients" },
+  3: { Component: EditRecipeNutritionLabels, name: "nutrition label" },
 };
 
 export function RecipeEditor({ recipe }: EditRecipeProps) {
@@ -65,9 +61,14 @@ export function RecipeEditor({ recipe }: EditRecipeProps) {
   }
 
   return (
-    <div>
-      <p className="text-2xl font-bold mb-8">{`${editStage}. ${name}`}</p>
+    <>
+      {/* Header */}
+      <h1 className="text-3xl font-serif font-bold mb-6">{`${editStage}. ${
+        recipe ? "Edit" : "Create"
+      } recipe ${name}`}</h1>
+      {/* Dynamic Content */}
       <Component ref={child} recipe={recipe}></Component>
+      {/* Bottom */}
       <div className="flex justify-end gap-4 mt-6">
         <Button
           variant="outline"
@@ -89,6 +90,6 @@ export function RecipeEditor({ recipe }: EditRecipeProps) {
           {isLastStep ? "Finish" : "Save and continue"}
         </Button>
       </div>
-    </div>
+    </>
   );
 }

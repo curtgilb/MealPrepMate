@@ -1,12 +1,10 @@
-export function toTitleCase(str: string | null | undefined) {
-  if (!str) return "";
-  return str
+export function toTitleCase(str: unknown): string {
+  return new String(str)
     .toLowerCase()
-    .split(" ")
-    .map(function (word) {
-      return word.charAt(0).toUpperCase() + word.slice(1);
-    })
-    .join(" ");
+    .replace(
+      /\w\S*/g,
+      (txt) => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase()
+    );
 }
 
 export function isNumeric(str: string) {

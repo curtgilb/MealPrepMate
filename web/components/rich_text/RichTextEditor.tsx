@@ -38,7 +38,7 @@ export function RichTextEditor({
           }
         >
           <RichTextEditorMenuBar editor={editor} />
-          <EditorContent className="px-4 py-3" editor={editor} />
+          <EditorContent className="px-4 py-3 min-h-56" editor={editor} />
         </div>
       )
     );

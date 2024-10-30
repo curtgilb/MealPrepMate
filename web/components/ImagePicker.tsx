@@ -20,10 +20,8 @@ export function ImagePicker({ value, setValue }: ImagePickerProps) {
     primaryPhoto = value[0];
   }
 
-  console.log(value);
   return (
     <div className="grid gap-2">
-      <Label>Photos</Label>
       <div className="bg-white overflow-hidden rounded-md">
         <Image
           alt="Product image"

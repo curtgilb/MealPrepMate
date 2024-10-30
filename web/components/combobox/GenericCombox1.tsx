@@ -30,7 +30,7 @@ function getNames(items: ComboboxItem[]) {
   }, "");
 }
 
-export interface GenericComboxProps<
+export interface GenericComboboxProps<
   TQuery,
   TVariables extends QueryVariables,
   TData
@@ -62,9 +62,12 @@ export function GenericCombobox<
   autoFilter,
   createNewOption,
   placeholder,
-}: GenericComboxProps<TQuery, TVariables, TNode>) {
-  const [search, setSearch] = useState("");
-  const [results] = useQuery({ variables: { ...variables }, query: query });
+}: GenericComboboxProps<TQuery, TVariables, TNode>) {
+  const [search, setSearch] = useState<string>("");
+  const [results] = useQuery({
+    variables: { ...variables, search },
+    query: query,
+  });
   const [open, setOpen] = useState(false);
   const isMobile = useMediaQuery("(max-width: 640px)");
   const triggerText =
@@ -75,9 +78,10 @@ export function GenericCombobox<
     unwrapDataList(results?.data)?.map((item) => renderItem(item)) ?? [];
 
   function handleSelect(item: ComboboxItem, selected: boolean) {
+    console.log(selected);
     // Removing an item
     if (selected && selectedItems) {
-      onChange(selectedItems.filter((item) => item.id !== item.id));
+      onChange(selectedItems.filter((curr) => curr.id !== item.id));
     }
     // Adding an item
     else {
@@ -89,16 +93,24 @@ export function GenericCombobox<
     }
   }
 
+  function handleOpenClose(value: boolean) {
+    if (!value) {
+      setSearch("");
+    }
+    setOpen(value);
+  }
+  console.log(triggerText);
+
   return (
     <>
       {isMobile ? (
-        <Drawer open={open} onOpenChange={setOpen}>
+        <Drawer open={open} onOpenChange={handleOpenClose}>
           <DrawerTrigger asChild>
             <Button
               variant="outline"
               role="combobox"
               aria-expanded={open}
-              className="justify-between"
+              className="justify-between font-normal"
             >
               {triggerText}
               <ChevronsDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -109,6 +121,7 @@ export function GenericCombobox<
               <ComboboxContent
                 items={data}
                 loading={results.fetching}
+                search={search}
                 setSearch={setSearch}
                 autoFilter={autoFilter}
                 selectedItems={selectedItems}
@@ -119,21 +132,23 @@ export function GenericCombobox<
           </DrawerContent>
         </Drawer>
       ) : (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={handleOpenClose}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
               role="combobox"
               aria-expanded={open}
-              className="max-w-56 w-full justify-between"
+              className="w-full justify-between font-normal"
             >
+              <span className="overflow-hidden">{triggerText}</span>
               <ChevronsDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-full max-w-64 p-0">
+          <PopoverContent className="w-full p-0">
             <ComboboxContent
               items={data}
               loading={results.fetching}
+              search={search}
               setSearch={setSearch}
               autoFilter={autoFilter}
               selectedItems={selectedItems}

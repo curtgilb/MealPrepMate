@@ -1,6 +1,7 @@
 "use client";
-import { BasicMultiSelect } from "@/components/BasicMultiSelect";
+import { GenericCombobox } from "@/components/combobox/GenericCombox1";
 import { ImagePicker } from "@/components/ImagePicker";
+import { RichTextEditor } from "@/components/rich_text/RichTextEditor";
 import {
   Form,
   FormControl,
@@ -10,36 +11,35 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { getCategoriesQuery } from "@/features/recipe/api/Category";
+import { getCoursesQuery } from "@/features/recipe/api/Course";
+import { getCuisinesQuery } from "@/features/recipe/api/Cuisine";
+import { editRecipeMutation } from "@/features/recipe/api/Recipe";
+import { recipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
 import {
   EditRecipeProps,
   EditRecipeSubmit,
 } from "@/features/recipe/components/edit/RecipeEditor";
+import { useFullIngredientString } from "@/features/recipe/hooks/useFullIngredientString";
+import { getFragmentData } from "@/gql";
 import {
-  GetCategoriesDocument,
-  GetCoursesDocument,
-  GetCuisinesDocument,
+  GetCategoriesQuery,
+  GetCoursesQuery,
+  GetCuisinesQuery,
 } from "@/gql/graphql";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  forwardRef,
-  useContext,
-  useImperativeHandle,
-  useState,
-  createContext,
-} from "react";
-import { useForm, UseFormReturn } from "react-hook-form";
 import { useMutation } from "@urql/next";
+import { createContext, forwardRef, useImperativeHandle } from "react";
+import { useForm, UseFormReturn } from "react-hook-form";
 import { z } from "zod";
-import { editRecipeMutation } from "@/features/recipe/api/Recipe";
-import { RichTextEditor } from "@/components/rich_text/RichTextEditor";
-import { EditRecipeIngredientItem } from "@/features/recipe/components/edit/ingredients/EditRecipeIngredientItem";
-import { EditIngredients } from "@/features/recipe/components/edit/info/ingredients/EditIngredients";
-import { CategoryPicker } from "@/components/pickers/CategoryPicker";
 
-export const BasicItem = z.object({
-  id: z.string(),
-  name: z.string(),
-});
+export const BasicItem = z
+  .object({
+    id: z.string(),
+    label: z.string(),
+  })
+  .passthrough();
 
 const PhotoItem = z.object({
   id: z.string(),
@@ -55,8 +55,8 @@ const recipeInputValidation = z.object({
   marinadeTime: z.coerce.number().optional(),
   directions: z.string().optional(),
   notes: z.string().optional(),
-  leftoverFridgeLife: z.coerce.number().int().positive().optional(),
-  leftoverFreezerLife: z.coerce.number().int().positive().optional(),
+  leftoverFridgeLife: z.coerce.number().int().nonnegative().optional(),
+  leftoverFreezerLife: z.coerce.number().int().nonnegative().optional(),
   ingredients: z.string().optional(),
   cuisine: z.array(BasicItem),
   category: z.array(BasicItem),
@@ -71,7 +71,9 @@ export const FormContext = createContext<
 
 export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
   function EditRecipe({ recipe }, ref) {
-    console.log(recipe);
+    const ingredientText = useFullIngredientString(
+      getFragmentData(recipeIngredientFragment, recipe?.ingredients)
+    );
     const form = useForm<RecipeValidation>({
       resolver: zodResolver(recipeInputValidation),
       defaultValues: {
@@ -84,7 +86,7 @@ export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
         notes: recipe?.notes ?? undefined,
         leftoverFridgeLife: recipe?.leftoverFridgeLife ?? 0,
         leftoverFreezerLife: recipe?.leftoverFreezerLife ?? undefined,
-        ingredients: undefined,
+        ingredients: ingredientText,
         cuisine: recipe?.cuisine ?? [],
         category: recipe?.category ?? [],
         course: recipe?.course ?? [],
@@ -93,25 +95,26 @@ export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
     });
 
     const [result, editRecipe] = useMutation(editRecipeMutation);
-    const [directions, setDirections] = useState<string>("Hello World");
+
     useImperativeHandle(ref, () => ({
       submit(postSubmit) {
         form.handleSubmit(
           (values: z.infer<typeof recipeInputValidation>) => {
             const { cuisine, category, course, photos, ...rest } = values;
             if (recipe?.id) {
-              editRecipe({
-                id: recipe.id,
-                recipe: {
-                  ...rest,
-                  cuisineIds: cuisine.map((item) => item.id),
-                  categoryIds: category.map((item) => item.id),
-                  courseIds: course.map((item) => item.id),
-                  photoIds: photos.map((item) => item.id),
-                },
-              }).then(() => {
-                postSubmit();
-              });
+              postSubmit();
+              // editRecipe({
+              //   id: recipe.id,
+              //   recipe: {
+              //     ...rest,
+              //     cuisineIds: cuisine.map((item) => item.id),
+              //     categoryIds: category.map((item) => item.id),
+              //     courseIds: course.map((item) => item.id),
+              //     photoIds: photos.map((item) => item.id),
+              //   },
+              // }).then(() => {
+              //   postSubmit();
+              // });
             }
           },
           (errors) => {}
@@ -123,8 +126,27 @@ export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
       <div>
         <FormContext.Provider value={form}>
           <Form {...form}>
-            <form>
-              <div className="col-span-2 flex flex-col gap-4 max-w-96">
+            <form className="grid md:grid-cols-[24rem_1fr] gap-x-24 gap-y-4">
+              <FormField
+                control={form.control}
+                name="photos"
+                render={({ field }) => (
+                  <FormItem className="max-w-96">
+                    <FormLabel>Photos</FormLabel>
+                    <FormControl>
+                      <ImagePicker
+                        value={field.value}
+                        setValue={(images) => {
+                          console.log("set value", images);
+                          form.setValue("photos", images);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="max-w-prose space-y-4 justify-items-center">
                 <FormField
                   control={form.control}
                   name="title"
@@ -139,17 +161,33 @@ export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
                   )}
                 />
 
-                <CategoryPicker />
+                <FormField
+                  control={form.control}
+                  name="source"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Source</FormLabel>
+                      <FormControl>
+                        <Input placeholder="" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <div className="flex justify-between">
                   <FormField
                     control={form.control}
                     name="prepTime"
                     render={({ field }) => (
-                      <FormItem className="max-w-20">
-                        <FormLabel>Prep Time</FormLabel>
+                      <FormItem>
+                        <FormLabel>Prep Time (mins)</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} />
+                          <Input
+                            className="max-w-24"
+                            type="number"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -159,10 +197,14 @@ export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
                     control={form.control}
                     name="marinadeTime"
                     render={({ field }) => (
-                      <FormItem className="max-w-20">
-                        <FormLabel>Rest Time</FormLabel>
+                      <FormItem>
+                        <FormLabel>Rest Time (mins)</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} />
+                          <Input
+                            className="max-w-24"
+                            type="number"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -172,10 +214,14 @@ export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
                     control={form.control}
                     name="cookTime"
                     render={({ field }) => (
-                      <FormItem className="max-w-20">
-                        <FormLabel>Cook Time</FormLabel>
+                      <FormItem>
+                        <FormLabel>Cook Time (mins)</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} />
+                          <Input
+                            className="max-w-24"
+                            type="number"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -183,25 +229,71 @@ export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
                   />
                 </div>
 
-                {/* <FormField
-                control={form.control}
-                name="photos"
-                render={({ field }) => (
-                  <FormItem className="max-w-96">
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <ImagePicker
-                        value={field.value}
-                        setValue={(images) => {
-                          console.log("set value", images);
-                          form.setValue("photos", images);
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <FormControl>
+                        <GenericCombobox
+                          query={getCategoriesQuery}
+                          variables={{ search: "" }}
+                          unwrapDataList={(query) => {
+                            return query?.categories;
+                          }}
+                          renderItem={(
+                            item: NonNullable<
+                              GetCategoriesQuery["categories"]
+                            >[number]
+                          ) => {
+                            return { id: item.id, label: item.name };
+                          }}
+                          selectedItems={field.value}
+                          onChange={(newValue) => {
+                            form.setValue("category", newValue);
+                          }}
+                          multiSelect={true}
+                          autoFilter={true}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="course"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Course</FormLabel>
+                      <FormControl>
+                        <GenericCombobox
+                          query={getCoursesQuery}
+                          variables={{ search: "" }}
+                          unwrapDataList={(query) => {
+                            return query?.courses;
+                          }}
+                          renderItem={(
+                            item: NonNullable<
+                              GetCoursesQuery["courses"]
+                            >[number]
+                          ) => {
+                            return { id: item.id, label: item.name };
+                          }}
+                          selectedItems={field.value}
+                          onChange={(newValue) => {
+                            form.setValue("course", newValue);
+                          }}
+                          multiSelect={true}
+                          autoFilter={true}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}
@@ -210,56 +302,25 @@ export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
                     <FormItem>
                       <FormLabel>Cuisine</FormLabel>
                       <FormControl>
-                        <BasicMultiSelect
-                          queryDocument={GetCuisinesDocument}
-                          listKey={"cuisines"}
-                          value={field.value}
-                          placeholder="Select cuisines"
-                          onChange={(value) => {
-                            form.setValue("cuisine", value);
+                        <GenericCombobox
+                          query={getCuisinesQuery}
+                          variables={{ search: "" }}
+                          unwrapDataList={(query) => {
+                            return query?.cuisines;
                           }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cuisine</FormLabel>
-                      <FormControl>
-                        <BasicMultiSelect
-                          queryDocument={GetCategoriesDocument}
-                          listKey={"categories"}
-                          value={field.value}
-                          placeholder="Select categories"
-                          onChange={(value) => {
-                            form.setValue("category", value);
+                          renderItem={(
+                            item: NonNullable<
+                              GetCuisinesQuery["cuisines"]
+                            >[number]
+                          ) => {
+                            return { id: item.id, label: item.name };
                           }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="course"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Courses</FormLabel>
-                      <FormControl>
-                        <BasicMultiSelect
-                          queryDocument={GetCoursesDocument}
-                          listKey={"courses"}
-                          value={field.value}
-                          placeholder="Select courses"
-                          onChange={(value) => {
-                            form.setValue("course", value);
+                          selectedItems={field.value}
+                          onChange={(newValue) => {
+                            form.setValue("cuisine", newValue);
                           }}
+                          multiSelect={true}
+                          autoFilter={true}
                         />
                       </FormControl>
                       <FormMessage />
@@ -268,9 +329,26 @@ export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
                 />
               </div>
 
-              <div className="flex gap-12">
-                <EditIngredients ingredients={null} />
+              <FormField
+                control={form?.control}
+                name="ingredients"
+                render={({ field }) => (
+                  <FormItem className=" w-full ">
+                    <FormLabel>Ingredients</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Ingredient list"
+                        className="resize-none min-h-[30rem]"
+                        {...field}
+                        disabled={!recipe}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
+              <div className="flex gap-12">
                 <div className="max-w-prose space-y-4">
                   <FormField
                     control={form.control}
@@ -313,10 +391,14 @@ export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
                       control={form.control}
                       name="leftoverFridgeLife"
                       render={({ field }) => (
-                        <FormItem className="max-w-20">
-                          <FormLabel>Fridge Life</FormLabel>
+                        <FormItem>
+                          <FormLabel>Fridge Life (days)</FormLabel>
                           <FormControl>
-                            <Input type="number" {...field} />
+                            <Input
+                              className="max-w-24"
+                              type="number"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -326,30 +408,20 @@ export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
                       control={form.control}
                       name="leftoverFreezerLife"
                       render={({ field }) => (
-                        <FormItem className="max-w-20">
-                          <FormLabel>Freezer Life</FormLabel>
+                        <FormItem>
+                          <FormLabel>Freezer Life (days)</FormLabel>
                           <FormControl>
-                            <Input type="number" {...field} />
+                            <Input
+                              className="max-w-24"
+                              type="number"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
-
-                  <FormField
-                    control={form.control}
-                    name="source"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Source</FormLabel>
-                        <FormControl>
-                          <Input placeholder="" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
               </div>
             </form>
@@ -359,9 +431,3 @@ export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
     );
   }
 );
-
-// <RichTextEditor
-// value={directions}
-// onChange={(v) => setDirections(v)}
-// editable
-// />

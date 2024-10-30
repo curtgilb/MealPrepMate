@@ -16,9 +16,6 @@ export default async function EditRecipe({
 
   return (
     <>
-      <h1 className="text-3xl font-serif font-bold mb-6">
-        Edit {recipe?.name}
-      </h1>
       <RecipeEditor recipe={recipe} />
     </>
   );

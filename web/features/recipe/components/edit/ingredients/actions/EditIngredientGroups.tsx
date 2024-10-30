@@ -1,13 +1,12 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
-import { RecipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
+import { recipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
 import { createRecipeIngredientGroupMutation } from "@/features/recipe/api/RecipeIngredientGroups";
 import {
   EditRecipeProps,
   EditRecipeSubmit,
 } from "@/features/recipe/components/edit/RecipeEditor";
-import { EditIngredientGroup } from "@/features/recipe/components/edit/ingredient_groups/EditIngredientGroup";
+import { EditIngredientGroup } from "@/features/recipe/components/edit/ingredients/ingredient_groups/EditIngredientGroup";
 import { getFragmentData } from "@/gql";
 import {
   EditIngredientGroupMutation,
@@ -34,7 +33,7 @@ export const EditIngredientGroups = forwardRef<
   EditRecipeProps
 >(function EditIngredientGroups(props, ref) {
   const ingredients = getFragmentData(
-    RecipeIngredientFragment,
+    recipeIngredientFragment,
     props.recipe?.ingredients
   );
 
@@ -86,47 +85,44 @@ export const EditIngredientGroups = forwardRef<
   function handleDragOver(event: DragOverEvent) {
     if (groupedIngredients) {
       const { over, active } = event;
-      console.log("active", active);
-      console.log("over", over);
-      console.log("groupedIngredients", groupedIngredients);
 
-      // const { containerId: activeContainerId, index: activeIndex } =
-      //   active.data.current?.sortable;
-      // const { containerId: overContainerId, index: overIndex } =
-      //   over?.data.current?.sortable;
+      const { containerId: activeContainerId, index: activeIndex } =
+        active.data.current?.sortable;
+      const { containerId: overContainerId, index: overIndex } =
+        over?.data.current?.sortable;
 
-      // console.log("active", activeContainerId);
-      // console.log("over", overContainerId);
+      console.log("active", activeContainerId);
+      console.log("over", overContainerId);
 
-      // if (active && over && activeContainerId !== overContainerId) {
-      //   // Remove the old item and place it in the new one
+      if (active && over && activeContainerId !== overContainerId) {
+        // Remove the old item and place it in the new one
 
-      //   setGroupedIngredients((prev) => {
-      //     if (!prev) return undefined;
-      //     return {
-      //       ...prev,
-      //       [activeContainerId]: {
-      //         name: prev[activeContainerId].name,
-      //         ingredients: [
-      //           ...prev[activeContainerId].ingredients.filter(
-      //             (item) => item.id !== active.id
-      //           ),
-      //         ],
-      //       },
-      //       [overContainerId]: {
-      //         name: prev[overContainerId].name,
-      //         ingredients: [
-      //           ...prev[overContainerId].ingredients.slice(0, overIndex),
-      //           groupedIngredients[activeContainerId].ingredients[activeIndex],
-      //           ...prev[overContainerId].ingredients.slice(
-      //             overIndex,
-      //             prev[overContainerId].ingredients.length
-      //           ),
-      //         ],
-      //       },
-      //     };
-      //   });
-      // }
+        setGroupedIngredients((prev) => {
+          if (!prev) return undefined;
+          return {
+            ...prev,
+            [activeContainerId]: {
+              name: prev[activeContainerId].name,
+              ingredients: [
+                ...prev[activeContainerId].ingredients.filter(
+                  (item) => item.id !== active.id
+                ),
+              ],
+            },
+            [overContainerId]: {
+              name: prev[overContainerId].name,
+              ingredients: [
+                ...prev[overContainerId].ingredients.slice(0, overIndex),
+                groupedIngredients[activeContainerId].ingredients[activeIndex],
+                ...prev[overContainerId].ingredients.slice(
+                  overIndex,
+                  prev[overContainerId].ingredients.length
+                ),
+              ],
+            },
+          };
+        });
+      }
     }
   }
 
@@ -236,7 +232,6 @@ export const EditIngredientGroups = forwardRef<
 
   return (
     <div>
-      <Button onClick={handleGroupAdd}>Add New Group</Button>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}

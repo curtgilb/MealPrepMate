@@ -15,6 +15,7 @@ import { Check, Loader2 } from "lucide-react";
 interface ComboboxContentProps {
   items: ComboboxItem[];
   loading: boolean;
+  search: string;
   setSearch: (value: string) => void;
   autoFilter: boolean;
   selectedItems: ComboboxItem[] | null | undefined;
@@ -25,6 +26,7 @@ interface ComboboxContentProps {
 export function ComboboxContent({
   items,
   loading,
+  search,
   setSearch,
   autoFilter,
   selectedItems,
@@ -32,7 +34,9 @@ export function ComboboxContent({
   onCreate,
 }: ComboboxContentProps) {
   const debouncedUpdate = debounce((value) => {
-    setSearch(value);
+    if (!autoFilter) {
+      setSearch(value);
+    }
   }, 500);
 
   return (

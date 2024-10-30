@@ -48,6 +48,8 @@ export type EditRecipeIngredientInput = {
   unitId: string | null | undefined;
   ingredientId: string | null | undefined;
   groupId: string | null | undefined;
+  mealPrepIngredient: boolean | null | undefined;
+  verified: boolean | null | undefined;
 };
 
 type RecipeIngredientQuery = {
@@ -132,17 +134,27 @@ async function addRecipeIngredients(
   ingredients: CreateRecipeIngredientInput[],
   query?: RecipeIngredientQuery
 ) {
+  // @ts-ignore
   return await db.recipeIngredient.createManyAndReturn({
     data: ingredients.map((ingredient) => ({
       sentence: ingredient.sentence,
       quantity: ingredient.quantity,
       order: ingredient.order,
       recipeId: recipeId,
-      unit: { connect: { id: ingredient.unitId } },
-      ingredient: { connect: { id: ingredient.ingredientId } },
+      measurementUnitId: ingredient.unitId,
+      ingredientId: ingredient.ingredientId,
     })),
     ...query,
   });
+}
+
+async function addRecipeIngredientsFromText(
+  recipeId: string,
+  ingredients: string,
+  query?: RecipeIngredientQuery
+) {
+  const taggedIngredients = await tagIngredients(ingredients, true);
+  return await addRecipeIngredients(recipeId, taggedIngredients, query);
 }
 
 async function editRecipeIngredient(
@@ -170,10 +182,15 @@ async function deleteRecipeIngredient(id: string) {
   await db.recipeIngredient.delete({ where: { id } });
 }
 
+async function deleteRecipeIngredients(ids: string[]) {
+  await db.recipeIngredient.deleteMany({ where: { id: { in: ids } } });
+}
+
 export {
   addRecipeIngredient,
   addRecipeIngredients,
   deleteRecipeIngredient,
   editRecipeIngredient,
+  addRecipeIngredientsFromText,
   tagIngredients,
 };

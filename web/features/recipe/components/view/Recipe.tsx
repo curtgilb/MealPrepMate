@@ -35,17 +35,18 @@ export function Recipe({ recipe }: Recipe) {
   );
 
   return (
-    <SingleColumnCentered className="grid grid-cols-1 md:grid-cols-3 gap-14">
+    <div className="grid grid-cols-1 md:grid-cols-[24rem_1fr] gap-x-24 gap-y-14">
       <FilledImage
         url={imageUrl}
         altText={`Image of ${recipe?.name}`}
         containerCss="w-96 h-96"
       />
 
-      <div className="flex flex-col gap-8 justify-between md:col-span-2 max-w-prose">
+      {/* Basic info */}
+      <div className="flex flex-col gap-10 justify-between max-w-prose">
         <div className="flex gap-8 justify-between">
           <div>
-            <h1 className="font-serif text-3xl font-extrabold mb-2">
+            <h1 className="font-serif text-3xl font-extrabold">
               {recipe?.name}
             </h1>
             <RecipeTagList tags={tags} />
@@ -59,78 +60,89 @@ export function Recipe({ recipe }: Recipe) {
           )}
         </div>
 
-        <div className="grow flex flex-col gap-6">
-          <div className="flex gap-12">
-            <div>
-              <h2 className="text-xl font-serif font-bold mb-2">Servings</h2>
-              <ServingsAjuster
-                servings={recipe?.aggregateLabel?.servings ?? 1}
-                onChange={(servings) => console.log(servings)}
-              />
-            </div>
-
-            <div>
-              <h2 className="text-xl font-serif font-bold mb-2">Scale</h2>
-              <ServingsAjuster
-                servings={1}
-                onChange={(servings) => console.log(servings)}
-              />
-            </div>
-          </div>
-
+        {/* Servings adjuster */}
+        <div className="flex gap-12">
           <div>
-            <h2 className="text-xl font-serif font-bold mb-2">Time</h2>
-            <RecipeTimes
-              prep={recipe?.prepTime}
-              marinade={recipe?.marinadeTime}
-              cook={recipe?.cookTime}
+            <h2 className="text-lg font-serif font-bold mb-2">Servings</h2>
+            <ServingsAjuster
+              servings={recipe?.aggregateLabel?.servings ?? 1}
+              onChange={(servings) => console.log(servings)}
             />
           </div>
+
           <div>
-            <h2 className="text-xl font-serif font-bold mb-2">
-              Nutrition per serving
-            </h2>
-            <RecipeNutritionSummary
-              nutritionLabel={recipe?.aggregateLabel}
-            ></RecipeNutritionSummary>
+            <h2 className="text-lg font-serif font-bold mb-2">Scale</h2>
+            <ServingsAjuster
+              servings={1}
+              onChange={(servings) => console.log(servings)}
+            />
           </div>
+        </div>
+
+        {/* Time */}
+        <div>
+          <h2 className="text-lg font-serif font-bold mb-2">Time</h2>
+          <RecipeTimes
+            prep={recipe?.prepTime}
+            marinade={recipe?.marinadeTime}
+            cook={recipe?.cookTime}
+          />
+        </div>
+
+        {/* Nutrition Per serving */}
+        <div>
+          <h2 className="text-lg font-serif font-bold mb-2">
+            Nutrition per serving
+          </h2>
+          <RecipeNutritionSummary
+            nutritionLabel={recipe?.aggregateLabel}
+          ></RecipeNutritionSummary>
         </div>
       </div>
 
+      {/* Recipe Ingredients */}
       <div>
-        <h2 className="text-xl font-serif font-bold mb-2">Ingredients</h2>
+        <h2 className="text-lg font-serif font-bold mb-2">Ingredients</h2>
         <RecipeIngredients ingredients={ingredients} />
       </div>
 
-      <div className="col-span-2">
-        <h2 className="text-xl font-serif font-bold mb-2 ">Directions</h2>
-        <RichTextEditor
-          value={recipe?.directions}
-          editable={false}
-          onChange={() => {}}
-        />
+      {/* Directions, notes, nutrition */}
+      <div className="space-y-8">
+        <div>
+          <h2 className="text-lg font-serif font-bold mb-2 ">Directions</h2>
+          <RichTextEditor
+            value={recipe?.directions}
+            editable={false}
+            onChange={() => {}}
+          />
+        </div>
 
-        <h2 className="text-xl font-serif font-bold mt-8 mb-2">Notes</h2>
-        <p className="max-w-prose">{recipe?.notes}</p>
+        <div>
+          <h2 className="text-lg font-serif font-bold mt-8 mb-2">Notes</h2>
+          <p className="max-w-prose">{recipe?.notes}</p>
+        </div>
 
-        <h3 className="text-xl font-serif font-bold mt-8 mb-2">
-          Leftover Lifespan
-        </h3>
-        <LeftoverLifespan
-          fridge={recipe?.leftoverFridgeLife}
-          freezer={recipe?.leftoverFreezerLife}
-        />
+        <div>
+          <h2 className="text-lg font-serif font-bold mt-8 mb-2">
+            Leftover Lifespan
+          </h2>
+          <LeftoverLifespan
+            fridge={recipe?.leftoverFridgeLife}
+            freezer={recipe?.leftoverFreezerLife}
+          />
+        </div>
 
-        <h2 className="text-xl font-serif font-bold mt-8 mb-2">Source</h2>
-        <SourceLink source={recipe?.source} />
+        <div>
+          <h2 className="text-lg font-serif font-bold mt-8 mb-2">Source</h2>
+          <SourceLink source={recipe?.source} />
+        </div>
       </div>
-      <div>
-        <h2 className="text-xl font-serif font-bold mb-2 ">Nutrition Facts</h2>
-        <RecipeNutritionlabel
-          className="col-span-3"
-          label={recipe?.aggregateLabel}
-        />
+
+      {/* Nutrition Label */}
+      <div className="col-start-2 max-w-prose">
+        <h2 className="text-lg font-serif font-bold mb-2 ">Nutrition Facts</h2>
+        <RecipeNutritionlabel label={recipe?.aggregateLabel} />
       </div>
-    </SingleColumnCentered>
+    </div>
   );
 }

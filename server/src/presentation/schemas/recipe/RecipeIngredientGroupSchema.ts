@@ -10,7 +10,7 @@ builder.prismaNode("RecipeIngredientGroup", {
     name: t.exposeString("name"),
     recipe: t.relation("recipe"),
     ingredients: t.relation("ingredients"),
-    lablel: t.relation("nutritionLabel"),
+    lable: t.relation("nutritionLabel", { nullable: true }),
   }),
 });
 
