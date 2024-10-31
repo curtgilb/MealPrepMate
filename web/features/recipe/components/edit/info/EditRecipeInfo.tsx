@@ -34,7 +34,7 @@ import { createContext, forwardRef, useImperativeHandle } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 
-export const BasicItem = z
+export const basicItem = z
   .object({
     id: z.string(),
     label: z.string(),
@@ -58,9 +58,9 @@ const recipeInputValidation = z.object({
   leftoverFridgeLife: z.coerce.number().int().nonnegative().optional(),
   leftoverFreezerLife: z.coerce.number().int().nonnegative().optional(),
   ingredients: z.string().optional(),
-  cuisine: z.array(BasicItem),
-  category: z.array(BasicItem),
-  course: z.array(BasicItem),
+  cuisine: z.array(basicItem),
+  category: z.array(basicItem),
+  course: z.array(basicItem),
   photos: z.array(PhotoItem),
 });
 

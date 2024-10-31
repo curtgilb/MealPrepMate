@@ -6,6 +6,7 @@ import {
 import {
   CreateRecipeIngredientInput,
   recipeIngredientValidation,
+  tagIngredients,
 } from "@/application/services/recipe/RecipeIngredientService.js";
 import { AllowUndefinedOrNull } from "@/application/types/CustomTypes.js";
 import { toTitleCase } from "@/application/util/utils.js";
@@ -37,6 +38,7 @@ const recipeValidation = z.object({
   categoryIds: z.string().uuid().array().nullish(),
   cuisineIds: z.string().uuid().array().nullish(),
   ingredients: recipeIngredientValidation.array().nullish(),
+  ingredientText: z.string().nullish(),
   leftoverFridgeLife: z.number().nonnegative().nullish(),
   leftoverFreezerLife: z.number().nonnegative().nullish(),
   nutrition: nutritionLabelValidation.nullish(),
@@ -55,6 +57,7 @@ export type CreateRecipeInput = {
   categoryIds: string[] | undefined | null;
   cuisineIds: string[] | undefined | null;
   ingredients: CreateRecipeIngredientInput[] | undefined | null;
+  ingredientText?: string;
   leftoverFridgeLife: number | undefined | null;
   leftoverFreezerLife: number | undefined | null;
   nutrition?: CreateNutritionLabelInput | undefined | null;
@@ -67,6 +70,10 @@ export type EditRecipeInput = Omit<
 
 async function createRecipe(recipe: CreateRecipeInput, query?: RecipeQuery) {
   const cleanedRecipe = await recipeValidation.parseAsync(recipe);
+  const ingredients = cleanedRecipe?.ingredientText
+    ? await tagIngredients(cleanedRecipe.ingredientText, true)
+    : cleanedRecipe?.ingredients;
+
   return await db.$transaction(async (tx) => {
     const createdRecipe = await db.recipe.create({
       include: {
@@ -100,10 +107,10 @@ async function createRecipe(recipe: CreateRecipeInput, query?: RecipeQuery) {
           : undefined,
         leftoverFridgeLife: cleanedRecipe.leftoverFridgeLife,
         leftoverFreezerLife: cleanedRecipe.leftoverFreezerLife,
-        ingredients: cleanedRecipe.ingredients
+        ingredients: ingredients
           ? {
               createMany: {
-                data: cleanedRecipe.ingredients.map((ingredient) => ({
+                data: ingredients.map((ingredient) => ({
                   sentence: ingredient.sentence,
                   quantity: ingredient?.quantity,
                   order: ingredient.order,

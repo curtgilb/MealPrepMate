@@ -1,5 +1,7 @@
 "use client";
+import { RichTextEditor } from "@/components/rich_text/RichTextEditor";
 import { recipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
+import { EditRecipeIngredient } from "@/features/recipe/components/edit/ingredients/ingredient/EditRecipeIngredient";
 import { IngredientList } from "@/features/recipe/components/edit/ingredients/list/IngredientList";
 
 import {
@@ -34,8 +36,16 @@ export const EditRecipeIngredients = forwardRef<
     <>
       <IngredientsContext.Provider value={groupedIngredients}>
         {props.recipe?.id && (
-          <div className="flex">
+          <div className="flex gap-6">
             <IngredientList recipeId={props.recipe.id} />
+            <div>
+              <EditRecipeIngredient />
+              <RichTextEditor
+                editable={false}
+                value={props.recipe.directions}
+                onChange={() => {}}
+              />
+            </div>
           </div>
         )}
       </IngredientsContext.Provider>
@@ -44,10 +54,4 @@ export const EditRecipeIngredients = forwardRef<
 });
 
 {
-  /* <div className="my-6">
-<Progress className="h-2" value={percent} />
-<p className="text-xs font-light text-right">
-  Verified {completed.length} of {ingredients?.length ?? 0}
-</p>
-</div> */
 }

@@ -57,6 +57,7 @@ const createRecipeInput = builder
       categoryIds: t.stringList(),
       cuisineIds: t.stringList(),
       ingredients: t.field({ type: [recipeIngredientInput] }),
+      ingredientText: t.string(),
       leftoverFridgeLife: t.int(),
       leftoverFreezerLife: t.int(),
     }),

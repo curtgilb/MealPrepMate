@@ -14,8 +14,8 @@ interface GroupedIngredients {
 const DEFAULT_KEY = "Default";
 
 type ActiveIngredient = {
-  group: string | undefined;
-  id: string | undefined;
+  group: string;
+  index: number;
 };
 
 type IngredientsContextType = {
@@ -55,11 +55,35 @@ function useGroupedRecipeIngredients(
   );
 
   const [activeIngredient, setActiveIngredient] = useState<ActiveIngredient>({
-    group: groupOrder[0],
-    id: groupedIngredients
-      ? groupedIngredients[groupOrder[0]][0].id
-      : undefined,
+    group: groupOrder[0] ?? DEFAULT_KEY,
+    index: 0,
   });
+
+  function advanceActive() {
+    if (groupedIngredients) {
+      const activeIndex = activeIngredient.index;
+      // Increase within the same group
+      if (activeIndex + 1 < groupedIngredients[activeIngredient.group].length) {
+        setActiveIngredient({ ...activeIngredient, index: activeIndex + 1 });
+      }
+      // Advance to next group if it has items or loop to beginning
+      else {
+        const groupIdx = groupOrder.findIndex(
+          (name) => name === activeIngredient.group
+        );
+        let newGroup = DEFAULT_KEY;
+        const length = groupOrder.length;
+
+        for (let i = 0; i < length; i++) {
+          let index = (groupIdx + 1 + i) % length;
+          if (groupedIngredients[groupOrder[index]].length > 0) {
+            newGroup = groupOrder[index];
+          }
+        }
+        setActiveIngredient({ group: newGroup, index: 0 });
+      }
+    }
+  }
 
   return {
     groupedIngredients,

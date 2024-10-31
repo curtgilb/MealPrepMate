@@ -14,7 +14,7 @@ import { useState } from "react";
 export type ComboboxItem = { id: string; label: string; name?: string };
 
 export interface QueryVariables {
-  search: string;
+  search?: string;
   first?: number;
   [prop: string]: any;
 }
