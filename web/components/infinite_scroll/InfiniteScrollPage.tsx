@@ -23,10 +23,8 @@ export function InfiniteScrollPage<
     pause: !variables.after,
     variables: variables,
   });
-  console.log("Page data ", results.data);
 
   const onLoadMore = useCallback(() => {
-    console.log("fetching more");
     executeQuery({ requestPolicy: "cache-first" });
   }, [executeQuery]);
 

@@ -60,7 +60,6 @@ async function scheduleMealPlan(
   date: Date,
   query: ScheduledPlanQuery
 ): Promise<ScheduledPlan> {
-  console.log(query);
   const { startingDate, notificationSetting, mealPlan } = await getMealPlanInfo(
     mealPlanId,
     date

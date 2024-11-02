@@ -27,7 +27,6 @@ export function IngredientSearchResults({
       }}
       getConnection={(data) => {
         if (!data?.ingredients) return undefined;
-        console.log(data);
         return data.ingredients;
       }}
     ></InfiniteScroll>

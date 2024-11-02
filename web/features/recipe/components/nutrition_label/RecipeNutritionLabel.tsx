@@ -24,10 +24,6 @@ import { HTMLAttributes, useMemo, useState } from "react";
 type NutritionValues = RecipeFieldsFragment["aggregateLabel"];
 type NutrientValue = NonNullable<NutritionValues>["nutrients"];
 
-interface NutritionLabelProps extends HTMLAttributes<HTMLDivElement> {
-  label: NutritionValues;
-}
-
 function getValueLabel(
   nutrient: NutrientFieldsFragment,
   value: number | undefined | null
@@ -52,18 +48,18 @@ function Nutrient({ nutrient, depth, value }: NutrientItemProps) {
   const { labelStr, percentage, target } = getValueLabel(nutrient, value);
 
   return (
-    <TableRow key={nutrient.id} className="text-sm">
-      <TableCell>
+    <TableRow key={nutrient.id} className="text-sm h-4">
+      <TableCell className="py-2">
         <p className={NutritionLabelIndentation[depth]}>{nutrient.name}</p>
       </TableCell>
-      <TableCell>
+      <TableCell className="py-2">
         {value
           ? `${Math.round((value + Number.EPSILON) * 100) / 100} ${
               nutrient.unit?.symbol
             }`
           : ""}
       </TableCell>
-      <TableCell className="text-right">
+      <TableCell className="text-right py-2">
         {target ? `${percentage}%` : ""}
       </TableCell>
     </TableRow>
@@ -79,8 +75,8 @@ function TableGroup({
 }) {
   return (
     <>
-      <TableRow>
-        <TableCell className="text-lg font-bold" colSpan={3}>
+      <TableRow className="bg-muted/50">
+        <TableCell className="font-serif font-bold py-2" colSpan={3}>
           {toTitleCase(name)}
         </TableCell>
       </TableRow>
@@ -89,12 +85,15 @@ function TableGroup({
   );
 }
 
+interface NutritionLabelProps extends HTMLAttributes<HTMLDivElement> {
+  label: NutritionValues;
+}
+
 export function RecipeNutritionlabel({
   label,
   className,
   ...rest
 }: NutritionLabelProps) {
-  console.log(label);
   const [servingSize, setServingSize] = useState<ServingSize>(
     ServingSize.Serving
   );
@@ -102,6 +101,7 @@ export function RecipeNutritionlabel({
     NutritionDisplayMode.Basic
   );
 
+  // Create map of nutrientID -> value
   const values = useMemo(() => {
     if (!label) return {};
     return label?.nutrients?.reduce((agg, nutrient) => {
@@ -132,17 +132,19 @@ export function RecipeNutritionlabel({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableCell>Nutrient</TableCell>
-            <TableCell>Value</TableCell>
-            <TableCell className="text-right">Goal %</TableCell>
+            <TableCell className="font-semibold font-serif">Nutrient</TableCell>
+            <TableCell className="font-semibold font-serif">Value</TableCell>
+            <TableCell className="text-right font-semibold font-serif">
+              Goal %
+            </TableCell>
           </TableRow>
         </TableHeader>
         <TableBody>
           <NutritionList
-            group={TableGroup}
+            groupComponent={TableGroup}
             mode={mode}
-            nutrient={Nutrient}
-            values={values}
+            nutrientComponent={Nutrient}
+            nutrientIdToValue={values}
           />
         </TableBody>
       </Table>

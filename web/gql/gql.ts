@@ -42,7 +42,7 @@ const documents = {
     "\n  mutation editServing($id: ID!, $serving: EditRecipeServingInput!) {\n    editRecipeServing(id: $id, serving: $serving) {\n      id\n      day\n      meal\n      numberOfServings\n      mealRecipe {\n        id\n        servingsOnPlan\n      }\n    }\n  }\n": types.EditServingDocument,
     "\n    query GetIngredientCategories {\n      ingredientCategories {\n        id\n        name\n      }\n    }\n  ": types.GetIngredientCategoriesDocument,
     "\n  fragment NutrientFields on Nutrient {\n    id\n    alternateNames\n    target {\n      id\n      nutrientTarget\n      preference\n      threshold\n    }\n    dri {\n      id\n      value\n      upperLimit\n    }\n    name\n    important\n    parentNutrientId\n    target {\n      id\n      nutrientTarget\n      preference\n      threshold\n    }\n    type\n    unit {\n      id\n      name\n      symbol\n      abbreviations\n    }\n  }\n": types.NutrientFieldsFragmentDoc,
-    "\n  query getNutrients($advanced: Boolean!, $name: String) {\n    nutrients(search: $name, advanced: $advanced) {\n      ...NutrientFields\n    }\n  }\n": types.GetNutrientsDocument,
+    "\n  query getNutrients($advanced: Boolean!, $name: String, $favorites: Boolean) {\n    nutrients(search: $name, advanced: $advanced, favorites: $favorites) {\n      ...NutrientFields\n    }\n  }\n": types.GetNutrientsDocument,
     "\n  query searchNutrients($search: String) {\n    nutrients(advanced: true, search: $search) {\n      id\n      name\n      unit {\n        id\n        symbol\n      }\n      alternateNames\n    }\n  }\n": types.SearchNutrientsDocument,
     "\n  query getRankedNutrients {\n    rankedNutrients {\n      id\n      name\n      unit {\n        id\n        symbol\n      }\n      alternateNames\n    }\n  }\n": types.GetRankedNutrientsDocument,
     "\n    mutation setRankedNutrients($nutrients: [RankedNutrientInput!]!) {\n      setRankedNutrients(nutrients: $nutrients) {\n        id\n        name\n        unit {\n          id\n          symbol\n        }\n        alternateNames\n      }\n    }\n  ": types.SetRankedNutrientsDocument,
@@ -213,7 +213,7 @@ export function graphql(source: "\n  fragment NutrientFields on Nutrient {\n    
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query getNutrients($advanced: Boolean!, $name: String) {\n    nutrients(search: $name, advanced: $advanced) {\n      ...NutrientFields\n    }\n  }\n"): (typeof documents)["\n  query getNutrients($advanced: Boolean!, $name: String) {\n    nutrients(search: $name, advanced: $advanced) {\n      ...NutrientFields\n    }\n  }\n"];
+export function graphql(source: "\n  query getNutrients($advanced: Boolean!, $name: String, $favorites: Boolean) {\n    nutrients(search: $name, advanced: $advanced, favorites: $favorites) {\n      ...NutrientFields\n    }\n  }\n"): (typeof documents)["\n  query getNutrients($advanced: Boolean!, $name: String, $favorites: Boolean) {\n    nutrients(search: $name, advanced: $advanced, favorites: $favorites) {\n      ...NutrientFields\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

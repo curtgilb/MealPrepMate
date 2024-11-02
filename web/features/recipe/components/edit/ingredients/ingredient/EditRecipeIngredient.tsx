@@ -24,11 +24,12 @@ import { useRecipeIngredientContext } from "@/features/recipe/hooks/useGroupedRe
 import { getFragmentData } from "@/gql";
 import { FetchUnitsQuery, GetIngredientsQuery } from "@/gql/graphql";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "urql";
 import { z } from "zod";
 
-const nameSchema = z.object({
+const ingredientSchema = z.object({
   sentence: z.string(),
   quantity: z.number().nonnegative(),
   mealPrepIngredient: z.boolean(),
@@ -42,15 +43,21 @@ export function EditRecipeIngredient() {
     setGroupOrder,
     groupedIngredients,
     setGroupedIngredients,
-    activeIngredient,
+    selectedLocation,
   } = useRecipeIngredientContext();
 
-  const { group, index } = activeIngredient;
-  const ingredient = index ? groupedIngredients[group][index] : undefined;
+  const { group, index } = selectedLocation;
+  const ingredient = index >= 0 ? groupedIngredients[group][index] : undefined;
 
-  const form = useForm<z.infer<typeof nameSchema>>({
-    resolver: zodResolver(nameSchema),
-    defaultValues: {
+  const form = useForm<z.infer<typeof ingredientSchema>>({
+    resolver: zodResolver(ingredientSchema),
+  });
+
+  useEffect(() => {
+    const { group, index } = selectedLocation;
+    const ingredient =
+      index >= 0 ? groupedIngredients[group][index] : undefined;
+    form.reset({
       sentence: ingredient?.sentence,
       quantity: ingredient?.quantity ?? undefined,
       mealPrepIngredient: ingredient?.mealPrepIngredient ?? false,
@@ -61,12 +68,12 @@ export function EditRecipeIngredient() {
           }
         : undefined,
       unit: ingredient?.unit,
-    },
-  });
+    });
+  }, [groupedIngredients, selectedLocation, form]);
 
   const [result, editIngredient] = useMutation(editRecipeIngredientMutation);
 
-  async function handleSubmit(values: z.infer<typeof nameSchema>) {
+  async function handleSubmit(values: z.infer<typeof ingredientSchema>) {
     await editIngredient({
       ingredient: {
         id: ingredient?.id,

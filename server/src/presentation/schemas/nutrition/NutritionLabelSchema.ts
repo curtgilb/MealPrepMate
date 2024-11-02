@@ -40,7 +40,7 @@ export const nutritionLabel = builder.prismaNode("NutritionLabel", {
   name: "NutritionLabel",
   fields: (t) => ({
     recipe: t.relation("recipe", { nullable: true }),
-    ingredientGroup: t.relation("ingredientGroup"),
+    ingredientGroup: t.relation("ingredientGroup", { nullable: true }),
     servings: t.exposeFloat("servings", { nullable: true }),
     servingSize: t.exposeFloat("servingSize", { nullable: true }),
     servingSizeUnit: t.relation("servingSizeUnit", { nullable: true }),

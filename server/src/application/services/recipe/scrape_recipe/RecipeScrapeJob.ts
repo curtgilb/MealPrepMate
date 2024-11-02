@@ -42,7 +42,6 @@ const worker = new Worker(
 );
 
 worker.on("failed", (job, err) => {
-  console.log(err);
   db.webScrapedRecipe
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     .update({ where: { id: job?.id }, data: { scraped: true } })

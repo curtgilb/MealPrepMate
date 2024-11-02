@@ -91,9 +91,6 @@ export const EditIngredientGroups = forwardRef<
       const { containerId: overContainerId, index: overIndex } =
         over?.data.current?.sortable;
 
-      console.log("active", activeContainerId);
-      console.log("over", overContainerId);
-
       if (active && over && activeContainerId !== overContainerId) {
         // Remove the old item and place it in the new one
 
@@ -128,7 +125,6 @@ export const EditIngredientGroups = forwardRef<
 
   // This will save it in the same container
   function handleDragEnd(event: DragEndEvent) {
-    console.log("drag end");
     const { over, active } = event;
     const { containerId: activeContainerId, index: activeIndex } =
       active.data.current?.sortable;
@@ -167,7 +163,6 @@ export const EditIngredientGroups = forwardRef<
   }
 
   function onItemEdit(ingredient: RecipeIngredientFieldsFragment) {
-    console.log("Parent on edit");
     const groupId = ingredient.group?.id ?? DEFAULT_KEY;
     if (groupedIngredients) {
       setGroupedIngredients({

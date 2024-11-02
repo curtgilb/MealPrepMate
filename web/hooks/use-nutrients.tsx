@@ -18,58 +18,73 @@ export enum NutritionDisplayMode {
   All = "all",
 }
 
+export type NutrientWithChildren = NutrientFieldsFragment & {
+  children?: NutrientFieldsFragment[];
+};
+
+interface GroupedNutrients {
+  [key: string]: NutrientWithChildren[];
+}
+
 export function useNutrients(type: NutritionDisplayMode) {
   const advanced = type !== NutritionDisplayMode.Basic;
   const [result, executeQuery] = useQuery({
     query: getNutrientsQuery,
     variables: {
       advanced: advanced,
+      favorites: type === NutritionDisplayMode.Favorites,
     },
   });
   const { data, fetching, error } = result;
   const nutrients = getFragmentData(nutritionFieldsFragment, data?.nutrients);
 
-  console.log(nutrients);
-
   return useMemo(() => {
     if (!nutrients) return {};
-    const filteredNutrients =
-      type === NutritionDisplayMode.Favorites
-        ? nutrients?.filter((nutrient) => nutrient.important)
-        : nutrients;
+    // Create a map of parent nutrients to their children
+    const parentChildMap = new Map<string, NutrientWithChildren[]>();
 
-    const childLookup = filteredNutrients.reduce((acc, nutrient) => {
+    // First pass: organize parent-child relationships
+    nutrients.forEach((nutrient) => {
       if (nutrient.parentNutrientId) {
-        if (!(nutrient.parentNutrientId in acc)) {
-          acc[nutrient.parentNutrientId] = [];
+        if (!parentChildMap.has(nutrient.parentNutrientId)) {
+          parentChildMap.set(nutrient.parentNutrientId, []);
         }
-        acc[nutrient.parentNutrientId].push(nutrient);
+        parentChildMap.get(nutrient.parentNutrientId)?.push({
+          ...nutrient,
+        });
       }
-      return acc;
-    }, {} as NutrientMap);
+    });
 
-    const categories = filteredNutrients
-      .filter((nutrient) => !nutrient.parentNutrientId)
-      .reduce((acc, nutrient) => {
-        if (!(nutrient.type in acc)) {
-          acc[nutrient.type] = [];
-        }
-        acc[nutrient.type].push(nutrient);
-        return acc;
-      }, {} as NutrientMap);
+    // Initialize the result object
+    const result: GroupedNutrients = {};
 
-    const allNutrients = filteredNutrients.reduce((acc, cur) => {
-      acc.set(cur.id, cur);
-      return acc;
-    }, new Map<string, NutrientFieldsFragment>());
+    // Process nutrients and organize them by type
+    nutrients.forEach((nutrient) => {
+      // Skip nutrients that are children of other passing nutrients
+      if (
+        nutrient.parentNutrientId &&
+        nutrients.some((n) => n.id === nutrient.parentNutrientId)
+      ) {
+        return;
+      }
 
-    return {
-      // A map of nutrients with no parent id
-      categorized: categories,
-      // parentId -> list of nutrients with that id
-      childNutrients: childLookup,
-      // nutritionId -> nutrient
-      all: allNutrients,
-    };
-  }, [nutrients, type]);
+      const type = nutrient.type.toUpperCase();
+      if (!result[type]) {
+        result[type] = [];
+      }
+
+      // Create the nutrient object with children if they exist
+      const nutrientWithChildren: NutrientWithChildren = {
+        ...nutrient,
+      };
+
+      if (parentChildMap.has(nutrient.id)) {
+        nutrientWithChildren.children = parentChildMap.get(nutrient.id);
+      }
+
+      result[type].push(nutrientWithChildren);
+    });
+
+    return result;
+  }, [nutrients]);
 }

@@ -5,6 +5,9 @@ type GroupedIngredient = {
   [key: string]: { id: string; lines: RecipeIngredientFieldsFragment[] };
 };
 
+// const pattern = /(\d+\/\d+|\d+)/g;
+// return text.match(pattern);
+
 export function useGroupedIngredients(
   ingredients: RecipeIngredientFieldsFragment[] | undefined | null
 ) {

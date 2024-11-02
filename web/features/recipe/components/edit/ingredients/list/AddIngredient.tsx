@@ -61,7 +61,6 @@ export function AddIngredient({ recipeId }: AddIngredientProps) {
       recipeId: recipeId,
       ingredient: values.value,
     }).then((result) => {
-      console.log(result);
       if (result?.data) {
         const newIngredients = getFragmentData(
           recipeIngredientFragment,

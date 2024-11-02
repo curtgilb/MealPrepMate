@@ -36,6 +36,7 @@ export async function seedDb() {
   await loadExpirationRules();
   await loadRecipeMetadata();
   await loadIngredients();
+  await loadHealthProfile();
 }
 
 export async function nukeData() {
@@ -127,19 +128,19 @@ export async function createBuckets() {
   }
 }
 
-// async function loadHealthProfile() {
-//   await prisma.healthProfile.create({
-//     data: {
-//       weight: 180,
-//       gender: "MALE",
-//       bodyFatPercentage: 0.25,
-//       height: 72,
-//       yearBorn: 1994,
-//       activityLevel: 1.2,
-//       specialCondition: "NONE",
-//     },
-//   });
-// }
+async function loadHealthProfile() {
+  await db.healthProfile.create({
+    data: {
+      weight: 180,
+      gender: "MALE",
+      bodyFatPercentage: 0.25,
+      height: 72,
+      yearBorn: 1994,
+      activityLevel: 1.2,
+      specialCondition: "NONE",
+    },
+  });
+}
 
 // async function loadNutrients() {
 //   const nutrients = new NutrientLoader();

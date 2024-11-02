@@ -94,7 +94,6 @@ builder.queryFields((t) => ({
         ...query,
       });
 
-      console.log(recipe);
       return recipe;
     },
   }),

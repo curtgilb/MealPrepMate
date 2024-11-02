@@ -116,7 +116,7 @@ export function Nutritionlabel({
         <NutritionList
           mode={mode}
           Group={Group}
-          nutrient={({ item: nutrient, depth }) => {
+          nutrientComponent={({ item: nutrient, depth }) => {
             const nutrientValue = values ? values[nutrient.id] : undefined;
             const finalValue =
               servingSize === ServingSize.Serving

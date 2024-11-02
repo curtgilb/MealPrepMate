@@ -31,7 +31,6 @@ function findProjectRoot(startDir = process.cwd()) {
 }
 
 const project_root = findProjectRoot();
-console.log(project_root);
 
 async function getFileMetadata(
   buffer: Buffer,

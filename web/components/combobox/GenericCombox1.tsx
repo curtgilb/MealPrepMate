@@ -78,7 +78,6 @@ export function GenericCombobox<
     unwrapDataList(results?.data)?.map((item) => renderItem(item)) ?? [];
 
   function handleSelect(item: ComboboxItem, selected: boolean) {
-    console.log(selected);
     // Removing an item
     if (selected && selectedItems) {
       onChange(selectedItems.filter((curr) => curr.id !== item.id));
@@ -99,7 +98,6 @@ export function GenericCombobox<
     }
     setOpen(value);
   }
-  console.log(triggerText);
 
   return (
     <>

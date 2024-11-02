@@ -35,8 +35,8 @@ const nutritionFieldsFragment = graphql(`
 `);
 
 const getNutrientsQuery = graphql(`
-  query getNutrients($advanced: Boolean!, $name: String) {
-    nutrients(search: $name, advanced: $advanced) {
+  query getNutrients($advanced: Boolean!, $name: String, $favorites: Boolean) {
+    nutrients(search: $name, advanced: $advanced, favorites: $favorites) {
       ...NutrientFields
     }
   }

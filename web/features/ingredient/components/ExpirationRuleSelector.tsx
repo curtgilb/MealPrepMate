@@ -1,7 +1,7 @@
 import { GenericCombobox } from "@/components/GenericCombobox";
 import { Button } from "@/components/ui/button";
 import { getExpirationRulesQuery } from "@/features/ingredient/api/ExpirationRule";
-import { ExpirationRule } from "@/features/ingredient/components/ExpirationRule";
+import { ExpirationRule } from "@/features/ingredient/components/view/ExpirationRule";
 import { ExpirationRulePicker } from "@/features/ingredient/components/ExpirationRulePicker";
 import {
   ExpirationRuleFieldsFragment,

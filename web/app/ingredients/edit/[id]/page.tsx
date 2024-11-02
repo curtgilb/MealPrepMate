@@ -1,6 +1,6 @@
 import SingleColumnCentered from "@/components/layouts/single-column-centered";
 import { getIngredientQuery } from "@/features/ingredient/api/Ingredient";
-import { EditIngredient } from "@/features/ingredient/components/EditIngredient";
+import { EditIngredient } from "@/features/ingredient/components/edit/EditIngredient";
 import { getClient } from "@/ssrGraphqlClient";
 
 export default async function EditIngredientPage({

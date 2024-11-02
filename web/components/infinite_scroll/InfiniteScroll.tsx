@@ -55,7 +55,6 @@ export function InfiniteScroll<
     const connection = getConnection(results.data);
     const hasNextPage = connection?.pageInfo.hasNextPage ?? false;
     const afterCursor = connection?.pageInfo.endCursor;
-    console.log("Root hasNextpage ", hasNextPage);
 
     return (
       <div className={className}>

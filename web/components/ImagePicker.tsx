@@ -36,7 +36,6 @@ export function ImagePicker({ value, setValue }: ImagePickerProps) {
           {value
             ?.filter((photo) => photo.id !== primaryPhoto?.id)
             .map((photo) => {
-              console.log("filtered photo", photo);
               return (
                 <Image
                   key={photo.id}
@@ -56,7 +55,6 @@ export function ImagePicker({ value, setValue }: ImagePickerProps) {
             content={
               <ImageUploadForm
                 onUploadedPhoto={(photo) => {
-                  console.log("On uploaded photo", photo);
                   setValue([...value, photo]);
                 }}
               />

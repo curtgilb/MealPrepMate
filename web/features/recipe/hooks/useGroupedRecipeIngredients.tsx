@@ -4,6 +4,7 @@ import {
   Dispatch,
   SetStateAction,
   useContext,
+  useMemo,
   useState,
 } from "react";
 
@@ -13,7 +14,7 @@ interface GroupedIngredients {
 
 const DEFAULT_KEY = "Default";
 
-type ActiveIngredient = {
+type SelectedLocation = {
   group: string;
   index: number;
 };
@@ -23,8 +24,10 @@ type IngredientsContextType = {
   setGroupedIngredients: Dispatch<SetStateAction<GroupedIngredients>>;
   groupOrder: string[];
   setGroupOrder: Dispatch<SetStateAction<string[]>>;
-  activeIngredient: ActiveIngredient;
-  setActiveIngredient: Dispatch<SetStateAction<ActiveIngredient>>;
+  selected: string;
+  setSelected: Dispatch<SetStateAction<string>>;
+  selectedLocation: SelectedLocation;
+  advanceSelected: () => void;
 };
 
 // context
@@ -54,22 +57,39 @@ function useGroupedRecipeIngredients(
     Object.keys(groupedIngredients || {})
   );
 
-  const [activeIngredient, setActiveIngredient] = useState<ActiveIngredient>({
-    group: groupOrder[0] ?? DEFAULT_KEY,
-    index: 0,
+  const [selected, setSelected] = useState<string | undefined>(() => {
+    if (groupedIngredients && groupedIngredients[DEFAULT_KEY].length > 0) {
+      return groupedIngredients[DEFAULT_KEY][0].id;
+    }
+
+    return undefined;
   });
 
-  function advanceActive() {
-    if (groupedIngredients) {
-      const activeIndex = activeIngredient.index;
+  const selectedLocation = useMemo(() => {
+    for (const [group, ingredients] of Object.entries(
+      groupedIngredients || {}
+    )) {
+      for (const [index, ingredient] of ingredients.entries()) {
+        if (selected === ingredient.id) {
+          return { group, index };
+        }
+      }
+    }
+  }, [selected, groupedIngredients]);
+
+  function advanceSelected() {
+    if (groupedIngredients && selectedLocation) {
+      const activeIndex = selectedLocation.index;
       // Increase within the same group
-      if (activeIndex + 1 < groupedIngredients[activeIngredient.group].length) {
-        setActiveIngredient({ ...activeIngredient, index: activeIndex + 1 });
+      if (activeIndex + 1 < groupedIngredients[selectedLocation.group].length) {
+        setSelected(
+          groupedIngredients[selectedLocation.group][activeIndex + 1].id
+        );
       }
       // Advance to next group if it has items or loop to beginning
       else {
         const groupIdx = groupOrder.findIndex(
-          (name) => name === activeIngredient.group
+          (name) => name === selectedLocation.group
         );
         let newGroup = DEFAULT_KEY;
         const length = groupOrder.length;
@@ -80,7 +100,7 @@ function useGroupedRecipeIngredients(
             newGroup = groupOrder[index];
           }
         }
-        setActiveIngredient({ group: newGroup, index: 0 });
+        setSelected(groupedIngredients[newGroup][0].id);
       }
     }
   }
@@ -90,8 +110,10 @@ function useGroupedRecipeIngredients(
     setGroupedIngredients,
     groupOrder,
     setGroupOrder,
-    activeIngredient,
-    setActiveIngredient,
+    selected,
+    setSelected,
+    selectedLocation,
+    advanceSelected,
   } as IngredientsContextType;
 }
 

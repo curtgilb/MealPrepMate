@@ -137,7 +137,6 @@ export const EditRecipeInfo = forwardRef<EditRecipeSubmit, EditRecipeProps>(
                       <ImagePicker
                         value={field.value}
                         setValue={(images) => {
-                          console.log("set value", images);
                           form.setValue("photos", images);
                         }}
                       />

@@ -16,7 +16,7 @@ export function IngredientItem({
   index,
   ingredient,
 }: SortableItemProps) {
-  const { groupedIngredients, activeIngredient, setActiveIngredient } =
+  const { groupedIngredients, selected, setSelected } =
     useRecipeIngredientContext();
 
   const {
@@ -32,9 +32,8 @@ export function IngredientItem({
       type: "item",
     },
   });
-  const selected =
-    groupedIngredients[activeIngredient.group][activeIngredient.index];
-  const isSelected = selected.id === ingredient.id;
+
+  const isSelected = selected === ingredient.id;
 
   return (
     <div
@@ -48,7 +47,7 @@ export function IngredientItem({
         transition,
       }}
       onClick={() => {
-        setActiveIngredient({ group, index });
+        setSelected(ingredient.id);
       }}
     >
       <GripVertical

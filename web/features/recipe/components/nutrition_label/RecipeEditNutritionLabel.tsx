@@ -66,7 +66,7 @@ function Nutrient({ nutrient, depth, value }: NutrientItemProps) {
             }}
             onInput={(e) => {
               const inputElement = e.target as HTMLInputElement;
-              console.log(inputElement.value);
+
               setInputValue(
                 parseFloat(inputElement.value.replace(/[^0-9.]/g, ""))
               );
@@ -126,10 +126,10 @@ export function RecipeEditNutritionlabel({
         </TableHeader>
         <TableBody>
           <NutritionList
-            group={TableGroup}
+            groupComponent={TableGroup}
             mode={mode}
-            nutrient={Nutrient}
-            values={values}
+            nutrientComponent={Nutrient}
+            nutrientIdToValue={values}
           />
         </TableBody>
       </Table>

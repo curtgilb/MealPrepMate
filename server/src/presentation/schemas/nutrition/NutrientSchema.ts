@@ -48,6 +48,7 @@ builder.queryFields((t) => ({
     args: {
       search: t.arg.string(),
       advanced: t.arg.boolean({ required: true }),
+      favorites: t.arg.boolean(),
     },
     resolve: async (query, root, args) => {
       const nutrients = await db.nutrient.findMany({
@@ -56,11 +57,12 @@ builder.queryFields((t) => ({
             ? { contains: args.search ?? undefined, mode: "insensitive" }
             : undefined,
           advancedView: args.advanced ? undefined : false,
+          important: args.favorites ? true : undefined,
         },
         orderBy: { order: "asc" },
         ...query,
       });
-      console.log(nutrients);
+
       return nutrients;
     },
   }),

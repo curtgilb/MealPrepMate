@@ -54,7 +54,7 @@ export const EditRecipeNutritionLabels = forwardRef<
       const formData = await formRef.current.getFormData();
       if (formData) {
         const { groupId, form, nutrients } = formData;
-        console.log(formData);
+
         setSavedForms((prev) => {
           return {
             ...prev,

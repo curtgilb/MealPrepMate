@@ -1,5 +1,5 @@
 "use client";
-import { RecipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
+import { recipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
 import { getFragmentData } from "@/gql";
 import { RecipeFieldsFragment } from "@/gql/graphql";
 import { useMemo } from "react";
@@ -14,7 +14,7 @@ export function useLabelsByGroup(
   selectedGroup: string
 ) {
   const typedIngredients = getFragmentData(
-    RecipeIngredientFragment,
+    recipeIngredientFragment,
     ingredients
   );
   const groupToLabel = useMemo(() => {

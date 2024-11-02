@@ -1,23 +1,12 @@
-import { TagList } from "@/components/TagList";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { getFragmentData, graphql } from "@/gql";
-import { ExpirationRule } from "@/features/ingredient/components/ExpirationRule";
-import { getClient } from "@/ssrGraphqlClient";
-import { PriceHistory } from "@/features/ingredient/components/PriceHistory";
 import SingleColumnCentered from "@/components/layouts/single-column-centered";
-import { PriceHistoryGroup } from "@/features/ingredient/components/PriceHistoryGroup";
-import { FoodType, MeasurementSystem, UnitType } from "@/gql/graphql";
 import {
   getIngredientQuery,
   ingredientFieldsFragment,
 } from "@/features/ingredient/api/Ingredient";
+import { PriceHistoryGroup } from "@/features/ingredient/components/PriceHistoryGroup";
+import { getFragmentData } from "@/gql";
+import { FoodType, MeasurementSystem, UnitType } from "@/gql/graphql";
+import { getClient } from "@/ssrGraphqlClient";
 
 const items = [
   { id: "1", name: "Hass Avocado" },
@@ -42,7 +31,7 @@ export default async function IngredientPage({
   );
 
   return (
-    <SingleColumnCentered>
+    <SingleColumnCentered condensed={true}>
       <div className="mb-12">
         <h1 className="text-4xl font-serif font-black mb-2">
           {ingredient?.name}

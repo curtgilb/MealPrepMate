@@ -34,7 +34,6 @@ export function ImageUploadForm({ onUploadedPhoto }: ImageUploadFormProps) {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     upload({ file: values.filePath }).then((result) => {
-      console.log("mutation response", result);
       const photo = result.data?.uploadPhoto;
       if (photo) {
         onUploadedPhoto(photo);
