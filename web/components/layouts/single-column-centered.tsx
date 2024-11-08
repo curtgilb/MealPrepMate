@@ -18,7 +18,7 @@ export default function SingleColumnCentered({
   return (
     <div
       className={cn(
-        "max-w-screen-2xl w-full px-8 py-6 mx-auto border curt",
+        "max-w-screen-2xl w-full px-8 py-6 mx-auto",
         {
           "h-main-full overflow-hidden": locked,
           "max-w-screen-xl": condensed,
