@@ -1,11 +1,13 @@
-import { Label } from "@/components/ui/label";
-import { PhotoFieldsFragment } from "@/gql/graphql";
-import { getImageUrl } from "@/utils/utils";
 import { Upload } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+
+import { Label } from "@/components/ui/label";
+import { PhotoFieldsFragment } from "@/gql/graphql";
+import { getImageUrl } from "@/utils/utils";
+
 import { ImageUploadForm } from "./ImageUpload";
-import { ModalDrawer } from "./ModalDrawer";
+import { ModalDrawerWithTrigger } from "./ModalDrawerWithTrigger";
 
 interface ImagePickerProps {
   value: PhotoFieldsFragment[];
@@ -48,7 +50,7 @@ export function ImagePicker({ value, setValue }: ImagePickerProps) {
               );
             })}
 
-          <ModalDrawer
+          <ModalDrawerWithTrigger
             title="Upload photo"
             open={open}
             setOpen={setOpen}
@@ -65,7 +67,7 @@ export function ImagePicker({ value, setValue }: ImagePickerProps) {
                 <span className="sr-only">Upload</span>
               </button>
             }
-          ></ModalDrawer>
+          ></ModalDrawerWithTrigger>
         </div>
       </div>
     </div>

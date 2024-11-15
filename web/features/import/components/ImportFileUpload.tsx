@@ -1,18 +1,8 @@
 "use client";
-import { ModalDrawer } from "../../../components/ModalDrawer";
-
 import { Plus } from "lucide-react";
-import { z } from "zod";
-import { Label } from "@/components/ui/label";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -24,10 +14,21 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { ModalDrawerWithTrigger } from "../../../components/ModalDrawerWithTrigger";
 
 export default function ImportFileUpload() {
   return (
-    <ModalDrawer
+    <ModalDrawerWithTrigger
       title="Upload file"
       description="Import a file from Cronometer or Recipe Keeper"
       trigger={

@@ -1,17 +1,18 @@
-import React, { ReactNode } from "react";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
+import React, { ReactNode } from "react";
+
+import { cn } from "@/lib/utils";
 
 export interface CardProps extends React.HTMLAttributes<HTMLElement> {
   children?: ReactNode;
-  image: {
-    urls: string[] | null | undefined;
+  images?: {
+    id: string;
+    url: string;
     altText: string;
-    placeholderUrl: string;
-    grid: boolean;
-  };
-
+  }[];
+  placeholderUrl: string;
+  imageGrid?: boolean;
   href?: string;
   vertical: boolean;
 }
@@ -20,13 +21,21 @@ export const Card = React.forwardRef<
   HTMLAnchorElement | HTMLDivElement,
   CardProps
 >(function Card(props, forwardedRef) {
-  const { children, image, vertical, href, ...rest } = props;
+  const {
+    children,
+    images,
+    vertical,
+    href,
+    placeholderUrl,
+    imageGrid,
+    ...rest
+  } = props;
   const { className, ...additionalProps } = rest;
   const baseStyle = cn(
     "border rounded-md overflow-hidden bg-card group ring-primary focus-visible:ring outline-none",
     {
       block: href,
-      "w-80": vertical,
+
       flex: !vertical,
       className,
     }
@@ -34,7 +43,12 @@ export const Card = React.forwardRef<
 
   const content = (
     <>
-      <CardImage images={image} verticalOrientation={vertical} />
+      <CardImage
+        images={images}
+        placeholderUrl={placeholderUrl}
+        imageGrid={imageGrid}
+        verticalOrientation={vertical}
+      />
       <div className={cn("p-2 text-left", { "px-4 py-2.5": vertical })}>
         {children}
       </div>
@@ -65,33 +79,60 @@ export const Card = React.forwardRef<
 });
 
 interface CardImageProps {
-  images: CardProps["image"];
+  images: CardProps["images"];
+  placeholderUrl: string;
+  imageGrid?: boolean;
   verticalOrientation: boolean;
 }
 
-function CardImage({ images, verticalOrientation }: CardImageProps) {
-  const url =
-    images.urls && images.urls.length > 0
-      ? images.urls[0]
-      : images.placeholderUrl;
+function CardImage({
+  images,
+  placeholderUrl,
+  imageGrid,
+  verticalOrientation,
+}: CardImageProps) {
+  const isMultiple = images && images.length > 1;
+  const imagesDisplayed = isMultiple && imageGrid ? 4 : 1;
+
+  // Create array of length imagesDisplayed, fill empty spots with null
+  const displayItems = Array(imagesDisplayed)
+    .fill(null)
+    .map((_, index) => {
+      return images?.[index] || null;
+    });
 
   return (
     <div
-      className={cn("overflow-hidden relative", {
+      className={cn("overflow-hidden relative bg-muted", {
         "w-80 h-72": verticalOrientation,
         "w-16 h-16": !verticalOrientation,
+        "grid grid-cols-2": imageGrid,
       })}
     >
-      <Image
-        className="group-hover:scale-105 transition-transform"
-        src={url}
-        alt={images.altText}
-        sizes="100vw"
-        fill
-        style={{
-          objectFit: "cover", // cover, contain, none
-        }}
-      />
+      {displayItems.map((image, index) => {
+        if (!image) {
+          return (
+            <div
+              key={`placeholder-${index}`}
+              className="bg-muted"
+              style={{ aspectRatio: "1" }}
+            />
+          );
+        }
+        return (
+          <Image
+            key={image.url}
+            className="group-hover:scale-105 transition-transform"
+            src={image.url}
+            alt={image.altText}
+            sizes="320px"
+            fill
+            style={{
+              objectFit: "cover",
+            }}
+          />
+        );
+      })}
     </div>
   );
 }

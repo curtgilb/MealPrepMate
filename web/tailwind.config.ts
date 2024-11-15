@@ -37,8 +37,7 @@ const config = {
         serif: ["var(--font-serif)", ...fontFamily.serif],
       },
       gridTemplateColumns: {
-        "autofit-vertical": "repeat(auto-fill, minmax(300px, 1fr))",
-        "autofit-horizontal": "repeat(auto-fill, minmax(250px, 1fr))",
+        autofit: "repeat(auto-fit, minmax(250px, 1fr))",
         recipe: "400px 1fr",
       },
       colors: {

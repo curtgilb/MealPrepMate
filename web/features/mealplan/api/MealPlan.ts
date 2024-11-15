@@ -1,7 +1,7 @@
 import { graphql } from "@/gql";
 
 export const mealPlanQuery = graphql(`
-  query GetMealPlan($mealPlanId: String!) {
+  query GetMealPlan($mealPlanId: ID!) {
     mealPlan(id: $mealPlanId) {
       id
       name
@@ -47,9 +47,12 @@ const getMealPlansQuery = graphql(`
           planRecipes {
             id
             originalRecipe {
+              id
+              name
               photos {
                 id
                 url
+                isPrimary
               }
             }
           }
@@ -59,4 +62,4 @@ const getMealPlansQuery = graphql(`
   }
 `);
 
-export { createMealPlanMutation, getMealPlansQuery };
+export { createMealPlanMutation, getMealPlansQuery, editMealPlanMutation };

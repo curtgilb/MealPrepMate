@@ -1,4 +1,9 @@
-import { ModalDrawer } from "@/components/ModalDrawer";
+import { FolderPlus } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { ModalDrawerWithTrigger } from "@/components/ModalDrawerWithTrigger";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,10 +21,6 @@ import { useRecipeIngredientContext } from "@/features/recipe/hooks/useGroupedRe
 import { toTitleCase } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@urql/next";
-import { FolderPlus } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 interface CreateIngredientGroupProps {
   recipeId: string;
@@ -76,7 +77,7 @@ export function CreateIngredientGroup({
   }
 
   return (
-    <ModalDrawer
+    <ModalDrawerWithTrigger
       title="Add ingredient group"
       open={open}
       setOpen={setOpen}

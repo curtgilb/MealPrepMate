@@ -1,6 +1,12 @@
 import React, { useState } from "react";
-import { graphql } from "@/gql";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { useMutation } from "urql";
+import { z } from "zod";
+
+import { Card } from "@/components/Card";
+import { ModalDrawerWithTrigger } from "@/components/ModalDrawerWithTrigger";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -9,22 +15,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { toTitleCase } from "@/utils/utils";
-import { meals } from "./AddServingDialog";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Meal } from "@/gql/graphql";
-import { toast } from "sonner";
-import { Card } from "@/components/Card";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Button } from "@/components/ui/button";
-import { ModalDrawer } from "@/components/ModalDrawer";
 import {
   deleteServingMutation,
   editServingMutation,
 } from "@/features/mealplan/api/MealPlanServings";
+import { graphql } from "@/gql";
+import { Meal } from "@/gql/graphql";
+import { toTitleCase } from "@/utils/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { meals } from "./AddServingDialog";
 
 interface MealPlanServingCardProps {
   id: string;
@@ -73,7 +75,7 @@ export const MealPlanServingCard = React.forwardRef<
   }
 
   return (
-    <ModalDrawer
+    <ModalDrawerWithTrigger
       open={open}
       setOpen={setOpen}
       title={`Edit ${name} serving`}
@@ -166,6 +168,6 @@ export const MealPlanServingCard = React.forwardRef<
           </form>
         </Form>
       }
-    ></ModalDrawer>
+    ></ModalDrawerWithTrigger>
   );
 });

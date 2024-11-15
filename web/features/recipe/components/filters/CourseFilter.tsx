@@ -1,16 +1,15 @@
 "use client";
-import { graphql } from "@/gql";
-import { getClient } from "@/ssrGraphqlClient";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { getCoursesQuery } from "@/features/recipe/api/Course";
 import { useQuery } from "@urql/next";
 
 export function CourseFilter() {
-  const [result, retry] = useQuery({ query: courseQuery });
+  const [result, retry] = useQuery({ query: getCoursesQuery });
   const { data, error, fetching } = result;
   return (
     <Collapsible>

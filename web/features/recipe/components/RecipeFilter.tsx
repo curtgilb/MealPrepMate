@@ -1,50 +1,74 @@
 "use client";
 
+import { Filter, FilterX, X } from "lucide-react";
+import { Dispatch, HTMLAttributes, SetStateAction, useState } from "react";
+import { Scalars, z } from "zod";
+
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { NumericalComparison, Recipe } from "@/gql/graphql";
-import { useState, Dispatch, SetStateAction, HTMLAttributes } from "react";
-import NumericalFilter from "./NumericalFilter";
-
-import { Filter, FilterX, X } from "lucide-react";
-import { NutritionFilter } from "./filters/NutrientFilter";
-
-import { IngredientFilter } from "./filters/IngredientFilter";
-import { RecipeSearchFilter } from "@/features/mealplan/components/RecipeSearch";
 import { Button } from "@/components/ui/button";
+import { TimeNumberInput } from "@/components/ui/time-number-input";
 import { CategoryFilter } from "@/features/recipe/components/filters/CategoryFilter";
 import { CourseFilter } from "@/features/recipe/components/filters/CourseFilter";
 import { CuisineFilter } from "@/features/recipe/components/filters/CuisineFIlter";
-import { TimeNumberInput } from "@/components/ui/time-number-input";
+import { IngredientFilter } from "@/features/recipe/components/filters/IngredientFilter";
+import { MetadataFilter } from "@/features/recipe/components/filters/MetadataFilter";
+import { NutritionFilter } from "@/features/recipe/components/filters/NutrientFilter";
+import NumericalFilter from "@/features/recipe/components/NumericalFilter";
+import { RecipeFilter as RecipeFilterInput } from "@/gql/graphql";
 
 interface RecipeFilterProps extends HTMLAttributes<HTMLDivElement> {
-  filter: RecipeSearchFilter;
-  setFilter: Dispatch<SetStateAction<RecipeSearchFilter>>;
+  filter: RecipeFilterInput;
+  setFilter: Dispatch<SetStateAction<RecipeFilterInput>>;
 }
 
-export interface FilterChildProp<K extends keyof RecipeSearchFilter> {
-  filter: RecipeSearchFilter[K];
-  updateFilter: (prop: K, value: RecipeSearchFilter[K]) => void;
-}
+// const ingredientFilterValidation = z.object({
+//   ingredientIds: z.string().array().nullish(),
+//   includeSubIngredients: z.boolean().nullish(),
+// });
+
+// const nutrientFilterValidation = z.object({
+//   nutrientIds: z.string().array().nullish(),
+//   comparison: z.nativeEnum(NumericalComparison).nullish(),
+// });
+
+// const filterValidation = z.object({
+//   categoryIds: z.string().array().nullish(),
+//   cookTime: z.number().nonnegative(),
+//   courseIds: z.string().array().nullish(),
+//   cuisineIds: z.string().array().nullish(),
+//   ingredientFilters: ingredientFilterValidation,
+//   ingredientFreshDays: z.number().nonnegative(),
+//   isFavorite: InputMaybe<Scalars['Boolean']['input']>;
+//   leftoverFreezerLife: InputMaybe<NumericalFilter>;
+//   leftoverFridgeLife: InputMaybe<NumericalFilter>;
+//   macroFilter: InputMaybe<MacroFilter>;
+//   marinadeTime: InputMaybe<NumericalFilter>;
+//   numOfServings: InputMaybe<NumericalFilter>;
+//   nutrientFilters: InputMaybe<Array<NutritionFilter>>;
+//   prepTime: InputMaybe<NumericalFilter>;
+//   searchTerm: InputMaybe<Scalars['String']['input']>;
+//   totalPrepTime: InputMaybe<NumericalFilter>;
+// });
 
 export function RecipeFilter({
   filter,
   setFilter,
-  ...divAttributes
+  ...rest
 }: RecipeFilterProps) {
-  function handleFilterUpdate<K extends keyof RecipeSearchFilter>(
-    prop: K,
-    value: RecipeSearchFilter[K]
-  ) {
-    setFilter({ ...filter, [prop]: value });
-  }
+  // function handleFilterUpdate<K extends keyof RecipeSearchFilter>(
+  //   prop: K,
+  //   value: RecipeSearchFilter[K]
+  // ) {
+  //   setFilter({ ...filter, [prop]: value });
+  // }
 
   return (
-    <div {...divAttributes}>
+    <div {...rest}>
       <div className="grid grid-cols-2 gap-2 my-6">
         <Button onClick={() => {}}>
           <Filter className="mr-2 h-4 w-4" />
@@ -67,12 +91,10 @@ export function RecipeFilter({
                 min={filter.numOfServings?.gte}
                 max={filter.numOfServings?.lte}
                 onChange={(update) => {
-                  handleFilterUpdate("numOfServings", update);
+                  // handleFilterUpdate("numOfServings", update);
                 }}
               />
-              <CategoryFilter />
-              <CourseFilter />
-              <CuisineFilter />
+              <MetadataFilter />
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -86,10 +108,10 @@ export function RecipeFilter({
               min={filter.macroFilter?.caloriePerServing?.gte}
               max={filter.macroFilter?.caloriePerServing?.lte}
               onChange={(update) => {
-                handleFilterUpdate("macroFilter", {
-                  ...filter.macroFilter,
-                  caloriePerServing: update,
-                });
+                // handleFilterUpdate("macroFilter", {
+                //   ...filter.macroFilter,
+                //   caloriePerServing: update,
+                // });
               }}
             ></NumericalFilter>
             <NumericalFilter
@@ -98,10 +120,10 @@ export function RecipeFilter({
               min={filter.macroFilter?.caloriePerServing?.gte}
               max={filter.macroFilter?.caloriePerServing?.lte}
               onChange={(update) => {
-                handleFilterUpdate("macroFilter", {
-                  ...filter.macroFilter,
-                  protienPerServing: update,
-                });
+                // handleFilterUpdate("macroFilter", {
+                //   ...filter.macroFilter,
+                //   protienPerServing: update,
+                // });
               }}
             ></NumericalFilter>
             <NumericalFilter
@@ -110,10 +132,10 @@ export function RecipeFilter({
               min={filter.macroFilter?.carbPerServing?.gte}
               max={filter.macroFilter?.carbPerServing?.lte}
               onChange={(update) => {
-                handleFilterUpdate("macroFilter", {
-                  ...filter.macroFilter,
-                  carbPerServing: update,
-                });
+                // handleFilterUpdate("macroFilter", {
+                //   ...filter.macroFilter,
+                //   carbPerServing: update,
+                // });
               }}
             ></NumericalFilter>
             <NumericalFilter
@@ -122,10 +144,10 @@ export function RecipeFilter({
               min={filter.macroFilter?.fatPerServing?.gte}
               max={filter.macroFilter?.fatPerServing?.lte}
               onChange={(update) => {
-                handleFilterUpdate("macroFilter", {
-                  ...filter.macroFilter,
-                  fatPerServing: update,
-                });
+                // handleFilterUpdate("macroFilter", {
+                //   ...filter.macroFilter,
+                //   fatPerServing: update,
+                // });
               }}
             ></NumericalFilter>
             <NumericalFilter
@@ -134,10 +156,10 @@ export function RecipeFilter({
               min={filter.macroFilter?.alcoholPerServing?.gte}
               max={filter.macroFilter?.alcoholPerServing?.lte}
               onChange={(update) => {
-                handleFilterUpdate("macroFilter", {
-                  ...filter.macroFilter,
-                  alcoholPerServing: update,
-                });
+                // handleFilterUpdate("macroFilter", {
+                //   ...filter.macroFilter,
+                //   alcoholPerServing: update,
+                // });
               }}
             ></NumericalFilter>
           </AccordionContent>
@@ -148,7 +170,7 @@ export function RecipeFilter({
           <AccordionContent>
             <NutritionFilter
               filter={filter.nutrientFilters}
-              updateFilter={handleFilterUpdate}
+              // updateFilter={handleFilterUpdate}
             />
           </AccordionContent>
         </AccordionItem>
@@ -159,7 +181,7 @@ export function RecipeFilter({
           <AccordionContent>
             <IngredientFilter
               filter={filter.ingredientFilters}
-              updateFilter={handleFilterUpdate}
+              // updateFilter={handleFilterUpdate}
             />
           </AccordionContent>
         </AccordionItem>
@@ -173,7 +195,7 @@ export function RecipeFilter({
                 label="Preparation time (max)"
                 value={filter.prepTime?.lte ?? 0}
                 onUpdate={(update) => {
-                  handleFilterUpdate("prepTime", { lte: update });
+                  // handleFilterUpdate("prepTime", { lte: update });
                 }}
               />
               <TimeNumberInput
@@ -181,7 +203,7 @@ export function RecipeFilter({
                 label="Marinade time (max)"
                 value={filter.marinadeTime?.lte ?? 0}
                 onUpdate={(update) => {
-                  handleFilterUpdate("marinadeTime", { lte: update });
+                  // handleFilterUpdate("marinadeTime", { lte: update });
                 }}
               />
               <TimeNumberInput
@@ -189,7 +211,7 @@ export function RecipeFilter({
                 label="Cook time (max)"
                 value={filter.cookTime?.lte ?? 0}
                 onUpdate={(update) => {
-                  handleFilterUpdate("cookTime", { lte: update });
+                  // handleFilterUpdate("cookTime", { lte: update });
                 }}
               />
               <TimeNumberInput
@@ -197,7 +219,7 @@ export function RecipeFilter({
                 label="Total Time (max)"
                 value={filter.totalPrepTime?.lte ?? 0}
                 onUpdate={(update) => {
-                  handleFilterUpdate("totalPrepTime", { lte: update });
+                  // handleFilterUpdate("totalPrepTime", { lte: update });
                 }}
               />
             </div>

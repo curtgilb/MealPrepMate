@@ -6,8 +6,8 @@ import {
   getMealPlan,
   getMealPlans,
 } from "@/application/services/mealplan/MealPlanService.js";
-import { builder } from "@/presentation/builder.js";
 import { db } from "@/infrastructure/repository/db.js";
+import { builder } from "@/presentation/builder.js";
 
 // ============================================ Types ===================================
 builder.prismaNode("MealPlan", {
@@ -63,10 +63,10 @@ builder.queryFields((t) => ({
   mealPlan: t.prismaField({
     type: "MealPlan",
     args: {
-      id: t.arg.string({ required: true }),
+      id: t.arg.globalID({ required: true }),
     },
     resolve: async (query, root, args) => {
-      return await getMealPlan(args.id, query);
+      return await getMealPlan(args.id.id, query);
     },
   }),
   mealPlans: t.prismaConnection({

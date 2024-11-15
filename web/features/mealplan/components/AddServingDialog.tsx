@@ -1,3 +1,19 @@
+import { useContext, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
+import { ModalDrawerWithTrigger } from "@/components/ModalDrawerWithTrigger";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -7,27 +23,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MealPlan } from "@/contexts/MealPlanContext";
-import { graphql } from "@/gql";
+import { addServingMutation } from "@/features/mealplan/api/MealPlanServings";
 import { Meal } from "@/gql/graphql";
-import { useContext, useState } from "react";
-
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { toTitleCase } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { useMutation } from "@urql/next";
-import { toast } from "sonner";
-import { ModalDrawer } from "@/components/ModalDrawer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 interface AddServingDialogProps {
   day: number;
@@ -76,7 +76,7 @@ export function AddServingDialog({ day }: AddServingDialogProps) {
   }
 
   return (
-    <ModalDrawer
+    <ModalDrawerWithTrigger
       open={open}
       setOpen={setOpen}
       title="Add serving"
@@ -175,6 +175,6 @@ export function AddServingDialog({ day }: AddServingDialogProps) {
           </form>
         </Form>
       }
-    ></ModalDrawer>
+    ></ModalDrawerWithTrigger>
   );
 }

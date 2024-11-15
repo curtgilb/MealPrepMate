@@ -1,6 +1,7 @@
 "use client";
-import { graphql } from "@/gql";
 import { Checkbox } from "@/components/ui/checkbox";
+import { getCategoriesQuery } from "@/features/recipe/api/Category";
+import { graphql } from "@/gql";
 import { useMutation, useQuery } from "@urql/next";
 
 interface CategoryFilterProps {
@@ -9,7 +10,7 @@ interface CategoryFilterProps {
 }
 
 export function CategoryFilter() {
-  const [result, reexecuteQuery] = useQuery({ query: categoryQuery });
+  const [result, reexecuteQuery] = useQuery({ query: getCategoriesQuery });
   const { data, fetching, error } = result;
   return (
     <div>

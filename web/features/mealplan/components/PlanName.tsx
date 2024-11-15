@@ -1,10 +1,11 @@
 import { Pencil, Save } from "lucide-react";
 import { useState } from "react";
-import { Input } from "../../../components/ui/input";
-import { InputWithIcon } from "../../../components/ui/InputWithIcon";
+
+import { InputWithIcon } from "@/components/ui/InputWithIcon";
+import { editMealPlanMutation } from "@/features/mealplan/api/MealPlan";
 import { graphql } from "@/gql";
-import { useMutation } from "@urql/next";
 import { cn } from "@/lib/utils";
+import { useMutation } from "@urql/next";
 
 export function MealPlanName({
   name,
@@ -14,14 +15,14 @@ export function MealPlanName({
   mealPlanId: string;
 }) {
   const [edit, setEdit] = useState<boolean>(false);
-  const [result, changeName] = useMutation(changeNameMutation);
+  const [result, changeName] = useMutation(editMealPlanMutation);
   const [newName, setName] = useState<string>();
   const css = edit ? "text-xl font-bold" : " ";
 
   function handleNameSave() {
     setEdit(false);
     if (newName && newName !== name) {
-      changeName({ name: newName, id: mealPlanId });
+      changeName({ mealPlan: { name: newName }, id: mealPlanId });
     }
   }
 

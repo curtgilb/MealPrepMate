@@ -1,4 +1,9 @@
-import { ModalDrawer } from "@/components/ModalDrawer";
+import { Plus } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { ModalDrawerWithTrigger } from "@/components/ModalDrawerWithTrigger";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -21,10 +26,6 @@ import {
 import { getFragmentData } from "@/gql";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@urql/next";
-import { Plus } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 interface AddIngredientProps {
   recipeId: string;
@@ -86,7 +87,7 @@ export function AddIngredient({ recipeId }: AddIngredientProps) {
   }
 
   return (
-    <ModalDrawer
+    <ModalDrawerWithTrigger
       title="Add ingredient"
       open={open}
       setOpen={setOpen}

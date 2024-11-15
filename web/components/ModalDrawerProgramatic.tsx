@@ -1,3 +1,5 @@
+import { Dispatch, SetStateAction } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -5,7 +7,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Drawer,
@@ -15,38 +16,40 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
 } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { Dispatch, SetStateAction } from "react";
+import { cn } from "@/lib/utils";
 
-interface DrawerDialogProps {
+interface ModalDrawerProgramaticProps {
   title: string;
   description?: string;
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
-  trigger: React.ReactNode;
   content: React.ReactNode;
+  className?: string;
+  showCloseButton?: boolean;
 }
 
-export function ModalDrawer({
+export function ProgramticModalDrawer({
   title,
   description,
-  trigger,
   content,
   open,
   setOpen,
-}: DrawerDialogProps) {
+  className,
+  showCloseButton = true,
+}: ModalDrawerProgramaticProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>{trigger}</DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className={cn("sm:max-w-[425px]", className)}>
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
-            <DialogDescription>{description}</DialogDescription>
+            {description && (
+              <DialogDescription>{description}</DialogDescription>
+            )}
           </DialogHeader>
           {content}
         </DialogContent>
@@ -56,18 +59,19 @@ export function ModalDrawer({
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>{trigger}</DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="text-left">
           <DrawerTitle>{title}</DrawerTitle>
-          <DrawerDescription>{description}</DrawerDescription>
+          {description && <DrawerDescription>{description}</DrawerDescription>}
         </DrawerHeader>
-        {content}
-        <DrawerFooter className="pt-2">
-          <DrawerClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DrawerClose>
-        </DrawerFooter>
+        <div className={className}>{content}</div>
+        {showCloseButton && (
+          <DrawerFooter className="pt-2">
+            <DrawerClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        )}
       </DrawerContent>
     </Drawer>
   );

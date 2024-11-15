@@ -1,4 +1,8 @@
 "use client";
+import { Filter, Import, Plus, Search } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+
 import SingleColumnCentered from "@/components/layouts/single-column-centered";
 import { Button } from "@/components/ui/button";
 import { InputWithIcon } from "@/components/ui/InputWithIcon";
@@ -11,17 +15,10 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { RecipeSearchFilter } from "@/features/mealplan/components/RecipeSearch";
-import { searchRecipesQuery } from "@/features/recipe/api/Recipe";
-import { RecipeFilter } from "@/features/recipe/components/RecipeFilter";
+import { MainRecipeSearchCard } from "@/features/recipe/components/recipe_search/MainRecipeSearchCard";
 import { RecipeSearchResults } from "@/features/recipe/components/recipe_search/RecipeSearchResults";
-import {
-  RecipeFieldsFragment,
-  RecipeSearchFieldsFragment,
-  SearchRecipesQuery,
-} from "@/gql/graphql";
-import { Filter, Import, Plus, Search } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
+import { RecipeFilter } from "@/features/recipe/components/RecipeFilter";
+import { SearchRecipesQuery } from "@/gql/graphql";
 
 type RecipeSearchResults = NonNullable<SearchRecipesQuery["recipes"]>;
 type RecipeSearchItem = NonNullable<
@@ -69,7 +66,10 @@ export default function RecipesPage() {
           </Link>
         </div>
       </div>
-      <RecipeSearchResults filter={{}} verticalOrientation={true} />
+      <RecipeSearchResults
+        filter={{}}
+        renderCard={(recipe) => <MainRecipeSearchCard recipe={recipe} />}
+      />
     </SingleColumnCentered>
   );
 }
