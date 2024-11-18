@@ -1,66 +1,109 @@
 "use client";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { NumericalComparison } from "@/gql/graphql";
-import { useRef } from "react";
+import { FieldValues, Path, UseFormReturn } from "react-hook-form";
+import { z } from "zod";
 
-interface NumericalFilterProps {
-  id: string;
-  name: string;
-  min: number | undefined | null;
-  max: number | undefined | null;
-  onChange: (update: NumericalComparison) => void;
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+
+export const numericalFilterSchema = z
+  .object({
+    gte: z.number().nullable().optional(),
+    lte: z.number().nullable().optional(),
+  })
+  .refine(
+    (data) => {
+      // If either value is null/undefined, validation passes
+      if (data.gte == null || data.lte == null) return true;
+      // Ensure min is not greater than max
+      return data.gte <= data.lte;
+    },
+    {
+      message: "Minimum value cannot be greater than maximum value",
+      path: ["gte"], // This will show the error on the min field
+    }
+  );
+
+type NumericalFilter = z.infer<typeof numericalFilterSchema>;
+
+type NumericalFilterPath<FormType> = Path<FormType> &
+  {
+    [Key in keyof FormType]: FormType[Key] extends NumericalFilter
+      ? Key
+      : never;
+  }[keyof FormType];
+
+interface NumericalFilterProps<FormType extends FieldValues> {
+  form: UseFormReturn<FormType>;
+  id: NumericalFilterPath<FormType>;
+  label: string;
 }
 
-export default function NumericalFilter({
+export default function NumericalFilter<FormType extends FieldValues>({
+  form,
   id,
-  name,
-  min,
-  max,
-  onChange,
-}: NumericalFilterProps) {
-  const lteField = useRef<HTMLInputElement>(null);
-  const gteField = useRef<HTMLInputElement>(null);
-
-  function updateFilter() {
-    const lte =
-      lteField && lteField.current
-        ? parseInt(lteField.current.value)
-        : undefined;
-    const gte =
-      gteField && gteField.current
-        ? parseInt(gteField.current.value)
-        : undefined;
-    const eq = lte === gte ? lte : undefined;
-
-    onChange({ lte, gte, eq });
-  }
+  label,
+}: NumericalFilterProps<FormType>) {
   return (
-    <div className="grid grid-cols-2 p-2 gap-y-4 gap-x-2">
-      <p className="col-span-2 font-medium">{name}</p>
-      <div>
-        <Input
-          ref={gteField}
-          className="h-8"
-          value={min ?? undefined}
-          onChange={updateFilter}
-          type="number"
-          id={`${id}-min`}
-          placeholder="Min"
-        />
-      </div>
+    <FormField
+      control={form.control}
+      name={id}
+      render={({ field }) => (
+        <FormItem>
+          {label && <FormLabel>{label}</FormLabel>}
+          <div className="flex items-center gap-2">
+            <FormItem className="flex-1">
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="Min"
+                  value={field.value?.min ?? ""}
+                  onChange={(e) => {
+                    field.onChange({
+                      ...field.value,
+                      min: e.target.value,
+                    });
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
 
-      <div>
-        <Input
-          className="h-8"
-          ref={lteField}
-          value={max ?? undefined}
-          onChange={updateFilter}
-          type="number"
-          id={`${id}-max`}
-          placeholder="Max"
-        />
-      </div>
-    </div>
+            <span className="text-muted-foreground">to</span>
+
+            <FormItem className="flex-1">
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="Max"
+                  value={field.value?.max ?? ""}
+                  onChange={(e) => {
+                    field.onChange({
+                      ...field.value,
+                      max: e.target.value,
+                    });
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </div>
+        </FormItem>
+      )}
+    />
   );
 }
+
+// const lte =
+// lteField && lteField.current
+//   ? parseInt(lteField.current.value)
+//   : undefined;
+// const gte =
+// gteField && gteField.current
+//   ? parseInt(gteField.current.value)
+//   : undefined;
