@@ -396,14 +396,6 @@ export type IngredientTotal = {
   unit?: Maybe<MeasurementUnit>;
 };
 
-export type MacroFilter = {
-  alcoholPerServing?: InputMaybe<NumericalFilter>;
-  caloriePerServing?: InputMaybe<NumericalFilter>;
-  carbPerServing?: InputMaybe<NumericalFilter>;
-  fatPerServing?: InputMaybe<NumericalFilter>;
-  protienPerServing?: InputMaybe<NumericalFilter>;
-};
-
 export type MacroNumbers = {
   __typename?: 'MacroNumbers';
   alcohol?: Maybe<Scalars['Float']['output']>;
@@ -1242,20 +1234,24 @@ export type Recipe = Node & {
 };
 
 export type RecipeFilter = {
+  alcoholPerServing?: InputMaybe<NumericalFilter>;
+  caloriePerServing?: InputMaybe<NumericalFilter>;
+  carbPerServing?: InputMaybe<NumericalFilter>;
   categoryIds?: InputMaybe<Array<Scalars['String']['input']>>;
   cookTime?: InputMaybe<NumericalFilter>;
   courseIds?: InputMaybe<Array<Scalars['String']['input']>>;
   cuisineIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  fatPerServing?: InputMaybe<NumericalFilter>;
   ingredientFilters?: InputMaybe<Array<IngredientFilter>>;
   ingredientFreshDays?: InputMaybe<NumericalFilter>;
   isFavorite?: InputMaybe<Scalars['Boolean']['input']>;
   leftoverFreezerLife?: InputMaybe<NumericalFilter>;
   leftoverFridgeLife?: InputMaybe<NumericalFilter>;
-  macroFilter?: InputMaybe<MacroFilter>;
   marinadeTime?: InputMaybe<NumericalFilter>;
   numOfServings?: InputMaybe<NumericalFilter>;
   nutrientFilters?: InputMaybe<Array<NutritionFilter>>;
   prepTime?: InputMaybe<NumericalFilter>;
+  protienPerServing?: InputMaybe<NumericalFilter>;
   searchTerm?: InputMaybe<Scalars['String']['input']>;
   totalPrepTime?: InputMaybe<NumericalFilter>;
 };

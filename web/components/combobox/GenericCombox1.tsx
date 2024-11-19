@@ -1,3 +1,6 @@
+import { ChevronsDown, ChevronsDownIcon, LucideIcon } from "lucide-react";
+import { useState } from "react";
+
 import { ComboboxContent } from "@/components/combobox/ComboboxContent";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
@@ -8,8 +11,6 @@ import {
 } from "@/components/ui/popover";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { TypedDocumentNode, useQuery } from "@urql/next";
-import { ChevronsDown, ChevronsDownIcon } from "lucide-react";
-import { useState } from "react";
 
 export type ComboboxItem = { id: string; label: string; name?: string };
 
@@ -33,24 +34,29 @@ function getNames(items: ComboboxItem[]) {
 export interface GenericComboboxProps<
   TQuery,
   TVariables extends QueryVariables,
-  TData
+  TData,
+  TItem extends ComboboxItem
 > {
   query: TypedDocumentNode<TQuery, TVariables>; // URQL query type
   variables: TVariables;
-  renderItem: (item: TData) => { id: string; label: string; name?: string };
+  renderItem: (item: TData) => TItem;
   unwrapDataList: (data: TQuery | undefined) => TData[] | undefined | null;
-  selectedItems: ComboboxItem[] | undefined | null;
-  onChange: (update: ComboboxItem[]) => void;
+  selectedItems: TItem[] | undefined | null;
+  onChange: (update: TItem[]) => void;
+  onItemAdded?: (item: TItem) => void;
+  onItemRemoved?: (item: TItem) => void;
   multiSelect: boolean;
   createNewOption?: (name: string) => void;
   autoFilter: boolean;
   placeholder?: string;
+  icon?: LucideIcon;
 }
 
 export function GenericCombobox<
   TQuery,
   TVariables extends QueryVariables,
-  TNode
+  TNode,
+  TItem extends ComboboxItem
 >({
   query,
   variables,
@@ -60,9 +66,12 @@ export function GenericCombobox<
   onChange,
   multiSelect,
   autoFilter,
+  onItemAdded,
+  onItemRemoved,
   createNewOption,
+  icon,
   placeholder,
-}: GenericComboboxProps<TQuery, TVariables, TNode>) {
+}: GenericComboboxProps<TQuery, TVariables, TNode, TItem>) {
   const [search, setSearch] = useState<string>("");
   const [results] = useQuery({
     variables: { ...variables, search },
@@ -77,10 +86,11 @@ export function GenericCombobox<
   const data =
     unwrapDataList(results?.data)?.map((item) => renderItem(item)) ?? [];
 
-  function handleSelect(item: ComboboxItem, selected: boolean) {
+  function handleSelect(item: TItem, selected: boolean) {
     // Removing an item
     if (selected && selectedItems) {
       onChange(selectedItems.filter((curr) => curr.id !== item.id));
+      if (onItemRemoved) onItemRemoved(item);
     }
     // Adding an item
     else {
@@ -89,6 +99,8 @@ export function GenericCombobox<
       } else {
         onChange([item]);
       }
+
+      if (onItemAdded) onItemAdded(item);
     }
   }
 
@@ -98,6 +110,8 @@ export function GenericCombobox<
     }
     setOpen(value);
   }
+
+  const ComboboxIcon = icon ? icon : ChevronsDownIcon;
 
   return (
     <>
@@ -111,7 +125,7 @@ export function GenericCombobox<
               className="justify-between font-normal"
             >
               {triggerText}
-              <ChevronsDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              <ComboboxIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </DrawerTrigger>
           <DrawerContent>
@@ -139,7 +153,7 @@ export function GenericCombobox<
               className="w-full justify-between font-normal"
             >
               <span className="overflow-hidden">{triggerText}</span>
-              <ChevronsDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              <ComboboxIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-full p-0">

@@ -6,14 +6,6 @@ export type NumericalFilter = {
   gte: number | undefined;
 };
 
-export type MacroFilter = {
-  caloriesPerServing: NumericalFilter | undefined;
-  carbPerServing: NumericalFilter | undefined;
-  fatPerServing: NumericalFilter | undefined;
-  proteinPerServing: NumericalFilter | undefined;
-  alcoholPerServing: NumericalFilter | undefined;
-};
-
 export type NutrientFilter = {
   nutrientId: string;
   perServing: boolean;
@@ -38,7 +30,11 @@ export type RecipeFilter = {
   totalPrepTime: NumericalFilter | undefined;
   leftoverFridgeLife: NumericalFilter | undefined;
   leftoverFreezerLife: NumericalFilter | undefined;
-  macroFilter: MacroFilter | undefined;
+  caloriesPerServing: NumericalFilter | undefined;
+  carbPerServing: NumericalFilter | undefined;
+  fatPerServing: NumericalFilter | undefined;
+  proteinPerServing: NumericalFilter | undefined;
+  alcoholPerServing: NumericalFilter | undefined;
   nutrientFilters: NutrientFilter[] | undefined;
   ingredientFilters: IngredientFilter[] | undefined;
   ingredientFreshDays: NumericalFilter | undefined;
@@ -104,11 +100,11 @@ export const recipeExtension = Prisma.defineExtension((client) => {
                 })),
               aggregateLabel: {
                 servings: filter?.numOfServings,
-                caloriesPerServing: filter?.macroFilter?.caloriesPerServing,
-                carbs: filter?.macroFilter?.carbPerServing,
-                fat: filter?.macroFilter?.fatPerServing,
-                alcohol: filter?.macroFilter?.alcoholPerServing,
-                protein: filter?.macroFilter?.proteinPerServing,
+                caloriesPerServing: filter?.caloriesPerServing,
+                carbs: filter?.carbPerServing,
+                fat: filter?.fatPerServing,
+                alcohol: filter?.alcoholPerServing,
+                protein: filter?.proteinPerServing,
                 AND:
                   filter?.nutrientFilters &&
                   filter.nutrientFilters.map((nutrient) => {

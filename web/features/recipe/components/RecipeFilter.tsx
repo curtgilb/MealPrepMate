@@ -12,103 +12,111 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { Form } from "@/components/ui/form";
+import { getCategoriesQuery } from "@/features/recipe/api/Category";
+import { getCoursesQuery } from "@/features/recipe/api/Course";
+import { getCuisinesQuery } from "@/features/recipe/api/Cuisine";
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { MetadataFilter } from "@/features/recipe/components/filters/MetadataFilter";
+  basicItemSchema,
+  CheckboxFilter,
+} from "@/features/recipe/components/filters/CheckboxFilter";
+import {
+  IngredientFilter,
+  ingredientFilterValidation,
+} from "@/features/recipe/components/filters/IngredientFilter";
+import {
+  nutrientFilterValidation,
+  NutritionFilter,
+} from "@/features/recipe/components/filters/NutrientFilter";
 import NumericalFilter, {
   numericalFilterSchema,
 } from "@/features/recipe/components/NumericalFilter";
-import { RecipeFilter as RecipeFilterInput } from "@/gql/graphql";
+import {
+  GetCategoriesQuery,
+  GetCoursesQuery,
+  GetCuisinesQuery,
+  RecipeFilter as RecipeFilterInput,
+} from "@/gql/graphql";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 interface RecipeFilterProps extends HTMLAttributes<HTMLDivElement> {
   setFilter: Dispatch<SetStateAction<RecipeFilterInput>>;
 }
 
-const ingredientFilterValidation = z.object({
-  ingredientId: z.string(),
-  amount: numericalFilterSchema,
-});
-
-const nutrientFilterValidation = z.object({
-  nutrientId: z.string(),
-  perServing: z.boolean(),
-  target: numericalFilterSchema,
-});
-
-const macroFilterValidation = z.object({
+const filterValidation = z.object({
+  cookTime: numericalFilterSchema,
+  categoryIds: basicItemSchema,
+  courseIds: basicItemSchema,
+  cuisineIds: basicItemSchema,
+  ingredientFilters: ingredientFilterValidation,
+  ingredientFreshDays: numericalFilterSchema,
+  isFavorite: z.boolean().nullish(),
+  leftoverFreezerLife: numericalFilterSchema,
+  leftoverFridgeLife: numericalFilterSchema,
   caloriePerServing: numericalFilterSchema,
   carbPerServing: numericalFilterSchema,
   fatPerServing: numericalFilterSchema,
   alcoholPerServing: numericalFilterSchema,
   proteinPerServing: numericalFilterSchema,
-});
-
-const filterValidation = z.object({
-  categoryIds: z.string().array().nullish(),
-  cookTime: z.number().nonnegative().nullish(),
-  courseIds: z.string().array().nullish(),
-  cuisineIds: z.string().array().nullish(),
-  ingredientFilters: ingredientFilterValidation.array().nullish(),
-  ingredientFreshDays: z.number().nonnegative().nullish(),
-  isFavorite: z.boolean().nullish(),
-  leftoverFreezerLife: numericalFilterSchema,
-  leftoverFridgeLife: numericalFilterSchema,
-  macroFilter: macroFilterValidation.nullish(),
   marinadeTime: numericalFilterSchema,
   numOfServings: numericalFilterSchema,
-  nutrientFilters: nutrientFilterValidation.array().nullish(),
+  nutrientFilters: nutrientFilterValidation,
   prepTime: numericalFilterSchema,
   searchTerm: z.string().nullish(),
   totalPrepTime: numericalFilterSchema,
 });
 
-type FilterValidation = z.infer<typeof filterValidation>;
+export type FilterValidationType = z.infer<typeof filterValidation>;
 
 export function RecipeFilter({ setFilter, ...rest }: RecipeFilterProps) {
-  const form = useForm<FilterValidation>({
+  const form = useForm<FilterValidationType>({
     resolver: zodResolver(filterValidation),
     defaultValues: {
       categoryIds: [],
-      cookTime: null,
       courseIds: [],
       cuisineIds: [],
       ingredientFilters: [],
-      ingredientFreshDays: null,
+      ingredientFreshDays: { lte: undefined, gte: undefined },
       isFavorite: null,
       leftoverFreezerLife: { lte: undefined, gte: undefined },
       leftoverFridgeLife: { lte: undefined, gte: undefined },
-      macroFilter: undefined,
-      marinadeTime: { lte: undefined, gte: undefined },
+      caloriePerServing: { lte: undefined, gte: undefined },
+      carbPerServing: { lte: undefined, gte: undefined },
+      fatPerServing: { lte: undefined, gte: undefined },
+      alcoholPerServing: { lte: undefined, gte: undefined },
+      proteinPerServing: { lte: undefined, gte: undefined },
       numOfServings: { lte: undefined, gte: undefined },
       nutrientFilters: [],
       prepTime: { lte: undefined, gte: undefined },
-      searchTerm: null,
+      cookTime: { lte: undefined, gte: undefined },
+      marinadeTime: { lte: undefined, gte: undefined },
       totalPrepTime: { lte: undefined, gte: undefined },
+      searchTerm: null,
     },
   });
 
+  function onApply(values: FilterValidationType) {
+    // Do something with the form values.
+    // ✅ This will be type-safe and validated.
+    console.log(values);
+  }
+
   return (
     <Form {...form}>
-      <form>
-        <NumericalFilter
-          form={form}
-          id="numOfServings"
-          label="Number of Servings"
-        />
+      <form onSubmit={form.handleSubmit(onApply)}>
         <div className="grid grid-cols-2 gap-2 my-6">
-          <Button onClick={() => {}}>
+          <Button type="submit">
             <Filter className="mr-2 h-4 w-4" />
             Apply
           </Button>
-          <Button variant="outline" onClick={() => {}}>
+          <Button
+            type="reset"
+            variant="outline"
+            onClick={(e) => {
+              e.preventDefault();
+              form.reset();
+            }}
+          >
             <FilterX className="mr-2 h-4 w-4" />
             Clear all
           </Button>
@@ -118,8 +126,42 @@ export function RecipeFilter({ setFilter, ...rest }: RecipeFilterProps) {
           <AccordionItem value="general">
             <AccordionTrigger>General</AccordionTrigger>
             <AccordionContent>
-              <div className="flex flex-col gap-4">
-                <MetadataFilter />
+              <div className="flex flex-col gap-8 px-2">
+                {/* Categories */}
+                <CheckboxFilter
+                  query={getCategoriesQuery}
+                  render={(item: GetCategoriesQuery["categories"][number]) => ({
+                    id: item.id,
+                    label: item.name,
+                  })}
+                  getList={(data) => data?.categories}
+                  title="Categories"
+                  name="categoryIds"
+                />
+
+                {/* Courses */}
+                <CheckboxFilter
+                  query={getCoursesQuery}
+                  render={(item: GetCoursesQuery["courses"][number]) => ({
+                    id: item.id,
+                    label: item.name,
+                  })}
+                  getList={(data) => data?.courses}
+                  title="Courses"
+                  name="courseIds"
+                />
+
+                {/* Cuisines */}
+                <CheckboxFilter
+                  query={getCuisinesQuery}
+                  render={(item: GetCuisinesQuery["cuisines"][number]) => ({
+                    id: item.id,
+                    label: item.name,
+                  })}
+                  getList={(data) => data?.cuisines}
+                  title="Cuisines"
+                  name="cuisineIds"
+                />
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -127,79 +169,34 @@ export function RecipeFilter({ setFilter, ...rest }: RecipeFilterProps) {
             <AccordionTrigger>Macros</AccordionTrigger>
 
             <AccordionContent>
-              {/* <FormField
-                control={form.control}
-                name="numOfServings"
-                render={({ field }) => (
-                  <FormItem>
-                    <NumericalFilter
-                      id="protein"
-                      name="Protein per serving (g)"
-                      minMax={field.value}
-                      onChange={(update) => {
-                        // handleFilterUpdate("macroFilter", {
-                        //   ...filter.macroFilter,
-                        //   protienPerServing: update,
-                        // });
-                      }}
-                    />
-                  </FormItem>
-                )}
-              /> */}
+              <NumericalFilter<FilterValidationType>
+                id="numOfServings"
+                label="Number of Servings"
+              />
 
-              {/* <FormField
-                control={form.control}
-                name="numOfServings"
-                render={({ field }) => (
-                  <FormItem>
-
-                  </FormItem>
-                )}
-              /> */}
-              {/* 
-              <NumericalFilter
-                id="carbs"
-                name="Carbohydrates per serving (g)"
-                minMax={field.value}
-                onChange={(update) => {
-                  // handleFilterUpdate("macroFilter", {
-                  //   ...filter.macroFilter,
-                  //   carbPerServing: update,
-                  // });
-                }}
-              ></NumericalFilter>
-              <NumericalFilter
-                id="fat"
-                name="Fat per serving (g)"
-                minMax={field.value}
-                onChange={(update) => {
-                  // handleFilterUpdate("macroFilter", {
-                  //   ...filter.macroFilter,
-                  //   fatPerServing: update,
-                  // });
-                }}
-              ></NumericalFilter>
-              <NumericalFilter
-                id="alcohol"
-                name="Alcohol per serving (g)"
-                minMax={field.value}
-                onChange={(update) => {
-                  // handleFilterUpdate("macroFilter", {
-                  //   ...filter.macroFilter,
-                  //   alcoholPerServing: update,
-                  // });
-                }}
-              ></NumericalFilter> */}
+              <NumericalFilter<FilterValidationType>
+                id="caloriePerServing"
+                label="Calories per serving"
+              />
+              <NumericalFilter<FilterValidationType>
+                id="carbPerServing"
+                label="Number of Servings"
+              />
+              <NumericalFilter<FilterValidationType>
+                id="fatPerServing"
+                label="Fat (g) per serving"
+              />
+              <NumericalFilter<FilterValidationType>
+                id="proteinPerServing"
+                label="Protein (g) per serving"
+              />
             </AccordionContent>
           </AccordionItem>
-          {/* <AccordionItem value="nutrients">
+          <AccordionItem value="nutrients">
             <AccordionTrigger>Nutrients</AccordionTrigger>
 
             <AccordionContent>
-              <NutritionFilter
-                filter={nutrientFilters}
-                // updateFilter={handleFilterUpdate}
-              />
+              <NutritionFilter<FilterValidationType> id="nutrientFilters" />
             </AccordionContent>
           </AccordionItem>
 
@@ -207,49 +204,30 @@ export function RecipeFilter({ setFilter, ...rest }: RecipeFilterProps) {
             <AccordionTrigger>Ingredients</AccordionTrigger>
 
             <AccordionContent>
-              <IngredientFilter
-                filter={filter.ingredientFilters}
-                // updateFilter={handleFilterUpdate}
-              />
+              <IngredientFilter />
             </AccordionContent>
-          </AccordionItem> */}
+          </AccordionItem>
 
           <AccordionItem value="time">
             <AccordionTrigger>Time</AccordionTrigger>
-            <AccordionContent>
+            <AccordionContent className="flex flex-col">
               <div className="grid gap-4">
-                {/* <TimeNumberInput
+                <NumericalFilter<FilterValidationType>
                   id="prepTime"
-                  label="Preparation time (max)"
-                  value={filter.prepTime?.lte ?? 0}
-                  onUpdate={(update) => {
-                    // handleFilterUpdate("prepTime", { lte: update });
-                  }}
+                  label="Prep time (mins)"
                 />
-                <TimeNumberInput
+                <NumericalFilter<FilterValidationType>
                   id="marinadeTime"
-                  label="Marinade time (max)"
-                  value={filter.marinadeTime?.lte ?? 0}
-                  onUpdate={(update) => {
-                    // handleFilterUpdate("marinadeTime", { lte: update });
-                  }}
+                  label="Marinade time (mins)"
                 />
-                <TimeNumberInput
+                <NumericalFilter<FilterValidationType>
                   id="cookTime"
-                  label="Cook time (max)"
-                  value={filter.cookTime?.lte ?? 0}
-                  onUpdate={(update) => {
-                    // handleFilterUpdate("cookTime", { lte: update });
-                  }}
+                  label="Cook Time (mins)"
                 />
-                <TimeNumberInput
-                  id="totalTime"
-                  label="Total Time (max)"
-                  value={filter.totalPrepTime?.lte ?? 0}
-                  onUpdate={(update) => {
-                    // handleFilterUpdate("totalPrepTime", { lte: update });
-                  }}
-                /> */}
+                <NumericalFilter<FilterValidationType>
+                  id="totalPrepTime"
+                  label="Total Time (mins)"
+                />
               </div>
             </AccordionContent>
           </AccordionItem>

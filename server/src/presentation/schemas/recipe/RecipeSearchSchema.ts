@@ -42,16 +42,6 @@ const ingredientFilter = builder
     }),
   });
 
-const macroFilter = builder.inputRef<MacroFilter>("MacroFilter").implement({
-  fields: (t) => ({
-    caloriePerServing: t.field({ type: numericalComparison, required: false }),
-    carbPerServing: t.field({ type: numericalComparison, required: false }),
-    fatPerServing: t.field({ type: numericalComparison, required: false }),
-    protienPerServing: t.field({ type: numericalComparison, required: false }),
-    alcoholPerServing: t.field({ type: numericalComparison, required: false }),
-  }),
-});
-
 // Filter by nutrient (calroies or any nutrient per serving or per recipe)
 // Filter by ingredient
 const recipeFilter = builder.inputRef<RecipeFilter>("RecipeFilter").implement({
@@ -71,7 +61,11 @@ const recipeFilter = builder.inputRef<RecipeFilter>("RecipeFilter").implement({
       required: false,
     }),
     isFavorite: t.boolean({ required: false }),
-    macroFilter: t.field({ type: macroFilter, required: false }),
+    caloriePerServing: t.field({ type: numericalComparison, required: false }),
+    carbPerServing: t.field({ type: numericalComparison, required: false }),
+    fatPerServing: t.field({ type: numericalComparison, required: false }),
+    protienPerServing: t.field({ type: numericalComparison, required: false }),
+    alcoholPerServing: t.field({ type: numericalComparison, required: false }),
     ingredientFilters: t.field({ type: [ingredientFilter], required: false }),
     nutrientFilters: t.field({ type: [nutritionFilter], required: false }),
     ingredientFreshDays: t.field({

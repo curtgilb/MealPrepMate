@@ -1,5 +1,10 @@
 "use client";
-import { FieldValues, Path, UseFormReturn } from "react-hook-form";
+import {
+  ControllerRenderProps,
+  FieldValues,
+  Path,
+  useFormContext,
+} from "react-hook-form";
 import { z } from "zod";
 
 import {
@@ -29,26 +34,25 @@ export const numericalFilterSchema = z
     }
   );
 
-type NumericalFilter = z.infer<typeof numericalFilterSchema>;
+// Type definitions
+export type NumericalFilter = z.infer<typeof numericalFilterSchema>;
 
-type NumericalFilterPath<FormType> = Path<FormType> &
-  {
-    [Key in keyof FormType]: FormType[Key] extends NumericalFilter
-      ? Key
-      : never;
-  }[keyof FormType];
+type NumericalFilterPath<FormType> = {
+  [Key in keyof FormType]: FormType[Key] extends NumericalFilter ? Key : never;
+}[keyof FormType] &
+  Path<FormType>;
 
 interface NumericalFilterProps<FormType extends FieldValues> {
-  form: UseFormReturn<FormType>;
   id: NumericalFilterPath<FormType>;
-  label: string;
+  label?: string;
 }
 
 export default function NumericalFilter<FormType extends FieldValues>({
-  form,
   id,
   label,
 }: NumericalFilterProps<FormType>) {
+  const form = useFormContext<FormType>();
+
   return (
     <FormField
       control={form.control}
@@ -56,54 +60,61 @@ export default function NumericalFilter<FormType extends FieldValues>({
       render={({ field }) => (
         <FormItem>
           {label && <FormLabel>{label}</FormLabel>}
-          <div className="flex items-center gap-2">
-            <FormItem className="flex-1">
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder="Min"
-                  value={field.value?.min ?? ""}
-                  onChange={(e) => {
-                    field.onChange({
-                      ...field.value,
-                      min: e.target.value,
-                    });
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-
-            <span className="text-muted-foreground">to</span>
-
-            <FormItem className="flex-1">
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder="Max"
-                  value={field.value?.max ?? ""}
-                  onChange={(e) => {
-                    field.onChange({
-                      ...field.value,
-                      max: e.target.value,
-                    });
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </div>
+          <NumericalFields field={field} />
         </FormItem>
       )}
     />
   );
 }
 
-// const lte =
-// lteField && lteField.current
-//   ? parseInt(lteField.current.value)
-//   : undefined;
-// const gte =
-// gteField && gteField.current
-//   ? parseInt(gteField.current.value)
-//   : undefined;
+interface NumericalFieldsProps<FormType extends FieldValues> {
+  field: ControllerRenderProps<FormType, Path<FormType>>;
+}
+
+export function NumericalFields<FormType extends FieldValues>({
+  field,
+}: NumericalFieldsProps<FormType>) {
+  return (
+    <div className="flex items-center gap-2">
+      <FormItem className="flex-1">
+        <FormControl>
+          <Input
+            type="number"
+            placeholder="min"
+            value={field.value?.gte ?? ""}
+            onChange={(e) => {
+              const value =
+                e.target.value === "" ? undefined : Number(e.target.value);
+              field.onChange({
+                ...field.value,
+                gte: value,
+              });
+            }}
+            onBlur={field.onBlur}
+          />
+        </FormControl>
+        <FormMessage />
+      </FormItem>
+      <span className="text-muted-foreground">to</span>
+      <FormItem className="flex-1">
+        <FormControl>
+          <Input
+            type="number"
+            placeholder="max"
+            value={field.value?.lte ?? ""}
+            onChange={(e) => {
+              const value =
+                e.target.value === "" ? null : Number(e.target.value);
+              field.onChange({
+                ...field.value,
+                lte: value,
+              });
+            }}
+            onBlur={field.onBlur}
+          />
+        </FormControl>
+        <FormMessage />
+      </FormItem>
+    </div>
+  );
+}
