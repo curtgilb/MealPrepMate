@@ -1,8 +1,8 @@
-import Image from "next/image";
-import Link from "next/link";
-import React, { ReactNode } from "react";
+import Image from 'next/image';
+import Link from 'next/link';
+import React, { ReactNode } from 'react';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 export interface CardProps extends React.HTMLAttributes<HTMLElement> {
   children?: ReactNode;
@@ -32,7 +32,7 @@ export const Card = React.forwardRef<
   } = props;
   const { className, ...additionalProps } = rest;
   const baseStyle = cn(
-    "border rounded-md overflow-hidden bg-card group ring-primary focus-visible:ring outline-none",
+    "border rounded-md overflow-hidden bg-card group ring ring-transparent focus:ring-primary",
     {
       block: href,
 
@@ -112,10 +112,16 @@ function CardImage({
       {displayItems.map((image, index) => {
         if (!image) {
           return (
-            <div
-              key={`placeholder-${index}`}
-              className="bg-muted"
-              style={{ aspectRatio: "1" }}
+            <Image
+              key={placeholderUrl}
+              className="group-hover:scale-105 transition-transform"
+              src={placeholderUrl}
+              alt={""}
+              sizes="320px"
+              fill
+              style={{
+                objectFit: "cover",
+              }}
             />
           );
         }

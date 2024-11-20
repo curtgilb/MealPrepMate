@@ -1,7 +1,7 @@
-import { graphql } from "@/gql";
+import { graphql } from '@/gql';
 
 const ingredientFieldsFragment = graphql(`
-  fragment IngredientFieldsFragment on Ingredient {
+  fragment IngredientFields on Ingredient {
     id
     name
     alternateNames
@@ -39,7 +39,7 @@ const ingredientFieldsFragment = graphql(`
 const getIngredientQuery = graphql(`
   query GetIngredient($id: ID!) {
     ingredient(ingredientId: $id) {
-      ...IngredientFieldsFragment
+      ...IngredientFields
     }
   }
 `);

@@ -1,7 +1,7 @@
-import { Card } from "@/components/Card";
-import { InfiniteScroll } from "@/components/infinite_scroll/InfiniteScroll";
-import { getIngredientsQuery } from "@/features/ingredient/api/Ingredient";
-import { GetIngredientsQuery } from "@/gql/graphql";
+import { Card } from '@/components/Card';
+import { InfiniteScroll } from '@/components/infinite_scroll/InfiniteScroll';
+import { getIngredientsQuery } from '@/features/ingredient/api/Ingredient';
+import { GetIngredientsQuery } from '@/gql/graphql';
 
 interface IngredientSearchResultsProps {
   search?: string;
@@ -16,12 +16,20 @@ export function IngredientSearchResults({
 }: IngredientSearchResultsProps) {
   return (
     <InfiniteScroll
-      className="grid grid-cols-autofit-horizontal gap-y-6 gap-x-4"
+      className="grid gap-4 grid-cols-autofit"
       query={getIngredientsQuery}
       variables={{ search: search }}
       renderItem={(item: IngredientSearchItem) => {
         return [
-          <IngredientSearchItem key={item.id} ingredient={item} />,
+          <Card
+            key={item.id}
+            images={[]}
+            placeholderUrl="/placeholder_ingredient.jpg"
+            vertical={false}
+            href={`/ingredients/${item.id}`}
+          >
+            <p>{item.name}</p>
+          </Card>,
           item.id,
         ] as const;
       }}
@@ -30,26 +38,5 @@ export function IngredientSearchResults({
         return data.ingredients;
       }}
     ></InfiniteScroll>
-  );
-}
-
-interface IngredientSearchItemProps {
-  ingredient: IngredientSearchItem;
-}
-
-function IngredientSearchItem({ ingredient }: IngredientSearchItemProps) {
-  return (
-    <Card
-      image={{
-        urls: [],
-        placeholderUrl: "/placeholder_ingredient.jpg",
-        altText: `Image of ${ingredient.name}`,
-        grid: false,
-      }}
-      vertical={false}
-      href={`/ingredients/${ingredient.id}`}
-    >
-      <p>{ingredient.name}</p>
-    </Card>
   );
 }

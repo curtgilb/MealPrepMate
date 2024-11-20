@@ -2,17 +2,16 @@
 // Returns which UnitTypes are in the time frame
 // The datapoints categoriezed by store and food type
 
-import { Timeframe } from "@/features/ingredient/components/PriceHistoryGroup";
-import { FoodType, GetIngredientQuery, UnitType } from "@/gql/graphql";
-import { DateTime } from "luxon";
-import { useMemo } from "react";
+import { DateTime } from 'luxon';
+import { useMemo } from 'react';
+
+import { Timeframe } from '@/features/ingredient/components/PriceHistoryGroup';
+import { FoodType, GetIngredientQuery, IngredientFieldsFragment, UnitType } from '@/gql/graphql';
 
 // Return applicable UnitTypes[]
 // grouped price points
 
-type PricePoint = NonNullable<
-  GetIngredientQuery["ingredient"]["priceHistory"]
->[number];
+type PricePoint = NonNullable<IngredientFieldsFragment["priceHistory"]>[number];
 
 function getCutoffDate(timeframe: Timeframe) {
   switch (timeframe) {
@@ -24,13 +23,13 @@ function getCutoffDate(timeframe: Timeframe) {
       return DateTime.now().minus({ months: 3 });
   }
 }
-
+// Grocery store id -> date -> PriceGroup
 type GroupedPrices = {
   [key: string]: { [key: string]: PriceGroup };
 };
 
 export type PriceGroup = {
-  date: Date;
+  date: number;
   storeName: string;
   uncategorized: PricePoint | undefined;
   canned: PricePoint | undefined;
@@ -66,14 +65,14 @@ function addPriceToGroup(
 export function usePriceHistory(
   timeframe: Timeframe,
   unitType: UnitType,
-  prices: GetIngredientQuery["ingredient"]["priceHistory"]
+  prices: IngredientFieldsFragment["priceHistory"]
 ) {
   const cutoffDate = getCutoffDate(timeframe).toJSDate();
   return prices
     ?.sort((a, b) => a.date - b.date)
     .reduce((groups, price) => {
-      // Filter out-of-range datets and non-matching unit types.
-      if (price.date >= cutoffDate) {
+      // Filter out-of-range dates and non-matching unit types.
+      if (price.date >= cutoffDate && unitType === price.unit.type) {
         if (!(price.groceryStore.id in groups)) {
           groups[price.groceryStore.id] = {};
         }
@@ -81,7 +80,7 @@ export function usePriceHistory(
         const dateString = price.date.toISOString().split("T")[0];
         if (!(dateString in groups[price.groceryStore.id])) {
           groups[price.groceryStore.id][dateString] = {
-            date: price.date,
+            date: price.date.getTime(),
             storeName: price.groceryStore.name,
             uncategorized: undefined,
             canned: undefined,

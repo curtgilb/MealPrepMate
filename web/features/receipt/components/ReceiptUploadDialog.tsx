@@ -1,14 +1,14 @@
 "use client";
 
-import { Loader2, Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { Dispatch, SetStateAction, useState } from "react";
-import { useMutation } from "urql";
+import { Loader2, Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Dispatch, SetStateAction, useState } from 'react';
+import { useMutation } from 'urql';
 
-import { ModalDrawerWithTrigger } from "@/components/ModalDrawerWithTrigger";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { graphql } from "@/gql";
+import { ModalDrawerWithTrigger } from '@/components/ModalDrawerWithTrigger';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { graphql } from '@/gql';
 
 const uploadReceipt = graphql(`
   mutation uploadReceipt($file: File!) {
@@ -52,7 +52,9 @@ function ReceiptUploadDialog({ open, setOpen }: ReceiptUploadDialogProps) {
   const handleFileUpload = () => {
     uploadFile({ file: selectedFile }).then((uploadResult) => {
       router.push(
-        `/ingredients/receipt/${uploadResult.data?.uploadReceipt.id}`
+        `/receipt/${decodeURIComponent(
+          uploadResult.data?.uploadReceipt.id ?? ""
+        )}`
       );
     });
   };
