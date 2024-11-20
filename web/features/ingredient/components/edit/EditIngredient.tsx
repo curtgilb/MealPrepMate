@@ -11,9 +11,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { expirationRuleFragment } from "@/features/ingredient/api/ExpirationRule";
-import { ExpirationRuleSelector } from "@/features/ingredient/components/ExpirationRuleSelector";
 import { getFragmentData } from "@/gql";
-import { GetIngredientQuery } from "@/gql/graphql";
+import { IngredientFieldsFragment } from "@/gql/graphql";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Save, X, XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -21,7 +20,7 @@ import { useRef } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
-const IngredientValidation = z.object({
+const ingredientSchema = z.object({
   name: z.string(),
   alternateNames: z
     .array(z.string().min(1, "String can't be empty"))
@@ -33,8 +32,10 @@ const IngredientValidation = z.object({
   expirationRuleId: z.string().cuid().nullish().optional(),
 });
 
+type IngredientFormType = z.infer<typeof ingredientSchema>;
+
 interface EditIngredientProps {
-  ingredient?: GetIngredientQuery["ingredient"];
+  ingredient?: IngredientFieldsFragment | null | undefined;
 }
 
 export function EditIngredient({ ingredient }: EditIngredientProps) {
@@ -44,8 +45,8 @@ export function EditIngredient({ ingredient }: EditIngredientProps) {
     expirationRuleFragment,
     ingredient?.expiration
   );
-  const form = useForm<z.infer<typeof IngredientValidation>>({
-    resolver: zodResolver(IngredientValidation),
+  const form = useForm<IngredientFormType>({
+    resolver: zodResolver(ingredientSchema),
     defaultValues: {
       name: ingredient?.name ?? "",
       alternateNames: ingredient?.alternateNames ?? [""],
@@ -60,7 +61,7 @@ export function EditIngredient({ ingredient }: EditIngredientProps) {
     control: form.control,
   });
 
-  function onSubmit(values: z.infer<typeof IngredientValidation>) {}
+  function onSubmit(values: IngredientFormType) {}
   return (
     <>
       <h2 className="text-4xl font-black mb-8">
