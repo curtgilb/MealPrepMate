@@ -1,14 +1,14 @@
-import { builder } from "@/presentation/builder.js";
-import { DeleteResult } from "@/presentation/schemas/common/MutationResult.js";
-import { db } from "@/infrastructure/repository/db.js";
+import { db } from '@/infrastructure/repository/db.js';
+import { builder } from '@/presentation/builder.js';
+import { DeleteResult } from '@/presentation/schemas/common/MutationResult.js';
+import { encodeGlobalID } from '@pothos/plugin-relay';
 
 // ============================================ Types ===================================
-builder.prismaObject("Category", {
+builder.prismaNode("Category", {
+  id: { field: "id" },
   name: "Category",
   fields: (t) => ({
-    id: t.exposeID("id"),
     name: t.exposeString("name"),
-    recipes: t.relation("recipes"),
   }),
 });
 
@@ -47,7 +47,6 @@ builder.mutationFields((t) => ({
         required: true,
       }),
     },
-
     resolve: async (query, root, args) => {
       await db.category.create({ data: { name: args.name } });
       // @ts-ignore
@@ -57,15 +56,13 @@ builder.mutationFields((t) => ({
   deleteCategory: t.field({
     type: DeleteResult,
     args: {
-      categoryId: t.arg.string({ required: true }),
+      categoryId: t.arg.globalID({ required: true }),
     },
     resolve: async (root, args) => {
-      try {
-        await db.category.delete({ where: { id: args.categoryId } });
-        return { success: true };
-      } catch (e) {
-        return { success: false, message: e.message };
-      }
+      const guid = encodeGlobalID(args.categoryId.typename, args.categoryId.id);
+
+      await db.category.delete({ where: { id: args.categoryId.id } });
+      return { id: guid, success: true };
     },
   }),
 }));

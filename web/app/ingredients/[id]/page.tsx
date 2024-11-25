@@ -1,12 +1,23 @@
-import SingleColumnCentered from '@/components/layouts/single-column-centered';
-import { expirationRuleFragment } from '@/features/ingredient/api/ExpirationRule';
-import { getIngredientQuery, ingredientFieldsFragment } from '@/features/ingredient/api/Ingredient';
-import { PriceHistoryGroup } from '@/features/ingredient/components/PriceHistoryGroup';
-import { ExpirationRule } from '@/features/ingredient/components/view/ExpirationRule';
-import { ExpirationRuleTable } from '@/features/ingredient/components/view/ExpirationRuleTable';
-import { getFragmentData } from '@/gql';
-import { FoodType, MeasurementSystem, UnitType } from '@/gql/graphql';
-import { getClient } from '@/ssrGraphqlClient';
+import { Edit } from "lucide-react";
+import Link from "next/link";
+
+import SingleColumnCentered from "@/components/layouts/single-column-centered";
+import { Button } from "@/components/ui/button";
+import { expirationRuleFragment } from "@/features/ingredient/api/ExpirationRule";
+import {
+  getIngredientQuery,
+  ingredientFieldsFragment,
+} from "@/features/ingredient/api/Ingredient";
+import { PriceHistoryGroup } from "@/features/ingredient/components/PriceHistoryGroup";
+import { EditExpirationRuleTable } from "@/features/ingredient/components/view/EditExpirationRule";
+import { ExpirationRule } from "@/features/ingredient/components/view/ExpirationRule";
+import {
+  EditExpirationRule,
+  ExpirationRuleTable,
+} from "@/features/ingredient/components/view/ExpirationRuleTable";
+import { getFragmentData } from "@/gql";
+import { FoodType, MeasurementSystem, UnitType } from "@/gql/graphql";
+import { getClient } from "@/ssrGraphqlClient";
 
 export default async function IngredientPage({
   params,
@@ -29,13 +40,23 @@ export default async function IngredientPage({
 
   return (
     <SingleColumnCentered condensed={true}>
-      <div className="mb-12">
-        <h1 className="font-serif text-4xl font-extrabold mb-2">
-          {ingredient?.name}
-        </h1>
-        <p className="font-light uppercase tracking-[.25em]">
-          {ingredient?.category?.name}
-        </p>
+      <div className="mb-12 flex justify-between">
+        <div>
+          <h1 className="font-serif text-4xl font-extrabold mb-2">
+            {ingredient?.name}
+          </h1>
+          <p className="font-light uppercase tracking-[.25em]">
+            {ingredient?.category?.name}
+          </p>
+        </div>
+        <div>
+          <Button variant="outline" asChild>
+            <Link href={`/ingredients/${ingredient?.id}/edit`}>
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-20">
@@ -68,7 +89,6 @@ export default async function IngredientPage({
 
         <div>
           <h2 className="text-2xl font-serif font-bold mb-2">Expiration</h2>
-          <ExpirationRuleTable edit={false} rule={expirationRule} />
         </div>
 
         <div className="col-span-2">

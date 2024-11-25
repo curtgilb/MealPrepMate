@@ -1,17 +1,20 @@
+import { GraphQLID } from "graphql";
+import { DateTimeResolver } from "graphql-scalars";
+
+import { db } from "@/infrastructure/repository/db.js";
 // Setup for your schema builder. Does not contain any definitions for types in your schema
 import SchemaBuilder from "@pothos/core";
 import PrismaPlugin from "@pothos/plugin-prisma";
-import RelayPlugin from "@pothos/plugin-relay";
-import { DateTimeResolver } from "graphql-scalars";
-import { db } from "@/infrastructure/repository/db.js";
-import type PrismaTypes from "@/types/PothosTypes.js";
+import RelayPlugin, { decodeGlobalID } from "@pothos/plugin-relay";
 
+import type PrismaTypes from "@/types/PothosTypes.js";
 const builder = new SchemaBuilder<{
   DefaultFieldNullability: false;
   PrismaTypes: PrismaTypes;
   Scalars: {
     File: { Input: File; Output: never };
     DateTime: { Input: Date; Output: Date };
+    RefID: { Input: string; Output: string };
   };
 }>({
   defaultFieldNullability: false,
@@ -32,6 +35,17 @@ const builder = new SchemaBuilder<{
 builder.queryType({});
 builder.mutationType({});
 builder.addScalarType("DateTime", DateTimeResolver, {});
+
+builder.scalarType("RefID", {
+  serialize: (n) => n,
+  parseValue: (n) => {
+    if (typeof n !== "string") {
+      throw new Error("Invalid Global ID");
+    }
+    return decodeGlobalID(n).id;
+  },
+});
+
 builder.scalarType("File", {
   serialize: () => {
     throw new Error("Uploads can only be used as input types");

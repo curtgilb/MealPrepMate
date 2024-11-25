@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import { toTitleCase } from "@/application/util/utils.js";
 import {
   cleanString,
@@ -7,7 +9,6 @@ import {
 import { readCSV } from "@/infrastructure/file_io/read.js";
 import { db } from "@/infrastructure/repository/db.js";
 import { NutrientType } from "@prisma/client";
-import { z } from "zod";
 
 const nutrientSchema = z.object({
   id: z.string().uuid(),
@@ -44,7 +45,7 @@ export async function loadNutrients() {
           id: record.id,
           name: record.nutrient as string,
           isMacro: record.isMacro,
-          alternateNames: record.alternateNames,
+          alternateNames: record.alternateNames ?? [],
           type: record.type,
           important: record.important,
           advancedView: record.advancedView,
@@ -55,7 +56,7 @@ export async function loadNutrients() {
           id: record.id,
           name: record.nutrient as string,
           isMacro: record.isMacro,
-          alternateNames: record.alternateNames,
+          alternateNames: record.alternateNames ?? [],
           type: record.type,
           important: record.important,
           advancedView: record.advancedView,

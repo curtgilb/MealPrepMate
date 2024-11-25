@@ -1,4 +1,8 @@
 "use client";
+import { useForm } from "react-hook-form";
+import { useMutation } from "urql";
+import { z } from "zod";
+
 import { uploadPhotoMutation } from "@/api/Photo";
 import {
   Form,
@@ -11,9 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Photo } from "@/gql/graphql";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { useMutation } from "urql";
-import { z } from "zod";
+
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
@@ -71,7 +73,7 @@ export function ImageUploadForm({ onUploadedPhoto }: ImageUploadFormProps) {
               );
             }}
           />
-          <Button type="submit">Submit</Button>
+          <Button type="submit">Upload</Button>
         </form>
       </Form>
     </div>

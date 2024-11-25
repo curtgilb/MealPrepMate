@@ -1,7 +1,7 @@
-import { db } from "@/infrastructure/repository/db.js";
-import { builder } from "@/presentation/builder.js";
-import { DeleteResult } from "@/presentation/schemas/common/MutationResult.js";
-import { encodeGlobalID } from "@pothos/plugin-relay";
+import { db } from '@/infrastructure/repository/db.js';
+import { builder } from '@/presentation/builder.js';
+import { DeleteResult } from '@/presentation/schemas/common/MutationResult.js';
+import { encodeGlobalID } from '@pothos/plugin-relay';
 
 // ============================================ Types ===================================
 builder.prismaNode("RecipeIngredientGroup", {
@@ -10,7 +10,7 @@ builder.prismaNode("RecipeIngredientGroup", {
     name: t.exposeString("name"),
     recipe: t.relation("recipe"),
     ingredients: t.relation("ingredients"),
-    lable: t.relation("nutritionLabel", { nullable: true }),
+    label: t.relation("nutritionLabel", { nullable: true }),
   }),
 });
 
@@ -29,6 +29,7 @@ builder.mutationFields((t) => ({
       name: t.arg.string({ required: true }),
     },
     resolve: async (query, root, args) => {
+      console.log(args);
       return await db.recipeIngredientGroup.create({
         data: {
           recipe: { connect: { id: args.recipeId.id } },

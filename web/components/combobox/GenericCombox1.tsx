@@ -87,8 +87,11 @@ export function GenericCombobox<
     unwrapDataList(results?.data)?.map((item) => renderItem(item)) ?? [];
 
   function handleSelect(item: TItem, selected: boolean) {
+    // console.log("status:", selected);
+    // console.log("selected:", selectedItems);
     // Removing an item
     if (selected && selectedItems) {
+      // console.log("removing item:", item);
       onChange(selectedItems.filter((curr) => curr.id !== item.id));
       if (onItemRemoved) onItemRemoved(item);
     }

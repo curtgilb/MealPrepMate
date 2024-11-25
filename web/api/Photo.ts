@@ -18,4 +18,14 @@ const uploadPhotoMutation = graphql(`
   }
 `);
 
+const editPhotoMutation = graphql(`
+  mutation uploadPhoto($file: File!) {
+    uploadPhoto(photo: $file, isPrimary: false) {
+      id
+      url
+      isPrimary
+    }
+  }
+`);
+
 export { photoFieldsFragment, uploadPhotoMutation };

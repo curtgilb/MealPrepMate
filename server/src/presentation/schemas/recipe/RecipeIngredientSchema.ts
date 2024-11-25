@@ -1,18 +1,13 @@
 import {
-  addRecipeIngredient,
-  addRecipeIngredients,
-  addRecipeIngredientsFromText,
-  CreateRecipeIngredientInput,
-  editRecipeIngredient,
-  EditRecipeIngredientInput,
-  TaggedIngredient,
-  tagIngredients,
-} from "@/application/services/recipe/RecipeIngredientService.js";
-import { builder } from "@/presentation/builder.js";
-import { DeleteResult } from "@/presentation/schemas/common/MutationResult.js";
-import { db } from "@/infrastructure/repository/db.js";
-import { measurementUnit } from "@/presentation/schemas/common/MeasurementUnitSchema.js";
-import { ingredient } from "@/presentation/schemas/ingredient/IngredientSchema.js";
+    addRecipeIngredientsFromText, editRecipeIngredient, RecipeIngredientInput, TaggedIngredient,
+    tagIngredients
+} from '@/application/services/recipe/RecipeIngredientService.js';
+import { db } from '@/infrastructure/repository/db.js';
+import { builder } from '@/presentation/builder.js';
+import { measurementUnit } from '@/presentation/schemas/common/MeasurementUnitSchema.js';
+import { DeleteResult } from '@/presentation/schemas/common/MutationResult.js';
+import { ingredient } from '@/presentation/schemas/ingredient/IngredientSchema.js';
+import { encodeGlobalID } from '@pothos/plugin-relay';
 
 // ============================================ Types ===================================
 
@@ -42,10 +37,12 @@ const taggedIngredient = builder
       verified: t.exposeBoolean("verified"),
       unit: t.field({
         type: measurementUnit,
+        nullable: true,
         resolve: (parent) => parent.unit,
       }),
       ingredient: t.field({
         type: ingredient,
+        nullable: true,
         resolve: (parent) => parent.ingredient,
       }),
     }),
@@ -54,33 +51,29 @@ const taggedIngredient = builder
 // ============================================ Inputs ==================================
 
 export const recipeIngredientInput = builder
-  .inputRef<CreateRecipeIngredientInput>("CreateRecipeIngredientInput")
+  .inputRef<RecipeIngredientInput>("RecipeIngredientInput")
   .implement({
     fields: (t) => ({
       order: t.int({ required: true }),
       sentence: t.string({ required: true }),
       quantity: t.int(),
-      unitId: t.string({ required: true }),
-      ingredientId: t.string({ required: true }),
-      groupId: t.string({ required: true }),
+      unitId: t.field({ type: "RefID", required: true }),
+      ingredientId: t.field({ type: "RefID", required: true }),
+      groupId: t.field({ type: "RefID", required: true }),
       mealPrepIngredient: t.boolean({ required: true }),
       verified: t.boolean({ required: true }),
     }),
   });
 
-export const editRecipeInput = builder
-  .inputRef<EditRecipeIngredientInput>("EditRecipeIngredientInput")
-  .implement({
+export const editRecipeIngredientsInput = builder.inputType(
+  "EditRecipeIngredientsInput",
+  {
     fields: (t) => ({
-      id: t.string({ required: true }),
-      order: t.int(),
-      sentence: t.string(),
-      quantity: t.int(),
-      unitId: t.string(),
-      ingredientId: t.string(),
-      groupId: t.string(),
+      id: t.field({ type: "RefID", required: true }),
+      input: t.field({ type: recipeIngredientInput, required: true }),
     }),
-  });
+  }
+);
 
 // ============================================ Queries =================================
 builder.queryFields((t) => ({
@@ -98,30 +91,6 @@ builder.queryFields((t) => ({
 // ============================================ Mutations ===============================
 
 builder.mutationFields((t) => ({
-  // addRecipeIngredient: t.prismaField({
-  //   type: "RecipeIngredient",
-  //   args: {
-  //     recipeId: t.arg.globalID({ required: true }),
-  //     ingredient: t.arg({ type: recipeIngredientInput, required: true }),
-  //   },
-  //   resolve: async (query, root, args) => {
-  //     return await addRecipeIngredient(args.recipeId.id, args.ingredient);
-  //   },
-  // }),
-  // addRecipeIngredients: t.prismaField({
-  //   type: ["RecipeIngredient"],
-  //   args: {
-  //     recipeId: t.arg.globalID({ required: true }),
-  //     ingredients: t.arg({ type: [recipeIngredientInput], required: true }),
-  //   },
-  //   resolve: async (query, root, args) => {
-  //     return await addRecipeIngredients(
-  //       args.recipeId.id,
-  //       args.ingredients,
-  //       query
-  //     );
-  //   },
-  // }),
   addRecipeIngredientsFromTxt: t.prismaField({
     type: ["RecipeIngredient"],
     args: {
@@ -136,34 +105,39 @@ builder.mutationFields((t) => ({
       );
     },
   }),
-  deleteRecipeIngredients: t.field({
+  deleteRecipeIngredient: t.field({
     type: DeleteResult,
     args: {
       ingredientId: t.arg.globalID({ required: true }),
     },
     resolve: async (root, args) => {
+      const guid = encodeGlobalID(
+        args.ingredientId.typename,
+        args.ingredientId.id
+      );
       try {
         await db.recipeIngredient.delete({
           where: { id: args.ingredientId.id },
         });
         return {
+          id: guid,
           success: true,
         };
       } catch (e) {
-        return { success: false, message: e.message };
+        return { id: guid, success: false, message: e.message };
       }
     },
   }),
   editRecipeIngredients: t.prismaField({
-    type: "RecipeIngredient",
+    type: ["RecipeIngredient"],
     args: {
-      ingredient: t.arg({ type: editRecipeInput, required: true }),
+      ingredients: t.arg({
+        type: [editRecipeIngredientsInput],
+        required: true,
+      }),
     },
     resolve: async (query, root, args) => {
-      return await editRecipeIngredient(
-        args.ingredient as EditRecipeIngredientInput,
-        query
-      );
+      return await editRecipeIngredient(args.ingredients, query);
     },
   }),
 }));

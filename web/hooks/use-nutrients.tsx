@@ -1,4 +1,6 @@
 "use client";
+import { useMemo } from "react";
+
 import {
   getNutrientsQuery,
   nutritionFieldsFragment,
@@ -6,7 +8,6 @@ import {
 import { getFragmentData } from "@/gql";
 import { NutrientFieldsFragment } from "@/gql/graphql";
 import { useQuery } from "@urql/next";
-import { useMemo } from "react";
 
 export type NutrientMap = {
   [key: string]: NutrientFieldsFragment[];
@@ -22,6 +23,11 @@ export type NutrientWithChildren = NutrientFieldsFragment & {
   children?: NutrientFieldsFragment[];
 };
 
+// {
+//   "VITAMIN": [/* array of nutrients with their children */],
+//   "MINERAL": [/* array of nutrients with their children */],
+//   "MACRONUTRIENT": [/* array of nutrients with their children */]
+// }
 interface GroupedNutrients {
   [key: string]: NutrientWithChildren[];
 }
@@ -40,49 +46,40 @@ export function useNutrients(type: NutritionDisplayMode) {
 
   return useMemo(() => {
     if (!nutrients) return {};
-    // Create a map of parent nutrients to their children
-    const parentChildMap = new Map<string, NutrientWithChildren[]>();
-
-    // First pass: organize parent-child relationships
-    nutrients.forEach((nutrient) => {
-      if (nutrient.parentNutrientId) {
-        if (!parentChildMap.has(nutrient.parentNutrientId)) {
-          parentChildMap.set(nutrient.parentNutrientId, []);
-        }
-        parentChildMap.get(nutrient.parentNutrientId)?.push({
-          ...nutrient,
-        });
-      }
-    });
 
     // Initialize the result object
     const result: GroupedNutrients = {};
 
-    // Process nutrients and organize them by type
+    // First pass: Create a map of all nutrients by type
     nutrients.forEach((nutrient) => {
-      // Skip nutrients that are children of other passing nutrients
-      if (
-        nutrient.parentNutrientId &&
-        nutrients.some((n) => n.id === nutrient.parentNutrientId)
-      ) {
-        return;
+      if (!result[nutrient.type]) {
+        result[nutrient.type] = [];
       }
+      result[nutrient.type].push({ ...nutrient });
+    });
 
-      const type = nutrient.type.toUpperCase();
-      if (!result[type]) {
-        result[type] = [];
-      }
+    // Second pass: Build parent-child relationships and track children
+    const childrenIds = new Set<string>();
+    Object.values(result).forEach((nutrientArray) => {
+      nutrientArray.forEach((nutrient) => {
+        if (nutrient.parentNutrientId) {
+          childrenIds.add(nutrient.id);
+          const parent = nutrientArray.find(
+            (n) => n.id === nutrient.parentNutrientId
+          );
+          if (parent) {
+            if (!parent.children) parent.children = [];
+            parent.children.push(nutrient);
+          }
+        }
+      });
+    });
 
-      // Create the nutrient object with children if they exist
-      const nutrientWithChildren: NutrientWithChildren = {
-        ...nutrient,
-      };
-
-      if (parentChildMap.has(nutrient.id)) {
-        nutrientWithChildren.children = parentChildMap.get(nutrient.id);
-      }
-
-      result[type].push(nutrientWithChildren);
+    // Final pass: Remove children from top level arrays using the Set
+    Object.keys(result).forEach((type) => {
+      result[type] = result[type].filter(
+        (nutrient) => !childrenIds.has(nutrient.id)
+      );
     });
 
     return result;

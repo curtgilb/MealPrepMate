@@ -1,6 +1,7 @@
 "use client";
 import { editorExtensions } from "@/components/rich_text/CustomExtensions";
 import { RichTextEditorMenuBar } from "@/components/rich_text/RichTextEditorMenuBar";
+import { cn } from "@/lib/utils";
 import { EditorContent, useEditor } from "@tiptap/react";
 
 interface RichTextEditorProps {
@@ -17,7 +18,9 @@ export function RichTextEditor({
   const editor = useEditor({
     editorProps: {
       attributes: {
-        class: "focus-visible:outline-none",
+        class: cn("focus-visible:outline-none min-h-56", {
+          "px-4 py-3": editable,
+        }),
       },
     },
     editable,
@@ -38,7 +41,7 @@ export function RichTextEditor({
           }
         >
           <RichTextEditorMenuBar editor={editor} />
-          <EditorContent className="px-4 py-3 min-h-56" editor={editor} />
+          <EditorContent editor={editor} />
         </div>
       )
     );

@@ -1,14 +1,10 @@
-import { cleanString } from "@/application/validations/Formatters.js";
-import { parseIngredients } from "@/infrastructure/IngredientParserClient.js";
-import { db } from "@/infrastructure/repository/db.js";
-import {
-  Ingredient,
-  MeasurementUnit,
-  Prisma,
-  RecipeIngredient,
-} from "@prisma/client";
-import { DefaultArgs } from "@prisma/client/runtime/library";
-import { z } from "zod";
+import { z } from 'zod';
+
+import { cleanString } from '@/application/validations/Formatters.js';
+import { parseIngredients } from '@/infrastructure/IngredientParserClient.js';
+import { db } from '@/infrastructure/repository/db.js';
+import { Ingredient, MeasurementUnit, Prisma, RecipeIngredient } from '@prisma/client';
+import { DefaultArgs } from '@prisma/client/runtime/library';
 
 export type TaggedIngredient = Omit<
   RecipeIngredient,
@@ -18,7 +14,7 @@ export type TaggedIngredient = Omit<
   ingredient: Ingredient | null | undefined;
 };
 
-export const recipeIngredientValidation = z.object({
+const recipeIngredientValidation = z.object({
   order: z.number().nonnegative(),
   sentence: z.preprocess(cleanString, z.string()),
   quantity: z.number().nonnegative().nullish(),
@@ -29,27 +25,15 @@ export const recipeIngredientValidation = z.object({
   verified: z.boolean(),
 });
 
-export type CreateRecipeIngredientInput = {
+type RecipeIngredientInput = {
   order: number;
   sentence: string;
-  quantity: number | undefined | null;
-  unitId: string | undefined | null;
-  ingredientId: string | undefined | null;
-  groupId: string | undefined | null;
+  quantity?: number | undefined | null;
+  unitId?: string | undefined | null;
+  ingredientId?: string | undefined | null;
+  groupId?: string | undefined | null;
   mealPrepIngredient: boolean;
   verified: boolean;
-};
-
-export type EditRecipeIngredientInput = {
-  id: string;
-  order: number | null | undefined;
-  sentence: string | null | undefined;
-  quantity: number | null | undefined;
-  unitId: string | null | undefined;
-  ingredientId: string | null | undefined;
-  groupId: string | null | undefined;
-  mealPrepIngredient: boolean | null | undefined;
-  verified: boolean | null | undefined;
 };
 
 type RecipeIngredientQuery = {
@@ -61,11 +45,9 @@ type RecipeIngredientQuery = {
 async function tagIngredients<T extends boolean = false>(
   ingredientList: string,
   onlyMatchingIds?: T
-): Promise<
-  T extends true ? CreateRecipeIngredientInput[] : TaggedIngredient[]
-> {
+): Promise<T extends true ? RecipeIngredientInput[] : TaggedIngredient[]> {
   const taggedIngredients: TaggedIngredient[] = [];
-  const createInputIngredients: CreateRecipeIngredientInput[] = [];
+  const createInputIngredients: RecipeIngredientInput[] = [];
 
   const parsedIngredients = await parseIngredients(ingredientList);
 
@@ -104,12 +86,12 @@ async function tagIngredients<T extends boolean = false>(
 
   return (
     onlyMatchingIds ? createInputIngredients : taggedIngredients
-  ) as T extends true ? CreateRecipeIngredientInput[] : TaggedIngredient[];
+  ) as T extends true ? RecipeIngredientInput[] : TaggedIngredient[];
 }
 
 async function addRecipeIngredient(
   recipeId: string,
-  ingredient: CreateRecipeIngredientInput,
+  ingredient: RecipeIngredientInput,
   query?: RecipeIngredientQuery
 ) {
   return await db.recipeIngredient.create({
@@ -131,7 +113,7 @@ async function addRecipeIngredient(
 
 async function addRecipeIngredients(
   recipeId: string,
-  ingredients: CreateRecipeIngredientInput[],
+  ingredients: RecipeIngredientInput[],
   query?: RecipeIngredientQuery
 ) {
   // @ts-ignore
@@ -157,25 +139,34 @@ async function addRecipeIngredientsFromText(
   return await addRecipeIngredients(recipeId, taggedIngredients, query);
 }
 
+type EditRecipeIngredientInput = {
+  id: string;
+  input: RecipeIngredientInput;
+};
+
 async function editRecipeIngredient(
-  ingredient: EditRecipeIngredientInput,
+  ingredient: EditRecipeIngredientInput[],
   query?: RecipeIngredientQuery
 ) {
-  return await db.recipeIngredient.update({
-    where: { id: ingredient.id },
-    data: {
-      sentence: ingredient?.sentence ?? undefined,
-      quantity: ingredient.quantity,
-      order: ingredient.order ?? undefined,
-      unit: ingredient?.unitId
-        ? { connect: { id: ingredient.unitId } }
-        : undefined,
-      ingredient: ingredient.ingredientId
-        ? { connect: { id: ingredient.ingredientId } }
-        : undefined,
-    },
-    ...query,
-  });
+  return await db.$transaction(
+    ingredient.map((ing) =>
+      db.recipeIngredient.update({
+        where: { id: ing.id },
+        data: {
+          sentence: ing.input?.sentence ?? undefined,
+          quantity: ing.input.quantity,
+          order: ing.input.order ?? undefined,
+          unit: ing.input?.unitId
+            ? { connect: { id: ing.input.unitId } }
+            : undefined,
+          ingredient: ing.input.ingredientId
+            ? { connect: { id: ing.input.ingredientId } }
+            : undefined,
+        },
+        ...query,
+      })
+    )
+  );
 }
 
 async function deleteRecipeIngredient(id: string) {
@@ -187,6 +178,8 @@ async function deleteRecipeIngredients(ids: string[]) {
 }
 
 export {
+  RecipeIngredientInput,
+  recipeIngredientValidation,
   addRecipeIngredient,
   addRecipeIngredients,
   deleteRecipeIngredient,

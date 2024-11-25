@@ -1,27 +1,48 @@
 import { graphql } from "@/gql";
 
-const editNutritionLabelMutation = graphql(`
-  mutation editNutritionLabel($label: EditNutritionLabelInput!) {
-    editNutritionLabel(label: $label) {
+const nutritionLabelFragment = graphql(`
+  fragment NutritionLabelFields on NutritionLabel {
+    id
+    ingredientGroup {
       id
-      recipe {
+      name
+    }
+    isPrimary
+    servingSize
+    servingSizeUnit {
+      id
+      name
+      symbol
+    }
+    servings
+    servingsUsed
+    nutrients {
+      value
+      nutrient {
         id
-      }
-      servings
-      servingSize
-      servingSizeUnit {
-        id
-        name
-        symbol
-      }
-      servingsUsed
-      isPrimary
-      nutrients {
-        nutrient {
-          id
-        }
-        value
       }
     }
   }
 `);
+
+const createNutritionLabelMutation = graphql(`
+  mutation createNutritionLabel($input: NutritionLabelInput!) {
+    createNutritionLabel(nutritionLabel: $input) {
+      ...NutritionLabelFields
+    }
+  }
+`);
+
+const editNutritionLabelMutation = graphql(`
+  mutation editNutritionLabel($id: ID!, $label: NutritionLabelInput!) {
+    editNutritionLabel(id: $id, label: $label) {
+      ...NutritionLabelFields
+    }
+  }
+`);
+
+export {
+  nutritionLabelFragment,
+  createNutritionLabelMutation,
+  editNutritionLabelMutation,
+};

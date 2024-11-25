@@ -30,7 +30,6 @@ const nutrientTargetInput = builder
   .inputRef<NutrientTargetInput>("NutrientTargetInput")
   .implement({
     fields: (t) => ({
-      nutrientId: t.string({ required: true }),
       value: t.float({ required: true }),
       threshold: t.float(),
       preference: t.field({ type: nutrientTargetEnum, required: true }),
@@ -45,10 +44,11 @@ builder.mutationFields((t) => ({
   setNutritionTarget: t.prismaField({
     type: "Nutrient",
     args: {
+      nutrientId: t.arg.globalID({ required: true }),
       target: t.arg({ type: nutrientTargetInput, required: true }),
     },
     resolve: async (query, root, args) => {
-      return setNutrientTarget(args.target, query);
+      return setNutrientTarget(args.nutrientId.id, args.target, query);
     },
   }),
 }));

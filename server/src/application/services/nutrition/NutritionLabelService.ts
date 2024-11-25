@@ -1,8 +1,8 @@
-import { updateAggregateLabel } from "@/application/services/nutrition/AggregateLabelService.js";
-import { AllowUndefinedOrNull } from "@/application/types/CustomTypes.js";
-import { db } from "@/infrastructure/repository/db.js";
-import { Prisma } from "@prisma/client";
-import { z } from "zod";
+import { z } from 'zod';
+
+import { updateAggregateLabel } from '@/application/services/nutrition/AggregateLabelService.js';
+import { db } from '@/infrastructure/repository/db.js';
+import { Prisma } from '@prisma/client';
 
 const nutrientValidation = z.object({
   nutrientId: z.string().uuid(),
@@ -19,25 +19,21 @@ export const nutritionLabelValidation = z.object({
   ingredientGroupId: z.string().uuid().nullish(),
 });
 
-export type CreateNutrientInput = {
+type NutrientInput = {
   nutrientId: string;
   value: number;
 };
 
-export type CreateNutritionLabelInput = {
+type NutritionLabelInput = {
   servings: number;
-  servingSize: number | undefined | null;
-  servingSizeUnitId: string | undefined | null;
-  servingsUsed: number | undefined | null;
+  servingSize?: number | undefined | null;
+  servingSizeUnitId?: string | undefined | null;
+  servingsUsed?: number | undefined | null;
   isPrimary: boolean;
-  nutrients: CreateNutrientInput[] | undefined | null;
-  ingredientGroupId: string | undefined | null;
+  nutrients?: NutrientInput[] | undefined | null;
+  ingredientGroupId?: string | undefined | null;
+  recipeId?: string | undefined | null;
 };
-
-export type EditNutritionLabelInput =
-  AllowUndefinedOrNull<CreateNutritionLabelInput> & {
-    recipeId: string | null | undefined;
-  };
 
 type NutritionLabelQuery = {
   include?: Prisma.NutritionLabelInclude | undefined;
@@ -45,8 +41,7 @@ type NutritionLabelQuery = {
 };
 
 async function createNutritionLabel(
-  label: CreateNutritionLabelInput,
-  recipeId: string | undefined = undefined,
+  label: NutritionLabelInput,
   query?: NutritionLabelQuery
 ) {
   return await db.$transaction(async (tx) => {
@@ -59,7 +54,9 @@ async function createNutritionLabel(
           : undefined,
         servingsUsed: label.servingsUsed,
         isPrimary: label.isPrimary,
-        recipe: recipeId ? { connect: { id: recipeId } } : undefined,
+        recipe: label.recipeId
+          ? { connect: { id: label.recipeId } }
+          : undefined,
         nutrients: label.nutrients
           ? {
               createMany: {
@@ -76,8 +73,8 @@ async function createNutritionLabel(
       },
     });
 
-    if (recipeId) {
-      await updateAggregateLabel(recipeId, undefined, tx);
+    if (label.recipeId) {
+      await updateAggregateLabel(label.recipeId, undefined, tx);
     }
 
     return await tx.nutritionLabel.findUniqueOrThrow({
@@ -89,7 +86,7 @@ async function createNutritionLabel(
 
 async function editNutritionLabel(
   labelId: string,
-  label: EditNutritionLabelInput,
+  label: NutritionLabelInput,
   query?: NutritionLabelQuery
 ) {
   return await db.$transaction(async (tx) => {
@@ -141,4 +138,10 @@ async function deleteNutritionLabel(labelId: string) {
   await db.nutritionLabel.delete({ where: { id: labelId } });
 }
 
-export { createNutritionLabel, deleteNutritionLabel, editNutritionLabel };
+export {
+  createNutritionLabel,
+  deleteNutritionLabel,
+  editNutritionLabel,
+  NutrientInput,
+  NutritionLabelInput,
+};

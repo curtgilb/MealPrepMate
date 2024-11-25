@@ -1,8 +1,14 @@
 "use client";
+import "@/styles/globals.css";
+
+import { Menu } from "lucide-react";
+import { Inter, Merriweather } from "next/font/google";
+import Image from "next/image";
+import { useMemo, useState } from "react";
+
 import { Navigation } from "@/components/SideNav";
 import { Button } from "@/components/ui/button";
-import { animated, useSpring } from "@react-spring/web";
-
+import { Toaster } from "@/components/ui/sonner";
 import {
   MutationAddRecipeServingArgs,
   MutationAddRecipeToMealPlanArgs,
@@ -10,19 +16,14 @@ import {
   MutationSetRankedNutrientsArgs,
 } from "@/gql/graphql";
 import { cn } from "@/lib/utils";
-import "@/styles/globals.css";
+import { animated, useSpring } from "@react-spring/web";
 import { cacheExchange } from "@urql/exchange-graphcache";
 import {
-  UrqlProvider,
   createClient,
   fetchExchange,
   ssrExchange,
+  UrqlProvider,
 } from "@urql/next";
-import { Menu } from "lucide-react";
-import { Inter, Merriweather } from "next/font/google";
-import { useMemo, useState } from "react";
-import { Toaster } from "@/components/ui/sonner";
-import Image from "next/image";
 
 const fontSans = Inter({
   subsets: ["latin"],
@@ -54,6 +55,8 @@ export default function RootLayout({
           keys: {
             NutrientsQuery: (data) => null,
             IngredientsQuery: (data) => null,
+            PolygonCoordinate: (data) => null,
+            BoundingBox: (data) => null,
           },
           updates: {
             Mutation: {

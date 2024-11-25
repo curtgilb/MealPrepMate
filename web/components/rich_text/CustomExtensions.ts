@@ -1,19 +1,19 @@
-import Underline from "@tiptap/extension-underline";
 import { CustomHeading } from "@/components/rich_text/CustomHeading";
+import Bold from "@tiptap/extension-bold";
 import BulletList from "@tiptap/extension-bullet-list";
+import Document from "@tiptap/extension-document";
+import Italic from "@tiptap/extension-italic";
 import ListItem from "@tiptap/extension-list-item";
+import OrderedList from "@tiptap/extension-ordered-list";
 import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
-import Document from "@tiptap/extension-document";
-import OrderedList from "@tiptap/extension-ordered-list";
-import Bold from "@tiptap/extension-bold";
-import Italic from "@tiptap/extension-italic";
+import Underline from "@tiptap/extension-underline";
 
 export const editorExtensions = [
   Bold,
   Italic.configure({
     HTMLAttributes: {
-      class: "my-custom-class",
+      class: "italic",
     },
   }),
   CustomHeading,
@@ -29,7 +29,11 @@ export const editorExtensions = [
       class: "list-decimal pl-4",
     },
   }),
-  Text,
+  Text.configure({
+    HTMLAttributes: {
+      class: "text-base font-light",
+    },
+  }),
   Document,
   Underline.configure({
     HTMLAttributes: {

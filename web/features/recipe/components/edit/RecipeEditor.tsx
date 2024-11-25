@@ -1,10 +1,4 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { EditRecipeInfo } from "@/features/recipe/components/edit/info/EditRecipeInfo";
-import { EditRecipeIngredients } from "@/features/recipe/components/edit/ingredients/EditRecipeIngredients";
-import { EditRecipeNutritionLabels } from "@/features/recipe/components/edit/labels/EditRecipeNutritionLabels";
-import { RecipeFieldsFragment } from "@/gql/graphql";
-
 import { useRouter } from "next/navigation";
 import {
   ForwardRefExoticComponent,
@@ -13,6 +7,12 @@ import {
   useRef,
   useState,
 } from "react";
+
+import { Button } from "@/components/ui/button";
+import { EditRecipeInfo } from "@/features/recipe/components/edit/info/EditRecipeInfo";
+import { EditRecipeIngredients } from "@/features/recipe/components/edit/ingredients/EditRecipeIngredients";
+import { EditRecipeNutritionLabels } from "@/features/recipe/components/edit/labels/EditRecipeNutritionLabels";
+import { RecipeFieldsFragment } from "@/gql/graphql";
 
 export interface EditRecipeProps {
   recipe: RecipeFieldsFragment | undefined | null;
@@ -32,7 +32,7 @@ const editComponents: {
 } = {
   1: { Component: EditRecipeInfo, name: "basic info" },
   2: { Component: EditRecipeIngredients, name: "ingredients" },
-  3: { Component: EditRecipeNutritionLabels, name: "nutrition label" },
+  // 3: { Component: EditRecipeNutritionLabels, name: "nutrition label" },
 };
 
 export function RecipeEditor({ recipe }: EditRecipeProps) {

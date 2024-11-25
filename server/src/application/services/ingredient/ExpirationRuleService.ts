@@ -1,24 +1,14 @@
 import { db } from "@/infrastructure/repository/db.js";
 import { Prisma } from "@prisma/client";
 
-type CreateExpirationRuleInput = {
+type ExpirationRuleInput = {
   name: string;
   variation?: string | null | undefined;
   defrostTime?: number | null | undefined;
   perishable?: boolean | null | undefined;
-  tableLife: number;
-  fridgeLife: number;
-  freezerLife: number;
-};
-
-type EditExpirationRuleInput = {
-  name?: string | undefined | null;
-  variation: string | null | undefined;
-  defrostTime: number | undefined | null;
-  perishable?: boolean | undefined | null;
-  tableLife?: number | undefined | null;
-  fridgeLife?: number | undefined | null;
-  freezerLife?: number | undefined | null;
+  tableLife?: number | null | undefined;
+  fridgeLife?: number | null | undefined;
+  freezerLife?: number | null | undefined;
 };
 
 type ExpirationRuleQuery = {
@@ -49,7 +39,7 @@ async function getExpirationRules(
 }
 
 async function createExpirationRule(
-  rule: CreateExpirationRuleInput,
+  rule: ExpirationRuleInput,
   query?: ExpirationRuleQuery
 ) {
   //@ts-ignore
@@ -70,7 +60,7 @@ async function createExpirationRule(
 
 async function editExpirationRule(
   ruleId: string,
-  rule: EditExpirationRuleInput,
+  rule: ExpirationRuleInput,
   query?: ExpirationRuleQuery
 ) {
   return await db.expirationRule.update({
@@ -97,8 +87,7 @@ async function deleteExpirationRule(ruleId: string) {
 }
 
 export {
-  CreateExpirationRuleInput,
-  EditExpirationRuleInput,
+  ExpirationRuleInput,
   createExpirationRule,
   editExpirationRule,
   deleteExpirationRule,

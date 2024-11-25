@@ -1,14 +1,14 @@
-import { CreateNutritionLabelInput } from "@/application/services/nutrition/NutritionLabelService.js";
-import { tagIngredients } from "@/application/services/recipe/RecipeIngredientService.js";
-import { CreateRecipeInput } from "@/application/services/recipe/RecipeService.js";
-import { MaybePromise } from "@/application/types/CustomTypes.js";
+import { NutritionLabelInput } from '@/application/services/nutrition/NutritionLabelService.js';
+import { tagIngredients } from '@/application/services/recipe/RecipeIngredientService.js';
+import { RecipeInput } from '@/application/services/recipe/RecipeService.js';
+import { MaybePromise } from '@/application/types/CustomTypes.js';
 
 type TransformedRecordData = {
   meta: {
     externalId: string | undefined;
   };
-  recipe: CreateRecipeInput;
-  label: CreateNutritionLabelInput;
+  recipe: RecipeInput;
+  label: NutritionLabelInput;
 };
 
 type UnwrapArray<T> = T extends (infer U)[]

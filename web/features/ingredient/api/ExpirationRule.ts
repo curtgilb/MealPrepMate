@@ -31,7 +31,7 @@ const getExpirationRulesQuery = graphql(`
 
 const createExpirationRuleMutation = graphql(
   `
-    mutation CreateExpirationRule($input: CreateExpirationRuleInput!) {
+    mutation CreateExpirationRule($input: ExpirationRuleInput!) {
       createExpirationRule(rule: $input) {
         ...ExpirationRuleFields
       }
@@ -41,7 +41,7 @@ const createExpirationRuleMutation = graphql(
 
 const editExpirationRuleMutation = graphql(
   `
-    mutation EditExpirationRule($id: ID!, $input: EditExpirationRuleInput!) {
+    mutation EditExpirationRule($id: ID!, $input: ExpirationRuleInput!) {
       editExpirationRule(ruleId: $id, expirationRule: $input) {
         ...ExpirationRuleFields
       }

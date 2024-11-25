@@ -1,4 +1,7 @@
-import { GroceryStorePicker } from "@/features/receipt/components/GroceryStorePicker";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { GenericCombobox } from "@/components/combobox/GenericCombox1";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
@@ -8,12 +11,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { GetReceiptQuery } from "@/gql/graphql";
+import { getGroceryStoresQuery } from "@/features/ingredient/api/GroceryStore";
+import { GetGroceryStoresQuery, GetReceiptQuery } from "@/gql/graphql";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 
-interface EditRecipeProps {
+interface EditRecipeInfoProps {
   receipt: GetReceiptQuery["receipt"];
 }
 
@@ -22,7 +24,7 @@ const receiptInputSchema = z.object({
   store: z.object({ id: z.string(), name: z.string() }),
 });
 
-export function EditReceipt({ receipt }: GetReceiptQuery) {
+export function EditReceiptInfo({ receipt }: EditRecipeInfoProps) {
   const form = useForm<z.infer<typeof receiptInputSchema>>({
     resolver: zodResolver(receiptInputSchema),
     defaultValues: {
@@ -30,6 +32,16 @@ export function EditReceipt({ receipt }: GetReceiptQuery) {
       date: receipt.date ? new Date(receipt.date) : new Date(),
     },
   });
+
+  function renderStore(
+    store: GetGroceryStoresQuery["stores"]["edges"][number]["node"]
+  ) {
+    return {
+      id: store.id,
+      name: store.name,
+      label: store.name,
+    };
+  }
 
   function updateReceipt(values: z.infer<typeof receiptInputSchema>) {}
 
@@ -46,16 +58,23 @@ export function EditReceipt({ receipt }: GetReceiptQuery) {
             <FormItem className="flex flex-col w-64">
               <FormLabel>Grocery Store</FormLabel>
               <FormControl>
-                <GroceryStorePicker
-                  select={(store) => {
-                    field.onChange(store);
+                <GenericCombobox
+                  query={getGroceryStoresQuery}
+                  variables={{}}
+                  unwrapDataList={(data) => data?.stores.edges ?? []}
+                  renderItem={({
+                    node: store,
+                  }: GetGroceryStoresQuery["stores"]["edges"][number]) =>
+                    renderStore(store)
+                  }
+                  selectedItems={
+                    field.value ? [renderStore(field.value)] : undefined
+                  }
+                  onChange={(store) => {
+                    field.onChange(store[0]);
                   }}
-                  deselect={() => {
-                    field.onChange(undefined);
-                  }}
-                  selectedIds={field.value ? [field.value.id] : []}
-                  multiselect={false}
-                  placeholder={field.value ? field.value.name : "Pick a store"}
+                  multiSelect={false}
+                  autoFilter={false}
                 />
               </FormControl>
               <FormMessage />

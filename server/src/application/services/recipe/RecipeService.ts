@@ -1,19 +1,16 @@
-import { updateAggregateLabel } from "@/application/services/nutrition/AggregateLabelService.js";
+import { z } from 'zod';
+
+import { updateAggregateLabel } from '@/application/services/nutrition/AggregateLabelService.js';
 import {
-  CreateNutritionLabelInput,
-  nutritionLabelValidation,
-} from "@/application/services/nutrition/NutritionLabelService.js";
+    NutritionLabelInput, nutritionLabelValidation
+} from '@/application/services/nutrition/NutritionLabelService.js';
 import {
-  CreateRecipeIngredientInput,
-  recipeIngredientValidation,
-  tagIngredients,
-} from "@/application/services/recipe/RecipeIngredientService.js";
-import { AllowUndefinedOrNull } from "@/application/types/CustomTypes.js";
-import { toTitleCase } from "@/application/util/utils.js";
-import { cleanString } from "@/application/validations/Formatters.js";
-import { db } from "@/infrastructure/repository/db.js";
-import { Prisma } from "@prisma/client";
-import { z } from "zod";
+    RecipeIngredientInput, recipeIngredientValidation, tagIngredients
+} from '@/application/services/recipe/RecipeIngredientService.js';
+import { toTitleCase } from '@/application/util/utils.js';
+import { cleanString } from '@/application/validations/Formatters.js';
+import { db } from '@/infrastructure/repository/db.js';
+import { Prisma, RecipeIngredient } from '@prisma/client';
 
 type WebRecipeQuery = {
   include?: Prisma.WebScrapedRecipeInclude | undefined;
@@ -44,31 +41,26 @@ const recipeValidation = z.object({
   nutrition: nutritionLabelValidation.nullish(),
 });
 
-export type CreateRecipeInput = {
+type RecipeInput = {
   title: string;
-  source: string | undefined | null;
-  prepTime: number | undefined | null;
-  cookTime: number | undefined | null;
-  marinadeTime: number | undefined | null;
-  directions: string | undefined | null;
-  notes: string | undefined | null;
-  photoIds: string[] | undefined | null;
-  courseIds: string[] | undefined | null;
-  categoryIds: string[] | undefined | null;
-  cuisineIds: string[] | undefined | null;
-  ingredients: CreateRecipeIngredientInput[] | undefined | null;
-  ingredientText?: string;
-  leftoverFridgeLife: number | undefined | null;
-  leftoverFreezerLife: number | undefined | null;
-  nutrition?: CreateNutritionLabelInput | undefined | null;
+  source?: string | undefined | null;
+  prepTime?: number | undefined | null;
+  cookTime?: number | undefined | null;
+  marinadeTime?: number | undefined | null;
+  directions?: string | undefined | null;
+  notes?: string | undefined | null;
+  photoIds?: string[] | undefined | null;
+  courseIds?: string[] | undefined | null;
+  categoryIds?: string[] | undefined | null;
+  cuisineIds?: string[] | undefined | null;
+  ingredients?: RecipeIngredientInput[] | undefined | null;
+  ingredientText?: string | null | undefined;
+  leftoverFridgeLife?: number | undefined | null;
+  leftoverFreezerLife?: number | undefined | null;
+  nutrition?: NutritionLabelInput | undefined | null;
 };
 
-export type EditRecipeInput = Omit<
-  AllowUndefinedOrNull<CreateRecipeInput>,
-  "nutrition" | "ingredients"
->;
-
-async function createRecipe(recipe: CreateRecipeInput, query?: RecipeQuery) {
+async function createRecipe(recipe: RecipeInput, query?: RecipeQuery) {
   const cleanedRecipe = await recipeValidation.parseAsync(recipe);
   const ingredients = cleanedRecipe?.ingredientText
     ? await tagIngredients(cleanedRecipe.ingredientText, true)
@@ -166,9 +158,11 @@ async function createRecipe(recipe: CreateRecipeInput, query?: RecipeQuery) {
 
 async function editRecipe(
   recipeId: string,
-  editedRecipe: EditRecipeInput,
+  editedRecipe: RecipeInput,
   query?: RecipeQuery
 ) {
+  console.log(recipeId);
+  console.log(editedRecipe);
   return await db.recipe.update({
     where: { id: recipeId },
     data: {
@@ -182,37 +176,50 @@ async function editRecipe(
       leftoverFreezerLife: editedRecipe.leftoverFreezerLife,
       directions: editedRecipe.directions,
       cuisine:
-        editedRecipe.cuisineIds === undefined
+        !editedRecipe.cuisineIds || editedRecipe.cuisineIds.length === 0
           ? undefined
           : {
-              set: editedRecipe.cuisineIds?.map((id) => ({ id })) ?? [],
+              set: editedRecipe.cuisineIds.map((id) => ({ id })) ?? [],
             },
       category:
-        editedRecipe.categoryIds === undefined
+        !editedRecipe.categoryIds || editedRecipe.categoryIds.length === 0
           ? undefined
           : {
-              set: editedRecipe.categoryIds?.map((id) => ({ id })) ?? [],
+              set: editedRecipe.categoryIds.map((id) => ({ id })) ?? [],
             },
       course:
-        editedRecipe.courseIds === undefined
+        !editedRecipe.courseIds || editedRecipe.courseIds.length === 0
           ? undefined
           : {
-              set: editedRecipe.courseIds?.map((id) => ({ id })) ?? [],
+              set: editedRecipe.courseIds.map((id) => ({ id })) ?? [],
             },
       photos:
-        editedRecipe.photoIds === undefined
+        !editedRecipe.photoIds || editedRecipe.photoIds.length === 0
           ? undefined
           : {
-              set: editedRecipe.photoIds?.map((id) => ({ id })) ?? [],
+              set: editedRecipe.photoIds.map((id) => ({ id })) ?? [],
             },
     },
     ...query,
   });
 }
 
-async function deleteRecipes(recipeIds: string[]) {
-  await db.recipe.deleteMany({
-    where: { id: { in: recipeIds } },
+async function getIngredientText(
+  ingredients: RecipeIngredient[] | null | undefined
+) {
+  const ingredientList = ingredients
+    ?.sort((i1, i2) => i1.order - i2.order)
+    .reduce((agg, ingredient) => {
+      agg.push(ingredient.sentence);
+      return agg;
+    }, [] as string[]);
+
+  return ingredientList?.join("\n") ?? "";
+}
+
+async function deleteRecipe(recipeId: string) {
+  await db.recipe.delete({
+    where: { id: recipeId },
   });
 }
 
@@ -239,19 +246,11 @@ async function getIngredientFreshness(recipeId: string): Promise<number> {
     }, Infinity);
 }
 
-export { createRecipe, editRecipe, deleteRecipes, getIngredientFreshness };
-
-// async function scrapeRecipeFromWeb(
-//   url: string,
-//   isBookmark: boolean,
-//   query?: WebRecipeQuery
-// ): Promise<WebScrapedRecipe> {
-//   const bookmark = await db.webScrapedRecipe.create({
-//     data: { url, isBookmark },
-//     ...query,
-//   });
-//   await RecipeScrapingQueue.add(bookmark.id, { url: url });
-//   return bookmark;
-// }
-
-// export { scrapeRecipeFromWeb };
+export {
+  createRecipe,
+  deleteRecipe,
+  editRecipe,
+  getIngredientFreshness,
+  RecipeInput,
+  getIngredientText,
+};

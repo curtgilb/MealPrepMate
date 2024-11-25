@@ -1,17 +1,20 @@
 import { Queue, Worker } from "bullmq";
+
+import { BoundingBox } from "@/application/types/CustomTypes.js";
+import { toNumber } from "@/application/util/TypeCast.js";
+import { downloadFile } from "@/infrastructure/object_storage/storage.js";
+import { redis_connection } from "@/infrastructure/Redis.js";
+import { db } from "@/infrastructure/repository/db.js";
 import {
   AzureKeyCredential,
   DocumentAnalysisClient,
 } from "@azure/ai-form-recognizer";
 import { Prisma } from "@prisma/client";
-import { BoundingBox } from "@/application/types/CustomTypes.js";
+
 import {
   PrebuiltReceiptModel,
   ReceiptRetailMealFields,
 } from "./PrebuiltReceipt.js";
-import { db } from "@/infrastructure/repository/db.js";
-import { redis_connection } from "@/infrastructure/Redis.js";
-import { downloadFile } from "@/infrastructure/object_storage/storage.js";
 
 async function searchIngredients(
   storeId: string | undefined,
@@ -100,7 +103,7 @@ const worker = new Worker(
             quantity: receiptItem.properties.quantity?.value,
             perUnitPrice: receiptItem.properties.price?.value,
             productCode: receiptItem.properties.productCode?.value,
-            unitQuantity: receiptItem.properties.quantityUnit?.value,
+            unitQuantity: toNumber(receiptItem.properties.quantityUnit?.value),
             ingredientId: matchingIngredientId,
             unitId: matchingUnitId,
             boundingBoxes: itemBoundingBoxes as BoundingBox[],

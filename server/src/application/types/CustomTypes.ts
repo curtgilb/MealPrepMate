@@ -29,7 +29,7 @@ declare global {
 
 type MaybePromise<T> = T | Promise<T>;
 
-type PolygonCoordinate = {
+export type PolygonCoordinate = {
   x: number;
   y: number;
 };

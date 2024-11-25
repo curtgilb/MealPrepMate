@@ -1,9 +1,13 @@
-import { getIngredientQuery, ingredientFragment } from '@/features/ingredient/api/Ingredient';
-import { IngredientEditor } from '@/features/ingredient/components/edit/IngredientEditor';
-import { getFragmentData } from '@/gql';
-import { getClient } from '@/ssrGraphqlClient';
+import SingleColumnCentered from "@/components/layouts/single-column-centered";
+import {
+  getIngredientQuery,
+  ingredientFieldsFragment,
+} from "@/features/ingredient/api/Ingredient";
+import { IngredientEditor } from "@/features/ingredient/components/edit/EditIngredient";
+import { getFragmentData } from "@/gql";
+import { getClient } from "@/ssrGraphqlClient";
 
-export default async function EditRecipe({
+export default async function EditIngredient({
   params,
 }: {
   params: { id: string };
@@ -12,11 +16,14 @@ export default async function EditRecipe({
   const result = await getClient().query(getIngredientQuery, {
     id: decodeURIComponent(id),
   });
-  const recipe = getFragmentData(recipeFragment, result.data?.recipe);
+  const ingredient = getFragmentData(
+    ingredientFieldsFragment,
+    result.data?.ingredient
+  );
 
   return (
-    <>
-      <RecipeEditor recipe={recipe} />
-    </>
+    <SingleColumnCentered condensed>
+      <IngredientEditor ingredient={ingredient} />
+    </SingleColumnCentered>
   );
 }

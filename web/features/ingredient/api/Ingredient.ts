@@ -1,4 +1,4 @@
-import { graphql } from '@/gql';
+import { graphql } from "@/gql";
 
 const ingredientFieldsFragment = graphql(`
   fragment IngredientFields on Ingredient {
@@ -63,19 +63,18 @@ const getIngredientsQuery = graphql(`
 
 const editIngredientMutation = graphql(
   `
-    mutation EditIngredient($id: ID!, $input: EditIngredientInput!) {
+    mutation EditIngredient($id: ID!, $input: IngredientInput!) {
       editIngredient(id: $id, ingredient: $input) {
-        id
+        ...IngredientFields
       }
     }
   `
 );
 
 const createIngredientMutation = graphql(`
-  mutation CreateIngredient($input: CreateIngredientInput!) {
+  mutation CreateIngredient($input: IngredientInput!) {
     createIngredient(ingredient: $input) {
-      id
-      name
+      ...IngredientFields
     }
   }
 `);

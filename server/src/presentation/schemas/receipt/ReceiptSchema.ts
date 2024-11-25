@@ -34,11 +34,11 @@ const updateReceipt = builder
 builder.queryFields((t) => ({
   receipt: t.prismaField({
     args: {
-      id: t.arg.id({ required: true }),
+      id: t.arg.globalID({ required: true }),
     },
     type: "Receipt",
     resolve: async (query, root, args) => {
-      return await getReceipt(args.id, query);
+      return await getReceipt(args.id.id, query);
     },
   }),
 }));

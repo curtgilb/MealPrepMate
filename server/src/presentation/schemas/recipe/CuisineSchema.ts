@@ -1,15 +1,14 @@
-import { z } from "zod";
-import { db } from "@/infrastructure/repository/db.js";
-import { toTitleCase } from "@/application/util/utils.js";
-import { builder } from "@/presentation/builder.js";
+import { db } from '@/infrastructure/repository/db.js';
+import { builder } from '@/presentation/builder.js';
+import { DeleteResult } from '@/presentation/schemas/common/MutationResult.js';
+import { encodeGlobalID } from '@pothos/plugin-relay';
 
 // ============================================ Types ===================================
-builder.prismaObject("Cuisine", {
+builder.prismaNode("Cuisine", {
+  id: { field: "id" },
   name: "Cuisine",
   fields: (t) => ({
-    id: t.exposeID("id"),
     name: t.exposeString("name"),
-    recipes: t.relation("recipes"),
   }),
 });
 
@@ -52,14 +51,16 @@ builder.mutationFields((t) => ({
       return db.cuisine.findMany({ ...query, orderBy: { name: "asc" } });
     },
   }),
-  deleteCuisine: t.prismaField({
-    type: ["Cuisine"],
+  deleteCuisine: t.field({
+    type: DeleteResult,
     args: {
-      cuisineId: t.arg.string({ required: true }),
+      cuisineId: t.arg.globalID({ required: true }),
     },
-    resolve: async (query, root, args) => {
-      await db.cuisine.delete({ where: { id: args.cuisineId } });
-      return await db.cuisine.findMany({ ...query, orderBy: { name: "asc" } });
+    resolve: async (root, args) => {
+      const guid = encodeGlobalID(args.cuisineId.typename, args.cuisineId.id);
+
+      await db.category.delete({ where: { id: args.cuisineId.id } });
+      return { id: guid, success: true };
     },
   }),
 }));

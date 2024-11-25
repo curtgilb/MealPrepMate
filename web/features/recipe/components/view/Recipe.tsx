@@ -1,6 +1,9 @@
 "use client";
+import { Pencil } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+
 import { FilledImage } from "@/components/images/FilledImage";
-import SingleColumnCentered from "@/components/layouts/single-column-centered";
 import { RichTextEditor } from "@/components/rich_text/RichTextEditor";
 import { Button } from "@/components/ui/button";
 import { recipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
@@ -10,19 +13,21 @@ import RecipeIngredients from "@/features/recipe/components/view/RecipeIngredien
 import { RecipeNutritionSummary } from "@/features/recipe/components/view/RecipeNutritionSummary";
 import { RecipeTagList } from "@/features/recipe/components/view/RecipeTagList";
 import { RecipeTimes } from "@/features/recipe/components/view/RecipeTimes";
-import { ServingsAjuster } from "@/features/recipe/components/view/ServingsAdjuster";
+import { ServingsAdjuster } from "@/features/recipe/components/view/ServingsAdjuster";
 import { SourceLink } from "@/features/recipe/components/view/SourceLink";
 import { getFragmentData } from "@/gql";
 import { RecipeFieldsFragment } from "@/gql/graphql";
-import { Pencil } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
 
 interface Recipe {
   recipe: RecipeFieldsFragment | undefined | null;
 }
 
 export function Recipe({ recipe }: Recipe) {
+  const [scale, setScale] = useState(1);
+  const [servings, setServings] = useState(
+    recipe?.aggregateLabel?.servings ?? 1
+  );
+
   let imageUrl =
     recipe?.photos && recipe.photos.length > 0
       ? `${process.env.NEXT_PUBLIC_STORAGE_URL}${recipe.photos[0].url}`
@@ -64,17 +69,18 @@ export function Recipe({ recipe }: Recipe) {
         <div className="flex gap-12">
           <div>
             <h2 className="text-lg font-serif font-bold mb-2">Servings</h2>
-            <ServingsAjuster
-              servings={recipe?.aggregateLabel?.servings ?? 1}
-              onChange={(servings) => console.log(servings)}
+            <ServingsAdjuster
+              servings={servings}
+              onChange={(update) => setServings(update)}
             />
           </div>
 
           <div>
             <h2 className="text-lg font-serif font-bold mb-2">Scale</h2>
-            <ServingsAjuster
-              servings={1}
-              onChange={(servings) => console.log(servings)}
+            <ServingsAdjuster
+              servings={scale}
+              step={0.25}
+              onChange={(update) => setScale(update)}
             />
           </div>
         </div>

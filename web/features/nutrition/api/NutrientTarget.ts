@@ -1,8 +1,8 @@
 import { graphql } from "@/gql";
 
 export const setNutritionTarget = graphql(`
-  mutation setNutrientTarget($target: NutrientTargetInput!) {
-    setNutritionTarget(target: $target) {
+  mutation setNutrientTarget($id: ID!, $target: NutrientTargetInput!) {
+    setNutritionTarget(nutrientId: $id, target: $target) {
       id
       target {
         id

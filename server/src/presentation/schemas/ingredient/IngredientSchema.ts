@@ -1,13 +1,11 @@
 import {
   createIngredient,
-  CreateIngredientInput,
   deleteIngredient,
   editIngredient,
-  EditIngredientInput,
   getIngredient,
   getIngredients,
+  IngredientInput,
 } from "@/application/services/ingredient/IngredientService.js";
-import { db } from "@/infrastructure/repository/db.js";
 import { builder } from "@/presentation/builder.js";
 import { DeleteResult } from "@/presentation/schemas/common/MutationResult.js";
 import { recipeIngredient } from "@/presentation/schemas/recipe/RecipeIngredientSchema.js";
@@ -49,44 +47,17 @@ export const ingredient = builder.prismaNode("Ingredient", {
 });
 
 // ============================================ Inputs ===================================
-const createIngredientInput = builder
-  .inputRef<CreateIngredientInput>("CreateIngredientInput")
+const ingredientInput = builder
+  .inputRef<IngredientInput>("IngredientInput")
   .implement({
     fields: (t) => ({
-      name: t.string({ required: true }),
-      alternateNames: t.stringList({ required: true }),
-      storageInstructions: t.string({ required: true }),
-      variant: t.string({ required: true }),
-      categoryId: t.string({ required: true }),
-      expirationRuleId: t.string({ required: true }),
-    }),
-  });
-
-const editIngredientInput = builder
-  .inputRef<EditIngredientInput>("EditIngredientInput")
-  .implement({
-    fields: (t) => ({
-      ingredientId: t.string({ required: true }),
-      variant: t.string({ required: false }),
       name: t.string({ required: true }),
       alternateNames: t.stringList(),
       storageInstructions: t.string(),
-      categoryId: t.string(),
-      expirationRuleId: t.string(),
+      categoryId: t.field({ type: "RefID" }),
+      expirationRuleId: t.field({ type: "RefID" }),
     }),
   });
-
-// const editIngredientInput = builder.inputType("EditIngredientInput", {
-//   fields: (t) => ({
-//     ingredientId: t.string({ required: true }),
-//     variant: t.string({ required: false }),
-//     name: t.string({ required: false }),
-//     alternateNames: t.stringList(),
-//     storageInstructions: t.string(),
-//     categoryId: t.string(),
-//     expirationRuleId: t.string(),
-//   }),
-// });
 
 // ============================================ Queries ===================================
 
@@ -159,9 +130,10 @@ builder.mutationFields((t) => ({
   createIngredient: t.prismaField({
     type: "Ingredient",
     args: {
-      ingredient: t.arg({ type: createIngredientInput, required: true }),
+      ingredient: t.arg({ type: ingredientInput, required: true }),
     },
     resolve: async (query, root, args) => {
+      console.log(args.ingredient);
       return await createIngredient(args.ingredient, query);
     },
   }),
@@ -169,10 +141,10 @@ builder.mutationFields((t) => ({
     type: "Ingredient",
     args: {
       id: t.arg.globalID({ required: true }),
-      ingredient: t.arg({ type: editIngredientInput, required: true }),
+      ingredient: t.arg({ type: ingredientInput, required: true }),
     },
     resolve: async (query, root, args) => {
-      args.ingredient?.name;
+      console.log(args.ingredient);
       return await editIngredient(args.id.id, args.ingredient, query);
     },
   }),

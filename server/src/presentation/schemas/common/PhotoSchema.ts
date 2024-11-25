@@ -1,7 +1,8 @@
-import { z } from "zod";
-import { db } from "@/infrastructure/repository/db.js";
-import { builder } from "@/presentation/builder.js";
-import { uploadPhoto } from "@/application/services/PhotoService.js";
+import { z } from 'zod';
+
+import { uploadPhoto } from '@/application/services/PhotoService.js';
+import { db } from '@/infrastructure/repository/db.js';
+import { builder } from '@/presentation/builder.js';
 
 // ============================================ Types ===================================
 builder.prismaNode("Photo", {

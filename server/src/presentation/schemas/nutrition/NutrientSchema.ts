@@ -1,7 +1,9 @@
 import { z } from "zod";
+
+import { getDriValues } from "@/application/services/nutrition/NutrientService.js";
 import { db } from "@/infrastructure/repository/db.js";
 import { builder } from "@/presentation/builder.js";
-import { getDriValues } from "@/application/services/nutrition/NutrientService.js";
+import { encodeGlobalID } from "@pothos/plugin-relay";
 
 // ============================================ Types ===================================
 const nutrient = builder.prismaNode("Nutrient", {
@@ -25,7 +27,13 @@ const nutrient = builder.prismaNode("Nutrient", {
         return getDriValues(root.id, query);
       },
     }),
-    parentNutrientId: t.exposeString("parentNutrientId", { nullable: true }),
+    parentNutrientId: t.globalID({
+      nullable: true,
+      resolve: (nutrient) => {
+        if (!nutrient.parentNutrientId) return null;
+        return encodeGlobalID("Nutrient", nutrient.parentNutrientId);
+      },
+    }),
     unit: t.relation("unit"),
   }),
 });

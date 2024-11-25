@@ -1,7 +1,8 @@
+import { z } from "zod";
+
 import { readCSV } from "@/infrastructure/file_io/read.js";
 import { db } from "@/infrastructure/repository/db.js";
 import { Gender, SpecialCondition } from "@prisma/client";
-import { z } from "zod";
 
 const nutrientMapping: { [key: string]: string } = {
   vitmainA: "da4d4dd6-f827-42b4-b12b-fe2ae372b7c0",
@@ -131,7 +132,7 @@ export async function loadDriRecommendations() {
 
       for (const [name, value] of Object.entries(rest)) {
         if (!name.endsWith("Max")) {
-          const upperLimit = rest[name];
+          const upperLimit = rest[`${name}Max`];
           const id = nutrientMapping[name];
 
           await tx.dailyReferenceIntake.upsert({

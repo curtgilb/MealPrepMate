@@ -2,7 +2,7 @@ import { AllOptionalPartiallyNullable } from "@/application/types/CustomTypes.js
 import { db } from "@/infrastructure/repository/db.js";
 import { ExpirationRule, Prisma } from "@prisma/client";
 
-type CreateIngredientInput = {
+export type IngredientInput = {
   name: string;
   variant?: string | null;
   alternateNames?: string[] | null;
@@ -10,11 +10,6 @@ type CreateIngredientInput = {
   storageInstructions?: string | null;
   expirationRuleId?: string | null;
 };
-
-type EditIngredientInput = AllOptionalPartiallyNullable<
-  CreateIngredientInput,
-  "variant" | "categoryId" | "storageInstructions" | "expirationRuleId"
->;
 
 type IngredientQuery = {
   include?: Prisma.IngredientInclude | undefined;
@@ -51,7 +46,7 @@ async function getIngredients(
 }
 
 async function createIngredient(
-  ingredient: CreateIngredientInput,
+  ingredient: IngredientInput,
   query?: IngredientQuery
 ) {
   return await db.ingredient.create({
@@ -70,7 +65,7 @@ async function createIngredient(
 
 async function editIngredient(
   id: string,
-  ingredient: EditIngredientInput,
+  ingredient: IngredientInput,
   query?: IngredientQuery
 ) {
   return db.ingredient.update({
@@ -100,10 +95,8 @@ async function deleteIngredient(id: string) {
 
 export {
   createIngredient,
-  CreateIngredientInput,
   deleteIngredient,
   editIngredient,
-  EditIngredientInput,
   getIngredient,
   getIngredients,
 };

@@ -1,6 +1,11 @@
 // import { NutritionLabel } from "@prisma/client";
-import { db } from "@/infrastructure/repository/db.js";
-import { builder } from "@/presentation/builder.js";
+import {
+    createNutritionLabel, editNutritionLabel, NutrientInput, NutritionLabelInput
+} from '@/application/services/nutrition/NutritionLabelService.js';
+import { db } from '@/infrastructure/repository/db.js';
+import { builder } from '@/presentation/builder.js';
+import { DeleteResult } from '@/presentation/schemas/common/MutationResult.js';
+import { encodeGlobalID } from '@pothos/plugin-relay';
 
 // ============================================ Types ===================================
 
@@ -21,14 +26,15 @@ const aggLabel = builder.prismaNode("AggregateLabel", {
   }),
 });
 
-builder.prismaObject("AggLabelNutrient", {
+builder.prismaNode("AggLabelNutrient", {
+  id: { field: "compoundId" },
   fields: (t) => ({
-    id: t.string({
-      nullable: false,
-      resolve: (label) => {
-        return `${label.aggLabelId}_${label.nutrientId}`;
-      },
-    }),
+    // id: t.string({
+    //   nullable: false,
+    //   resolve: (label) => {
+    //     return `${label.aggLabelId}_${label.nutrientId}`;
+    //   },
+    // }),
     value: t.exposeFloat("value"),
     perServing: t.exposeFloat("valuePerServing", { nullable: true }),
     nutrient: t.relation("nutrient"),
@@ -59,44 +65,31 @@ builder.prismaObject("NutritionLabelNutrient", {
 
 // ============================================ Inputs ==================================
 
-const createNutritionLabel = builder.inputType("CreateNutritionLabelInput", {
-  fields: (t) => ({
-    servings: t.float({ required: true }),
-    servingSize: t.float(),
-    servingSizeUnitId: t.string(),
-    servingsUsed: t.float(),
-    isPrimary: t.boolean(),
-    nutrients: t.field({
-      type: [createNutrient],
+const nutritionLabelInput = builder
+  .inputRef<NutritionLabelInput>("NutritionLabelInput")
+  .implement({
+    fields: (t) => ({
+      servings: t.float({ required: true }),
+      servingSize: t.float(),
+      servingSizeUnitId: t.field({ type: "RefID" }),
+      recipeId: t.field({ type: "RefID" }),
+      ingredientGroupId: t.field({ type: "RefID" }),
+      servingsUsed: t.float(),
+      isPrimary: t.boolean({ required: true }),
+      nutrients: t.field({
+        type: [nutrientInput],
+      }),
     }),
-  }),
-});
+  });
 
-const createNutrient = builder.inputType("CreateNutrientInput", {
-  fields: (t) => ({
-    nutrientId: t.string({ required: true }),
-    value: t.float({ required: true }),
-  }),
-});
-
-const editNutritionLabelInput = builder.inputType("EditNutritionLabelInput", {
-  fields: (t) => ({
-    id: t.string({ required: true }),
-    servings: t.float(),
-    servingSize: t.float(),
-    servingSizeUnitId: t.string(),
-    servingsUsed: t.float(),
-    isPrimary: t.boolean(),
-    ingredientGroupId: t.string(),
-    nutrientsToDelete: t.stringList(),
-    nutrientsToEdit: t.field({
-      type: [createNutrient],
+const nutrientInput = builder
+  .inputRef<NutrientInput>("NutrientInput")
+  .implement({
+    fields: (t) => ({
+      nutrientId: t.string({ required: true }),
+      value: t.float({ required: true }),
     }),
-    nutrientsToAdd: t.field({
-      type: [createNutrient],
-    }),
-  }),
-});
+  });
 
 // ============================================ Queries =================================
 
@@ -117,40 +110,40 @@ builder.queryFields((t) => ({
 
 // ============================================ Mutations ===============================
 builder.mutationFields((t) => ({
-  createNutritionLabels: t.prismaField({
+  createNutritionLabel: t.prismaField({
     type: "NutritionLabel",
     args: {
-      recipeId: t.arg.string({ required: true }),
-      ingredientGroupId: t.arg.string(),
-      nutritionLabel: t.arg({ type: createNutritionLabel, required: true }),
+      nutritionLabel: t.arg({ type: nutritionLabelInput, required: true }),
     },
     resolve: async (query, root, args) => {
-      return await db.nutritionLabel.createNutritionLabel(
-        args.nutritionLabel,
-        args.recipeId,
-        args.ingredientGroupId ?? null,
-        true,
-        query
-      );
+      return await createNutritionLabel(args.nutritionLabel, query);
     },
   }),
   editNutritionLabel: t.prismaField({
     type: "NutritionLabel",
     args: {
-      label: t.arg({ type: editNutritionLabelInput, required: true }),
+      id: t.arg.globalID({ required: true }),
+      label: t.arg({ type: nutritionLabelInput, required: true }),
     },
     resolve: async (query, root, args) => {
-      return await db.nutritionLabel.editNutritionLabel(args.label, query);
+      return await editNutritionLabel(args.id.id, args.label, query);
     },
   }),
-  deleteNutritionLabel: t.prismaField({
-    type: ["NutritionLabel"],
+  deleteNutritionLabel: t.field({
+    type: DeleteResult,
     args: {
-      id: t.arg.string({ required: true }),
+      id: t.arg.globalID({ required: true }),
     },
-    resolve: async (query, root, args) => {
-      await db.nutritionLabel.delete({ where: { id: args.id } });
-      return db.nutritionLabel.findMany({ ...query });
+    resolve: async (root, args) => {
+      const guid = encodeGlobalID(args.id.typename, args.id.id);
+
+      await db.nutritionLabel.delete({
+        where: { id: args.id.id },
+      });
+      return {
+        id: guid,
+        success: true,
+      };
     },
   }),
 }));

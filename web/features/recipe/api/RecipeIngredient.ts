@@ -53,17 +53,6 @@ const getRecipeIngredients = graphql(`
   }
 `);
 
-// const createRecipeIngredientMutation = graphql(`
-//   mutation createRecipeIngredient(
-//     $recipeId: ID!
-//     $ingredient: CreateRecipeIngredientInput!
-//   ) {
-//     addRecipeIngredient(recipeId: $recipeId, ingredient: $ingredient) {
-//       ...RecipeIngredientFields
-//     }
-//   }
-// `);
-
 const createRecipeIngredientMutation = graphql(`
   mutation createRecipeIngredient($recipeId: ID!, $ingredient: String!) {
     addRecipeIngredientsFromTxt(recipeId: $recipeId, ingredients: $ingredient) {
@@ -73,8 +62,8 @@ const createRecipeIngredientMutation = graphql(`
 `);
 
 const editRecipeIngredientMutation = graphql(`
-  mutation editRecipeIngredient($ingredient: EditRecipeIngredientInput!) {
-    editRecipeIngredients(ingredient: $ingredient) {
+  mutation editRecipeIngredient($input: [EditRecipeIngredientsInput!]!) {
+    editRecipeIngredients(ingredients: $input) {
       ...RecipeIngredientFields
     }
   }
@@ -82,7 +71,7 @@ const editRecipeIngredientMutation = graphql(`
 
 const deleteRecipeIngredientMutation = graphql(`
   mutation deleteRecipeIngredient($id: ID!) {
-    deleteRecipeIngredients(ingredientId: $id) {
+    deleteRecipeIngredient(ingredientId: $id) {
       success
     }
   }

@@ -5,6 +5,12 @@ const createRecipeIngredientGroupMutation = graphql(`
     createIngredientGroup(name: $name, recipeId: $recipeId) {
       id
       name
+      recipe {
+        id
+      }
+      ingredients {
+        id
+      }
     }
   }
 `);
@@ -22,6 +28,12 @@ const editRecipeIngredientGroupMutation = graphql(`
     editRecipeIngredientGroup(name: $name, groupId: $groupId) {
       id
       name
+      recipe {
+        id
+      }
+      ingredients {
+        id
+      }
     }
   }
 `);

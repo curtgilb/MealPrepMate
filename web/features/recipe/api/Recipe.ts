@@ -21,6 +21,7 @@ const recipeFragment = graphql(`
     leftoverFridgeLife
     leftoverFreezerLife
     marinadeTime
+    ingredientText
     verified
     notes
     photos {
@@ -34,26 +35,7 @@ const recipeFragment = graphql(`
       ...RecipeIngredientFields
     }
     nutritionLabels {
-      id
-      ingredientGroup {
-        id
-        name
-      }
-      isPrimary
-      servingSize
-      servingSizeUnit {
-        id
-        name
-        symbol
-      }
-      servings
-      servingsUsed
-      nutrients {
-        value
-        nutrient {
-          id
-        }
-      }
+      ...NutritionLabelFields
     }
     aggregateLabel {
       id
@@ -81,6 +63,14 @@ const recipeFragment = graphql(`
   }
 `);
 
+const createRecipeMutation = graphql(`
+  mutation createRecipe($input: RecipeInput!) {
+    createRecipe(recipe: $input) {
+      ...RecipeFields
+    }
+  }
+`);
+
 const getRecipeQuery = graphql(`
   query getRecipe($id: ID!) {
     recipe(recipeId: $id) {
@@ -90,7 +80,7 @@ const getRecipeQuery = graphql(`
 `);
 
 const editRecipeMutation = graphql(`
-  mutation editRecipe($recipe: EditRecipeInput!, $id: String!) {
+  mutation editRecipe($recipe: RecipeInput!, $id: ID!) {
     editRecipe(recipeId: $id, recipe: $recipe) {
       ...RecipeFields
     }
@@ -211,6 +201,7 @@ const searchRecipesQuery = graphql(`
 `);
 
 export {
+  createRecipeMutation,
   getRecipeQuery,
   getRecipeBaiscInfo,
   getRecipeLabels,

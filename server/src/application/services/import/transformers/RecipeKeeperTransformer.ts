@@ -1,17 +1,14 @@
+import { HTMLElement, parse as parseHTML } from 'node-html-parser';
+
 import {
-  TransformedRecord,
-  TransformMapping,
-} from "@/application/services/import/transformers/TransformedRecord.js";
-import {
-  FileSource,
-  Transformer,
-} from "@/application/services/import/transformers/Transformer.js";
-import { CreateNutrientInput } from "@/application/services/nutrition/NutritionLabelService.js";
-import { uploadPhoto } from "@/application/services/PhotoService.js";
-import { tagIngredients } from "@/application/services/recipe/RecipeIngredientService.js";
-import { toNumber } from "@/application/util/TypeCast.js";
-import { getFileMetadata } from "@/infrastructure/file_io/common.js";
-import { HTMLElement, parse as parseHTML } from "node-html-parser";
+    TransformedRecord, TransformMapping
+} from '@/application/services/import/transformers/TransformedRecord.js';
+import { FileSource, Transformer } from '@/application/services/import/transformers/Transformer.js';
+import { NutrientInput } from '@/application/services/nutrition/NutritionLabelService.js';
+import { uploadPhoto } from '@/application/services/PhotoService.js';
+import { tagIngredients } from '@/application/services/recipe/RecipeIngredientService.js';
+import { toNumber } from '@/application/util/TypeCast.js';
+import { getFileMetadata } from '@/infrastructure/file_io/common.js';
 
 export class RecipeKeeperTransformer extends Transformer {
   recipeKeeperMapping: { [key: string]: TransformMapping | null } = {
@@ -246,10 +243,7 @@ export class RecipeKeeperTransformer extends Transformer {
     return { key, value };
   }
 
-  private getNutrientId(
-    value: string,
-    key: string
-  ): CreateNutrientInput | undefined {
+  private getNutrientId(value: string, key: string): NutrientInput | undefined {
     const input = {
       nutrientId: this.nutrientMapping[key],
       value: toNumber(value),

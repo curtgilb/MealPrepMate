@@ -1,4 +1,3 @@
-import { RecipeIngredientFieldsFragment } from "@/gql/graphql";
 import {
   createContext,
   Dispatch,
@@ -8,11 +7,13 @@ import {
   useState,
 } from "react";
 
+import { RecipeIngredientFieldsFragment } from "@/gql/graphql";
+
 interface GroupedIngredients {
   [key: string]: RecipeIngredientFieldsFragment[];
 }
 
-const DEFAULT_KEY = "Default";
+const DEFAULT_GROUP_KEY = "Default";
 
 type SelectedLocation = {
   group: string;
@@ -27,13 +28,9 @@ type IngredientsContextType = {
   selected: string;
   setSelected: Dispatch<SetStateAction<string>>;
   selectedLocation: SelectedLocation;
+  selectedIngredient: RecipeIngredientFieldsFragment | undefined;
   advanceSelected: () => void;
 };
-
-// context
-const IngredientsContext = createContext<IngredientsContextType | undefined>(
-  undefined
-);
 
 function useGroupedRecipeIngredients(
   ingredients: RecipeIngredientFieldsFragment[] | null | undefined
@@ -42,7 +39,7 @@ function useGroupedRecipeIngredients(
     GroupedIngredients | undefined
   >(() =>
     ingredients?.reduce((acc, ingredient) => {
-      const groupId = ingredient.group?.id ?? DEFAULT_KEY;
+      const groupId = ingredient.group?.id ?? DEFAULT_GROUP_KEY;
 
       if (!Object.hasOwn(acc, groupId)) {
         acc[groupId] = [];
@@ -58,8 +55,11 @@ function useGroupedRecipeIngredients(
   );
 
   const [selected, setSelected] = useState<string | undefined>(() => {
-    if (groupedIngredients && groupedIngredients[DEFAULT_KEY].length > 0) {
-      return groupedIngredients[DEFAULT_KEY][0].id;
+    if (
+      groupedIngredients &&
+      groupedIngredients[DEFAULT_GROUP_KEY].length > 0
+    ) {
+      return groupedIngredients[DEFAULT_GROUP_KEY][0].id;
     }
 
     return undefined;
@@ -77,6 +77,11 @@ function useGroupedRecipeIngredients(
     }
   }, [selected, groupedIngredients]);
 
+  const selectedIngredient = useMemo(() => {
+    if (!groupedIngredients || !selectedLocation) return undefined;
+    return groupedIngredients[selectedLocation.group][selectedLocation.index];
+  }, [groupedIngredients, selectedLocation]);
+
   function advanceSelected() {
     if (groupedIngredients && selectedLocation) {
       const activeIndex = selectedLocation.index;
@@ -91,7 +96,7 @@ function useGroupedRecipeIngredients(
         const groupIdx = groupOrder.findIndex(
           (name) => name === selectedLocation.group
         );
-        let newGroup = DEFAULT_KEY;
+        let newGroup = DEFAULT_GROUP_KEY;
         const length = groupOrder.length;
 
         for (let i = 0; i < length; i++) {
@@ -113,9 +118,15 @@ function useGroupedRecipeIngredients(
     selected,
     setSelected,
     selectedLocation,
+    selectedIngredient,
     advanceSelected,
   } as IngredientsContextType;
 }
+
+// context
+const IngredientsContext = createContext<IngredientsContextType | undefined>(
+  undefined
+);
 
 function useRecipeIngredientContext() {
   const context = useContext(IngredientsContext);
@@ -131,5 +142,5 @@ export {
   IngredientsContext,
   useGroupedRecipeIngredients,
   useRecipeIngredientContext,
-  DEFAULT_KEY,
+  DEFAULT_GROUP_KEY as DEFAULT_KEY,
 };

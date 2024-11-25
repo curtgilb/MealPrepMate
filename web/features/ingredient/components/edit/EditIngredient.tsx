@@ -1,4 +1,13 @@
 "use client";
+import { Pen, PenBox, Save, X } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { useMutation } from "urql";
+import { z } from "zod";
+
+import { GenericCombobox } from "@/components/combobox/GenericCombox1";
+import { RichTextEditor } from "@/components/rich_text/RichTextEditor";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -9,68 +18,119 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { expirationRuleFragment } from "@/features/ingredient/api/ExpirationRule";
+import {
+  createIngredientMutation,
+  editIngredientMutation,
+  ingredientFieldsFragment,
+} from "@/features/ingredient/api/Ingredient";
+import { getIngredientCategoryQuery } from "@/features/ingredient/api/IngredientCategory";
+import { IngredientAlternateNames } from "@/features/ingredient/components/edit/AlternateNames";
+import {
+  convertRuleToFormInput,
+  expirationRuleSchema,
+} from "@/features/ingredient/components/view/EditExpirationRule";
+import { ExpirationRule } from "@/features/ingredient/components/view/ExpirationRulePicker";
 import { getFragmentData } from "@/gql";
-import { IngredientFieldsFragment } from "@/gql/graphql";
+import {
+  GetIngredientCategoryQuery,
+  IngredientFieldsFragment,
+} from "@/gql/graphql";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Save, X, XIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useRef } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
-import { z } from "zod";
 
-const ingredientSchema = z.object({
+const ingredientFormSchema = z.object({
   name: z.string(),
-  alternateNames: z
-    .array(z.string().min(1, "String can't be empty"))
-    .min(1, "At least one string is required")
-    .optional()
-    .nullish(),
+  alternateNames: z.string().array(),
   storageInstructions: z.string(),
-  categoryId: z.string().cuid(),
-  expirationRuleId: z.string().cuid().nullish().optional(),
+  category: z
+    .object({
+      id: z.string(),
+      label: z.string(),
+    })
+    .nullish(),
+  expirationRule: expirationRuleSchema.nullable(),
 });
 
-type IngredientFormType = z.infer<typeof ingredientSchema>;
+export type IngredientFormType = z.infer<typeof ingredientFormSchema>;
 
 interface EditIngredientProps {
   ingredient?: IngredientFieldsFragment | null | undefined;
 }
 
-export function EditIngredient({ ingredient }: EditIngredientProps) {
+export function IngredientEditor({ ingredient }: EditIngredientProps) {
+  const isCreate = !ingredient;
   const router = useRouter();
-  const addRef = useRef<HTMLInputElement>(null);
+  const [{ fetching: createFetching }, createIngredient] = useMutation(
+    createIngredientMutation
+  );
+  const [{ fetching: editFetching }, editIngredient] = useMutation(
+    editIngredientMutation
+  );
+
   const expirationRule = getFragmentData(
     expirationRuleFragment,
     ingredient?.expiration
   );
+
   const form = useForm<IngredientFormType>({
-    resolver: zodResolver(ingredientSchema),
+    resolver: zodResolver(ingredientFormSchema),
     defaultValues: {
       name: ingredient?.name ?? "",
-      alternateNames: ingredient?.alternateNames ?? [""],
+      alternateNames: ingredient?.alternateNames ?? [],
       storageInstructions: ingredient?.storageInstructions ?? "",
-      categoryId: ingredient?.category?.id ?? "",
-      expirationRuleId: expirationRule?.id,
+      category:
+        ingredient && ingredient.category
+          ? { id: ingredient.category.id, label: ingredient.category.name }
+          : null,
+      expirationRule: expirationRule
+        ? convertRuleToFormInput(expirationRule)
+        : null,
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
-    name: "alternateNames",
-    control: form.control,
-  });
+  async function onSubmit(values: IngredientFormType) {
+    const ingredientInput = {
+      name: values.name,
+      alternateNames:
+        values.alternateNames.length > 0 ? values.alternateNames : null,
+      storageInstructions: values.storageInstructions ?? null,
+      categoryId: values.category?.id ?? null,
+      expirationRuleId: values.expirationRule?.id ?? null,
+    };
 
-  function onSubmit(values: IngredientFormType) {}
+    if (isCreate) {
+      await createIngredient({
+        input: ingredientInput,
+      }).then((createdIngredient) => {
+        const id = getFragmentData(
+          ingredientFieldsFragment,
+          createdIngredient.data?.createIngredient
+        )?.id;
+        router.push(`/ingredients/${id}`);
+      });
+    } else {
+      await editIngredient({
+        id: ingredient?.id,
+        input: ingredientInput,
+      });
+      router.push(`/ingredients/${ingredient?.id}`);
+    }
+  }
+
   return (
     <>
-      <h2 className="text-4xl font-black mb-8">
+      <h2 className="font-serif text-4xl font-extrabold mb-8">
         {ingredient ? `Edit ${ingredient.name}` : "Create new ingredient"}
       </h2>
       <Form {...form}>
         <form
-          className="flex flex-col gap-4"
-          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-col gap-8"
+          onSubmit={(e) => {
+            console.log("Form state:", form.formState);
+            console.log("Form errors:", form.formState.errors);
+            console.log("Raw form values:", form.getValues());
+            form.handleSubmit(onSubmit)(e);
+          }}
         >
           <FormField
             control={form.control}
@@ -85,17 +145,38 @@ export function EditIngredient({ ingredient }: EditIngredientProps) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
-            name="storageInstructions"
+            name="category"
             render={({ field }) => (
-              <FormItem className="max-w-xl w-full">
-                <FormLabel>Storage Instructions</FormLabel>
+              <FormItem className="max-w-72 w-full">
+                <FormLabel>Ingredient Category</FormLabel>
                 <FormControl>
-                  <Textarea
-                    className="min-h-[200px]"
-                    placeholder="Name"
-                    {...field}
+                  <GenericCombobox
+                    query={getIngredientCategoryQuery}
+                    variables={{}}
+                    unwrapDataList={(query) => {
+                      return query?.ingredientCategories;
+                    }}
+                    renderItem={(
+                      item: NonNullable<
+                        GetIngredientCategoryQuery["ingredientCategories"]
+                      >[number]
+                    ) => {
+                      return { id: item.id, label: item.name };
+                    }}
+                    selectedItems={field.value ? [field.value] : undefined}
+                    onChange={(newValue) => {
+                      if (newValue.length > 0) {
+                        field.onChange(newValue[0]);
+                      } else {
+                        field.onChange(null);
+                      }
+                    }}
+                    multiSelect={false}
+                    autoFilter={true}
+                    placeholder="Select category"
                   />
                 </FormControl>
                 <FormMessage />
@@ -105,99 +186,47 @@ export function EditIngredient({ ingredient }: EditIngredientProps) {
 
           <FormField
             control={form.control}
-            name="alternateNames"
-            render={() => (
-              <FormItem>
-                <FormLabel>Alternate Names</FormLabel>
-                <div className="bg-white rounded-md px-4 py-6 w-full max-w-96 border">
-                  <div className="flex gap-4 items-center mb-6">
-                    <Input
-                      ref={addRef}
-                      className="w-full max-w-64"
-                      placeholder="Enter alternate name"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          if (addRef.current?.value) {
-                            append(addRef.current.value);
-                            addRef.current.value = "";
-                          }
-                        }
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        if (addRef.current?.value) {
-                          append(addRef.current.value);
-                          addRef.current.value = "";
-                        }
-                      }}
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add
-                    </Button>
-                  </div>
-
-                  <div className="grid gap-4">
-                    {fields.map((field, index) => (
-                      <FormField
-                        key={field.id}
-                        control={form.control}
-                        name={`alternateNames.${index}`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <div className="flex items-center space-x-2">
-                                <Input
-                                  {...field}
-                                  placeholder={`Alternate name #${index + 1}`}
-                                />
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="icon"
-                                  onClick={() => remove(index)}
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="expirationRuleId"
+            name="storageInstructions"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Expiration Rule</FormLabel>
+              <FormItem className="max-w-prose w-full">
+                <FormLabel>Storage Instructions</FormLabel>
                 <FormControl>
-                  <ExpirationRuleSelector />
+                  <RichTextEditor
+                    value={field.value}
+                    onChange={(v) => field.onChange(v)}
+                    editable
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+          <IngredientAlternateNames />
+
+          <ExpirationRule />
           <div className="flex gap-2 mt-8">
-            <Button>
-              <Save className="h-4 w-4 mr-2" /> Save
+            <Button type="submit" disabled={createFetching || editFetching}>
+              {isCreate ? (
+                <>
+                  <PenBox /> Create
+                </>
+              ) : (
+                <>
+                  <Save />
+                  Save
+                </>
+              )}
             </Button>
             <Button
               variant="outline"
-              onClick={(e) => {
-                e.preventDefault();
-                router.back();
-              }}
+              asChild
+              disabled={createFetching || editFetching}
             >
-              <XIcon className="h-4 w-4 mr-2" /> Cancel
+              <Link
+                href={`/ingredients/${ingredient?.id ? ingredient?.id : ""}`}
+              >
+                <X /> Cancel
+              </Link>
             </Button>
           </div>
         </form>

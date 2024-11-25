@@ -1,14 +1,13 @@
-import { builder } from "@/presentation/builder.js";
-import { DeleteResult } from "@/presentation/schemas/common/MutationResult.js";
 import {
-  CreateExpirationRuleInput,
-  EditExpirationRuleInput,
   createExpirationRule,
   deleteExpirationRule,
   editExpirationRule,
+  ExpirationRuleInput,
   getExpirationRule,
   getExpirationRules,
 } from "@/application/services/ingredient/ExpirationRuleService.js";
+import { builder } from "@/presentation/builder.js";
+import { DeleteResult } from "@/presentation/schemas/common/MutationResult.js";
 import { encodeGlobalID } from "@pothos/plugin-relay";
 
 builder.prismaNode("ExpirationRule", {
@@ -37,25 +36,11 @@ builder.prismaNode("ExpirationRule", {
 
 // ============================================ Inputs ==================================
 
-const createExpirationRuleInput = builder
-  .inputRef<CreateExpirationRuleInput>("CreateExpirationRuleInput")
+const expirationRuleInput = builder
+  .inputRef<ExpirationRuleInput>("ExpirationRuleInput")
   .implement({
     fields: (t) => ({
       name: t.string({ required: true }),
-      variation: t.string(),
-      defrostTime: t.float(),
-      perishable: t.boolean(),
-      tableLife: t.int({ required: true }),
-      fridgeLife: t.int({ required: true }),
-      freezerLife: t.int({ required: true }),
-    }),
-  });
-
-const editExpirationRuleInput = builder
-  .inputRef<EditExpirationRuleInput>("EditExpirationRuleInput")
-  .implement({
-    fields: (t) => ({
-      name: t.string(),
       variation: t.string(),
       defrostTime: t.float(),
       perishable: t.boolean(),
@@ -93,9 +78,10 @@ builder.mutationFields((t) => ({
   createExpirationRule: t.prismaField({
     type: "ExpirationRule",
     args: {
-      rule: t.arg({ type: createExpirationRuleInput, required: true }),
+      rule: t.arg({ type: expirationRuleInput, required: true }),
     },
     resolve: async (query, root, args) => {
+      console.log(args.rule);
       return await createExpirationRule(args.rule, query);
     },
   }),
@@ -103,14 +89,10 @@ builder.mutationFields((t) => ({
     type: "ExpirationRule",
     args: {
       ruleId: t.arg.globalID({ required: true }),
-      expirationRule: t.arg({ type: editExpirationRuleInput, required: true }),
+      expirationRule: t.arg({ type: expirationRuleInput, required: true }),
     },
     resolve: async (query, root, args) => {
-      return editExpirationRule(
-        args.ruleId.id,
-        args.expirationRule as EditExpirationRuleInput,
-        query
-      );
+      return editExpirationRule(args.ruleId.id, args.expirationRule, query);
     },
   }),
   deleteExpirationRule: t.field({

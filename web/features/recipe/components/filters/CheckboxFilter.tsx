@@ -1,8 +1,6 @@
-import { Dispatch, SetStateAction } from "react";
 import { useFormContext } from "react-hook-form";
 import { z } from "zod";
 
-import { QueryVariables } from "@/components/infinite_scroll/InfiniteScroll";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { FilterValidationType } from "@/features/recipe/components/RecipeFilter";

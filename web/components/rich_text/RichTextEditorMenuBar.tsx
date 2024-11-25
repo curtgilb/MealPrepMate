@@ -1,5 +1,5 @@
 import { Bold, Italic, List, ListOrdered, Underline } from "lucide-react";
-import { type Editor } from "@tiptap/react";
+
 import {
   Select,
   SelectContent,
@@ -14,8 +14,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Editor } from "@tiptap/react";
 
 export function RichTextEditorMenuBar({ editor }: { editor: Editor }) {
+  function getCurrentHeadingValue(): string {
+    if (editor.isActive("heading", { level: 3 })) return "1";
+    if (editor.isActive("heading", { level: 4 })) return "2";
+    if (editor.isActive("heading", { level: 5 })) return "3";
+    return "text";
+  }
+
   function handleHeadingChange(newValue: String) {
     switch (newValue) {
       case "1":
@@ -34,7 +42,10 @@ export function RichTextEditorMenuBar({ editor }: { editor: Editor }) {
 
   return (
     <div className="flex gap-8 px-3 py-1.5 border-b items-center">
-      <Select defaultValue="text" onValueChange={handleHeadingChange}>
+      <Select
+        value={getCurrentHeadingValue()}
+        onValueChange={handleHeadingChange}
+      >
         <SelectTrigger className="h-8 w-[140px]  m-0">
           <SelectValue />
         </SelectTrigger>
@@ -49,7 +60,7 @@ export function RichTextEditorMenuBar({ editor }: { editor: Editor }) {
       <div>
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger asChild>
               <Toggle
                 size="sm"
                 pressed={editor.isActive("bold")}
@@ -65,9 +76,10 @@ export function RichTextEditorMenuBar({ editor }: { editor: Editor }) {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger asChild>
               <Toggle
                 size="sm"
                 pressed={editor.isActive("italic")}
@@ -83,9 +95,10 @@ export function RichTextEditorMenuBar({ editor }: { editor: Editor }) {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger asChild>
               <Toggle
                 size="sm"
                 pressed={editor.isActive("underline")}
@@ -106,7 +119,7 @@ export function RichTextEditorMenuBar({ editor }: { editor: Editor }) {
       <div>
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger asChild>
               <Toggle
                 size="sm"
                 onPressedChange={() => {
@@ -125,7 +138,7 @@ export function RichTextEditorMenuBar({ editor }: { editor: Editor }) {
 
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger asChild>
               <Toggle
                 size="sm"
                 onPressedChange={() =>

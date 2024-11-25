@@ -332,7 +332,7 @@ model ReceiptLine {
   quantity           Float?
   perUnitPrice       Float?
   productCode        String?
-  unitQuantity       String?
+  unitQuantity       Float?
   receipt            Receipt          @relation(fields: [receiptId], references: [id])
   receiptId          String
   ingredientPrice    IngredientPrice?

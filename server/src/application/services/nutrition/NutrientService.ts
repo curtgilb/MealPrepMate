@@ -7,7 +7,6 @@ export type RankedNutrientInput = {
 };
 
 export type NutrientTargetInput = {
-  nutrientId: string;
   value: number;
   threshold?: number | undefined | null;
   preference: TargetPreference;
@@ -39,11 +38,12 @@ async function getDriValues(nutrientId: string, query?: DriQuery) {
 }
 
 async function setNutrientTarget(
+  nutrientId: string,
   target: NutrientTargetInput,
   query?: NutrientQuery
 ) {
   await db.nutrientTarget.upsert({
-    where: { id: target.nutrientId },
+    where: { nutrientId: nutrientId },
     update: {
       targetValue: target.value,
       preference: target.preference,
@@ -53,11 +53,11 @@ async function setNutrientTarget(
       targetValue: target.value,
       preference: target.preference,
       threshold: target.threshold,
-      nutrient: { connect: { id: target.nutrientId } },
+      nutrient: { connect: { id: nutrientId } },
     },
   });
   return await db.nutrient.findUniqueOrThrow({
-    where: { id: target.nutrientId },
+    where: { id: nutrientId },
     ...query,
   });
 }
