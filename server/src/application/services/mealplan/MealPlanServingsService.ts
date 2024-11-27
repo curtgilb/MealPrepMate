@@ -1,5 +1,5 @@
-import { db } from "@/infrastructure/repository/db.js";
-import { Meal, Prisma } from "@prisma/client";
+import { db } from '@/infrastructure/repository/db.js';
+import { Meal, Prisma } from '@prisma/client';
 
 type AddRecipeServingInput = {
   day: number;
@@ -20,10 +20,15 @@ type MealPlanServingQuery = {
   select?: Prisma.MealPlanServingSelect | undefined;
 };
 
+type ServingsFilterInput = {
+  day?: number | null;
+  minDay?: number | null;
+  maxDay?: number | null;
+};
+
 async function getMealPlanServings(
   mealPlanId: string,
-  minDay: number | undefined,
-  maxDay: number | undefined,
+  filter: ServingsFilterInput | null | undefined,
   query?: MealPlanServingQuery
 ) {
   // @ts-ignore
@@ -31,7 +36,11 @@ async function getMealPlanServings(
     // @ts-ignore
     where: {
       mealPlan: { id: mealPlanId },
-      day: { lte: maxDay ?? undefined, gte: minDay ?? undefined },
+      day: {
+        equals: filter?.day ?? undefined,
+        lte: filter?.maxDay ?? undefined,
+        gte: filter?.minDay ?? undefined,
+      },
     },
     ...query,
   });
@@ -117,4 +126,5 @@ export {
   editMealPlanServing,
   EditRecipeServingInput,
   getMealPlanServings,
+  ServingsFilterInput,
 };

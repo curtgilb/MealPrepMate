@@ -1,13 +1,15 @@
-import { RecipeNutrientLookup } from "./use-recipe-label-lookup";
-import { ServingsLookup } from "./use-meal-plan";
+import { useMemo } from "react";
+
+import { WeekNumber } from "@/features/mealplan/components/summary/WeekSelect";
+import { MealPlanServingsFieldFragment } from "@/gql/graphql";
 import {
   averageNutrients,
   SummedNutrients,
   sumNutrients,
 } from "@/utils/nutrients";
-import { MealPlanServingsFieldFragment } from "@/gql/graphql";
-import { useMemo } from "react";
-import { WeekNumber } from "@/features/mealplan/components/summary/WeekSelect";
+
+import { ServingsLookup } from "./use-meal-plan";
+import { RecipeNutrientLookup } from "./usePlanRecipeLabels";
 
 export function useAggregateNutrients(
   week: WeekNumber,

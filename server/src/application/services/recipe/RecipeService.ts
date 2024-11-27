@@ -223,7 +223,9 @@ async function deleteRecipe(recipeId: string) {
   });
 }
 
-async function getIngredientFreshness(recipeId: string): Promise<number> {
+async function getIngredientFreshness(
+  recipeId: string
+): Promise<number | null> {
   const expRules = await db.expirationRule.findMany({
     where: {
       ingredients: {
@@ -231,6 +233,8 @@ async function getIngredientFreshness(recipeId: string): Promise<number> {
       },
     },
   });
+
+  if (expRules.length === 0) return null;
 
   return expRules
     .map((rule) =>

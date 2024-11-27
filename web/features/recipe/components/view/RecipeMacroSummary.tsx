@@ -1,17 +1,26 @@
-import { StackedList } from "@/components/StackedList";
-import { RecipeFieldsFragment } from "@/gql/graphql";
+import { HTMLAttributes } from "react";
 
-interface RecipeNutritionSummaryProps {
-  nutritionLabel: RecipeFieldsFragment["aggregateLabel"] | undefined;
+import { StackedList } from "@/components/StackedList";
+import { AggregateLabel, RecipeFieldsFragment } from "@/gql/graphql";
+
+interface RecipeMacroSummaryProps extends HTMLAttributes<HTMLUListElement> {
+  nutritionLabel:
+    | Pick<
+        AggregateLabel,
+        "totalCalories" | "carbs" | "fat" | "protein" | "servings"
+      >
+    | undefined
+    | null;
   scaleFactor?: number | undefined;
   servings?: number | undefined;
 }
 
-export function RecipeNutritionSummary({
+export function RecipeMacroSummary({
   nutritionLabel,
   scaleFactor,
   servings,
-}: RecipeNutritionSummaryProps) {
+  ...listProps
+}: RecipeMacroSummaryProps) {
   const finalServings = servings || nutritionLabel?.servings || 1;
   const finalScaleFactor = scaleFactor || 1;
   function getTotal(value: number) {
@@ -39,10 +48,6 @@ export function RecipeNutritionSummary({
       bottom: "Protein",
     },
   ];
-  const calories = nutritionLabel?.totalCalories ?? 0;
-  const carbs = nutritionLabel?.carbs ?? 0;
-  const fat = nutritionLabel?.fat ?? 0;
-  const protein = nutritionLabel?.protein ?? 0;
 
-  return <StackedList items={list} />;
+  return <StackedList {...listProps} items={list} />;
 }

@@ -13,6 +13,7 @@ import {
   MutationAddRecipeServingArgs,
   MutationAddRecipeToMealPlanArgs,
   MutationDeleteRecipeServingArgs,
+  MutationRemoveMealPlanRecipeArgs,
   MutationSetRankedNutrientsArgs,
 } from "@/gql/graphql";
 import { cn } from "@/lib/utils";
@@ -60,59 +61,62 @@ export default function RootLayout({
           },
           updates: {
             Mutation: {
-              addRecipeServing(result, args, cache, info) {
-                const typedArgs = (args as MutationAddRecipeServingArgs).serving
-                  .mealPlanId;
-
-                const servings = cache.resolve(
-                  { __typename: "MealPlan", id: typedArgs },
-                  "mealPlanServings"
-                );
-
-                if (Array.isArray(servings)) {
-                  cache.link(
-                    { __typename: "MealPlan", id: typedArgs },
-                    "mealPlanServings",
-                    [...servings, result.addRecipeServing]
-                  );
-                }
-              },
-              deleteRecipeServing(result, args, cache, info) {
+              removeMealPlanRecipe(result, args, cache, info) {
                 cache.invalidate({
-                  __typename: "MealPlanServing",
-                  id: (args as MutationDeleteRecipeServingArgs).id,
+                  __typename: "MealPlanRecipe",
+                  id: (args as MutationRemoveMealPlanRecipeArgs).id,
                 });
               },
-              addRecipeToMealPlan(result, args, cache, info) {
-                const mealPlanId = (args as MutationAddRecipeToMealPlanArgs)
-                  .recipe.mealPlanId;
-                const mealPlan = cache.resolve(
-                  { __typename: "MealPlan", id: mealPlanId },
-                  "planRecipes"
-                );
-                if (Array.isArray(mealPlan)) {
-                  cache.link(
-                    { __typename: "MealPlan", id: mealPlanId },
-                    "planRecipes",
-                    [...mealPlan, result.addRecipeToMealPlan]
-                  );
-                }
-              },
-              setRankedNutrients(result, args, cache, info) {
-                const rankedNutrients = cache.resolve(
-                  "Query",
-                  "getRankedNutrients"
-                );
-
-                if (
-                  Array.isArray(rankedNutrients) &&
-                  Array.isArray(result.setRankedNutrients)
-                ) {
-                  cache.link("Query", "getRankedNutrients", [
-                    ...result.setRankedNutrients,
-                  ]);
-                }
-              },
+              // addRecipeServing(result, args, cache, info) {
+              //   const typedArgs = (args as MutationAddRecipeServingArgs).serving
+              //     .mealPlanId;
+              //   const servings = cache.resolve(
+              //     { __typename: "MealPlan", id: typedArgs },
+              //     "mealPlanServings"
+              //   );
+              //   if (Array.isArray(servings)) {
+              //     cache.link(
+              //       { __typename: "MealPlan", id: typedArgs },
+              //       "mealPlanServings",
+              //       [...servings, result.addRecipeServing]
+              //     );
+              //   }
+              // },
+              // deleteRecipeServing(result, args, cache, info) {
+              //   cache.invalidate({
+              //     __typename: "MealPlanServing",
+              //     id: (args as MutationDeleteRecipeServingArgs).id,
+              //   });
+              // },
+              // addRecipeToMealPlan(result, args, cache, info) {
+              //   const mealPlanId = (args as MutationAddRecipeToMealPlanArgs)
+              //     .recipe.mealPlanId;
+              //   const mealPlan = cache.resolve(
+              //     { __typename: "MealPlan", id: mealPlanId },
+              //     "planRecipes"
+              //   );
+              //   if (Array.isArray(mealPlan)) {
+              //     cache.link(
+              //       { __typename: "MealPlan", id: mealPlanId },
+              //       "planRecipes",
+              //       [...mealPlan, result.addRecipeToMealPlan]
+              //     );
+              //   }
+              // },
+              // setRankedNutrients(result, args, cache, info) {
+              //   const rankedNutrients = cache.resolve(
+              //     "Query",
+              //     "getRankedNutrients"
+              //   );
+              //   if (
+              //     Array.isArray(rankedNutrients) &&
+              //     Array.isArray(result.setRankedNutrients)
+              //   ) {
+              //     cache.link("Query", "getRankedNutrients", [
+              //       ...result.setRankedNutrients,
+              //     ]);
+              //   }
+              // },
             },
           },
         }),
@@ -167,7 +171,7 @@ export default function RootLayout({
             {children}
           </UrqlProvider>
         </animated.main>
-        <Toaster />
+        <Toaster position="bottom-center" />
       </body>
     </html>
   );

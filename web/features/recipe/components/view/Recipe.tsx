@@ -3,17 +3,17 @@ import { Pencil } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { FilledImage } from "@/components/images/FilledImage";
+import { FilledImage } from "@/components/images/SquareImage";
 import { RichTextEditor } from "@/components/rich_text/RichTextEditor";
 import { Button } from "@/components/ui/button";
 import { recipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
 import { RecipeNutritionlabel } from "@/features/recipe/components/nutrition_label/RecipeNutritionLabel";
+import { Counter } from "@/features/recipe/components/view/Counter";
 import { LeftoverLifespan } from "@/features/recipe/components/view/LeftoverLifespan";
 import RecipeIngredients from "@/features/recipe/components/view/RecipeIngredients";
-import { RecipeNutritionSummary } from "@/features/recipe/components/view/RecipeNutritionSummary";
+import { RecipeMacroSummary } from "@/features/recipe/components/view/RecipeMacroSummary";
 import { RecipeTagList } from "@/features/recipe/components/view/RecipeTagList";
 import { RecipeTimes } from "@/features/recipe/components/view/RecipeTimes";
-import { ServingsAdjuster } from "@/features/recipe/components/view/ServingsAdjuster";
 import { SourceLink } from "@/features/recipe/components/view/SourceLink";
 import { getFragmentData } from "@/gql";
 import { RecipeFieldsFragment } from "@/gql/graphql";
@@ -69,7 +69,7 @@ export function Recipe({ recipe }: Recipe) {
         <div className="flex gap-12">
           <div>
             <h2 className="text-lg font-serif font-bold mb-2">Servings</h2>
-            <ServingsAdjuster
+            <Counter
               servings={servings}
               onChange={(update) => setServings(update)}
             />
@@ -77,7 +77,7 @@ export function Recipe({ recipe }: Recipe) {
 
           <div>
             <h2 className="text-lg font-serif font-bold mb-2">Scale</h2>
-            <ServingsAdjuster
+            <Counter
               servings={scale}
               step={0.25}
               onChange={(update) => setScale(update)}
@@ -100,16 +100,16 @@ export function Recipe({ recipe }: Recipe) {
           <h2 className="text-lg font-serif font-bold mb-2">
             Nutrition per serving
           </h2>
-          <RecipeNutritionSummary
+          <RecipeMacroSummary
             nutritionLabel={recipe?.aggregateLabel}
-          ></RecipeNutritionSummary>
+          ></RecipeMacroSummary>
         </div>
       </div>
 
       {/* Recipe Ingredients */}
       <div>
         <h2 className="text-lg font-serif font-bold mb-2">Ingredients</h2>
-        <RecipeIngredients ingredients={ingredients} />
+        <RecipeIngredients ingredients={ingredients} scale={scale} />
       </div>
 
       {/* Directions, notes, nutrition */}

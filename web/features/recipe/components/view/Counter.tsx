@@ -3,17 +3,13 @@ import { Minus, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-interface ServingsAdjusterProps {
+interface CounterProps {
   servings: number;
   step?: number;
   onChange: (servings: number) => void;
 }
 
-export function ServingsAdjuster({
-  servings,
-  step = 1,
-  onChange,
-}: ServingsAdjusterProps) {
+export function Counter({ servings, step = 1, onChange }: CounterProps) {
   return (
     <div className="flex items-center gap-4">
       <Button
@@ -27,7 +23,7 @@ export function ServingsAdjuster({
       >
         <Minus className="h-4 w-4" />
       </Button>
-      <p className="text-lg font-semibold">{servings}</p>
+      <p className="text-lg font-semibold min-w-10 text-center">{servings}</p>
       <Button
         onClick={() => onChange(servings + step)}
         variant="secondary"

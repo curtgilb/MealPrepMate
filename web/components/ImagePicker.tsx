@@ -13,7 +13,7 @@ import { ProgramticModalDrawer } from "./ModalDrawerProgramatic";
 import { ModalDrawerWithTrigger } from "./ModalDrawerWithTrigger";
 
 interface ImagePickerProps {
-  images: PhotoFieldsFragment[];
+  images: PhotoFieldsFragment[] | null;
   setImages: (images: PhotoFieldsFragment[]) => void;
 }
 
@@ -25,7 +25,7 @@ export function ImagePicker({ images, setImages }: ImagePickerProps) {
 
   let primaryPhoto = images?.find((photo) => photo.isPrimary);
   if (!primaryPhoto) {
-    if (images.length > 0) {
+    if (images?.length && images.length > 0) {
       primaryPhoto = images[0];
     } else {
       primaryPhoto = {
@@ -120,7 +120,9 @@ export function ImagePicker({ images, setImages }: ImagePickerProps) {
                   variant="destructive"
                   onClick={() => {
                     setImages(
-                      images.filter((image) => image.id !== selectedImage.id)
+                      images?.filter(
+                        (image) => image.id !== selectedImage.id
+                      ) ?? []
                     );
                     setViewOpen(false);
                   }}
@@ -141,7 +143,7 @@ export function ImagePicker({ images, setImages }: ImagePickerProps) {
         content={
           <ImageUploadForm
             onUploadedPhoto={(photo) => {
-              setImages([...images, photo]);
+              setImages(images ? [...images, photo] : [photo]);
               setUploadOpen(false);
             }}
           />

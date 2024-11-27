@@ -10,6 +10,7 @@ builder.prismaNode("Photo", {
   name: "Photo",
   fields: (t) => ({
     url: t.exposeString("path"),
+    blurData: t.exposeString("blurData", { nullable: true }),
     isPrimary: t.exposeBoolean("isPrimary"),
   }),
 });

@@ -1,12 +1,58 @@
 import { graphql } from "@/gql";
 
-export const mealServingsFragment = graphql(`
-  fragment MealPlanServingsField on MealPlanServing {
+const mealRecipeFragment = graphql(`
+  fragment MealRecipeFields on MealPlanRecipe {
     id
-    day
-    meal
-    numberOfServings
-    mealPlanRecipeId
+    totalServings
+    factor
+    servingsOnPlan
+    originalRecipe {
+      id
+      name
+      photos {
+        id
+        url
+        isPrimary
+      }
+      ingredientFreshness
+      ingredients {
+        id
+        quantity
+        sentence
+        baseIngredient {
+          id
+          name
+        }
+        unit {
+          id
+          name
+          symbol
+        }
+      }
+      aggregateLabel {
+        id
+        totalCalories
+        fat
+        alcohol
+        carbs
+        protein
+        nutrients {
+          id
+          perServing
+          value
+          nutrient {
+            id
+          }
+        }
+        servings
+        servingSize
+        servingSizeUnit {
+          id
+          name
+          symbol
+        }
+      }
+    }
   }
 `);
 
@@ -16,12 +62,16 @@ export const mealPlanQuery = graphql(`
       id
       name
       mealPrepInstructions
-      mealPlanServings {
-        ...MealPlanServingsField
-      }
-      planRecipes {
-        ...MealPlanRecipeFields
-      }
+    }
+  }
+`);
+
+export const mealPlanInfoQuery = graphql(`
+  query GetMealPlanInfo($mealPlanId: ID!) {
+    mealPlan(id: $mealPlanId) {
+      id
+      name
+      mealPrepInstructions
     }
   }
 `);
@@ -39,6 +89,7 @@ const editMealPlanMutation = graphql(`
     editMealPlan(id: $id, mealPlan: $mealPlan) {
       id
       name
+      mealPrepInstructions
     }
   }
 `);
@@ -72,4 +123,9 @@ const getMealPlansQuery = graphql(`
   }
 `);
 
-export { createMealPlanMutation, getMealPlansQuery, editMealPlanMutation };
+export {
+  createMealPlanMutation,
+  getMealPlansQuery,
+  editMealPlanMutation,
+  mealRecipeFragment,
+};

@@ -10,9 +10,11 @@ import {
   RecipeSearchFieldsFragment,
   SearchRecipesQuery,
 } from "@/gql/graphql";
+import { cn } from "@/lib/utils";
 
 interface RecipeSearchResultsProps {
   filter: RecipeFilter;
+  className?: string;
   renderCard: (recipe: RecipeSearchFieldsFragment) => JSX.Element;
 }
 
@@ -23,11 +25,12 @@ export type RecipeSearchItem = NonNullable<
 export function RecipeSearchResults({
   filter,
   renderCard,
+  className,
 }: RecipeSearchResultsProps) {
   return (
     <InfiniteScroll
       query={searchRecipesQuery}
-      className="grid gap-4 grid-cols-autofit"
+      className={cn("grid gap-4 grid-cols-autofit", className)}
       variables={{ filters: filter }}
       renderItem={(recipeFragment: RecipeSearchItem) => {
         const recipe = getFragmentData(recipeSearchFragment, recipeFragment);

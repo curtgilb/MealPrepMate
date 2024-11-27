@@ -1,6 +1,7 @@
-import { MealRecipeFieldsFragment } from "@/gql/graphql";
-import { RecipeNutrientLookup } from "@/hooks/use-recipe-label-lookup";
 import { createContext } from "react";
+
+import { MealRecipeFieldsFragment } from "@/gql/graphql";
+import { RecipeNutrientLookup } from "@/hooks/usePlanRecipeLabels";
 
 export type MealPlanContext = {
   id: string;

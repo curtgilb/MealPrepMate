@@ -1,6 +1,8 @@
-import { ReactNode } from "react";
+import { HTMLAttributes, ReactNode } from "react";
 
-interface StackedListProps {
+import { cn } from "@/lib/utils";
+
+interface StackedListProps extends HTMLAttributes<HTMLUListElement> {
   items: {
     id: string;
     top: string | number;
@@ -9,9 +11,9 @@ interface StackedListProps {
   }[];
 }
 
-export function StackedList({ items }: StackedListProps) {
+export function StackedList({ items, className, ...props }: StackedListProps) {
   return (
-    <ul className="flex gap-8">
+    <ul className={cn("flex gap-8", className)} {...props}>
       {items.map((item) => (
         <li key={item.id} className="flex gap-2 items-center">
           {item.icon && item.icon}

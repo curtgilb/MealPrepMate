@@ -4,18 +4,35 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
+import { Dispatch, SetStateAction } from "react";
+
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+export type ViewMode = "day" | "week";
+
 interface DayScrollerProps {
   value: number;
-  canScrollDays: boolean;
   onChange: (value: number) => void;
+  view: ViewMode;
+  setView: (value: ViewMode) => void;
 }
 
 export function DayScroller({
   value,
   onChange,
-  canScrollDays,
+  view,
+  setView,
 }: DayScrollerProps) {
+  const isDayView = view === "day";
   const week = value <= 7 ? 1 : Math.ceil(value / 7);
   let days = value <= 7 ? value : value - Math.floor(value / 7) * 7;
   days = days === 0 ? 7 : days;
@@ -23,7 +40,7 @@ export function DayScroller({
   const canSubtractDays = value > 1;
 
   return (
-    <div className="flex items-center gap-6">
+    <div className="flex items-center gap-3">
       <div>
         <Button
           onClick={() => {
@@ -37,7 +54,8 @@ export function DayScroller({
         >
           <ChevronsLeft className="h-4 w-4" />
         </Button>
-        {canScrollDays && (
+
+        {isDayView && (
           <Button
             onClick={() => {
               if (canSubtractDays) {
@@ -52,13 +70,30 @@ export function DayScroller({
           </Button>
         )}
       </div>
-      <p>
-        <Button className="min-w-40" variant="outline">
-          Week {week} {canScrollDays ? `Day ${days}` : null}
-        </Button>
-      </p>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button className="min-w-40" variant="outline">
+            {isDayView ? `Week ${week} Day ${days}` : `Week ${week}`}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56">
+          <DropdownMenuLabel>Planning view</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuRadioGroup
+            value={view}
+            onValueChange={(v) => {
+              setView(v as "week" | "day");
+            }}
+          >
+            <DropdownMenuRadioItem value="week">Week</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="day">Day</DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
       <div>
-        {canScrollDays && (
+        {isDayView && (
           <Button
             onClick={() => {
               onChange(value + 1);

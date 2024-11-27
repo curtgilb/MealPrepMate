@@ -41,7 +41,11 @@ const recipe = builder.prismaNode("Recipe", {
     }),
   }),
   include: {
-    ingredients: true,
+    ingredients: {
+      include: {
+        group: true,
+      },
+    },
   },
 });
 

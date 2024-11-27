@@ -24,6 +24,7 @@ const recipeIngredient = builder.prismaObject("RecipeIngredient", {
     group: t.relation("group", { nullable: true }),
     verified: t.exposeBoolean("verified"),
     mealPrepIngredient: t.exposeBoolean("mealPrepIngredient"),
+    optional: t.exposeBoolean("optional"),
   }),
 });
 

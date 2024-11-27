@@ -1,12 +1,14 @@
-import { mealPlanQuery } from "@/graphql/mealplan/mealplan";
-import { useQuery } from "@urql/next";
-import { useRecipeLabelLookup } from "./use-recipe-label-lookup";
+import { useMemo } from "react";
+
 import { getFragmentData } from "@/gql";
+import { MealPlanServingsFieldFragment } from "@/gql/graphql";
+import { mealPlanQuery } from "@/graphql/mealplan/mealplan";
 import { mealRecipeFragment } from "@/graphql/mealplan/mealrecipes";
 import { mealServingsFragment } from "@/graphql/mealplan/mealservings";
-import { MealPlanServingsFieldFragment } from "@/gql/graphql";
-import { useMemo } from "react";
 import { getDisplayDayNumber, getWeekNumber } from "@/utils/weeks";
+import { useQuery } from "@urql/next";
+
+import { useMealPlanRecipes } from "./usePlanRecipeLabels";
 
 // {week: day: {course: servings[]}}
 export type ServingsLookup = Map<
@@ -24,7 +26,7 @@ export function useMealPlan(id: string) {
   });
 
   const { data, fetching, error } = mealPlanResult;
-  const labels = useRecipeLabelLookup(data?.mealPlan.planRecipes);
+  const labels = useMealPlanRecipes(data?.mealPlan.planRecipes);
   const recipes = getFragmentData(
     mealRecipeFragment,
     data?.mealPlan.planRecipes

@@ -199,6 +199,7 @@ model RecipeIngredient {
   sentence           String
   quantity           Float?
   name               String?
+  optional           Boolean                @default(false)
   order              Int
   verified           Boolean                @default(false)
   mealPrepIngredient Boolean                @default(false)
@@ -425,6 +426,7 @@ model Photo {
   id        String  @id @default(uuid())
   path      String
   isPrimary Boolean @default(false)
+  blurData     String?
   hash      String  @unique
   recipe    Recipe? @relation(fields: [recipeId], references: [id], onDelete: SetNull)
   recipeId  String?

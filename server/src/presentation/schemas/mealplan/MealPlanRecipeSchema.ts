@@ -1,14 +1,10 @@
 import {
-  addRecipeToPlan,
-  AddRecipeToPlanInput,
-  EditMealPlanRecipeInput,
-  editRecipeOnPlan,
-  getMealPlanRecipes,
-  getMealPlanRecipeServings,
-  removeRecipeFromPlan,
-} from "@/application/services/mealplan/MealPlanRecipeService.js";
-import { builder } from "@/presentation/builder.js";
-import { DeleteResult } from "@/presentation/schemas/common/MutationResult.js";
+    addRecipeToPlan, AddRecipeToPlanInput, EditMealPlanRecipeInput, editRecipeOnPlan,
+    getMealPlanRecipes, getMealPlanRecipeServings, removeRecipeFromPlan
+} from '@/application/services/mealplan/MealPlanRecipeService.js';
+import { builder } from '@/presentation/builder.js';
+import { DeleteResult } from '@/presentation/schemas/common/MutationResult.js';
+import { encodeGlobalID } from '@pothos/plugin-relay';
 
 // ============================================ Types ===================================
 builder.prismaNode("MealPlanRecipe", {
@@ -20,7 +16,8 @@ builder.prismaNode("MealPlanRecipe", {
     mealPlanServings: t.relation("servings"),
     totalServings: t.exposeInt("totalServings"),
     cookDayOffset: t.exposeInt("cookDayOffset"),
-    servingsOnPlan: t.int({
+    servingsOnPlan: t.field({
+      type: "Int",
       resolve: async (recipe) => {
         return await getMealPlanRecipeServings(recipe);
       },
@@ -42,8 +39,7 @@ const addRecipeToMealPlanInput = builder
   .inputRef<AddRecipeToPlanInput>("AddRecipeToPlanInput")
   .implement({
     fields: (t) => ({
-      mealPlanId: t.string({ required: true }),
-      recipeId: t.string({ required: true }),
+      recipeId: t.field({ type: "RefID", required: true }),
       scaleFactor: t.float({ required: true }),
       servings: t.int({ required: true }),
     }),
@@ -54,10 +50,10 @@ builder.queryFields((t) => ({
   mealPlanRecipes: t.prismaField({
     type: ["MealPlanRecipe"],
     args: {
-      mealPlanId: t.arg.string({ required: true }),
+      mealPlanId: t.arg.globalID({ required: true }),
     },
     resolve: async (query, root, args) => {
-      return getMealPlanRecipes(args.mealPlanId, query);
+      return getMealPlanRecipes(args.mealPlanId.id, query);
     },
   }),
 }));
@@ -74,6 +70,7 @@ builder.mutationFields((t) => ({
       }),
     },
     resolve: async (query, root, args) => {
+      console.log(args);
       return await addRecipeToPlan(args.mealPlanId.id, args.recipe, query);
     },
   }),
@@ -96,8 +93,10 @@ builder.mutationFields((t) => ({
       id: t.arg.globalID({ required: true }),
     },
     resolve: async (root, args) => {
+      const guid = encodeGlobalID(args.id.typename, args.id.id);
+
       await removeRecipeFromPlan(args.id.id);
-      return { success: true };
+      return { id: guid, success: true };
     },
   }),
 }));

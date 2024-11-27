@@ -1,13 +1,7 @@
+import { builder } from '@/presentation/builder.js';
 import {
-  Gender,
-  ImportStatus,
-  ImportType,
-  Meal,
-  MeasurementSystem,
-  NutrientType,
-  RecordStatus,
-} from "@prisma/client";
-import { builder } from "@/presentation/builder.js";
+    Gender, ImportStatus, ImportType, Meal, MeasurementSystem, NutrientType, RecordStatus
+} from '@prisma/client';
 
 enum ExternalImportType {
   RECIPE_KEEPER,
@@ -18,7 +12,7 @@ builder.enumType(Gender, { name: "Gender" });
 const importStatus = builder.enumType(ImportStatus, { name: "ImportStatus" });
 
 const recordStatus = builder.enumType(RecordStatus, { name: "RecordStatus" });
-const meal = builder.enumType(Meal, { name: "Meal" });
+
 const measurementSystem = builder.enumType(MeasurementSystem, {
   name: "MeasurementSystem",
 });

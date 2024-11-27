@@ -1,13 +1,15 @@
-import { NutrientTargetBar } from "@/features/nutrition/components/NutrientTargetBar";
-import { PlanDay, PlanDayProps } from "./DayInterface";
-import { useFeaturedNutrients } from "@/hooks/use-featured-nutrients";
-import {
-  Nutrients,
-  useRecipeLabelLookup,
-} from "@/hooks/use-recipe-label-lookup";
-import { MealPlan } from "@/contexts/MealPlanContext";
 import { useContext } from "react";
+
+import { MealPlan } from "@/contexts/MealPlanContext";
+import { NutrientTargetBar } from "@/features/nutrition/components/NutrientTargetBar";
+import { useFeaturedNutrients } from "@/hooks/use-featured-nutrients";
 import { useNutrientSum } from "@/hooks/use-nutrient-sum";
+import {
+  ScaledNutrients,
+  useMealPlanRecipes,
+} from "@/hooks/usePlanRecipeLabels";
+
+import { PlanDay, PlanDayProps } from "./DayInterface";
 
 export function NutritionDay({
   dayNumber,
@@ -22,7 +24,7 @@ export function NutritionDay({
   const mealPlan = useContext(MealPlan);
   const summedLabel = useNutrientSum(
     allServingsForDay,
-    mealPlan?.labels ?? new Map<string, Nutrients>()
+    mealPlan?.labels ?? new Map<string, ScaledNutrients>()
   );
 
   return (

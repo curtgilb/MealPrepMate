@@ -1,25 +1,29 @@
-import { cn } from "@/lib/utils";
 import Image from "next/image";
+
+import { cn } from "@/lib/utils";
 
 interface FilledImageProps {
   altText: string;
   url: string;
-  imageCss?: string;
-  containerCss?: string;
+  height?: number;
+  targetWidth: number;
 }
 
-export function FilledImage({
+export function RectangleImage({
   url,
   altText,
-  imageCss,
-  containerCss,
+  height = 224,
+  targetWidth,
 }: FilledImageProps) {
   return (
-    <div className={cn("overflow-hidden relative rounded-md", containerCss)}>
+    <div
+      className="overflow-hidden rounded-md relative w-full"
+      style={{ height: `${height}px` }}
+    >
       <Image
-        className={imageCss}
         src={url}
         alt={altText}
+        sizes={`${targetWidth}px`}
         fill
         style={{
           objectFit: "cover",

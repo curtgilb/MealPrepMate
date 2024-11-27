@@ -1,5 +1,23 @@
 import { graphql } from "@/gql";
 
+const mealServingsFragment = graphql(`
+  fragment MealPlanServingsField on MealPlanServing {
+    id
+    day
+    meal
+    numberOfServings
+    mealPlanRecipeId
+  }
+`);
+
+const getServingsQuery = graphql(`
+  query getServings($mealPlanId: ID!, $filter: ServingsFilterInput) {
+    mealPlanServings(mealPlanId: $mealPlanId, filter: $filter) {
+      ...MealPlanServingsField
+    }
+  }
+`);
+
 const addServingMutation = graphql(`
   mutation addServingToPlan($serving: AddRecipeServingInput!) {
     addRecipeServing(serving: $serving) {
@@ -40,4 +58,10 @@ const editServingMutation = graphql(`
   }
 `);
 
-export { addServingMutation, deleteServingMutation, editServingMutation };
+export {
+  addServingMutation,
+  deleteServingMutation,
+  editServingMutation,
+  mealServingsFragment,
+  getServingsQuery,
+};

@@ -1,4 +1,4 @@
-import { builder } from "@/presentation/builder.js";
+import { builder } from '@/presentation/builder.js';
 
 export const DeleteResult = builder
   .objectRef<{
@@ -8,7 +8,7 @@ export const DeleteResult = builder
   }>("DeleteResult")
   .implement({
     fields: (t) => ({
-      id: t.globalID({ resolve: (parent) => parent.message }),
+      id: t.id({ resolve: (parent) => parent.id }),
       success: t.boolean({ resolve: (parent) => parent.success }),
       message: t.string({
         nullable: true,

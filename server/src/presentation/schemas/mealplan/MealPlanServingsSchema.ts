@@ -1,14 +1,13 @@
 import {
-  AddRecipeServingInput,
-  addServingToPlan,
-  deleteMealPlanServing,
-  editMealPlanServing,
-  EditRecipeServingInput,
-  getMealPlanServings,
-} from "@/application/services/mealplan/MealPlanServingsService.js";
-import { builder } from "@/presentation/builder.js";
-import { DeleteResult } from "@/presentation/schemas/common/MutationResult.js";
-import { meal } from "../common/EnumSchema.js";
+    AddRecipeServingInput, addServingToPlan, deleteMealPlanServing, editMealPlanServing,
+    EditRecipeServingInput, getMealPlanServings, ServingsFilterInput
+} from '@/application/services/mealplan/MealPlanServingsService.js';
+import { builder } from '@/presentation/builder.js';
+import { DeleteResult } from '@/presentation/schemas/common/MutationResult.js';
+import { encodeGlobalID } from '@pothos/plugin-relay';
+import { Meal } from '@prisma/client';
+
+const meal = builder.enumType(Meal, { name: "Meal" });
 
 // ============================================ Types ===================================
 builder.prismaNode("MealPlanServing", {
@@ -18,7 +17,7 @@ builder.prismaNode("MealPlanServing", {
   },
   fields: (t) => ({
     day: t.exposeInt("day"),
-    meal: t.exposeString("meal"),
+    meal: t.field({ type: meal, resolve: (parent) => parent.meal }),
     numberOfServings: t.exposeInt("numberOfServings"),
     mealPlanRecipeId: t.exposeString("mealPlanRecipeId"),
     mealRecipe: t.relation("recipe"),
@@ -47,22 +46,26 @@ const editRecipeServingInput = builder
     }),
   });
 
+const servingsDayInput = builder
+  .inputRef<ServingsFilterInput>("ServingsFilterInput")
+  .implement({
+    fields: (t) => ({
+      day: t.int(),
+      minDay: t.int(),
+      maxDay: t.int(),
+    }),
+  });
+
 // ============================================ Queries =================================
 builder.queryFields((t) => ({
   mealPlanServings: t.prismaField({
     type: ["MealPlanServing"],
     args: {
-      mealPlanId: t.arg.string({ required: true }),
-      minDay: t.arg.int(),
-      maxDay: t.arg.int(),
+      mealPlanId: t.arg.globalID({ required: true }),
+      filter: t.arg({ type: servingsDayInput }),
     },
     resolve: async (query, root, args) => {
-      return await getMealPlanServings(
-        args.mealPlanId,
-        args.minDay ?? undefined,
-        args.maxDay ?? undefined,
-        query
-      );
+      return await getMealPlanServings(args.mealPlanId.id, args.filter, query);
     },
   }),
 }));
@@ -87,12 +90,9 @@ builder.mutationFields((t) => ({
       id: t.arg.globalID({ required: true }),
     },
     resolve: async (root, args) => {
-      try {
-        await deleteMealPlanServing(args.id.id);
-        return { success: true };
-      } catch {
-        return { success: false };
-      }
+      const guid = encodeGlobalID(args.id.typename, args.id.id);
+      await deleteMealPlanServing(args.id.id);
+      return { id: guid, success: true };
     },
   }),
   editRecipeServing: t.prismaField({

@@ -92,29 +92,29 @@ const getRecipeBaiscInfo = graphql(`
     recipe(recipeId: $id) {
       id
       name
-      category {
-        id
-        name
-      }
-      cuisine {
-        id
-        name
-      }
       cookTime
-      course {
-        id
-        name
-      }
       directions
       leftoverFridgeLife
       leftoverFreezerLife
       marinadeTime
       verified
+      ingredients {
+        ...RecipeIngredientFields
+      }
       notes
       photos {
         id
         isPrimary
         url
+      }
+      aggregateLabel {
+        id
+        servings
+        totalCalories
+        protein
+        fat
+        carbs
+        alcohol
       }
       prepTime
       source

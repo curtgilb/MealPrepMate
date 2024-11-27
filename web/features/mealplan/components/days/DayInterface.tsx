@@ -1,11 +1,12 @@
 import { ReactNode } from "react";
-import { ServingsLookup } from "./DayManager";
+
 import { cn } from "@/lib/utils";
+
+import { ServingsLookup } from "./DayManager";
 
 export interface PlanDayProps {
   dayNumber: number;
   displayNumber: number;
-  servingsByMeal: ServingsLookup | null | undefined;
   isVerticalLayout: boolean;
 }
 

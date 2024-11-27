@@ -1,7 +1,9 @@
-import { MealPlanServingsFieldFragment } from "@/gql/graphql";
 import { useMemo } from "react";
-import { RecipeNutrientLookup } from "./use-recipe-label-lookup";
+
+import { MealPlanServingsFieldFragment } from "@/gql/graphql";
 import { SummedNutrients, sumNutrients } from "@/utils/nutrients";
+
+import { RecipeNutrientLookup } from "./usePlanRecipeLabels";
 
 export function useNutrientSum(
   servings: MealPlanServingsFieldFragment[],

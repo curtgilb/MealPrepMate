@@ -1,8 +1,8 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import React, { ReactNode } from 'react';
+import Image from "next/image";
+import Link from "next/link";
+import React, { ReactNode } from "react";
 
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
 export interface CardProps extends React.HTMLAttributes<HTMLElement> {
   children?: ReactNode;
@@ -32,10 +32,9 @@ export const Card = React.forwardRef<
   } = props;
   const { className, ...additionalProps } = rest;
   const baseStyle = cn(
-    "border rounded-md overflow-hidden bg-card group ring ring-transparent focus:ring-primary",
+    "border rounded-md overflow-hidden bg-card group ring ring-transparent hover:cursor-pointer focus:ring-primary",
     {
       block: href,
-
       flex: !vertical,
       className,
     }
@@ -103,7 +102,7 @@ function CardImage({
 
   return (
     <div
-      className={cn("overflow-hidden relative bg-muted", {
+      className={cn("overflow-hidden relative bg-muted shrink-0", {
         "w-80 h-72": verticalOrientation,
         "w-16 h-16": !verticalOrientation,
         "grid grid-cols-2": imageGrid,

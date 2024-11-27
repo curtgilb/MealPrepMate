@@ -1,8 +1,7 @@
-import { db } from "@/infrastructure/repository/db.js";
-import { MealPlanRecipe, Prisma } from "@prisma/client";
+import { db } from '@/infrastructure/repository/db.js';
+import { MealPlanRecipe, Prisma } from '@prisma/client';
 
 type AddRecipeToPlanInput = {
-  mealPlanId: string;
   recipeId: string;
   scaleFactor: number;
   servings: number;
@@ -46,7 +45,7 @@ async function addRecipeToPlan(
   query: MealPlanRecipeQuery
 ) {
   // @ts-ignore
-  return await db.mealPlanRecipe.create({
+  const result = await db.mealPlanRecipe.create({
     data: {
       mealPlan: { connect: { id: mealPlanId } },
       recipe: { connect: { id: recipe.recipeId } },
@@ -55,6 +54,7 @@ async function addRecipeToPlan(
     },
     ...query,
   });
+  return result;
 }
 
 async function editRecipeOnPlan(
