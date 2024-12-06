@@ -1,42 +1,31 @@
 "use client";
-import { Pen, PenBox, Save, X } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { useMutation } from "urql";
-import { z } from "zod";
+import { Pen, PenBox, Save, X } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { useMutation } from 'urql';
+import { z } from 'zod';
 
-import { GenericCombobox } from "@/components/combobox/GenericCombox1";
-import { RichTextEditor } from "@/components/rich_text/RichTextEditor";
-import { Button } from "@/components/ui/button";
+import { GenericCombobox } from '@/components/combobox/GenericCombox1';
+import { RichTextEditor } from '@/components/rich_text/RichTextEditor';
+import { Button } from '@/components/ui/button';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { expirationRuleFragment } from "@/features/ingredient/api/ExpirationRule";
+    Form, FormControl, FormField, FormItem, FormLabel, FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { expirationRuleFragment } from '@/features/ingredient/api/ExpirationRule';
 import {
-  createIngredientMutation,
-  editIngredientMutation,
-  ingredientFieldsFragment,
-} from "@/features/ingredient/api/Ingredient";
-import { getIngredientCategoryQuery } from "@/features/ingredient/api/IngredientCategory";
-import { IngredientAlternateNames } from "@/features/ingredient/components/edit/AlternateNames";
+    createIngredientMutation, editIngredientMutation, ingredientFieldsFragment
+} from '@/features/ingredient/api/Ingredient';
+import { getIngredientCategoryQuery } from '@/features/ingredient/api/IngredientCategory';
+import { IngredientAlternateNames } from '@/features/ingredient/components/edit/AlternateNames';
 import {
-  convertRuleToFormInput,
-  expirationRuleSchema,
-} from "@/features/ingredient/components/view/EditExpirationRule";
-import { ExpirationRule } from "@/features/ingredient/components/view/ExpirationRulePicker";
-import { getFragmentData } from "@/gql";
-import {
-  GetIngredientCategoryQuery,
-  IngredientFieldsFragment,
-} from "@/gql/graphql";
-import { zodResolver } from "@hookform/resolvers/zod";
+    convertRuleToFormInput, expirationRuleSchema
+} from '@/features/ingredient/components/view/EditExpirationRule';
+import { ExpirationRule } from '@/features/ingredient/components/view/ExpirationRulePicker';
+import { getFragmentData } from '@/gql';
+import { GetIngredientCategoryQuery, IngredientFieldsFragment } from '@/gql/graphql';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 const ingredientFormSchema = z.object({
   name: z.string(),
@@ -126,9 +115,6 @@ export function IngredientEditor({ ingredient }: EditIngredientProps) {
         <form
           className="flex flex-col gap-8"
           onSubmit={(e) => {
-            console.log("Form state:", form.formState);
-            console.log("Form errors:", form.formState.errors);
-            console.log("Raw form values:", form.getValues());
             form.handleSubmit(onSubmit)(e);
           }}
         >

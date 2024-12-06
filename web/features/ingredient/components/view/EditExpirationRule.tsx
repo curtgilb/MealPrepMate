@@ -1,35 +1,24 @@
-import { Save } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { useMutation } from "urql";
-import { z } from "zod";
+import { Save } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { useMutation } from 'urql';
+import { z } from 'zod';
 
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+    Form, FormControl, FormField, FormItem, FormLabel, FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
-  createExpirationRuleMutation,
-  editExpirationRuleMutation,
-  expirationRuleFragment,
-} from "@/features/ingredient/api/ExpirationRule";
-import { getFragmentData } from "@/gql";
-import {
-  CreateExpirationRuleMutation,
-  ExpirationRuleFieldsFragment,
-} from "@/gql/graphql";
-import { zodResolver } from "@hookform/resolvers/zod";
+    createExpirationRuleMutation, editExpirationRuleMutation, expirationRuleFragment
+} from '@/features/ingredient/api/ExpirationRule';
+import { getFragmentData } from '@/gql';
+import { CreateExpirationRuleMutation, ExpirationRuleFieldsFragment } from '@/gql/graphql';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 export function convertRuleToFormInput(
   rule: ExpirationRuleFieldsFragment | null | undefined | ExpirationRuleFormType
 ): ExpirationRuleFormType {
-  console.log("preconversion", rule);
   return {
     id: rule?.id ?? "Default",
     name: rule?.name ?? "",
@@ -80,7 +69,6 @@ export function EditExpirationRule({
 
   const onSubmit = async (values: ExpirationRuleFormType) => {
     try {
-      console.log("submitted", values);
       const { id, label, ...input } = values;
       let fragment:
         | CreateExpirationRuleMutation["createExpirationRule"]
@@ -236,7 +224,6 @@ export function EditExpirationRule({
             type="button"
             disabled={loading}
             onClick={(e) => {
-              console.log("form state", form.formState.errors);
               form.handleSubmit(onSubmit)(e);
             }}
           >

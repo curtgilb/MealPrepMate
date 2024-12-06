@@ -48,7 +48,6 @@ type PriceGroupType =
 
 export function PriceHistory({ prices }: PriceHistoryProps) {
   const [foodType, setFoodType] = useState<FoodType | "ALL">("ALL");
-  console.log(prices);
 
   let dataLines = [];
 

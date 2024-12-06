@@ -38,7 +38,7 @@ const nutrient = builder.prismaNode("Nutrient", {
   }),
 });
 
-builder.prismaNode("DailyReferenceIntake", {
+export const dri = builder.prismaNode("DailyReferenceIntake", {
   id: { field: "id" },
   name: "DailyReferenceIntake",
   fields: (t) => ({

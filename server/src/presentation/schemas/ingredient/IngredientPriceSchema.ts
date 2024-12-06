@@ -32,7 +32,7 @@ builder.prismaNode("IngredientPrice", {
     pricePerUnit: t.exposeFloat("pricePerUnit"),
     ingredient: t.relation("ingredient"),
     unit: t.relation("unit"),
-    receiptLine: t.relation("receiptLine"),
+    receiptLine: t.relation("receiptLine", { nullable: true }),
     price: t.exposeFloat("price"),
   }),
 });

@@ -1,4 +1,4 @@
-import { graphql } from "@/gql";
+import { graphql } from '@/gql';
 
 const mealRecipeFragment = graphql(`
   fragment MealRecipeFields on MealPlanRecipe {

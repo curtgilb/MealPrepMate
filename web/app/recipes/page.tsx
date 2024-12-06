@@ -14,7 +14,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { RecipeSearchFilter } from "@/features/mealplan/components/sidebar/recipe_search/RecipeSearch";
+import { RecipeSearchFilter } from "@/features/mealplan/components/sidebar/recipes/RecipeSearch";
 import { MainRecipeSearchCard } from "@/features/recipe/components/recipe_search/MainRecipeSearchCard";
 import { RecipeSearchResults } from "@/features/recipe/components/recipe_search/RecipeSearchResults";
 import { RecipeFilter } from "@/features/recipe/components/RecipeFilter";

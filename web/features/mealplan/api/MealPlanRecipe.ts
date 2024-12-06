@@ -1,4 +1,4 @@
-import { graphql } from "@/gql";
+import { graphql } from '@/gql';
 
 const mealPlanRecipeFragment = graphql(`
   fragment MealPlanRecipeFields on MealPlanRecipe {
@@ -48,6 +48,26 @@ const mealPlanRecipeFragment = graphql(`
   }
 `);
 
+const basicPlanRecipeFragment = graphql(`
+  fragment BasicPlanRecipeFields on MealPlanRecipe {
+    id
+    mealPlan {
+      id
+    }
+    totalServings
+    servingsOnPlan
+    originalRecipe {
+      id
+      name
+      photos {
+        id
+        url
+        isPrimary
+      }
+    }
+  }
+`);
+
 const planNutritionFragment = graphql(`
   fragment PlanNutritionFields on MealPlanRecipe {
     id
@@ -74,6 +94,14 @@ const planNutritionFragment = graphql(`
           }
         }
       }
+    }
+  }
+`);
+
+const getBasicPlanRecipeInfo = graphql(`
+  query GetBasicPlanRecipeInfo($mealPlanId: ID!) {
+    mealPlanRecipes(mealPlanId: $mealPlanId) {
+      ...BasicPlanRecipeFields
     }
   }
 `);
@@ -130,4 +158,6 @@ export {
   deleteMealPlanRecipeMutation,
   planNutritionFragment,
   getMealPlanRecipeNutrition,
+  getBasicPlanRecipeInfo,
+  basicPlanRecipeFragment,
 };

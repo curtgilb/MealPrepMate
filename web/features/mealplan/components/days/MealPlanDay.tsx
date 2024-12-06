@@ -1,14 +1,15 @@
 "use client";
-import { useContext } from "react";
+import { Plus } from 'lucide-react';
 
-import { MealPlan } from "@/contexts/MealPlanContext";
-import { Meal } from "@/gql/graphql";
-import { RecipeNutrientLookup } from "@/hooks/usePlanRecipeLabels";
-import { cn } from "@/lib/utils";
-import { SummedNutrients } from "@/utils/nutrients";
-import { toTitleCase } from "@/utils/utils";
-
-import { AddServingDialog } from "../AddServingDialog";
+import { Button } from '@/components/ui/button';
+import {
+    NutrientLabel, SummedNutrientLabelArgs
+} from '@/features/mealplan/hooks/useMealPlanNutrition';
+import { UseMealPlanRecipesResult } from '@/features/mealplan/hooks/useMealPlanRecipes';
+import { PlanServingsByDayResultData } from '@/features/mealplan/hooks/usePlanServings';
+import { Meal, MealPlanServingsFieldFragment } from '@/gql/graphql';
+import { cn } from '@/lib/utils';
+import { toTitleCase } from '@/utils/utils';
 
 export const courses: Meal[] = [
   Meal.Breakfast,
@@ -27,7 +28,7 @@ const DAYS_OF_WEEK = [
   "Saturday",
 ];
 
-const macros: Array<keyof SummedNutrients> = [
+const macros: Array<keyof NutrientLabel> = [
   "calories",
   "protein",
   "carbs",
@@ -35,48 +36,48 @@ const macros: Array<keyof SummedNutrients> = [
 ];
 
 interface PlanDayProps {
-  weekAndDay: number;
-  dayOfWeek: number;
+  dayNumber: number;
   isVerticalLayout: boolean;
-  labels: RecipeNutrientLookup;
+  servings: PlanServingsByDayResultData["groupedByCourse"] | undefined;
+  recipeLookup: UseMealPlanRecipesResult | undefined;
+  openDialog: (
+    day: number,
+    serving: MealPlanServingsFieldFragment | null
+  ) => void;
 }
 
 export function MealPlanDay({
-  weekAndDay,
-  dayOfWeek,
+  dayNumber,
   isVerticalLayout,
-  labels,
+  servings,
+  recipeLookup,
+  openDialog,
 }: PlanDayProps) {
-  const mealPlan = useContext(MealPlan);
-  const recipes = mealPlan?.recipes;
-  // const servingsByCourse = servingsByMeal?.get(dayNumber);
-  // const allServingsForDay = Array.from(
-  //   servingsByMeal?.get(dayNumber)?.values() ?? []
-  // ).flat();
-  // const dayTotal = useNutrientSum(
-  //   allServingsForDay,
-  //   mealPlan?.labels ?? new Map<string, Nutrients>()
-  // );
+  const dayOfWeek = DAYS_OF_WEEK[(dayNumber - 1) % 7];
 
   return (
     <div
       className={cn(
         "border rounded-md p-6 bg-card shadow grid gap-y-4",
-        isVerticalLayout ? "w-full" : "w-[28rem]"
+        isVerticalLayout ? "w-[28rem]" : "w-full"
       )}
     >
       <div className="flex items-baseline justify-between">
-        <p className="text-2xl  font-serif font-medium mb-4">
-          {DAYS_OF_WEEK[(dayOfWeek - 1) % 7]}
-        </p>
-        <AddServingDialog day={weekAndDay} />
+        <p className="text-2xl  font-serif font-medium mb-4">{dayOfWeek}</p>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            openDialog(dayNumber, null);
+          }}
+        >
+          <Plus /> Add serving
+        </Button>
       </div>
       <div>
         <div className="flex justify-between mb-8">
           <ul
             className={cn("flex justify-between  w-full", {
-              "max-w-[20rem]": isVerticalLayout,
-              "ms-auto": isVerticalLayout,
+              "max-w-[20rem] ms-auto": !isVerticalLayout,
             })}
           >
             {macros.map((macro) => {
@@ -96,40 +97,22 @@ export function MealPlanDay({
           <div
             className={cn(
               "grid gap-4",
-              isVerticalLayout ? "grid-cols-2" : "grid-cols-1"
+              isVerticalLayout ? "grid-cols-1" : "grid-cols-2"
             )}
           >
             {courses.map((course) => {
-              // const mealServings = servingsByCourse?.get(course);
               return (
                 <div key={course}>
                   <p className="font-semibold mb-2">{toTitleCase(course)}</p>
-                  <div className="bg-secondary/50 min-h-48 rounded p-2">
-                    {/* {mealServings?.map((serving) => {
-                      const matchingRecipe = recipes?.find(
-                        (recipe) => recipe.id === serving.mealPlanRecipeId
-                      );
-                      const recipeLabel = mealPlan?.labels.get(
-                        serving.mealPlanRecipeId
-                      );
-                      const servingCalories = Math.round(
-                        (recipeLabel?.calories.perServing ?? 0) *
-                          serving.numberOfServings
-                      );
-                      return (
-                        <MealPlanServingCard
-                          id={serving.id}
-                          meal={serving.meal as Meal}
-                          dayNumber={dayNumber}
-                          key={serving.id}
-                          servings={serving.numberOfServings}
-                          calories={servingCalories}
-                          name={matchingRecipe?.originalRecipe.name ?? ""}
-                          photoUrl={""}
-                        />
-                      );
-                    })} */}
-                  </div>
+                  <ul className="bg-secondary/50 min-h-48 rounded p-2">
+                    {servings &&
+                      dayNumber in servings &&
+                      servings[dayNumber][course].map((serving) => {
+                        return (
+                          <li key={serving.id}>{serving.numberOfServings}</li>
+                        );
+                      })}
+                  </ul>
                 </div>
               );
             })}

@@ -1,15 +1,14 @@
-import { useContext } from "react";
+import { useContext } from 'react';
 
-import { MealPlan } from "@/contexts/MealPlanContext";
-import { NutrientTargetBar } from "@/features/nutrition/components/NutrientTargetBar";
-import { useFeaturedNutrients } from "@/hooks/use-featured-nutrients";
-import { useNutrientSum } from "@/hooks/use-nutrient-sum";
+import { MealPlan } from '@/features/mealplan/contexts/ServingsContext';
 import {
-  ScaledNutrients,
-  useMealPlanRecipes,
-} from "@/hooks/usePlanRecipeLabels";
+    ScaledNutrients, useMealPlanRecipes
+} from '@/features/mealplan/hooks/useMealPlanNutrition';
+import { NutrientTargetBar } from '@/features/nutrition/components/NutrientTargetBar';
+import { useFeaturedNutrients } from '@/hooks/use-featured-nutrients';
+import { useNutrientSum } from '@/hooks/use-nutrient-sum';
 
-import { PlanDay, PlanDayProps } from "./DayInterface";
+import { PlanDay, PlanDayProps } from './DayInterface';
 
 export function NutritionDay({
   dayNumber,

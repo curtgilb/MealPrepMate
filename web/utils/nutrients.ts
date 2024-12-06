@@ -1,5 +1,5 @@
+import { RecipeNutrientLookup } from "@/features/mealplan/hooks/useMealPlanNutrition";
 import { MealPlanServingsFieldFragment } from "@/gql/graphql";
-import { RecipeNutrientLookup } from "@/hooks/usePlanRecipeLabels";
 
 export type SummedNutrients = {
   calories: number;

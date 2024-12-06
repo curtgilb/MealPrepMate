@@ -1,15 +1,9 @@
-import { db } from "@/infrastructure/repository/db.js";
-import { Prisma, TargetPreference } from "@prisma/client";
+import { db } from '@/infrastructure/repository/db.js';
+import { Prisma, TargetPreference } from '@prisma/client';
 
 export type RankedNutrientInput = {
   nutrientId: string;
   rank: number;
-};
-
-export type NutrientTargetInput = {
-  value: number;
-  threshold?: number | undefined | null;
-  preference: TargetPreference;
 };
 
 type NutrientQuery = {
@@ -37,31 +31,6 @@ async function getDriValues(nutrientId: string, query?: DriQuery) {
   });
 }
 
-async function setNutrientTarget(
-  nutrientId: string,
-  target: NutrientTargetInput,
-  query?: NutrientQuery
-) {
-  await db.nutrientTarget.upsert({
-    where: { nutrientId: nutrientId },
-    update: {
-      targetValue: target.value,
-      preference: target.preference,
-      threshold: target.threshold,
-    },
-    create: {
-      targetValue: target.value,
-      preference: target.preference,
-      threshold: target.threshold,
-      nutrient: { connect: { id: nutrientId } },
-    },
-  });
-  return await db.nutrient.findUniqueOrThrow({
-    where: { id: nutrientId },
-    ...query,
-  });
-}
-
 async function setRankedNutrients(
   rankedNutrients: RankedNutrientInput[],
   query?: NutrientQuery
@@ -85,4 +54,4 @@ async function setRankedNutrients(
   return created;
 }
 
-export { setRankedNutrients, getDriValues, setNutrientTarget };
+export { setRankedNutrients, getDriValues };

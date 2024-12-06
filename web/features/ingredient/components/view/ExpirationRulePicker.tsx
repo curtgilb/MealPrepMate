@@ -1,28 +1,21 @@
-import { Edit } from "lucide-react";
-import { useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { Edit } from 'lucide-react';
+import { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 
-import { GenericCombobox } from "@/components/combobox/GenericCombox1";
-import { ProgramticModalDrawer } from "@/components/ModalDrawerProgramatic";
-import { Button } from "@/components/ui/button";
+import { GenericCombobox } from '@/components/combobox/GenericCombox1';
+import { ProgramticModalDrawer } from '@/components/ModalDrawerProgramatic';
+import { Button } from '@/components/ui/button';
+import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
+    expirationRuleFragment, getExpirationRulesQuery
+} from '@/features/ingredient/api/ExpirationRule';
+import { IngredientFormType } from '@/features/ingredient/components/edit/EditIngredient';
 import {
-  expirationRuleFragment,
-  getExpirationRulesQuery,
-} from "@/features/ingredient/api/ExpirationRule";
-import { IngredientFormType } from "@/features/ingredient/components/edit/EditIngredient";
-import {
-  convertRuleToFormInput,
-  EditExpirationRule,
-} from "@/features/ingredient/components/view/EditExpirationRule";
-import { ExpirationRuleTable } from "@/features/ingredient/components/view/ExpirationRuleTable";
-import { getFragmentData } from "@/gql/fragment-masking";
-import { GetExpirationRulesQuery } from "@/gql/graphql";
+    convertRuleToFormInput, EditExpirationRule
+} from '@/features/ingredient/components/view/EditExpirationRule';
+import { ExpirationRuleTable } from '@/features/ingredient/components/view/ExpirationRuleTable';
+import { getFragmentData } from '@/gql/fragment-masking';
+import { GetExpirationRulesQuery } from '@/gql/graphql';
 
 // WHen you are picking an existing expiration rule
 export function ExpirationRule() {
@@ -59,7 +52,7 @@ export function ExpirationRule() {
                           expirationRuleFragment,
                           item.node
                         );
-                        console.log("rule", convertRuleToFormInput(rule));
+
                         return convertRuleToFormInput(rule);
                       }}
                       selectedItems={field.value?.id ? [field.value] : []}
@@ -119,7 +112,6 @@ export function ExpirationRule() {
             create={toCreate}
             onClose={(newRule) => {
               if (newRule) {
-                console.log("newRule", newRule);
                 form.setValue("expirationRule", newRule);
               }
               setEdit(false);

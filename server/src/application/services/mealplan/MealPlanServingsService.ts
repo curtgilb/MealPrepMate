@@ -10,9 +10,9 @@ type AddRecipeServingInput = {
 };
 
 type EditRecipeServingInput = {
-  day: number | undefined;
-  servings: number | undefined;
-  meal: Meal | undefined;
+  day: number;
+  servings: number;
+  meal: Meal;
 };
 
 type MealPlanServingQuery = {

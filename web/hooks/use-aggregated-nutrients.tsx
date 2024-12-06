@@ -8,8 +8,8 @@ import {
   sumNutrients,
 } from "@/utils/nutrients";
 
+import { RecipeNutrientLookup } from "../features/mealplan/hooks/useMealPlanNutrition";
 import { ServingsLookup } from "./use-meal-plan";
-import { RecipeNutrientLookup } from "./usePlanRecipeLabels";
 
 export function useAggregateNutrients(
   week: WeekNumber,

@@ -1,32 +1,26 @@
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { useMutation } from "urql";
-import { z } from "zod";
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { useMutation } from 'urql';
+import { z } from 'zod';
 
-import { Card } from "@/components/Card";
-import { ModalDrawerWithTrigger } from "@/components/ModalDrawerWithTrigger";
-import { Button } from "@/components/ui/button";
+import { Card } from '@/components/Card';
+import { ModalDrawerWithTrigger } from '@/components/ModalDrawerWithTrigger';
+import { Button } from '@/components/ui/button';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+    Form, FormControl, FormField, FormItem, FormLabel, FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
-  deleteServingMutation,
-  editServingMutation,
-} from "@/features/mealplan/api/MealPlanServings";
-import { graphql } from "@/gql";
-import { Meal } from "@/gql/graphql";
-import { toTitleCase } from "@/utils/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
+    deleteServingMutation, editServingMutation
+} from '@/features/mealplan/api/MealPlanServings';
+import { graphql } from '@/gql';
+import { Meal } from '@/gql/graphql';
+import { toTitleCase } from '@/utils/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import { meals } from "./AddServingDialog";
+import { meals } from './servings/ServingForm';
 
 interface MealPlanServingCardProps {
   id: string;

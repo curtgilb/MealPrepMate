@@ -8,7 +8,7 @@ import { mealServingsFragment } from "@/graphql/mealplan/mealservings";
 import { getDisplayDayNumber, getWeekNumber } from "@/utils/weeks";
 import { useQuery } from "@urql/next";
 
-import { useMealPlanRecipes } from "./usePlanRecipeLabels";
+import { useMealPlanRecipes } from "../features/mealplan/hooks/useMealPlanNutrition";
 
 // {week: day: {course: servings[]}}
 export type ServingsLookup = Map<

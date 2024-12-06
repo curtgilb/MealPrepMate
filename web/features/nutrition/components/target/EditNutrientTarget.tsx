@@ -1,33 +1,21 @@
 "use client";
-import Link from "next/link";
-import { Dispatch, SetStateAction, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { Dispatch, SetStateAction, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+    Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { setNutritionTarget } from "@/features/nutrition/api/NutrientTarget";
-import { NutrientFieldsFragment, TargetPreference } from "@/gql/graphql";
-import { toTitleCase } from "@/utils/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@urql/next";
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from '@/components/ui/select';
+import { setNutritionTarget } from '@/features/mealplan/api/NutrientTarget';
+import { NutrientFieldsFragment, TargetPreference } from '@/gql/graphql';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@urql/next';
 
 interface EditNutrientTargetProps {
   nutrient: NutrientFieldsFragment;

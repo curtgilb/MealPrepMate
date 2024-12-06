@@ -19,7 +19,11 @@ builder.prismaNode("MealPlanServing", {
     day: t.exposeInt("day"),
     meal: t.field({ type: meal, resolve: (parent) => parent.meal }),
     numberOfServings: t.exposeInt("numberOfServings"),
-    mealPlanRecipeId: t.exposeString("mealPlanRecipeId"),
+    mealPlanRecipeId: t.field({
+      type: "RefID",
+      resolve: (parent) =>
+        encodeGlobalID("MealPlanRecipe", parent.mealPlanRecipeId),
+    }),
     mealRecipe: t.relation("recipe"),
   }),
 });
@@ -29,8 +33,8 @@ const addRecipeServingInput = builder
   .implement({
     fields: (t) => ({
       day: t.int({ required: true }),
-      mealPlanRecipeId: t.string({ required: true }),
-      mealPlanId: t.string({ required: true }),
+      mealPlanRecipeId: t.field({ type: "RefID", required: true }),
+      mealPlanId: t.field({ type: "RefID", required: true }),
       servings: t.int({ required: true }),
       meal: t.field({ type: meal, required: true }),
     }),

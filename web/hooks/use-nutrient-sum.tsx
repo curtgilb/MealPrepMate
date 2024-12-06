@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { MealPlanServingsFieldFragment } from "@/gql/graphql";
 import { SummedNutrients, sumNutrients } from "@/utils/nutrients";
 
-import { RecipeNutrientLookup } from "./usePlanRecipeLabels";
+import { RecipeNutrientLookup } from "../features/mealplan/hooks/useMealPlanNutrition";
 
 export function useNutrientSum(
   servings: MealPlanServingsFieldFragment[],

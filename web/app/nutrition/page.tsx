@@ -1,8 +1,5 @@
 "use client";
-import { NutrientRanking } from "@/features/nutrition/components/NutrientRanking";
-import { MacroSummary } from "@/features/nutrition/components/target/MacroNutritionSummary";
-import { NutritionTargets } from "@/features/nutrition/components/target/NutrientTarget";
-import { TDEECalculator } from "@/features/nutrition/components/TDEECalculator";
+import { NutritionTargets } from '@/features/nutrition/components/target/NutrientTarget';
 
 export default function NutritionPage() {
   return (

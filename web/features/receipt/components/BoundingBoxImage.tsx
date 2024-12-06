@@ -1,5 +1,5 @@
-import Image from "next/image";
-import { useRef, useState } from "react";
+import Image from 'next/image';
+import { useRef, useState } from 'react';
 
 interface Coordinate {
   x: number;
@@ -35,7 +35,6 @@ export function BoundingBoxImage({
     const points = coordinates
       .map((coord) => `${coord.x},${coord.y}`)
       .join(" ");
-    console.log("Generated polygon points:", points);
     return points;
   };
 
@@ -55,10 +54,6 @@ export function BoundingBoxImage({
           }}
           unoptimized
           onLoadingComplete={({ naturalWidth, naturalHeight }) => {
-            console.log("Image loaded with dimensions:", {
-              naturalWidth,
-              naturalHeight,
-            });
             setImageSize({ width: naturalWidth, height: naturalHeight });
           }}
           priority
