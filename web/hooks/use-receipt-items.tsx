@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useMemo, useState } from "react";
 
 import { ReceiptItemFragment } from "@/gql/graphql";
@@ -33,15 +34,15 @@ export function useReceiptItems(
     }
   }, [items]);
 
-  useEffect(() => {
-    if (items?.length && index >= items?.length) {
-      setIndex(items.length - 1);
-    }
-    const activeId = sortedItems?.[index]?.id;
-    if (activeId) {
-      window.localStorage.setItem(receiptId, activeId);
-    }
-  }, [receiptId, index, items, sortedItems]);
+  // useEffect(() => {
+  //   if (items?.length && index >= items?.length) {
+  //     setIndex(items.length - 1);
+  //   }
+  //   const activeId = sortedItems?.[index]?.id;
+  //   if (activeId) {
+  //     window.localStorage.setItem(receiptId, activeId);
+  //   }
+  // }, [receiptId, index, items, sortedItems]);
 
   const activeItem = useMemo(() => {
     return sortedItems?.[index] ?? null;

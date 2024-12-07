@@ -2,10 +2,8 @@
 import SingleColumnCentered from "@/components/layouts/single-column-centered";
 import { Button } from "@/components/ui/button";
 import { InputWithIcon } from "@/components/ui/InputWithIcon";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { IngredientSearchResults } from "@/features/ingredient/components/IngredientSearchResults";
 
-import { ReceiptUpload } from "@/features/receipt/components/ReceiptUploadDialog";
 import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -31,8 +29,6 @@ export default function IngredientsPage() {
               New ingredient
             </Button>
           </Link>
-
-          <ReceiptUpload />
         </div>
       </div>
 

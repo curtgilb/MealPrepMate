@@ -313,6 +313,7 @@ model GroceryStore {
 
 model Receipt {
   id              String        @id @default(uuid())
+  dateUploaded    DateTime      @default(now())      
   merchantName    String?
   matchingStore   GroceryStore? @relation(fields: [storeId], references: [id])
   storeId         String?

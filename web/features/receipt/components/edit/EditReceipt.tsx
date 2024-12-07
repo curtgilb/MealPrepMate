@@ -1,77 +1,116 @@
 "use client";
 
-import { useMutation } from "urql";
-
-import {
-  finalizeReceiptMutation,
-  receiptItemFragment,
-} from "@/features/receipt/api/Receipt";
+import { Button } from "@/components/ui/button";
+import { receiptItemFragment } from "@/features/receipt/api/Receipt";
 import { EditReceiptInfo } from "@/features/receipt/components/edit/EditReceiptInfo";
-import { EditReceiptLineItem } from "@/features/receipt/components/edit/EditReceiptLineItem";
+import {
+  EditReceiptLineItem,
+  getLineItemDefaultValues,
+  receiptItemFormSchema,
+} from "@/features/receipt/components/edit/EditReceiptLineItem";
 import { EditReceiptProgress } from "@/features/receipt/components/edit/EditReceiptProgress";
 import { ReceiptLineItems } from "@/features/receipt/components/edit/ReceiptLineItems";
 import { ZoomableImage } from "@/features/receipt/components/edit/ZoomableImage";
 import { getFragmentData } from "@/gql";
-import { GetReceiptQuery } from "@/gql/graphql";
+import { GetReceiptQuery, ReceiptItemFragment } from "@/gql/graphql";
 import { useReceiptItems } from "@/hooks/use-receipt-items";
-import { toTitleCase } from "@/utils/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-interface ReceiptViewProps {
+import { Form } from "@/components/ui/form";
+import { useEffect } from "react";
+
+interface EditReceiptProps {
   receipt: GetReceiptQuery["receipt"];
 }
 
-export function EditReceipt({ receipt }: ReceiptViewProps) {
-  const [finalizeResult, finalize] = useMutation(finalizeReceiptMutation);
+const receiptInputSchema = z.object({
+  date: z.date(),
+  store: z.object({ id: z.string(), name: z.string() }),
+  item: receiptItemFormSchema,
+});
+export type EditReceiptForm = z.infer<typeof receiptInputSchema>;
+
+function getDefaultValues(
+  receipt: GetReceiptQuery["receipt"],
+  activeItem: ReceiptItemFragment | null
+) {
+  return {
+    date: receipt?.date ?? new Date().toDateString(),
+    store: receipt?.matchingStore ?? undefined,
+    item: getLineItemDefaultValues(activeItem),
+  };
+}
+
+export function EditReceipt({ receipt }: EditReceiptProps) {
   const lineItems = getFragmentData(receiptItemFragment, receipt.items);
   const { activeItem, setActive, sortedItems, advance } = useReceiptItems(
     receipt.id,
     lineItems
   );
 
+  const allVerified = lineItems?.every((item) => item.verified);
+
+  function updateReceipt(values: z.infer<typeof receiptInputSchema>) {}
+
+  const form = useForm<z.infer<typeof receiptInputSchema>>({
+    resolver: zodResolver(receiptInputSchema),
+    defaultValues: getDefaultValues(receipt, activeItem),
+  });
+
+  useEffect(() => {
+    form.resetField("item", {
+      defaultValue: getLineItemDefaultValues(activeItem),
+    });
+  }, [activeItem, form]);
+  console.log(activeItem);
+
   return (
     <div className="flex gap-12">
-      <div className="flex flex-col gap-4 border rounded-md p-4">
-        <div className="flex gap-6 items-start ">
-          <div className="shrink-0">
-            <h2 className="text-xl font-bold font-serif mb-4">Scanned Items</h2>
-            <ReceiptLineItems
-              activeId={activeItem?.id}
-              setActiveId={setActive}
-              items={sortedItems ?? []}
-            />
-          </div>
-          <ZoomableImage
-            src={`${process.env.NEXT_PUBLIC_STORAGE_URL}${receipt?.imagePath}`}
-            title="Uploaded Receipt"
-            alt="Uploaded Receipt"
-            width={400}
-            height={800}
-            highlight={
-              // Example bounding box
-              {
-                name: activeItem?.description ?? "",
-                boxList:
-                  activeItem?.boundingBoxes?.map((box) => box.coordinates) ??
-                  [],
-              }
-            }
+      <div className="flex gap-6">
+        <ZoomableImage
+          src={`${process.env.NEXT_PUBLIC_STORAGE_URL}${receipt?.imagePath}`}
+          title="Uploaded Receipt"
+          alt="Uploaded Receipt"
+          width={400}
+          height={800}
+          highlight={{
+            name: activeItem?.description ?? "",
+            boxList:
+              activeItem?.boundingBoxes?.map((box) => box.coordinates) ?? [],
+          }}
+        />
+        <div>
+          <ReceiptLineItems
+            activeId={activeItem?.id}
+            setActiveId={setActive}
+            items={sortedItems ?? []}
           />
         </div>
-
-        <EditReceiptProgress items={sortedItems ?? []} />
       </div>
 
       <div className="flex flex-col justify-between max-w-md w-full">
-        <div>
-          <h2 className="text-xl font-bold font-serif mb-4">Receipt Info</h2>
-          <EditReceiptInfo receipt={receipt} />
+        <Form {...form}>
+          <form
+            onSubmit={(e) => {
+              console.log("form values", form.getValues());
+              console.log("Form errors:", form.formState.errors);
+              form.handleSubmit(updateReceipt)(e);
+            }}
+            className="flex flex-col gap-10 justify-between"
+          >
+            <EditReceiptInfo />
+            <EditReceiptLineItem item={activeItem} advance={advance} />
 
-          <h2 className="text-xl font-bold font-serif mb-4">
-            Edit {toTitleCase(activeItem?.description)}
-          </h2>
-          <EditReceiptLineItem item={activeItem} advance={advance} />
-        </div>
-        <div></div>
+            <div className="space-y-4">
+              <Button className="w-full" type="submit" disabled={!allVerified}>
+                Complete verification
+              </Button>
+              <EditReceiptProgress items={lineItems ?? []} />
+            </div>
+          </form>
+        </Form>
       </div>
     </div>
   );

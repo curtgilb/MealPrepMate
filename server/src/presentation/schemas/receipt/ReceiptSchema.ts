@@ -3,6 +3,7 @@ import {
   EditReceiptInput,
   finalizeReceipt,
   getReceipt,
+  getReceipts,
   uploadReceipt,
 } from "@/application/services/receipt/ReceiptService.js";
 import { builder } from "@/presentation/builder.js";
@@ -11,6 +12,7 @@ builder.prismaNode("Receipt", {
   id: { field: "id" },
   name: "Receipt",
   fields: (t) => ({
+    dateUploaded: t.expose("dateUploaded", { type: "DateTime" }),
     total: t.exposeFloat("total", { nullable: true }),
     merchantName: t.exposeString("merchantName", { nullable: true }),
     matchingStore: t.relation("matchingStore", { nullable: true }),
@@ -18,6 +20,7 @@ builder.prismaNode("Receipt", {
     imagePath: t.exposeString("path"),
     items: t.relation("lineItems", { nullable: true }),
     scanned: t.exposeBoolean("scanned"),
+    verified: t.exposeBoolean("verified"),
   }),
 });
 
@@ -39,6 +42,15 @@ builder.queryFields((t) => ({
     type: "Receipt",
     resolve: async (query, root, args) => {
       return await getReceipt(args.id.id, query);
+    },
+  }),
+  receipts: t.prismaConnection({
+    type: "Receipt",
+    cursor: "id",
+    edgesNullable: false,
+    nodeNullable: false,
+    resolve: async (query, root, args) => {
+      return await getReceipts(query);
     },
   }),
 }));

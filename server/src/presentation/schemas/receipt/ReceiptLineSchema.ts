@@ -64,7 +64,6 @@ const receiptLineInput = builder.inputType("ReceiptItemInput", {
     description: t.string(),
     quantity: t.float(),
     perUnitPrice: t.float(),
-    productCode: t.string(),
     unitQuantity: t.float(),
     unitId: t.field({ type: "RefID" }),
     ingredientId: t.field({ type: "RefID" }),

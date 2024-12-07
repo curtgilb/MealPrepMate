@@ -2,9 +2,8 @@
 import { cn } from "@/lib/utils";
 import {
   Apple,
-  CalendarDays,
-  FolderInput,
   Library,
+  ReceiptText,
   Target,
   UtensilsCrossed,
 } from "lucide-react";
@@ -29,11 +28,11 @@ export const navigationLinks = [
     icon: <Library className="h-5 w-5 shrink-0" />,
     link: "/recipes",
   },
-  {
-    title: "Calendar",
-    icon: <CalendarDays className="h-5 w-5 shrink-0" />,
-    link: "/calendar",
-  },
+  // {
+  //   title: "Calendar",
+  //   icon: <CalendarDays className="h-5 w-5 shrink-0" />,
+  //   link: "/calendar",
+  // },
   {
     title: "Ingredients",
     icon: <Apple className="h-5 w-5 shrink-0" />,
@@ -45,9 +44,9 @@ export const navigationLinks = [
     link: "/nutrition",
   },
   {
-    title: "Imports",
-    icon: <FolderInput className="h-5 w-5 shrink-0" />,
-    link: "/imports",
+    title: "Receipts",
+    icon: <ReceiptText className="h-5 w-5 shrink-0" />,
+    link: "/receipts",
   },
 ];
 
@@ -57,7 +56,7 @@ interface SideNavProps {
 
 function Navigation({ isCollapsed }: SideNavProps) {
   return (
-    <nav className="flex flex-col z-10 h-full border-r bg-sidebar p-4 gap-y-2">
+    <nav className="flex flex-col z-10 h-full border-r border-sidebar-border bg-sidebar p-4 gap-y-2">
       {navigationLinks.map((link) => {
         return (
           <NavigationItem
@@ -91,8 +90,11 @@ function NavigationItem({ title, icon, link, collapsed }: NavLink) {
           <Link
             className={cn(
               "flex gap-2 w-full items-center whitespace-nowrap text-sm font-medium justify-items-start  px-2.5 py-2.5 rounded-lg  text-accent-foreground transition-all  overflow-hidden",
-              { "bg-primary text-primary-foreground": activeLink },
-              { "hover:bg-accent hover:text-foreground": !activeLink }
+              {
+                "bg-sidebar-primary text-sidebar-primary-foreground":
+                  activeLink,
+              },
+              { "hover:bg-sidebar-accent hover:text-foreground": !activeLink }
             )}
             href={link}
           >

@@ -15,9 +15,9 @@ export function EditReceiptProgress({ items }: EditReceiptProgressProps) {
   }, 0);
 
   return (
-    <div className="mb-4">
-      <Progress className="h-3" value={(verified / total) * 100} />
-      <p className="text-sm font-light">{`Verified ${verified} of ${total}`}</p>
+    <div>
+      <Progress className="h-2" value={(verified / total) * 100} />
+      <p className="text-xs font-light">{`Verified ${verified} of ${total}`}</p>
     </div>
   );
 }

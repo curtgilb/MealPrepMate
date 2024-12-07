@@ -1,6 +1,7 @@
+"use client";
 import { Minus, Plus, RotateCcw } from "lucide-react";
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { SyntheticEvent, useRef, useState } from "react";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 
 import { Button } from "@/components/ui/button";
@@ -95,7 +96,11 @@ export function ZoomableImage({
                     height: "auto",
                   }}
                   unoptimized
-                  onLoadingComplete={({ naturalWidth, naturalHeight }) => {
+                  onLoad={(event: SyntheticEvent<HTMLImageElement>) => {
+                    const naturalWidth = (event.target as HTMLImageElement)
+                      .naturalWidth;
+                    const naturalHeight = (event.target as HTMLImageElement)
+                      .naturalHeight;
                     setImageSize({
                       width: naturalWidth,
                       height: naturalHeight,

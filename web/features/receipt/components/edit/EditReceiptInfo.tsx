@@ -1,10 +1,8 @@
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useFormContext } from "react-hook-form";
 
 import { GenericCombobox } from "@/components/combobox/GenericCombox1";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -12,50 +10,31 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { getGroceryStoresQuery } from "@/features/ingredient/api/GroceryStore";
+import { EditReceiptForm } from "@/features/receipt/components/edit/EditReceipt";
 import { GetGroceryStoresQuery, GetReceiptQuery } from "@/gql/graphql";
-import { zodResolver } from "@hookform/resolvers/zod";
 
-interface EditRecipeInfoProps {
-  receipt: GetReceiptQuery["receipt"];
+function renderStore(
+  store: GetGroceryStoresQuery["stores"]["edges"][number]["node"]
+) {
+  return {
+    id: store.id,
+    name: store.name,
+    label: store.name,
+  };
 }
 
-const receiptInputSchema = z.object({
-  date: z.date(),
-  store: z.object({ id: z.string(), name: z.string() }),
-});
-
-export function EditReceiptInfo({ receipt }: EditRecipeInfoProps) {
-  const form = useForm<z.infer<typeof receiptInputSchema>>({
-    resolver: zodResolver(receiptInputSchema),
-    defaultValues: {
-      store: receipt.matchingStore ?? undefined,
-      date: receipt.date ? new Date(receipt.date) : new Date(),
-    },
-  });
-
-  function renderStore(
-    store: GetGroceryStoresQuery["stores"]["edges"][number]["node"]
-  ) {
-    return {
-      id: store.id,
-      name: store.name,
-      label: store.name,
-    };
-  }
-
-  function updateReceipt(values: z.infer<typeof receiptInputSchema>) {}
+export function EditReceiptInfo() {
+  const form = useFormContext<EditReceiptForm>();
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(updateReceipt)}
-        className="flex gap-x-6 mb-8"
-      >
+    <fieldset className="space-y-4">
+      <legend className="font-serif text-xl">Recipe Info</legend>
+      <div className="flex gap-6">
         <FormField
           control={form.control}
           name="store"
           render={({ field }) => (
-            <FormItem className="flex flex-col w-64">
+            <FormItem className="flex flex-col w-full grow">
               <FormLabel>Grocery Store</FormLabel>
               <FormControl>
                 <GenericCombobox
@@ -85,7 +64,7 @@ export function EditReceiptInfo({ receipt }: EditRecipeInfoProps) {
           control={form.control}
           name="date"
           render={({ field }) => (
-            <FormItem className="flex flex-col w-52">
+            <FormItem className="flex flex-col">
               <FormLabel>Date</FormLabel>
               <FormControl>
                 <DatePicker
@@ -99,7 +78,7 @@ export function EditReceiptInfo({ receipt }: EditRecipeInfoProps) {
             </FormItem>
           )}
         />
-      </form>
-    </Form>
+      </div>
+    </fieldset>
   );
 }

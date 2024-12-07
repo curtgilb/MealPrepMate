@@ -74,6 +74,12 @@ async function getReceipt(id: string, query?: ReceiptQuery) {
   });
 }
 
+async function getReceipts(query?: ReceiptQuery) {
+  return await db.receipt.findMany({
+    ...query,
+  });
+}
+
 async function editReceipt(
   id: string,
   receipt: EditReceiptInput,
@@ -143,4 +149,5 @@ export {
   finalizeReceipt,
   getReceipt,
   uploadReceipt,
+  getReceipts,
 };

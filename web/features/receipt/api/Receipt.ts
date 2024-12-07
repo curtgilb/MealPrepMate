@@ -45,6 +45,31 @@ const receiptQuery = graphql(`
         ...ReceiptItem
       }
       scanned
+      verified
+    }
+  }
+`);
+
+const getReceiptsQuery = graphql(`
+  query getReceipts {
+    receipts {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        node {
+          id
+          date
+          dateUploaded
+          matchingStore {
+            id
+            name
+          }
+          total
+          verified
+        }
+      }
     }
   }
 `);
@@ -101,4 +126,9 @@ const finalizeReceiptMutation = graphql(`
 //   `
 // );
 
-export { receiptQuery, editReceiptItem, finalizeReceiptMutation };
+export {
+  receiptQuery,
+  editReceiptItem,
+  finalizeReceiptMutation,
+  getReceiptsQuery,
+};
