@@ -16,7 +16,7 @@ interface NutritionTargetRowProp {
   nutrient: NutrientWithChildren;
 }
 
-const getPaddingClass = (depth: number) => {
+export const getPaddingClass = (depth: number) => {
   switch (depth) {
     case 0:
       return "";

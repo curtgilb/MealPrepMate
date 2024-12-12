@@ -21,9 +21,6 @@ import { cn } from "@/lib/utils";
 import { toTitleCase } from "@/utils/utils";
 import { HTMLAttributes, useMemo, useState } from "react";
 
-type NutritionValues = RecipeFieldsFragment["aggregateLabel"];
-type NutrientValue = NonNullable<NutritionValues>["nutrients"];
-
 function getValueLabel(
   nutrient: NutrientFieldsFragment,
   value: number | undefined | null
@@ -85,8 +82,13 @@ function TableGroup({
   );
 }
 
+type NutritionLabelInput = {
+  servings: number;
+  nutrients: { [key: string]: number };
+};
+
 interface NutritionLabelProps extends HTMLAttributes<HTMLDivElement> {
-  label: NutritionValues;
+  label: NutritionLabelInput;
 }
 
 export function RecipeNutritionlabel({
@@ -104,13 +106,16 @@ export function RecipeNutritionlabel({
   // Create map of nutrientID -> value
   const values = useMemo(() => {
     if (!label) return {};
-    return label?.nutrients?.reduce((agg, nutrient) => {
-      agg[nutrient.nutrient.id] =
-        servingSize === ServingSize.Recipe
-          ? nutrient.value
-          : nutrient.perServing;
-      return agg;
-    }, {} as { [key: string]: number | undefined | null });
+    return Object.entries(label.nutrients).reduce(
+      (agg, [nutrientId, value]) => {
+        agg[nutrientId] =
+          servingSize === ServingSize.Recipe
+            ? value
+            : value / (label.servings ?? 1);
+        return agg;
+      },
+      {} as { [key: string]: number | undefined | null }
+    );
   }, [label, servingSize]);
 
   return (

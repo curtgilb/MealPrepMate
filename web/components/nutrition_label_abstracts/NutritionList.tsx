@@ -1,9 +1,12 @@
-import { Fragment, FunctionComponent } from 'react';
+import { Fragment, FunctionComponent } from "react";
 
-import { GetRecipeQuery, NutrientFieldsFragment } from '@/gql/graphql';
+import { GetRecipeQuery, NutrientFieldsFragment } from "@/gql/graphql";
 import {
-    NutrientMap, NutrientWithChildren, NutritionDisplayMode, useNutrients
-} from '@/hooks/use-nutrients';
+  NutrientMap,
+  NutrientWithChildren,
+  NutritionDisplayMode,
+  useNutrients,
+} from "@/hooks/use-nutrients";
 
 export type NutrientItemProps = {
   nutrient: NutrientFieldsFragment;
@@ -64,7 +67,7 @@ export function NutritionList({
   nutrientIdToValue: values,
   mode,
 }: NutritionListProps) {
-  const nutrients = useNutrients(mode);
+  const { grouped: nutrients } = useNutrients(mode);
 
   return (
     <>

@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { NutritionContext } from "@/features/recipe/components/nutrition_label/EditNutritionLabelForm";
+import { NutritionContext } from "@/features/recipe/components/nutrition_label/EditNutritionLabel";
 import { NutritionDisplayMode } from "@/hooks/use-nutrients";
 import { cn } from "@/lib/utils";
 import { toTitleCase } from "@/utils/utils";

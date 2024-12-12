@@ -4,6 +4,7 @@ const nutritionFieldsFragment = graphql(`
   fragment NutrientFields on Nutrient {
     id
     alternateNames
+    advancedView
     target {
       id
       nutrientTarget

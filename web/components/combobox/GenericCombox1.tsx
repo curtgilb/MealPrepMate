@@ -94,6 +94,7 @@ export function GenericCombobox<
       // console.log("removing item:", item);
       onChange(selectedItems.filter((curr) => curr.id !== item.id));
       if (onItemRemoved) onItemRemoved(item);
+      setOpen(false);
     }
     // Adding an item
     else {
@@ -101,6 +102,7 @@ export function GenericCombobox<
         onChange([...selectedItems, item]);
       } else {
         onChange([item]);
+        setOpen(false);
       }
 
       if (onItemAdded) onItemAdded(item);

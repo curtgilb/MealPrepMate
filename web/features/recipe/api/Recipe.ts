@@ -54,7 +54,6 @@ const recipeFragment = graphql(`
       nutrients {
         id
         value
-        perServing
         nutrient {
           id
         }

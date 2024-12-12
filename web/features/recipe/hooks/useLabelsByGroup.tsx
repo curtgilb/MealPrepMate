@@ -1,12 +1,12 @@
 "use client";
+import { nutritionLabelFragment } from "@/features/recipe/api/NutritionLabel";
 import { recipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
 import { getFragmentData } from "@/gql";
-import { RecipeFieldsFragment } from "@/gql/graphql";
+import {
+  NutritionLabelFieldsFragment,
+  RecipeFieldsFragment,
+} from "@/gql/graphql";
 import { useMemo } from "react";
-
-type GroupLabel =
-  | NonNullable<RecipeFieldsFragment["nutritionLabels"]>[number]
-  | undefined;
 
 export function useLabelsByGroup(
   labels: RecipeFieldsFragment["nutritionLabels"],
@@ -17,21 +17,22 @@ export function useLabelsByGroup(
     recipeIngredientFragment,
     ingredients
   );
+  const typedLabels = getFragmentData(nutritionLabelFragment, labels);
   const groupToLabel = useMemo(() => {
-    const lookup = labels?.reduce((agg, label) => {
+    const lookup = typedLabels?.reduce((agg, label) => {
       if (label?.ingredientGroup && !agg.has(label.ingredientGroup.id)) {
         agg.set(label.ingredientGroup.id, label);
       }
       return agg;
-    }, new Map<string, GroupLabel>());
+    }, new Map<string, NutritionLabelFieldsFragment | undefined>());
 
     // Give the default group the primary label
     lookup?.set(
       "default",
-      labels?.find((label) => label.isPrimary)
+      typedLabels?.find((label) => label.isPrimary)
     );
     return lookup;
-  }, [labels]);
+  }, [typedLabels]);
 
   const selectedLabel = groupToLabel?.get(selectedGroup);
 

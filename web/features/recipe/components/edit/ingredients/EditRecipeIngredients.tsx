@@ -1,7 +1,6 @@
 "use client";
 import { forwardRef, useImperativeHandle } from "react";
 
-import { RichTextEditor } from "@/components/rich_text/RichTextEditor";
 import { recipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
 import { EditRecipeIngredient } from "@/features/recipe/components/edit/ingredients/ingredient/EditRecipeIngredient";
 import { IngredientList } from "@/features/recipe/components/edit/ingredients/list/IngredientList";

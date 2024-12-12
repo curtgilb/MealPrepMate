@@ -32,7 +32,7 @@ const editComponents: {
 } = {
   1: { Component: EditRecipeInfo, name: "basic info" },
   2: { Component: EditRecipeIngredients, name: "ingredients" },
-  // 3: { Component: EditRecipeNutritionLabels, name: "nutrition label" },
+  3: { Component: EditRecipeNutritionLabels, name: "nutrition label" },
 };
 
 export function RecipeEditor({ recipe }: EditRecipeProps) {
@@ -63,33 +63,37 @@ export function RecipeEditor({ recipe }: EditRecipeProps) {
   return (
     <>
       {/* Header */}
-      <h1 className="text-3xl font-serif font-bold mb-6">{`${editStage}. ${
-        recipe ? "Edit" : "Create"
-      } recipe ${name}`}</h1>
+      <div className="flex justify-between mb-6">
+        <h1 className="text-3xl font-serif font-bold ">{`${editStage}. ${
+          recipe ? "Edit" : "Create"
+        } recipe ${name}`}</h1>
+
+        <div className="flex justify-end gap-4 mt-6">
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (editStage === 1) {
+                router.back();
+              } else {
+                setEditStage(editStage - 1);
+              }
+            }}
+          >
+            Back
+          </Button>
+          <Button
+            onClick={() => {
+              advanceStep();
+            }}
+          >
+            {isLastStep ? "Finish" : "Save and continue"}
+          </Button>
+        </div>
+      </div>
+
       {/* Dynamic Content */}
       <Component ref={child} recipe={recipe}></Component>
       {/* Bottom */}
-      <div className="flex justify-end gap-4 mt-6">
-        <Button
-          variant="outline"
-          onClick={() => {
-            if (editStage === 1) {
-              router.back();
-            } else {
-              setEditStage(editStage - 1);
-            }
-          }}
-        >
-          Back
-        </Button>
-        <Button
-          onClick={() => {
-            advanceStep();
-          }}
-        >
-          {isLastStep ? "Finish" : "Save and continue"}
-        </Button>
-      </div>
     </>
   );
 }
