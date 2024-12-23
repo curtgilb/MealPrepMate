@@ -82,8 +82,6 @@ export function ReceiptsList() {
   const [result] = useQuery({ query: getReceiptsQuery });
   const data = result?.data?.receipts.edges.map((node) => node.node) ?? [];
 
-  console.log(data);
-
   return (
     <>
       <DataTable columns={columns} data={data} />

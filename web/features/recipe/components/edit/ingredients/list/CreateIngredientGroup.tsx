@@ -61,8 +61,11 @@ export function CreateIngredientGroup({
       (result) => {
         if (result?.data) {
           const newGroup = result.data.createIngredientGroup;
-          setGroupedIngredients({ ...groupedIngredients, [newGroup.name]: [] });
-          setGroupOrder([...groupOrder, newGroup.name]);
+          setGroupedIngredients({
+            ...groupedIngredients,
+            [newGroup.id]: { name: newGroup.name, items: [] },
+          });
+          setGroupOrder([...groupOrder, newGroup.id]);
         }
 
         if (result.error) {

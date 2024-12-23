@@ -87,8 +87,16 @@ export class LabelAggregator {
       });
     });
 
+    const aggLabel = await this.db.aggregateLabel.findUniqueOrThrow({
+      where: { recipeId: this.recipeId },
+    });
+
+    await this.db.aggLabelNutrient.deleteMany({
+      where: { aggLabelId: aggLabel.id },
+    });
+
     return await this.db.aggregateLabel.upsert({
-      where: { id: this.recipeId },
+      where: { recipeId: this.recipeId },
       update: {
         servings: label.servings,
         servingSize: label.servingSize,
@@ -116,7 +124,9 @@ export class LabelAggregator {
         alcohol: label.alcohol,
         totalCalories: label.calories,
         caloriesPerServing: label.calories / (label.servings ?? 1),
-        nutrients: { createMany: { data: nutrientCreateInput } },
+        nutrients: {
+          createMany: { data: nutrientCreateInput },
+        },
       },
     });
   }

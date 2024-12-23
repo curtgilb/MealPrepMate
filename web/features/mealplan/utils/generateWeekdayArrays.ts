@@ -17,5 +17,3 @@ function generateWeekdayArrays(maxWeeks: number) {
 
   return weekdays;
 }
-
-console.log();

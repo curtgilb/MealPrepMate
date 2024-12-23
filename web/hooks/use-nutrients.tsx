@@ -48,7 +48,6 @@ export function useNutrients(type: NutritionDisplayMode): UseNutrientResult {
   const nutrients = getFragmentData(nutritionFieldsFragment, data?.nutrients);
 
   return useMemo(() => {
-    console.log("use nutrients use memo");
     if (!nutrients) return { grouped: {}, flattened: [], nutrientMap: {} };
 
     const childrenIds = new Set<string>();
@@ -76,7 +75,7 @@ export function useNutrients(type: NutritionDisplayMode): UseNutrientResult {
       if (processedForFlattened.has(nutrientId)) return;
 
       const nutrient = nutrientMap[nutrientId];
-      const parentId = nutrient.parentNutrientId;
+      const parentId = nutrient?.parentNutrientId;
 
       // First process parent if it exists and hasn't been processed
       if (parentId && !processedForFlattened.has(parentId)) {
@@ -89,7 +88,7 @@ export function useNutrients(type: NutritionDisplayMode): UseNutrientResult {
         processedForFlattened.add(nutrientId);
 
         // Process children
-        nutrient.children?.forEach((child) => {
+        nutrient?.children?.forEach((child) => {
           if (!processedForFlattened.has(child.id)) {
             addToFlattenedWithAncestors(child.id);
           }

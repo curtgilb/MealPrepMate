@@ -80,7 +80,6 @@ export function CheckboxFilter<TQuery, TData>({
                           id={item.id}
                           checked={isChecked}
                           onCheckedChange={(state) => {
-                            console.log(state);
                             if (state) {
                               field.onChange([...field.value, item]);
                             } else {

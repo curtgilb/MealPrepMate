@@ -10,7 +10,7 @@ export function Loader({ onView }: LoaderProps) {
   return (
     <InView
       as="div"
-      className="col-span-full flex "
+      className="col-span-full flex justify-center"
       onChange={(inView, entry) => {
         if (inView && onView) {
           onView();

@@ -3,7 +3,6 @@ import { AddIngredient } from "@/features/recipe/components/edit/ingredients/lis
 import { CreateIngredientGroup } from "@/features/recipe/components/edit/ingredients/list/CreateIngredientGroup";
 import { IngredientAndGroupList } from "@/features/recipe/components/edit/ingredients/list/dnd_ingredient_list/IngredientAndGroupList";
 import { useRecipeIngredientContext } from "@/features/recipe/hooks/useGroupedRecipeIngredients";
-import { group } from "console";
 import { useMemo } from "react";
 
 interface IngredientListProps {
@@ -15,6 +14,7 @@ export function IngredientList({ recipeId }: IngredientListProps) {
 
   const [stepsCompleted, steps] = useMemo(() => {
     return Object.values(groupedIngredients)
+      .map((group) => group.items)
       .flat()
       .reduce(
         (totals, ingredient) => {
@@ -30,19 +30,21 @@ export function IngredientList({ recipeId }: IngredientListProps) {
   }, [groupedIngredients]);
 
   return (
-    <div className="max-w-96 space-y-4">
-      <div className="flex justify-between">
-        <h2 className="font-serif text-lg font-bold">Ingredient List</h2>
+    <div className="min-w-96 w-full">
+      <div className="px-4 space-y-6">
+        <div className="flex justify-between ">
+          <h2 className="font-serif text-lg font-bold">Ingredient List</h2>
 
-        <div className="flex gap-3">
-          <AddIngredient recipeId={recipeId} />
-          <CreateIngredientGroup recipeId={recipeId} />
+          <div className="flex gap-3">
+            <AddIngredient recipeId={recipeId} />
+            <CreateIngredientGroup recipeId={recipeId} />
+          </div>
         </div>
+        <VerificationProgress
+          totalSteps={steps}
+          stepsCompleted={stepsCompleted}
+        />
       </div>
-      <VerificationProgress
-        totalSteps={steps}
-        stepsCompleted={stepsCompleted}
-      />
 
       <IngredientAndGroupList />
     </div>

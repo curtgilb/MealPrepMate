@@ -7,7 +7,7 @@ interface RecipeTagListProps {
 export function RecipeTagList({ tags }: RecipeTagListProps) {
   return (
     tags && (
-      <ul className="flex gap-2 text-sm mt-2">
+      <ul className="flex gap-2 text-sm mt-2 flex-wrap">
         {tags
           ?.filter((tag) => tag)
           .map((tag) => (

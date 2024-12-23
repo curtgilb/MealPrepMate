@@ -1,11 +1,12 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
 import {
-    getMealPlanRecipeNutrition, planNutritionFragment
-} from '@/features/mealplan/api/MealPlanRecipe';
-import { getFragmentData } from '@/gql';
-import { PlanNutritionFieldsFragment } from '@/gql/graphql';
-import { useQuery } from '@urql/next';
+  getMealPlanRecipeNutrition,
+  planNutritionFragment,
+} from "@/features/mealplan/api/MealPlanRecipe";
+import { getFragmentData } from "@/gql";
+import { PlanNutritionFieldsFragment } from "@/gql/graphql";
+import { useQuery } from "@urql/next";
 
 export type NutrientLabel = {
   calories: number;
@@ -80,15 +81,11 @@ export function useMealPlanNutrition(
       data?.mealPlanRecipes
     );
 
-    console.log("Raw data: ", data);
-
     return recipes?.reduce((lookup, recipe) => {
       lookup.set(recipe.id, scaleRecipeNutrients(recipe));
       return lookup;
     }, new Map<string, ScaledNutrients>());
   }, [data?.mealPlanRecipes]);
-
-  console.log("Recipe Lookup: ", recipeLookup);
 
   function scaleRecipeNutrients(
     recipe: PlanNutritionFieldsFragment

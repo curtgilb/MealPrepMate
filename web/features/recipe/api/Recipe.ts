@@ -31,6 +31,10 @@ const recipeFragment = graphql(`
     }
     prepTime
     source
+    ingredientGroups {
+      id
+      name
+    }
     ingredients {
       ...RecipeIngredientFields
     }

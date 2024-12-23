@@ -10,8 +10,8 @@ export function VerificationProgress({
   stepsCompleted,
 }: VerificationProgressProps) {
   return (
-    <div className="my-6">
-      <Progress className="h-2" value={stepsCompleted / totalSteps} />
+    <div>
+      <Progress className="h-2" value={(stepsCompleted / totalSteps) * 100} />
       <p className="text-xs font-light text-right">
         Verified {stepsCompleted ?? 0} of {totalSteps ?? 0}
       </p>

@@ -5,19 +5,12 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CircleCheck, GripVertical } from "lucide-react";
 
-interface SortableItemProps {
-  group: string;
-  index: number;
+interface IngredientItemProps {
   ingredient: RecipeIngredientFieldsFragment;
 }
 
-export function IngredientItem({
-  group,
-  index,
-  ingredient,
-}: SortableItemProps) {
-  const { groupedIngredients, selected, setSelected } =
-    useRecipeIngredientContext();
+export function IngredientItem({ ingredient }: IngredientItemProps) {
+  const { selected, setSelected } = useRecipeIngredientContext();
 
   const {
     attributes,
@@ -39,7 +32,7 @@ export function IngredientItem({
     <div
       ref={setNodeRef}
       className={cn(
-        "group flex gap-2 py-1.5 px-4 mb-3 items-center justify-between bg-white rounded shadow text-sm cursor-pointer",
+        "group flex gap-2 py-1.5 px-4 mb-3 items-center justify-between bg-white rounded text-sm cursor-pointer",
         { "opacity-50": isDragging, "ring ring-primary": isSelected }
       )}
       style={{
@@ -50,11 +43,9 @@ export function IngredientItem({
         setSelected(ingredient.id);
       }}
     >
-      <GripVertical
-        {...attributes}
-        {...listeners}
-        className={cn("h-4 w-4 grab shrink-0 cursor-grab", {
-          "cursor-grabbing": isDragging,
+      <CircleCheck
+        className={cn("w-6 h-6 shrink-0 stroke-muted-foreground self-center", {
+          "fill-green-700 stroke-white": ingredient.verified,
         })}
       />
 
@@ -63,9 +54,11 @@ export function IngredientItem({
       >
         {ingredient.sentence}
       </p>
-      <CircleCheck
-        className={cn("w-4 h-4 shrink-0 stroke-muted-foreground self-center", {
-          "stroke-green-700": ingredient.verified,
+      <GripVertical
+        {...attributes}
+        {...listeners}
+        className={cn("h-4 w-4 grab shrink-0 cursor-grab", {
+          "cursor-grabbing": isDragging,
         })}
       />
     </div>

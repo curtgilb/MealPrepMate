@@ -65,7 +65,6 @@ export function WeekCalorieChart({ data, target }: WeekCalorieChartProps) {
     return (total += dataPoint.calories);
   }, 0);
 
-  console.log(target);
   return (
     <ChartContainer config={chartConfig}>
       <BarChart accessibilityLayer data={data}>

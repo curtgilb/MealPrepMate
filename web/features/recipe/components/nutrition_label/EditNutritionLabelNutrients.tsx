@@ -32,13 +32,11 @@ import {
   UseFormReturn,
 } from "react-hook-form";
 
-interface EditNutritionLabelNutrientsProps {
+interface LabelNutrientFieldsProps {
   nutrientMap: UseNutrientResult["nutrientMap"];
 }
 
-export function EditNutritionLabelNutrients({
-  nutrientMap,
-}: EditNutritionLabelNutrientsProps) {
+export function LabelNutrientFields({ nutrientMap }: LabelNutrientFieldsProps) {
   const [mode, setMode] = useState<NutritionDisplayMode>(
     NutritionDisplayMode.Basic
   );
@@ -70,8 +68,8 @@ export function EditNutritionLabelNutrients({
 
   return (
     <fieldset>
-      <div className="flex justify-between">
-        <legend className="text-lg font-serif">Nutrients</legend>
+      <div className="flex justify-between mb-6">
+        <legend className="text-lg font-serif font-bold">Nutrients</legend>
         <EnumSelect
           className="max-w-32"
           enum={NutritionDisplayMode}
@@ -79,41 +77,48 @@ export function EditNutritionLabelNutrients({
           onChange={setMode}
         />
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow className="hover:bg-transparent">
-            <TableCell className="font-semibold font-serif">Nutrient</TableCell>
-            <TableCell className="font-semibold font-serif text-right">
-              Value
-            </TableCell>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {Object.keys(groupedFields).map((category) => {
-            const categoryNutrients = groupedFields[category];
-            return (
-              <Fragment key={category}>
-                <TableRow className="bg-muted/50" aria-colspan={2}>
-                  <TableCell className="font-serif font-bold py-2" colSpan={2}>
-                    {toTitleCase(category)}
-                  </TableCell>
-                </TableRow>
-                {categoryNutrients.map((field) => {
-                  const nutrientInfo = nutrientMap[field.nutrientId];
-                  return (
-                    <NutrientRow
-                      key={field.id}
-                      nutrient={nutrientInfo}
-                      field={field}
-                      control={form.control}
-                    />
-                  );
-                })}
-              </Fragment>
-            );
-          })}
-        </TableBody>
-      </Table>
+      <div className="border rounded-md">
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableCell className="font-semibold font-serif">
+                Nutrient
+              </TableCell>
+              <TableCell className="font-semibold font-serif text-right">
+                Value
+              </TableCell>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Object.keys(groupedFields).map((category) => {
+              const categoryNutrients = groupedFields[category];
+              return (
+                <Fragment key={category}>
+                  <TableRow className="bg-muted/50" aria-colspan={2}>
+                    <TableCell
+                      className="font-serif font-bold py-2"
+                      colSpan={2}
+                    >
+                      {toTitleCase(category)}
+                    </TableCell>
+                  </TableRow>
+                  {categoryNutrients.map((field) => {
+                    const nutrientInfo = nutrientMap[field.nutrientId];
+                    return (
+                      <NutrientRow
+                        key={field.id}
+                        nutrient={nutrientInfo}
+                        field={field}
+                        control={form.control}
+                      />
+                    );
+                  })}
+                </Fragment>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
     </fieldset>
   );
 }

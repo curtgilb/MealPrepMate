@@ -81,7 +81,7 @@ export function EditReceiptLineItem({
   const form = useFormContext<EditReceiptForm>();
 
   async function onSubmit(ignore: boolean) {
-    // console.log("Cleaned values", values);
+    //
     // const { id, unit, ingredient, ...rest } = values;
     // await editItem({
     //   lineId: values.id,
@@ -119,7 +119,6 @@ export function EditReceiptLineItem({
                   multiSelect={false}
                   selectedItems={field.value ? [field.value] : []}
                   onChange={(items) => {
-                    console.log(items);
                     if (items.length > 0) {
                       field.onChange(items[0]);
                     } else {

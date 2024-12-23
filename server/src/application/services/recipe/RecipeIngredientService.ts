@@ -1,10 +1,15 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-import { cleanString } from '@/application/validations/Formatters.js';
-import { parseIngredients } from '@/infrastructure/IngredientParserClient.js';
-import { db } from '@/infrastructure/repository/db.js';
-import { Ingredient, MeasurementUnit, Prisma, RecipeIngredient } from '@prisma/client';
-import { DefaultArgs } from '@prisma/client/runtime/library';
+import { cleanString } from "@/application/validations/Formatters.js";
+import { parseIngredients } from "@/infrastructure/IngredientParserClient.js";
+import { db } from "@/infrastructure/repository/db.js";
+import {
+  Ingredient,
+  MeasurementUnit,
+  Prisma,
+  RecipeIngredient,
+} from "@prisma/client";
+import { DefaultArgs } from "@prisma/client/runtime/library";
 
 export type TaggedIngredient = Omit<
   RecipeIngredient,
@@ -80,6 +85,7 @@ async function tagIngredients<T extends boolean = false>(
         ingredient: bestIngredientMatch,
         mealPrepIngredient: false,
         name: ingredient.name ?? null,
+        optional: false,
       });
     }
   }
@@ -114,6 +120,7 @@ async function addRecipeIngredient(
 async function addRecipeIngredients(
   recipeId: string,
   ingredients: RecipeIngredientInput[],
+  groupId: string | undefined,
   query?: RecipeIngredientQuery
 ) {
   // @ts-ignore
@@ -123,6 +130,7 @@ async function addRecipeIngredients(
       quantity: ingredient.quantity,
       order: ingredient.order,
       recipeId: recipeId,
+      groupId: groupId,
       measurementUnitId: ingredient.unitId,
       ingredientId: ingredient.ingredientId,
     })),
@@ -130,13 +138,24 @@ async function addRecipeIngredients(
   });
 }
 
-async function addRecipeIngredientsFromText(
-  recipeId: string,
-  ingredients: string,
-  query?: RecipeIngredientQuery
-) {
-  const taggedIngredients = await tagIngredients(ingredients, true);
-  return await addRecipeIngredients(recipeId, taggedIngredients, query);
+async function addRecipeIngredientsFromText({
+  recipeId,
+  text,
+  groupId,
+  query,
+}: {
+  recipeId: string;
+  text: string;
+  groupId?: string | undefined;
+  query?: RecipeIngredientQuery;
+}) {
+  const taggedIngredients = await tagIngredients(text, true);
+  return await addRecipeIngredients(
+    recipeId,
+    taggedIngredients,
+    groupId,
+    query
+  );
 }
 
 type EditRecipeIngredientInput = {
@@ -156,6 +175,11 @@ async function editRecipeIngredient(
           sentence: ing.input?.sentence ?? undefined,
           quantity: ing.input.quantity,
           order: ing.input.order ?? undefined,
+          verified: ing.input.verified,
+          mealPrepIngredient: ing.input.mealPrepIngredient,
+          group: ing.input.groupId
+            ? { connect: { id: ing.input.groupId } }
+            : undefined,
           unit: ing.input?.unitId
             ? { connect: { id: ing.input.unitId } }
             : undefined,

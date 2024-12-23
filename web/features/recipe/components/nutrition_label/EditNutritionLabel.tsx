@@ -27,7 +27,7 @@ export function EditNutritionLabel({ isDefault }: EditNutritionLabelProps) {
 
   return (
     <fieldset className="space-y-4">
-      <legend className="text-lg font-serif">Serving info</legend>
+      <legend className="text-lg font-serif font-bold">Serving info</legend>
       {/* Servings */}
       <div className="flex gap-4">
         <FormField

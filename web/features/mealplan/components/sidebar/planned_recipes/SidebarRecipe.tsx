@@ -1,7 +1,7 @@
 "use client";
 
 import { RectangleImage } from "@/components/images/RectangleImage";
-import { RichTextContent } from "@/components/RichTextContent";
+import { RichTextContent } from "@/components/rich_text/RichTextContent";
 import {
   Accordion,
   AccordionContent,

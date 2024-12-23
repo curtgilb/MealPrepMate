@@ -197,4 +197,4 @@ const tests = [
   { input: 0.833333333333333, expected: "5/6" },
 ];
 
-console.log(numberToFractionString(0.33));
+);

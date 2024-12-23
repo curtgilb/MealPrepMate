@@ -1,11 +1,14 @@
 // import { NutritionLabel } from "@prisma/client";
 import {
-    createNutritionLabel, editNutritionLabel, NutrientInput, NutritionLabelInput
-} from '@/application/services/nutrition/NutritionLabelService.js';
-import { db } from '@/infrastructure/repository/db.js';
-import { builder } from '@/presentation/builder.js';
-import { DeleteResult } from '@/presentation/schemas/common/MutationResult.js';
-import { encodeGlobalID } from '@pothos/plugin-relay';
+  createNutritionLabel,
+  editNutritionLabel,
+  NutrientInput,
+  NutritionLabelInput,
+} from "@/application/services/nutrition/NutritionLabelService.js";
+import { db } from "@/infrastructure/repository/db.js";
+import { builder } from "@/presentation/builder.js";
+import { DeleteResult } from "@/presentation/schemas/common/MutationResult.js";
+import { encodeGlobalID } from "@pothos/plugin-relay";
 
 // ============================================ Types ===================================
 
@@ -86,7 +89,7 @@ const nutrientInput = builder
   .inputRef<NutrientInput>("NutrientInput")
   .implement({
     fields: (t) => ({
-      nutrientId: t.string({ required: true }),
+      nutrientId: t.field({ type: "RefID", required: true }),
       value: t.float({ required: true }),
     }),
   });

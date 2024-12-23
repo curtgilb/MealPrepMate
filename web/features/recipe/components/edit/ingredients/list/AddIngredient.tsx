@@ -1,3 +1,4 @@
+"use client";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -67,16 +68,19 @@ export function AddIngredient({ recipeId }: AddIngredientProps) {
           recipeIngredientFragment,
           result.data.addRecipeIngredientsFromTxt
         );
-        const oldDefaultGroup = groupedIngredients[DEFAULT_KEY];
+        const oldDefaultGroup = groupedIngredients[DEFAULT_KEY].items;
 
         setGroupedIngredients({
           ...groupedIngredients,
-          [DEFAULT_KEY]: [...oldDefaultGroup, ...newIngredients],
+          [DEFAULT_KEY]: {
+            name: "Primary",
+            items: [...oldDefaultGroup, ...newIngredients],
+          },
         });
       }
       setOpen(false);
 
-      if (!result.error) {
+      if (result.error) {
         toast({
           title: "Uh oh...",
           description: "Ingredient couldn't be added",

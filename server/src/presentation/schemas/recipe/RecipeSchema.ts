@@ -1,10 +1,15 @@
 import {
-    createRecipe, deleteRecipe, editRecipe, getIngredientFreshness, getIngredientText, RecipeInput
-} from '@/application/services/recipe/RecipeService.js';
-import { builder } from '@/presentation/builder.js';
-import { DeleteResult } from '@/presentation/schemas/common/MutationResult.js';
-import { recipeIngredientInput } from '@/presentation/schemas/recipe/RecipeIngredientSchema.js';
-import { encodeGlobalID } from '@pothos/plugin-relay';
+  createRecipe,
+  deleteRecipe,
+  editRecipe,
+  getIngredientFreshness,
+  getIngredientText,
+  RecipeInput,
+} from "@/application/services/recipe/RecipeService.js";
+import { builder } from "@/presentation/builder.js";
+import { DeleteResult } from "@/presentation/schemas/common/MutationResult.js";
+import { recipeIngredientInput } from "@/presentation/schemas/recipe/RecipeIngredientSchema.js";
+import { encodeGlobalID } from "@pothos/plugin-relay";
 
 // ============================================ Types ===================================
 const recipe = builder.prismaNode("Recipe", {
@@ -24,6 +29,7 @@ const recipe = builder.prismaNode("Recipe", {
     category: t.relation("category"),
     course: t.relation("course"),
     ingredients: t.relation("ingredients"),
+    ingredientGroups: t.relation("ingredientGroups"),
     photos: t.relation("photos"),
     nutritionLabels: t.relation("nutritionLabels", { nullable: true }),
     aggregateLabel: t.relation("aggregateLabel", { nullable: true }),

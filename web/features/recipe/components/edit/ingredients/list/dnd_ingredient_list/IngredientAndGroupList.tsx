@@ -1,6 +1,10 @@
 import { IngredientGroup } from "@/features/recipe/components/edit/ingredients/list/dnd_ingredient_list/IngredientGroup";
-import { IngredientsContext } from "@/features/recipe/hooks/useGroupedRecipeIngredients";
+import {
+  IngredientsContext,
+  useRecipeIngredientContext,
+} from "@/features/recipe/hooks/useGroupedRecipeIngredients";
 import { RecipeIngredientFieldsFragment } from "@/gql/graphql";
+import { cn } from "@/lib/utils";
 import {
   closestCorners,
   DndContext,
@@ -19,10 +23,16 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { useContext, useState } from "react";
+import { useState } from "react";
 
 export function IngredientAndGroupList() {
-  const context = useContext(IngredientsContext);
+  const {
+    groupedIngredients,
+    setGroupedIngredients,
+    groupOrder,
+    setGroupOrder,
+  } = useRecipeIngredientContext();
+  const [isDragging, setIsDragging] = useState<boolean>(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [activeType, setActiveType] = useState<"container" | "item" | null>(
     null
@@ -34,26 +44,15 @@ export function IngredientAndGroupList() {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-  if (context === undefined) {
-    return null;
-  }
-  const {
-    groupedIngredients,
-    setGroupedIngredients,
-    groupOrder,
-    setGroupOrder,
-    activeIngredient,
-    setActiveIngredient,
-  } = context;
 
   const findContainer = (id: string): string | undefined => {
-    if (id in groupedIngredients) return id;
+    // First check if the id is a container
+    if (groupOrder.includes(id)) return id;
 
-    for (const [key, items] of Object.entries(groupedIngredients)) {
-      if (items.find((item) => item.id === id)) return key;
-    }
-
-    return undefined;
+    // Then look for the item in each container
+    return groupOrder.find((containerId) =>
+      groupedIngredients[containerId].items.some((item) => item.id === id)
+    );
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -61,11 +60,11 @@ export function IngredientAndGroupList() {
     const activeType = active.data.current?.type || "item";
     setActiveId(active.id.toString());
     setActiveType(activeType);
+    setIsDragging(activeType === "container");
   };
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
-
     if (!over) return;
 
     const activeId = active.id.toString();
@@ -86,39 +85,38 @@ export function IngredientAndGroupList() {
     }
 
     setGroupedIngredients((prev) => {
-      const activeItems = prev[activeContainer];
-      const overItems = prev[overContainer];
-
+      const activeItems = prev[activeContainer].items;
       const activeIndex = activeItems.findIndex((item) => item.id === activeId);
-      const overIndex = overItems.length;
+      const activeItem = activeItems[activeIndex];
 
       return {
         ...prev,
-        [activeContainer]: [
-          ...prev[activeContainer].filter((item) => item.id !== activeId),
-        ],
-        [overContainer]: [
-          ...prev[overContainer].slice(0, overIndex),
-          activeItems[activeIndex],
-          ...prev[overContainer].slice(overIndex),
-        ],
+        [activeContainer]: {
+          ...prev[activeContainer],
+          items: prev[activeContainer].items.filter(
+            (item) => item.id !== activeId
+          ),
+        },
+        [overContainer]: {
+          ...prev[overContainer],
+          items: [...prev[overContainer].items, activeItem],
+        },
       };
     });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-
     if (!over) {
       setActiveId(null);
       setActiveType(null);
+      setIsDragging(false);
       return;
     }
 
     const activeId = active.id.toString();
     const overId = over.id.toString();
 
-    // Handle container sorting
     if (active.data.current?.type === "container") {
       const oldIndex = groupOrder.indexOf(activeId);
       const newIndex = groupOrder.indexOf(overId);
@@ -126,73 +124,78 @@ export function IngredientAndGroupList() {
       if (oldIndex !== newIndex) {
         setGroupOrder(arrayMove(groupOrder, oldIndex, newIndex));
       }
-      setActiveId(null);
-      setActiveType(null);
-      return;
-    }
+    } else {
+      const activeContainer = findContainer(activeId);
+      const overContainer = findContainer(overId);
 
-    // Handle item sorting
-    const activeContainer = findContainer(activeId);
-    const overContainer = findContainer(overId);
+      if (!activeContainer || !overContainer) return;
 
-    if (!activeContainer || !overContainer) {
-      setActiveId(null);
-      setActiveType(null);
-      return;
-    }
+      const activeItems = groupedIngredients[activeContainer].items;
+      const overItems = groupedIngredients[overContainer].items;
 
-    if (activeId !== overId) {
-      setGroupedIngredients((prev) => {
-        const activeItems = prev[activeContainer];
-        const overItems = prev[overContainer];
+      const activeIndex = activeItems.findIndex((item) => item.id === activeId);
+      const overIndex = overItems.findIndex((item) => item.id === overId);
 
-        const activeIndex = activeItems.findIndex(
-          (item) => item.id === activeId
-        );
-        let overIndex = overItems.findIndex((item) => item.id === overId);
-
-        if (overId === overContainer || overIndex === -1) {
-          overIndex = overItems.length;
-        }
-
-        if (activeContainer === overContainer) {
-          return {
+      if (activeContainer === overContainer) {
+        // Same container sorting
+        if (activeIndex !== overIndex) {
+          setGroupedIngredients((prev) => ({
             ...prev,
-            [activeContainer]: arrayMove(activeItems, activeIndex, overIndex),
-          };
+            [activeContainer]: {
+              ...prev[activeContainer],
+              items: arrayMove(
+                prev[activeContainer].items,
+                activeIndex,
+                overIndex
+              ),
+            },
+          }));
         }
+      } else {
+        // Moving between containers
+        const newOverIndex = overIndex === -1 ? overItems.length : overIndex;
+        const itemToMove = activeItems[activeIndex];
 
-        return {
+        setGroupedIngredients((prev) => ({
           ...prev,
-          [activeContainer]: [
-            ...prev[activeContainer].filter((item) => item.id !== activeId),
-          ],
-          [overContainer]: [
-            ...prev[overContainer].slice(0, overIndex),
-            activeItems[activeIndex],
-            ...prev[overContainer].slice(overIndex),
-          ],
-        };
-      });
+          [activeContainer]: {
+            ...prev[activeContainer],
+            items: prev[activeContainer].items.filter(
+              (item) => item.id !== activeId
+            ),
+          },
+          [overContainer]: {
+            ...prev[overContainer],
+            items: [
+              ...prev[overContainer].items.slice(0, newOverIndex),
+              itemToMove,
+              ...prev[overContainer].items.slice(newOverIndex),
+            ],
+          },
+        }));
+      }
     }
 
     setActiveId(null);
     setActiveType(null);
+    setIsDragging(false);
   };
 
   const getActiveItem = (): RecipeIngredientFieldsFragment | undefined => {
     if (!activeId || activeType === "container") return undefined;
-
     const activeContainer = findContainer(activeId);
     if (!activeContainer) return undefined;
-
-    return groupedIngredients[activeContainer].find(
+    return groupedIngredients[activeContainer].items.find(
       (item) => item.id === activeId
     );
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div
+      className={cn("flex flex-col gap-4 p-4 rounded-md", {
+        "bg-black/50": isDragging,
+      })}
+    >
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -207,13 +210,14 @@ export function IngredientAndGroupList() {
           {groupOrder.map((containerId) => (
             <IngredientGroup
               key={containerId}
+              name={groupedIngredients[containerId].name}
               id={containerId}
-              items={groupedIngredients[containerId]}
+              items={groupedIngredients[containerId].items}
             />
           ))}
         </SortableContext>
 
-        <DragOverlay>
+        {/* <DragOverlay>
           {activeId && activeType === "item" ? (
             <div className="p-4 bg-white rounded shadow cursor-grabbing">
               {getActiveItem()?.sentence}
@@ -222,16 +226,16 @@ export function IngredientAndGroupList() {
           {activeId && activeType === "container" ? (
             <div className="w-64 p-4 bg-gray-100 rounded-lg opacity-80">
               <h2 className="mb-4 text-lg font-semibold">
-                Container {activeId}
+                {groupedIngredients[activeId].name}
               </h2>
-              {groupedIngredients[activeId].map((item) => (
+              {groupedIngredients[activeId].items.map((item) => (
                 <div key={item.id} className="p-4 mb-2 bg-white rounded shadow">
                   {item?.sentence}
                 </div>
               ))}
             </div>
           ) : null}
-        </DragOverlay>
+        </DragOverlay> */}
       </DndContext>
     </div>
   );

@@ -21,6 +21,9 @@ const recipeIngredientFragment = graphql(`
       id
       name
     }
+    recipe {
+      id
+    }
   }
 `);
 
@@ -54,8 +57,16 @@ const getRecipeIngredients = graphql(`
 `);
 
 const createRecipeIngredientMutation = graphql(`
-  mutation createRecipeIngredient($recipeId: ID!, $ingredient: String!) {
-    addRecipeIngredientsFromTxt(recipeId: $recipeId, ingredients: $ingredient) {
+  mutation createRecipeIngredient(
+    $recipeId: ID!
+    $ingredient: String!
+    $groupId: ID
+  ) {
+    addRecipeIngredientsFromTxt(
+      recipeId: $recipeId
+      text: $ingredient
+      groupId: $groupId
+    ) {
       ...RecipeIngredientFields
     }
   }

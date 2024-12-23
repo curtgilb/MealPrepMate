@@ -3,19 +3,13 @@ import "@/styles/globals.css";
 
 import { Menu } from "lucide-react";
 import { Inter, Merriweather } from "next/font/google";
-import Image from "next/image";
 import { useMemo, useState } from "react";
+import { devtoolsExchange } from "@urql/devtools";
 
 import { Navigation } from "@/components/SideNav";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
-import {
-  MutationAddRecipeServingArgs,
-  MutationAddRecipeToMealPlanArgs,
-  MutationDeleteRecipeServingArgs,
-  MutationRemoveMealPlanRecipeArgs,
-  MutationSetRankedNutrientsArgs,
-} from "@/gql/graphql";
+import { MutationRemoveMealPlanRecipeArgs } from "@/gql/graphql";
 import { cn } from "@/lib/utils";
 import { animated, useSpring } from "@react-spring/web";
 import { cacheExchange } from "@urql/exchange-graphcache";
@@ -50,75 +44,77 @@ export default function RootLayout({
 
     const client = createClient({
       url: process.env.NEXT_PUBLIC_CLIENT_API_URL ?? "",
-      fetchOptions: { cache: "no-store" },
+      // fetchOptions: { cache: "no-store" },
       exchanges: [
+        devtoolsExchange,
         cacheExchange({
           keys: {
             NutrientsQuery: (data) => null,
             IngredientsQuery: (data) => null,
             PolygonCoordinate: (data) => null,
             BoundingBox: (data) => null,
+            NutritionLabelNutrient: (data) => null,
           },
-          updates: {
-            Mutation: {
-              removeMealPlanRecipe(result, args, cache, info) {
-                cache.invalidate({
-                  __typename: "MealPlanRecipe",
-                  id: (args as MutationRemoveMealPlanRecipeArgs).id,
-                });
-              },
-              // addRecipeServing(result, args, cache, info) {
-              //   const typedArgs = (args as MutationAddRecipeServingArgs).serving
-              //     .mealPlanId;
-              //   const servings = cache.resolve(
-              //     { __typename: "MealPlan", id: typedArgs },
-              //     "mealPlanServings"
-              //   );
-              //   if (Array.isArray(servings)) {
-              //     cache.link(
-              //       { __typename: "MealPlan", id: typedArgs },
-              //       "mealPlanServings",
-              //       [...servings, result.addRecipeServing]
-              //     );
-              //   }
-              // },
-              // deleteRecipeServing(result, args, cache, info) {
-              //   cache.invalidate({
-              //     __typename: "MealPlanServing",
-              //     id: (args as MutationDeleteRecipeServingArgs).id,
-              //   });
-              // },
-              // addRecipeToMealPlan(result, args, cache, info) {
-              //   const mealPlanId = (args as MutationAddRecipeToMealPlanArgs)
-              //     .recipe.mealPlanId;
-              //   const mealPlan = cache.resolve(
-              //     { __typename: "MealPlan", id: mealPlanId },
-              //     "planRecipes"
-              //   );
-              //   if (Array.isArray(mealPlan)) {
-              //     cache.link(
-              //       { __typename: "MealPlan", id: mealPlanId },
-              //       "planRecipes",
-              //       [...mealPlan, result.addRecipeToMealPlan]
-              //     );
-              //   }
-              // },
-              // setRankedNutrients(result, args, cache, info) {
-              //   const rankedNutrients = cache.resolve(
-              //     "Query",
-              //     "getRankedNutrients"
-              //   );
-              //   if (
-              //     Array.isArray(rankedNutrients) &&
-              //     Array.isArray(result.setRankedNutrients)
-              //   ) {
-              //     cache.link("Query", "getRankedNutrients", [
-              //       ...result.setRankedNutrients,
-              //     ]);
-              //   }
-              // },
-            },
-          },
+          // updates: {
+          //   Mutation: {
+          //     // removeMealPlanRecipe(result, args, cache, info) {
+          //     //   cache.invalidate({
+          //     //     __typename: "MealPlanRecipe",
+          //     //     id: (args as MutationRemoveMealPlanRecipeArgs).id,
+          //     //   });
+          //     // },
+          //     // addRecipeServing(result, args, cache, info) {
+          //     //   const typedArgs = (args as MutationAddRecipeServingArgs).serving
+          //     //     .mealPlanId;
+          //     //   const servings = cache.resolve(
+          //     //     { __typename: "MealPlan", id: typedArgs },
+          //     //     "mealPlanServings"
+          //     //   );
+          //     //   if (Array.isArray(servings)) {
+          //     //     cache.link(
+          //     //       { __typename: "MealPlan", id: typedArgs },
+          //     //       "mealPlanServings",
+          //     //       [...servings, result.addRecipeServing]
+          //     //     );
+          //     //   }
+          //     // },
+          //     // deleteRecipeServing(result, args, cache, info) {
+          //     //   cache.invalidate({
+          //     //     __typename: "MealPlanServing",
+          //     //     id: (args as MutationDeleteRecipeServingArgs).id,
+          //     //   });
+          //     // },
+          //     // addRecipeToMealPlan(result, args, cache, info) {
+          //     //   const mealPlanId = (args as MutationAddRecipeToMealPlanArgs)
+          //     //     .recipe.mealPlanId;
+          //     //   const mealPlan = cache.resolve(
+          //     //     { __typename: "MealPlan", id: mealPlanId },
+          //     //     "planRecipes"
+          //     //   );
+          //     //   if (Array.isArray(mealPlan)) {
+          //     //     cache.link(
+          //     //       { __typename: "MealPlan", id: mealPlanId },
+          //     //       "planRecipes",
+          //     //       [...mealPlan, result.addRecipeToMealPlan]
+          //     //     );
+          //     //   }
+          //     // },
+          //     // setRankedNutrients(result, args, cache, info) {
+          //     //   const rankedNutrients = cache.resolve(
+          //     //     "Query",
+          //     //     "getRankedNutrients"
+          //     //   );
+          //     //   if (
+          //     //     Array.isArray(rankedNutrients) &&
+          //     //     Array.isArray(result.setRankedNutrients)
+          //     //   ) {
+          //     //     cache.link("Query", "getRankedNutrients", [
+          //     //       ...result.setRankedNutrients,
+          //     //     ]);
+          //     //   }
+          //     // },
+          //   },
+          // },
         }),
         ssr,
         fetchExchange,

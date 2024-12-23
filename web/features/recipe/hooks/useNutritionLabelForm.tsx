@@ -1,3 +1,4 @@
+"use client";
 import {
   createNutritionLabelMutation,
   editNutritionLabelMutation,
@@ -77,14 +78,16 @@ export function useNutritionLabelForm({
   );
   const isFetching = createFetching || editFetching;
 
+  const { reset } = form;
+
   useEffect(() => {
-    form.reset(toDefaultValues(label, nutrients));
-  }, [label, form, nutrients]);
+    reset(toDefaultValues(label, nutrients));
+  }, [label, reset, nutrients]);
 
   function saveLabel() {
-    return new Promise<boolean>(async (resolve) => {
+    return new Promise<boolean>((resolve) => {
       async function submit(values: NutritionFormValues) {
-        console.log(values);
+        console.log("submit triggered");
         const filteredNutrients = values.nutrients
           .filter((nutrient) => nutrient.value > 0)
           .map((nutrient) => ({
@@ -102,24 +105,25 @@ export function useNutritionLabelForm({
           nutrients: filteredNutrients,
         };
 
-        console.log("submitted values: ", input);
-
+        console.log("input submitted", input);
         // create
         if (!label) {
-          await createLabel({ input }).then((result) => {
-            if (!result.error) resolve(true);
-          });
+          const result = await createLabel({ input });
+          resolve(!result.error);
         }
+
         // edit
         else {
-          await editLabel({ label: input, id: label.id }).then((result) => {
-            if (!result.error) resolve(true);
-          });
+          const result = await editLabel({ label: input, id: label.id });
+          resolve(!result.error);
         }
         resolve(false);
       }
-
-      form.handleSubmit(submit, () => resolve(false))();
+      console.log("errors: ", form.formState.errors);
+      form.handleSubmit(submit, (e) => {
+        console.log(e);
+        resolve(false);
+      })();
     });
   }
 
@@ -141,7 +145,7 @@ function toDefaultValues(
     servingSize: label?.servingSize ?? 0,
     servingSizeUnit: label?.servingSizeUnit ?? null,
     servingsUsed: label?.isPrimary ? 0 : label?.servingsUsed ?? servings,
-    isPrimary: label?.isPrimary,
+    isPrimary: label?.isPrimary ?? false,
     nutrients:
       nutrients?.map((nutrient, index) => {
         const lookup = nutrientValueLookup && nutrientValueLookup[nutrient.id];

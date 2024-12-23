@@ -98,7 +98,6 @@ export function RecipeFilter({ setFilter, ...rest }: RecipeFilterProps) {
   function onApply(values: FilterValidationType) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-    console.log(values);
   }
 
   return (

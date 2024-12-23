@@ -74,8 +74,6 @@ export function NutrientChart({ data, target, dri, unit }: NutrientChartProps) {
     };
   }, [target]);
 
-  console.log(targetArea);
-
   return (
     <div>
       <ChartContainer config={chartConfig}>

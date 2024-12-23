@@ -1,8 +1,8 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-import { updateAggregateLabel } from '@/application/services/nutrition/AggregateLabelService.js';
-import { db } from '@/infrastructure/repository/db.js';
-import { Prisma } from '@prisma/client';
+import { updateAggregateLabel } from "@/application/services/nutrition/AggregateLabelService.js";
+import { db } from "@/infrastructure/repository/db.js";
+import { Prisma } from "@prisma/client";
 
 const nutrientValidation = z.object({
   nutrientId: z.string().uuid(),
@@ -44,6 +44,7 @@ async function createNutritionLabel(
   label: NutritionLabelInput,
   query?: NutritionLabelQuery
 ) {
+  console.log(label);
   return await db.$transaction(async (tx) => {
     const createdLabel = await tx.nutritionLabel.create({
       data: {

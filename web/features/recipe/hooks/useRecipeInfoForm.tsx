@@ -32,13 +32,10 @@ export function useRecipeInfoForm(
   }, [recipe, reset]);
 
   async function handleSubmit(values: RecipeInfoForm, postSubmit?: () => void) {
-    console.log("cleaned Values: ", values);
-
     if (recipe?.id) {
       // Edit new recipe
       await editRecipe({ id: recipe.id, recipe: toApiValues(values) }).then(
         (result) => {
-          console.log("result: ", result);
           if (!result.error) {
             postSubmit?.();
           }

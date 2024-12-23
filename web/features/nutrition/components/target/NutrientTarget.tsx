@@ -26,7 +26,7 @@ export function NutritionTargets(props: NutritionConfigurationProps) {
   const [editingNutrient, setEditingNutrient] =
     useState<NutrientWithChildren | null>(null);
   const [advanced, setAdvanced] = useState<boolean>(false);
-  const nutrients = useNutrients(
+  const { grouped: nutrients } = useNutrients(
     advanced ? NutritionDisplayMode.All : NutritionDisplayMode.Basic
   );
 

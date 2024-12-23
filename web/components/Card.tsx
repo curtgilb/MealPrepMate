@@ -90,6 +90,7 @@ function CardImage({
   imageGrid,
   verticalOrientation,
 }: CardImageProps) {
+  console.log(images);
   const isMultiple = images && images.length > 1;
   const imagesDisplayed = isMultiple && imageGrid ? 4 : 1;
 
@@ -100,42 +101,46 @@ function CardImage({
       return images?.[index] || null;
     });
 
+  console.log("display item", displayItems);
+
   return (
     <div
-      className={cn("overflow-hidden relative bg-muted shrink-0", {
-        "w-80 h-72": verticalOrientation,
-        "w-16 h-16": !verticalOrientation,
+      className={cn(" bg-muted shrink-0", {
+        // "w-80 h-72": verticalOrientation,
+        // "w-16 h-16": !verticalOrientation,
         "grid grid-cols-2": imageGrid,
       })}
     >
       {displayItems.map((image, index) => {
         if (!image) {
           return (
+            <div className="overflow-hidden relative">
+              <Image
+                key={placeholderUrl}
+                src={placeholderUrl}
+                alt={""}
+                sizes="320px"
+                fill
+                style={{
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+          );
+        }
+        return (
+          <div className="overflow-hidden relative">
             <Image
-              key={placeholderUrl}
-              className="group-hover:scale-105 transition-transform"
-              src={placeholderUrl}
-              alt={""}
+              key={image.url}
+              src={image.url}
+              alt={image.altText}
               sizes="320px"
               fill
               style={{
                 objectFit: "cover",
               }}
             />
-          );
-        }
-        return (
-          <Image
-            key={image.url}
-            className="group-hover:scale-105 transition-transform"
-            src={image.url}
-            alt={image.altText}
-            sizes="320px"
-            fill
-            style={{
-              objectFit: "cover",
-            }}
-          />
+          </div>
         );
       })}
     </div>

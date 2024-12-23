@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import DOMPurify from "isomorphic-dompurify";
 import { FC, memo } from "react";
 
@@ -40,7 +41,7 @@ export const RichTextContent: FC<RichTextContentProps> = memo(
 
     return (
       <div
-        className={className}
+        className={cn("[&>p]:mb-4", className)}
         dangerouslySetInnerHTML={{ __html: sanitizedContent }}
       />
     );

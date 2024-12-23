@@ -32,7 +32,7 @@ export function NutritionLabelPreview({
         if (!(id in total)) {
           total[id] = 0;
         }
-        console.log("value: ", servingsUsed, servings);
+
         total[id] = total[id] + value;
       });
 
@@ -41,14 +41,17 @@ export function NutritionLabelPreview({
     {} as { [key: string]: number }
   );
 
-  console.log(nutrientValues);
-
   return (
-    <RecipeNutritionlabel
-      label={{
-        servings: servings ?? 1,
-        nutrients: nutrientValues,
-      }}
-    />
+    <div className=" sticky top-0">
+      <p className="text-lg font-serif font-bold mb-6">
+        Combined Nutrition Label Preview
+      </p>
+      <RecipeNutritionlabel
+        label={{
+          servings: servings ?? 1,
+          nutrients: nutrientValues,
+        }}
+      />
+    </div>
   );
 }

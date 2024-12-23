@@ -1,10 +1,10 @@
 "use client";
 import { Pencil } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { SquareImage } from "@/components/images/SquareImage";
-import { RichTextEditor } from "@/components/rich_text/RichTextEditor";
+import { RichTextContent } from "@/components/rich_text/RichTextContent";
 import { Button } from "@/components/ui/button";
 import { recipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
 import { RecipeNutritionlabel } from "@/features/recipe/components/nutrition_label/RecipeNutritionLabel";
@@ -17,6 +17,7 @@ import { RecipeTimes } from "@/features/recipe/components/view/RecipeTimes";
 import { SourceLink } from "@/features/recipe/components/view/SourceLink";
 import { getFragmentData } from "@/gql";
 import { RecipeFieldsFragment } from "@/gql/graphql";
+import { nutritionLabelFragment } from "@/features/recipe/api/NutritionLabel";
 
 interface Recipe {
   recipe: RecipeFieldsFragment | undefined | null;
@@ -39,13 +40,24 @@ export function Recipe({ recipe }: Recipe) {
     recipe?.ingredients
   );
 
+  const nutrients = useMemo(() => {
+    return recipe?.aggregateLabel?.nutrients.reduce((all, nutrient) => {
+      all[nutrient.nutrient.id] = nutrient.value;
+      return all;
+    }, {} as { [key: string]: number });
+  }, [recipe?.aggregateLabel]);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-[24rem_1fr] gap-x-24 gap-y-14">
-      <SquareImage url={imageUrl} altText={`Image of ${recipe?.name}`} />
+      <SquareImage
+        url={imageUrl}
+        altText={`Image of ${recipe?.name}`}
+        targetSize={384}
+      />
 
       {/* Basic info */}
-      <div className="flex flex-col gap-10 justify-between max-w-prose">
-        <div className="flex gap-8 justify-between">
+      <div className="flex flex-col gap-10 justify-between ">
+        <div className="flex gap-12 justify-between">
           <div>
             <h1 className="font-serif text-3xl font-extrabold">
               {recipe?.name}
@@ -109,41 +121,44 @@ export function Recipe({ recipe }: Recipe) {
       </div>
 
       {/* Directions, notes, nutrition */}
-      <div className="space-y-8">
+      <div className="space-y-12">
         <div>
           <h2 className="text-lg font-serif font-bold mb-2 ">Directions</h2>
-          <RichTextEditor
-            value={recipe?.directions}
-            editable={false}
-            onChange={() => {}}
-          />
+          <RichTextContent content={recipe?.directions ?? ""} />
         </div>
 
         <div>
           <h2 className="text-lg font-serif font-bold mt-8 mb-2">Notes</h2>
-          <p className="max-w-prose">{recipe?.notes}</p>
+          <RichTextContent content={recipe?.notes ?? ""} />
         </div>
 
-        <div>
-          <h2 className="text-lg font-serif font-bold mt-8 mb-2">
-            Leftover Lifespan
-          </h2>
-          <LeftoverLifespan
-            fridge={recipe?.leftoverFridgeLife}
-            freezer={recipe?.leftoverFreezerLife}
-          />
-        </div>
+        <div className="flex gap-20 flex-wrap ">
+          <div>
+            <h2 className="text-lg font-serif font-bold mt-8 mb-2">
+              Leftover Lifespan
+            </h2>
+            <LeftoverLifespan
+              fridge={recipe?.leftoverFridgeLife}
+              freezer={recipe?.leftoverFreezerLife}
+            />
+          </div>
 
-        <div>
-          <h2 className="text-lg font-serif font-bold mt-8 mb-2">Source</h2>
-          <SourceLink source={recipe?.source} />
+          <div>
+            <h2 className="text-lg font-serif font-bold mt-8 mb-2">Source</h2>
+            <SourceLink source={recipe?.source} />
+          </div>
         </div>
       </div>
 
       {/* Nutrition Label */}
-      <div className="col-start-2 max-w-prose">
+      <div className="col-start-2 max-w-lg">
         <h2 className="text-lg font-serif font-bold mb-2 ">Nutrition Facts</h2>
-        <RecipeNutritionlabel label={recipe?.aggregateLabel} />
+        <RecipeNutritionlabel
+          label={{
+            nutrients: nutrients ?? {},
+            servings: recipe?.aggregateLabel?.servings,
+          }}
+        />
       </div>
     </div>
   );

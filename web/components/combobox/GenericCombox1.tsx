@@ -14,7 +14,7 @@ import { TypedDocumentNode, useQuery } from "@urql/next";
 
 export type ComboboxItem = { id: string; label: string; name?: string };
 
-export interface QueryVariables {
+interface QueryVariables {
   search?: string;
   first?: number;
   [prop: string]: any;
@@ -87,11 +87,11 @@ export function GenericCombobox<
     unwrapDataList(results?.data)?.map((item) => renderItem(item)) ?? [];
 
   function handleSelect(item: TItem, selected: boolean) {
-    // console.log("status:", selected);
-    // console.log("selected:", selectedItems);
+    //
+    //
     // Removing an item
     if (selected && selectedItems) {
-      // console.log("removing item:", item);
+      //
       onChange(selectedItems.filter((curr) => curr.id !== item.id));
       if (onItemRemoved) onItemRemoved(item);
       setOpen(false);

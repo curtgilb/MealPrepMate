@@ -34,7 +34,6 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function CalorieBalanceChart({ data }: CalorieBalanceInterface) {
-  console.log(data);
   return (
     <ChartContainer config={chartConfig}>
       <BarChart accessibilityLayer data={data}>

@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { InfiniteScroll } from "@/components/infinite_scroll/InfiniteScroll";
 import SingleColumnCentered from "@/components/layouts/single-column-centered";
-import { MealPlans as MealPlanList } from "@/components/pagination/MealPlans";
+
 import { Button } from "@/components/ui/button";
 import {
   createMealPlanMutation,
@@ -41,6 +41,7 @@ export default function MealPlans() {
       </div>
       <InfiniteScroll
         query={getMealPlansQuery}
+        className="grid gap-4 grid-cols-autofit"
         variables={{}}
         renderItem={(
           mealPlan: GetMealPlansQuery["mealPlans"]["edges"][number]["node"]

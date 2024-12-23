@@ -64,7 +64,6 @@ export function EditReceipt({ receipt }: EditReceiptProps) {
       defaultValue: getLineItemDefaultValues(activeItem),
     });
   }, [activeItem, form]);
-  console.log(activeItem);
 
   return (
     <div className="flex gap-12">
@@ -94,8 +93,6 @@ export function EditReceipt({ receipt }: EditReceiptProps) {
         <Form {...form}>
           <form
             onSubmit={(e) => {
-              console.log("form values", form.getValues());
-              console.log("Form errors:", form.formState.errors);
               form.handleSubmit(updateReceipt)(e);
             }}
             className="flex flex-col gap-10 justify-between"

@@ -9,10 +9,13 @@ import {
 } from "react";
 
 import { Button } from "@/components/ui/button";
-import { EditRecipeInfo } from "@/features/recipe/components/edit/info/EditRecipeInfo";
-import { EditRecipeIngredients } from "@/features/recipe/components/edit/ingredients/EditRecipeIngredients";
-import { EditRecipeNutritionLabels } from "@/features/recipe/components/edit/labels/EditRecipeNutritionLabels";
+import { BasicRecipeInfoFields } from "@/features/recipe/components/edit/info/BasicRecipeInfoFields";
+import { RecipeIngredientsEditor } from "@/features/recipe/components/edit/ingredients/RecipeIngredientsEditor";
+import { NutritionLabelEditor } from "@/features/recipe/components/edit/labels/NutritionLabelEditor";
 import { RecipeFieldsFragment } from "@/gql/graphql";
+import { useQuery } from "@urql/next";
+import { getRecipeQuery, recipeFragment } from "@/features/recipe/api/Recipe";
+import { getFragmentData } from "@/gql";
 
 export interface EditRecipeProps {
   recipe: RecipeFieldsFragment | undefined | null;
@@ -30,9 +33,9 @@ const editComponents: {
     name: string;
   };
 } = {
-  1: { Component: EditRecipeInfo, name: "basic info" },
-  2: { Component: EditRecipeIngredients, name: "ingredients" },
-  3: { Component: EditRecipeNutritionLabels, name: "nutrition label" },
+  1: { Component: BasicRecipeInfoFields, name: "basic info" },
+  2: { Component: RecipeIngredientsEditor, name: "ingredients" },
+  3: { Component: NutritionLabelEditor, name: "nutrition label" },
 };
 
 export function RecipeEditor({ recipe }: EditRecipeProps) {
@@ -41,15 +44,15 @@ export function RecipeEditor({ recipe }: EditRecipeProps) {
   const { Component, name } = editComponents[editStage];
   const child = useRef<EditRecipeSubmit>(null);
   const isLastStep = editStage === Object.keys(editComponents).length;
-  // const [result, executeQuery] = useQuery({
-  //   query: getRecipeQuery,
-  //   variables: { id: recipe?.id ?? "" },
-  //   pause: true,
-  // });
+  const [result] = useQuery({
+    query: getRecipeQuery,
+    // requestPolicy: "network-only",
+    variables: { id: recipe?.id ?? "" },
+  });
 
   function advanceStep() {
     if (child.current?.submit) {
-      child.current.submit(() => {
+      child.current.submit(async () => {
         if (editStage < Object.keys(editComponents).length) {
           setEditStage(editStage + 1);
         } else if (isLastStep) {
@@ -63,12 +66,12 @@ export function RecipeEditor({ recipe }: EditRecipeProps) {
   return (
     <>
       {/* Header */}
-      <div className="flex justify-between mb-6">
+      <div className="flex justify-between mb-14 align-middle">
         <h1 className="text-3xl font-serif font-bold ">{`${editStage}. ${
           recipe ? "Edit" : "Create"
         } recipe ${name}`}</h1>
 
-        <div className="flex justify-end gap-4 mt-6">
+        <div className="flex justify-end gap-4 ">
           <Button
             variant="outline"
             onClick={() => {
@@ -92,8 +95,10 @@ export function RecipeEditor({ recipe }: EditRecipeProps) {
       </div>
 
       {/* Dynamic Content */}
-      <Component ref={child} recipe={recipe}></Component>
-      {/* Bottom */}
+      <Component
+        ref={child}
+        recipe={getFragmentData(recipeFragment, result.data?.recipe)}
+      ></Component>
     </>
   );
 }
