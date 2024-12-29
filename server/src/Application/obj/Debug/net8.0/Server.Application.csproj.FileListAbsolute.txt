@@ -1,0 +1,12 @@
+/Users/curtgilbert/Documents/code/MealPrepMate/server/src/Application/bin/Debug/net8.0/Server.Application.deps.json
+/Users/curtgilbert/Documents/code/MealPrepMate/server/src/Application/bin/Debug/net8.0/Server.Application.dll
+/Users/curtgilbert/Documents/code/MealPrepMate/server/src/Application/bin/Debug/net8.0/Server.Application.pdb
+/Users/curtgilbert/Documents/code/MealPrepMate/server/src/Application/obj/Debug/net8.0/Server.Application.GeneratedMSBuildEditorConfig.editorconfig
+/Users/curtgilbert/Documents/code/MealPrepMate/server/src/Application/obj/Debug/net8.0/Server.Application.AssemblyInfoInputs.cache
+/Users/curtgilbert/Documents/code/MealPrepMate/server/src/Application/obj/Debug/net8.0/Server.Application.AssemblyInfo.cs
+/Users/curtgilbert/Documents/code/MealPrepMate/server/src/Application/obj/Debug/net8.0/Server.Application.csproj.CoreCompileInputs.cache
+/Users/curtgilbert/Documents/code/MealPrepMate/server/src/Application/obj/Debug/net8.0/Server.Application.sourcelink.json
+/Users/curtgilbert/Documents/code/MealPrepMate/server/src/Application/obj/Debug/net8.0/Server.Application.dll
+/Users/curtgilbert/Documents/code/MealPrepMate/server/src/Application/obj/Debug/net8.0/refint/Server.Application.dll
+/Users/curtgilbert/Documents/code/MealPrepMate/server/src/Application/obj/Debug/net8.0/Server.Application.pdb
+/Users/curtgilbert/Documents/code/MealPrepMate/server/src/Application/obj/Debug/net8.0/ref/Server.Application.dll
