@@ -1,3 +1,4 @@
+namespace Server.Domain;
 public abstract class Entity : IEquatable<Entity>
 {
     public Guid Id { get; private init; }

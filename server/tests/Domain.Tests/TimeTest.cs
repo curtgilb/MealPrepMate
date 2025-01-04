@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Server.Domain;
-using Server.Domain.Recipes;
+using Server.Domain.Recipe;
+
 
 namespace Domain.Tests;
 
@@ -41,7 +42,7 @@ public class TimeTests
     {
         var time1 = new Time(30);
         var time2 = new Time(45);
-        var result = time1 + time2;
+        var result = Time.Sum(time1, time2);
         result.Hours.Should().Be(1);
         result.Minutes.Should().Be(15);
     }

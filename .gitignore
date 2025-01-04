@@ -14,7 +14,7 @@ lerna-debug.log*
 /storage/.minio.sys/
 
 /cloudbeaver/
-
+/server/cloudbeaver/
 
 /redis/
 

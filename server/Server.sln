@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server.Application", "src\A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server.Domain", "src\Domain\Server.Domain.csproj", "{04850E42-2A36-4C4A-A7F6-266EB6A74AA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphQL", "src\GraphQL\GraphQL.csproj", "{A333D554-109F-4BAA-8210-294036E75063}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphQL", "src\GraphQL\Server.GraphQL.csproj", "{A333D554-109F-4BAA-8210-294036E75063}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server.Infrastructure", "src\Infrastructure\Server.Infrastructure.csproj", "{8521D451-8E16-4CDE-A787-B1F4EA42E941}"
 EndProject

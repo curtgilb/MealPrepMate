@@ -4,25 +4,32 @@ public record Time : IComparable<Time>
 {
     public int TotalMinutes { get; }
 
-    public Time(int minutes)
+    public Time(int? minutes)
     {
-        if (minutes < 0)
+        TotalMinutes = minutes ?? 0;
+        if (TotalMinutes < 0)
         {
             throw new DomainException("Time cannot be negative");
         }
-        TotalMinutes = minutes;
     }
 
     // Computed properties for hours and minutes
     public int Hours => TotalMinutes / 60;
     public int Minutes => TotalMinutes % 60;
 
-    // Overload the + operator to add two Time objects
-    public static Time operator +(Time a, Time b)
+    public static Time Sum(params Time?[] times)
     {
-        int totalMinutes = a.TotalMinutes + b.TotalMinutes;
+        int totalMinutes = 0;
+        foreach (var time in times)
+        {
+            if (time != null)
+            {
+                totalMinutes += time.TotalMinutes;
+            }
+        }
         return new Time(totalMinutes);
     }
+
 
     public int CompareTo(Time? other)
     {
