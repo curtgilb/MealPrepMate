@@ -1,9 +1,9 @@
 from IngredientParser import IngredientParser
 
 input_tests = [
+    "1 tbsp plus 1 tsp arrowroot powder (or flour of choice)",
     "2 large chicken breasts (about 1 \u00bd pounds)",
-    "1-2 tablespoons arrowroot powder (or flour of choice)",
-    "1 tablespoon lemon pepper seasoning",
+    "Marinade",
     "\u00bd teaspoon kosher salt",
     "2 tablespoons extra virgin olive oil",
     "2 tablespoons unsalted butter",

@@ -14,37 +14,71 @@ class IngredientParser:
         except ValueError:
             return string
 
-    def __extract_qty(self, output):
-        if len(output.amount) > 0:
-            qty = output.amount[0]
+    def find_all(self, sentence, substring):
+        positions = []
+        pos = sentence.find(substring)
+        while pos != -1:
+            positions.append(pos)
+            pos = sentence.find(substring, pos + 1)
+        return positions
 
-            if qty.__class__.__name__ == "IngredientAmount":
-                return {
-                    "qty": self.__convert_to_float(qty.quantity),
-                    "maxQty": self.__convert_to_float(qty.quantity_max),
-                    "unit": qty.unit,
-                }
-            elif qty.__class__.__name__ == "CompositeIngredientAmount":
-                return {
-                    "qty": self.__convert_to_float(qty.amounts[0].quantity),
-                    "maxQty": self.__convert_to_float(qty.amounts[0].quantity_max),
-                    "unit": qty.amounts[0].unit,
-                }
+    def __get_qty(self, parsed_amount):
+        if parsed_amount.__class__.__name__ == "IngredientAmount":
+            return {
+                "qty": self.__convert_to_float(parsed_amount.quantity),
+                "maxQty": self.__convert_to_float(parsed_amount.quantity_max),
+                "unit": parsed_amount.unit,
+            }
+        elif parsed_amount.__class__.__name__ == "CompositeIngredientAmount":
+            return {
+                "qty": self.__convert_to_float(parsed_amount.amounts[0].quantity),
+                "maxQty": self.__convert_to_float(
+                    parsed_amount.amounts[0].quantity_max
+                ),
+                "unit": parsed_amount.amounts[0].unit,
+            }
+
+        return None
+
+    def __get_amount(self, parsed_amount):
+        if parsed_amount.__class__.__name__ == "IngredientAmount":
+            return {
+                "qty": self.__convert_to_float(parsed_amount.quantity),
+                "maxQty": self.__convert_to_float(parsed_amount.quantity_max),
+                "unit": parsed_amount.unit,
+            }
+        elif parsed_amount.__class__.__name__ == "CompositeIngredientAmount":
+            return {
+                "qty": self.__convert_to_float(parsed_amount.amounts[0].quantity),
+                "maxQty": self.__convert_to_float(
+                    parsed_amount.amounts[0].quantity_max
+                ),
+                "unit": parsed_amount.amounts[0].unit,
+            }
 
         return None
 
     def __get_ingredient_annotation(self, result) -> IngredientAnnotation:
-        text = None if not hasattr(result.name, "text") else result.name.text
+        if not (hasattr(result.name, "text")):
+            return None
+
+        self.find_all(result.name.text)
+
+        text = result.name.text
         text_len = len(text) if text else 0
 
         return IngredientAnnotation(
             text=text,
-            start=None if not text else result.name.startIndex,
-            end=None if not text else result.name.startIndex + text_len,
-            name=None if not text else self.p.singular_noun(result.name.text),
+            start=result.name.starting_index,
+            end=result.name.starting_index + text_len,
+            name=self.p.singular_noun(result.name.text),
         )
 
     def __get_ingredient_amount_annotations(self, result) -> IngredientAmount:
+        annotations = []
+        for amount in result.amount:
+            pass
+
         return IngredientAmount(
             quantity=QuantityAnnotation(
                 text=result.quantity.text,
@@ -88,7 +122,5 @@ class IngredientParser:
                 # transformedOutput["unit"] = amount["unit"] if amount else None
                 # parsed_ingredients.append(transformedOutput)
         except Exception as e:
-            print(ingredient)
-            print(result)
             print(e)
         return parsed_ingredients
