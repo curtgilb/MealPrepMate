@@ -5,9 +5,9 @@ public abstract class Entity : IEquatable<Entity>
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
 
-    protected Entity(Guid id)
+    protected Entity(Guid? id)
     {
-        Id = id;
+        Id = id ?? new Guid();
     }
 
     public override bool Equals(object? obj)

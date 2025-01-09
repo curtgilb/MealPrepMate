@@ -1,18 +1,39 @@
 ﻿namespace Server.Domain.Recipe;
 
-public sealed class Recipe(Guid id, string name, string? source, Time? prepTime, Time? cookTime, Time? marinateTime, string? directions, string? notes, int? leftoverFridgeLife, int? leftoverFreezerLife) : Entity(id)
+public sealed class Recipe : Entity
 {
-    public string Name { get; private set; } = name;
-    public string? Source { get; private set; } = source;
-    public Time? PrepTime { get; private set; } = prepTime;
-    public Time? CookTime { get; private set; } = cookTime;
-    public Time? MarinateTime { get; private set; } = marinateTime;
-    public Time TotalTime => Time.Sum(PrepTime, CookTime, MarinateTime);
-    public Time ActiveTime => Time.Sum(PrepTime, CookTime);
 
-    public string? Directions { get; private set; } = directions;
-    public string? Notes { get; private set; } = notes;
-    public int? LeftoverFridgeLife { get; private set; } = leftoverFridgeLife;
-    public int? LeftoverFreezerLife { get; private set; } = leftoverFreezerLife;
+    private Recipe(Guid? id, string name, string? source, bool canMealPrep, string? directions, string notes, RecipeTime cookingTimes, LeftoverStorageLife leftoverStorageLife) : base(id)
+    {
+        Name = name;
+        Source = source;
+        CanMealPrep = canMealPrep;
+        Directions = directions;
+        Notes = notes;
+        CookingTimes = cookingTimes;
+        LeftoverLife = leftoverStorageLife;
+    }
+
+    public string Name { get; private set; }
+    public string? Source { get; private set; }
+    public bool CanMealPrep { get; private set; }
+    public string? Directions { get; private set; }
+    public string? Notes { get; private set; }
+    public RecipeTime CookingTimes { get; private set; }
+    public LeftoverStorageLife LeftoverLife { get; private set; }
+    // Ingredients
+    public ICollection<RecipeIngredient> Ingredients { get; private set; };
+
+
+    public static Recipe Create(string name, string? source, bool canMealPrep, string? directions, string notes, RecipeTime cookingTimes, LeftoverStorageLife leftoverStorageLife)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new DomainException("Name cannot be empty");
+        }
+
+        return new Recipe(Guid.NewGuid(), name, source, canMealPrep, directions, notes, cookingTimes, leftoverStorageLife);
+    }
+
 
 }

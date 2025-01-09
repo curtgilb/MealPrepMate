@@ -11,6 +11,7 @@ pip freeze --local > requirements.txt
 pip install ingredient_parser_nlp
 pip install "fastapi[standard]"
 pip install recipe-scrapers
+pip install inflect 
 
 <!-- pip install uvicorn -->
 
