@@ -5,7 +5,7 @@ input_tests = [
     "2 large chicken breasts (about 1 \u00bd pounds)",
     "Marinade",
     "\u00bd teaspoon kosher salt",
-    "2 tablespoons extra virgin olive oil",
+    "1-2 tablespoons extra virgin olive oil",
     "2 tablespoons unsalted butter",
     "2 garlic cloves (minced)",
     "3 tablespoons lemon juice (from 1 lemon)",

@@ -1,4 +1,4 @@
-from annotations import IngredientAnnotation, QuantityAnnotation, UnitAnnotation
+from annotations import Annotation, IngredientAnnotation, QuantityAnnotation
 from typing import List, Union
 
 from pydantic import BaseModel
@@ -6,11 +6,17 @@ from pydantic import BaseModel
 
 class IngredientAmount(BaseModel):
     quantity: QuantityAnnotation
-    unit: UnitAnnotation
+    maxQuantity: QuantityAnnotation
+    amount_text: Annotation
+    unit: Annotation
+
+
+class CompositeIngredientAmount(BaseModel):
+    quantities: QuantityAnnotation
+    amount_text: Annotation
 
 
 class ParsedIngredientResult(BaseModel):
     ingredient: IngredientAnnotation
-    amount: Union[IngredientAmount, List[IngredientAmount]]
-    original_sentence: str
-    additional: List[Union[IngredientAmount, List[IngredientAmount]]]
+    amounts: List[Union[IngredientAmount, CompositeIngredientAmount]]
+    sentence: str
