@@ -1,18 +1,18 @@
-from annotations import Annotation, IngredientAnnotation, QuantityAnnotation
-from typing import List, Union
+from models.Annotations import Annotation, IngredientAnnotation, QuantityAnnotation
+from typing import List, Optional, Union
 
 from pydantic import BaseModel
 
 
 class IngredientAmount(BaseModel):
     quantity: QuantityAnnotation
-    maxQuantity: QuantityAnnotation
+    max_quantity: Optional[QuantityAnnotation]
     amount_text: Annotation
     unit: Annotation
 
 
 class CompositeIngredientAmount(BaseModel):
-    quantities: QuantityAnnotation
+    quantities: List[IngredientAmount]
     amount_text: Annotation
 
 

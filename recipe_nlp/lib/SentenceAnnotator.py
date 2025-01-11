@@ -1,11 +1,9 @@
 from ingredient_parser.en.preprocess import PreProcessor
 from dataclasses import dataclass
 from typing import Optional
-import re
 
-from fractions import Fraction
-
-from Inflect import Inflect
+from lib.NumberConverter import NumberConverter
+from lib.Inflect import Inflect
 
 
 @dataclass
@@ -29,53 +27,16 @@ class AmountPosition:
     amount: Position
 
 
-number_pattern = re.compile(r"""(?x)                
-    (?:
-        # Mixed fractions (e.g., 1 2/3)
-        \d+\s+\d+/\d+|
-        
-        # Simple fractions (e.g., 1/2)
-        \d+/\d+|
-        
-        # Decimal numbers (e.g., 123.456)
-        \d*\.?\d+
-    )
-    """)
-
-fraction_pattern = re.compile(r"""(?x)                
-    (?:
-        # Mixed fractions (e.g., 1 2/3)
-        \d+\s+\d+/\d+|
-        
-        # Simple fractions (e.g., 1/2)
-        \d+/\d+
-    )
-    """)
-
-tokeized_fraction_pattern = re.compile(r"\d*#\d+\$\d+")
-
-
 class SentenceAnnotator:
-    def __init__(self, sentence: str, inflect: Inflect):
+    def __init__(
+        self, sentence: str, inflect: Inflect, number_converter: NumberConverter
+    ):
         processed = PreProcessor(sentence)
-        self.sentence = self.__replace_tokenized_fractions(processed.sentence)
+        self.sentence = number_converter.replace_tokenized_fractions(processed.sentence)
         self.tokens = processed.tokenized_sentence
+        self.numbers = number_converter
         self.positions = None
         self.inflect = inflect
-
-    def __replace_tokenized_fractions(self, text: str):
-        return tokeized_fraction_pattern.sub(
-            lambda m: str(
-                self.__cast_to_float(m.group(0).replace("#", " ").replace("$", "/"))
-            ),
-            text,
-        )
-
-    def __replace_fractions(self, text: str):
-        return fraction_pattern.sub(
-            lambda m: str(self.__cast_to_float(m.group(0))),
-            text,
-        )
 
     def __try_token_variations(
         self, sentence_remainder: str, token: str
@@ -90,7 +51,7 @@ class SentenceAnnotator:
             return token
 
         # 2. Try with fractions replaced
-        cleaned_token = self.__replace_tokenized_fractions(token)
+        cleaned_token = self.numbers.replace_tokenized_fractions(token)
         if sentence_remainder.startswith(cleaned_token):
             return cleaned_token
 
@@ -118,57 +79,24 @@ class SentenceAnnotator:
                 self.positions.append(current_pos)
                 current_pos = current_pos + len(matching_token)
 
-    def __cast_to_float(self, number_str: str):
-        # Strip any whitespace
-        number_str = number_str.strip()
-
-        # Check if it's a mixed fraction (e.g., "1 2/3")
-        mixed_fraction_match = re.match(r"(\d+)\s+(\d+/\d+)", number_str)
-        if mixed_fraction_match:
-            whole = int(mixed_fraction_match.group(1))
-            fraction = Fraction(mixed_fraction_match.group(2))
-            return round(float(whole + fraction), 3)
-
-        # Check if it's a simple fraction (e.g., "1/2")
-        if "/" in number_str:
-            return round(float(Fraction(number_str)), 3)
-
-        # Must be a regular number or decimal
-        return round(float(number_str), 3)
-
-    def __numbers_are_equal(self, from_text: float, from_nlp: float):
-        percent_tolerance = 1.5
-
-        if from_text == from_nlp:  # Handle exact equality including both being zero
-            return True
-
-        if from_text == 0 or from_nlp == 0:  # Handle when one value is zero
-            return False  # Can't calculate percentage difference with zero
-
-        # Calculate percentage difference relative to the larger value
-        larger = max(abs(from_text), abs(from_nlp))
-        diff_percentage = abs(from_text - from_nlp) / larger * 100
-
-        return diff_percentage <= percent_tolerance
-
     def __extract_numbers(
         self, sub_string: str, token_start_pos: int, quantities: QuantityInput
     ):
         results = [None, None]
 
-        for match in number_pattern.finditer(sub_string):
+        for match in self.numbers.any_number_pattern.finditer(sub_string):
             matching_text = match.group()
-            value = self.__cast_to_float(matching_text)
+            value = self.numbers.cast_to_float(matching_text)
             start_pos = match.start() + token_start_pos
             end_pos = (match.end() - 1) + token_start_pos
-            if quantities.quantity and self.__numbers_are_equal(
+            if quantities.quantity and self.numbers.numbers_are_equal(
                 value, quantities.quantity
             ):
-                results[0] = (matching_text, start_pos, end_pos)
-            elif quantities.maxQuantity and self.__numbers_are_equal(
+                results[0] = Position(text=matching_text, start=start_pos, end=end_pos)
+            elif quantities.maxQuantity and self.numbers.numbers_are_equal(
                 value, quantities.maxQuantity
             ):
-                results[1] = (matching_text, start_pos, end_pos)
+                results[1] = Position(text=matching_text, start=start_pos, end=end_pos)
 
         return results
 
@@ -176,7 +104,7 @@ class SentenceAnnotator:
         match_index = sub_string.find(unit)
         if match_index != -1:
             start = match_index + token_start_pos
-            end = start + len(unit)
+            end = start + len(unit) - 1
             word_end = self.__get_full_word(end)
             return Position(
                 start=start, end=end, text=self.sentence[start : word_end + 1]
@@ -185,7 +113,7 @@ class SentenceAnnotator:
 
     def __get_token_position(self, token_index: int, text: str):
         self.__map_token_to_pos()
-        text_no_fractions = self.__replace_fractions(text)
+        text_no_fractions = self.numbers.replace_fractions_with_decimals(text)
         start = self.positions[token_index]
         end = start + len(text_no_fractions) - 1
         word_end = self.__get_full_word(end)
