@@ -142,7 +142,9 @@ class SentenceAnnotator:
         matching_numbers = self.__extract_numbers(
             amount_substring, pos.start, quantities
         )
-        unit_pos = self.__extract_unit(amount_substring, pos.start, unit)
+        unit_pos = (
+            None if not unit else self.__extract_unit(amount_substring, pos.start, unit)
+        )
 
         return AmountPosition(
             quantity=matching_numbers[0],
@@ -150,47 +152,3 @@ class SentenceAnnotator:
             unit=unit_pos,
             amount=pos,
         )
-
-
-# test_sentences = [
-#     "2 tablespoons cumin",
-#     "1 to 2 tablespoons cumin",
-#     "0.5 tablespoon cumin",
-#     "\u00bd tablespoon cumin",
-#     "1 1/2 tablespoon cumin",
-#     "1\u00bd tablespoon cumin",
-#     "1.5 tablespoon cumin",
-# ]
-
-
-# for sentence in test_sentences:
-#     parsed = parse_ingredient(sentence, string_units=True)
-#     processed = PreProcessor(sentence)
-
-#     print(
-#         f"Parsed sentence: {parsed.sentence}\n Processed sentence {processed.sentence}\n Tokens: {processed.tokenized_sentence}"
-#     )
-
-
-# parsed = parse_ingredient("1 to 2 tablespoons cumin", string_units=True)
-# cache = PositionCache(parsed.sentence)
-# # Get ingredient Position
-# ingredient = cache.get_token_position(parsed.name.starting_index, parsed.name.text)
-# # Get amount(both quantity and unit) Positions
-# parsed_amount = parsed.amount[0]
-# quantities = Quantities(
-#     quantity=parsed_amount.quantity,
-#     maxQuantity=None
-#     if parsed_amount.quantity == parsed_amount.quantity_max
-#     else parsed_amount.quantity_max,
-# )
-# amount = cache.get_amount_position(
-#     parsed_amount.starting_index, parsed_amount.text, parsed_amount.unit, quantities
-# )
-# sentence = cache.sentence
-# print("finished")
-
-
-# quantity is off by one at end
-# Full amount is good
-# unit is off by one at the end

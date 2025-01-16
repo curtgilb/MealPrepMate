@@ -1,11 +1,11 @@
-from ingredient_parser import parse_multiple_ingredients
+from ingredient_parser import parse_ingredient
 from ingredient_parser.dataclasses import (
     CompositeIngredientAmount,
     IngredientAmount,
     ParsedIngredient,
 )
 
-from lib import NumberConverter
+from lib.NumberConverter import NumberConverter
 from lib.Inflect import Inflect
 import models.Response as Response
 from models.Annotations import (
@@ -113,24 +113,25 @@ class IngredientParser:
     ) -> List[Response.ParsedIngredientResult]:
         parsed_ingredients = []
         try:
-            results = parse_multiple_ingredients(ingredient_lines, string_units=True)
-            for line_parsing in results:
-                annotations = SentenceAnnotator(
-                    line_parsing.sentence, self.inflect, self.numbers
-                )
-                cleaned_sentence = annotations.sentence
-                ingredient_name = self.__get_ingredient_annotation(
-                    line_parsing, annotations
-                )
-                amounts = self.__get_amount_annotations(line_parsing, annotations)
-
-                parsed_ingredients.append(
-                    Response.ParsedIngredientResult(
-                        ingredient=ingredient_name,
-                        amounts=amounts,
-                        sentence=cleaned_sentence,
+            for line_parsing in ingredient_lines:
+                if line_parsing:
+                    parsed_line = parse_ingredient(line_parsing, string_units=True)
+                    annotations = SentenceAnnotator(
+                        parsed_line.sentence, self.inflect, self.numbers
                     )
-                )
+                    cleaned_sentence = annotations.sentence
+                    ingredient_name = self.__get_ingredient_annotation(
+                        parsed_line, annotations
+                    )
+                    amounts = self.__get_amount_annotations(parsed_line, annotations)
+
+                    parsed_ingredients.append(
+                        Response.ParsedIngredientResult(
+                            ingredient=ingredient_name,
+                            amounts=amounts,
+                            sentence=cleaned_sentence,
+                        )
+                    )
             return parsed_ingredients
         except Exception as e:
             print(e)

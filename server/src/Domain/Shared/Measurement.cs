@@ -6,6 +6,9 @@ namespace Server.Domain.Shared;
 public class Measurement
 {
     public double Value { get; private set; }
+    public Unit Unit { get; private set; }
+
+
     public Measurement(double value)
     {
         Value = value;

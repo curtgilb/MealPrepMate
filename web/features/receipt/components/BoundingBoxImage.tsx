@@ -59,11 +59,6 @@ export function BoundingBoxImage({
           priority
         />
 
-        {/* Debug info */}
-        <div className="absolute top-0 left-0 bg-black/50 text-white p-2 text-xs">
-          Image Size: {imageSize.width} x {imageSize.height}
-        </div>
-
         <svg
           className="absolute top-0 left-0 w-full h-full"
           preserveAspectRatio="none"

@@ -25,8 +25,10 @@ public sealed class Unit : Entity
     public string Symbol { get; private set; }
     public MeasurementType MeasurementType { get; private set; }
     public UnitSystem? UnitSystem { get; private set; }
+    // Is a unit used in recipes
     public Boolean IsCookingUnit { get; private set; }
-
+    // Is a unit that can be converted to other units (i.e., 3 tsp == t tbsp)
+    public Boolean IsConvertable { get; private set; }
 
     private Unit(Guid id, string name, string abbreviation) : base(id)
     {

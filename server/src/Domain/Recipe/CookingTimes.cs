@@ -1,6 +1,6 @@
 namespace Server.Domain.Recipe;
 
-public record RecipeTime
+public record CookingTimes
 {
     public Time? PrepTime { get; init; }
     public Time? CookTime { get; init; }
@@ -8,9 +8,7 @@ public record RecipeTime
     public Time TotalTime => Time.Sum(PrepTime, CookTime, MarinateTime);
     public Time ActiveTime => Time.Sum(PrepTime, CookTime);
 
-
-
-    public static RecipeTime Sum(params RecipeTime?[] recipeTimes)
+    public static CookingTimes Sum(params CookingTimes?[] recipeTimes)
     {
         int totalPrepTime = 0;
         int totalCookTime = 0;
@@ -25,7 +23,7 @@ public record RecipeTime
             }
         }
 
-        return new RecipeTime { PrepTime = new Time(totalPrepTime), CookTime = new Time(totalCookTime), MarinateTime = new Time(totalMarinateTime) };
+        return new CookingTimes { PrepTime = new Time(totalPrepTime), CookTime = new Time(totalCookTime), MarinateTime = new Time(totalMarinateTime) };
     }
 
 }

@@ -1,8 +1,7 @@
 "use client";
 import { InfiniteScrollPage } from "@/components/infinite_scroll/InfiniteScrollPage";
-import { getClient } from "@/ssrGraphqlClient";
-import { AnyVariables, TypedDocumentNode, useQuery } from "@urql/next";
-import { Fragment } from "react";
+import { Fragment, HTMLAttributes } from "react";
+import { TypedDocumentNode, useQuery } from "@urql/next";
 
 export interface QueryVariables {
   after?: string;
@@ -27,12 +26,11 @@ export interface InfiniteScrollProps<
   TQuery,
   TVariables extends QueryVariables,
   TNode
-> {
+> extends HTMLAttributes<HTMLDivElement> {
   query: TypedDocumentNode<TQuery, TVariables>; // URQL query type
-  variables: TVariables;
-  renderItem: (item: TNode) => [JSX.Element, string | number];
+  variables: TVariables; // Variables to pass with the query
+  renderItem: (item: TNode) => [JSX.Element, string | number]; // 
   getConnection: (data: TQuery | undefined) => Connection<TNode> | undefined; // Function to extract connection from the data
-  className?: string;
 }
 
 export function InfiniteScroll<
@@ -44,7 +42,7 @@ export function InfiniteScroll<
   variables,
   renderItem,
   getConnection,
-  className,
+  ...rest
 }: InfiniteScrollProps<TQuery, TVariables, TNode>) {
   const [results, executeQuery] = useQuery({
     query: query,
@@ -57,7 +55,7 @@ export function InfiniteScroll<
     const afterCursor = connection?.pageInfo.endCursor;
 
     return (
-      <div className={className}>
+      <div {...rest}>
         {/* Render the first list */}
         {connection?.edges.map((edge) => {
           const [component, key] = renderItem(edge.node);

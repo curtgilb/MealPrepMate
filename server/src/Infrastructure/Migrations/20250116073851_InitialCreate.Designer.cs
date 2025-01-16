@@ -12,7 +12,7 @@ using Server.Infrastructure.Repository;
 namespace Server.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20241231025839_InitialCreate")]
+    [Migration("20250116073851_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -31,23 +31,14 @@ namespace Server.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("CookTime")
-                        .HasColumnType("integer");
+                    b.Property<bool>("CanMealPrep")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Directions")
                         .HasColumnType("text");
-
-                    b.Property<int?>("LeftoverFreezerLife")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("LeftoverFridgeLife")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("MarinateTime")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -56,9 +47,6 @@ namespace Server.Infrastructure.Migrations
 
                     b.Property<string>("Notes")
                         .HasColumnType("text");
-
-                    b.Property<int>("PrepTime")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Source")
                         .HasColumnType("text");
@@ -69,6 +57,37 @@ namespace Server.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Recipes");
+                });
+
+            modelBuilder.Entity("Server.Domain.Recipe.Recipe", b =>
+                {
+                    b.OwnsOne("Server.Domain.Recipe.LeftoverStorageLife", "StorageLife", b1 =>
+                        {
+                            b1.Property<Guid>("RecipeId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int?>("FreezerLife")
+                                .HasColumnType("integer");
+
+                            b1.Property<int?>("FridgeLife")
+                                .HasColumnType("integer");
+
+                            b1.Property<int?>("LeftoverFreezerLife")
+                                .HasColumnType("integer");
+
+                            b1.Property<int?>("LeftoverFridgeLife")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("RecipeId");
+
+                            b1.ToTable("Recipes");
+
+                            b1.WithOwner()
+                                .HasForeignKey("RecipeId");
+                        });
+
+                    b.Navigation("StorageLife")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

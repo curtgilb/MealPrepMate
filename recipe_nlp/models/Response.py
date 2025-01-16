@@ -8,7 +8,7 @@ class IngredientAmount(BaseModel):
     quantity: QuantityAnnotation
     max_quantity: Optional[QuantityAnnotation]
     amount_text: Annotation
-    unit: Annotation
+    unit: Optional[Annotation]
 
 
 class CompositeIngredientAmount(BaseModel):
