@@ -1,6 +1,5 @@
 import 'dotenv/config';
 
-import { z } from 'zod';
 
 import {
     RecipeKeeperTransformer
@@ -21,8 +20,8 @@ const recipes = await recipeKeeper.transform({
 for (const recipe of recipes) {
   await createRecipe(recipe.getRecipe(true));
 }
-/Users/curtgilbert/MealPrepMate/server/data/RecipeKeeper.zip
-C:\\Users\\cgilb\\Desktop\\RecipeKeeper_20241010_135410.zip
+// /Users/curtgilbert/MealPrepMate/server/data/RecipeKeeper.zip
+// C:\\Users\\cgilb\\Desktop\\RecipeKeeper_20241010_135410.zip
 
 // const test = { title: undefined, numbers: -2 };
 

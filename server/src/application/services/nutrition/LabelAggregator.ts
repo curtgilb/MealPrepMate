@@ -87,13 +87,15 @@ export class LabelAggregator {
       });
     });
 
-    const aggLabel = await this.db.aggregateLabel.findUniqueOrThrow({
+    const aggLabel = await this.db.aggregateLabel.findUnique({
       where: { recipeId: this.recipeId },
     });
 
-    await this.db.aggLabelNutrient.deleteMany({
-      where: { aggLabelId: aggLabel.id },
-    });
+    if (aggLabel) {
+      await this.db.aggLabelNutrient.deleteMany({
+        where: { aggLabelId: aggLabel.id },
+      });
+    }
 
     return await this.db.aggregateLabel.upsert({
       where: { recipeId: this.recipeId },
