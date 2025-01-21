@@ -1,6 +1,11 @@
 namespace Server.Domain;
 public abstract class Entity : IEquatable<Entity>
 {
+    // private readonly List<IDomainEvent> _domainEvents = [];
+
+    // public List<IDomainEvent> DomainEvents => [.. _domainEvents];
+
+
     public Guid Id { get; private init; }
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
@@ -9,6 +14,16 @@ public abstract class Entity : IEquatable<Entity>
     {
         Id = id ?? new Guid();
     }
+
+    // public void ClearDomainEvents()
+    // {
+    //     _domainEvents.Clear();
+    // }
+
+    // public void Raise(IDomainEvent domainEvent)
+    // {
+    //     _domainEvents.Add(domainEvent);
+    // }
 
     public override bool Equals(object? obj)
     {

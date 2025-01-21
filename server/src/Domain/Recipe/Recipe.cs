@@ -4,7 +4,7 @@ public sealed class Recipe : Entity
 {
     private Recipe() : base(Guid.NewGuid()) { }
 
-    public Recipe(Guid id, string name, string? source, bool canMealPrep, string? directions, string notes, LeftoverStorageLife storageLife)
+    public Recipe(Guid id, string name, string? source, bool canMealPrep, string? directions, string notes, LeftoverStorageLife storageLife, List<Tag> tags)
         : base(id)
     {
         Name = name;
@@ -13,9 +13,10 @@ public sealed class Recipe : Entity
         Directions = directions;
         Notes = notes;
         StorageLife = storageLife;
+        Tags = tags;
     }
 
-    public string Name { get; private set; }
+    public  string  Name { get; private set; }
     public string? Source { get; private set; }
     public bool CanMealPrep { get; private set; }
     public string? Directions { get; private set; }

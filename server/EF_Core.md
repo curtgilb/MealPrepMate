@@ -250,3 +250,10 @@ internal class LineItemConfiguration : IEntityTypeConfiguration<LineItem>
 
 
 ```
+
+
+IN the domain layer with each entity, defined an interface for each repository. Implementations is in the infrastracture layer.
+
+Create a abstract class of repository in the infrastructure layer, generic is the Entity Type, which must be an entity.
+
+In the infrastructure layer

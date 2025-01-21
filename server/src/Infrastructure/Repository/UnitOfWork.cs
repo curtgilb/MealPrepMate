@@ -1,6 +1,7 @@
-using Server.Application.Repository;
+using Server.Application.Abstractions.Repository;
 namespace Server.Infrastructure.Repository;
 using Microsoft.EntityFrameworkCore;
+using Server.Domain;
 
 public class UnitOfWork : IUnitOfWork
 {
@@ -14,7 +15,7 @@ public class UnitOfWork : IUnitOfWork
         _repositories = new Dictionary<Type, object>();
     }
 
-    public IRepository<TEntity> Repository<TEntity>() where TEntity : class
+    public IRepository<TEntity> Repository<TEntity>() where TEntity : Entity
     {
         var type = typeof(TEntity);
         if (!_repositories.ContainsKey(type))

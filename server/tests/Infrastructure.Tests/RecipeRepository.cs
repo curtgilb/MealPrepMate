@@ -1,6 +1,6 @@
 namespace Infrastructure.Tests;
 
-using Server.Application.Repository;
+using Server.Application.Abstractions.Repository;
 using Server.Infrastructure.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,9 +22,11 @@ public class RecipeRepositoryTests
 
     [Fact]
     public async Task Test1()
+
     {
-        var recipe = new Recipe(new Guid(), "Test Recipe", "Test Source", new Time(10), new Time(20), new Time(30), "Test Directions", "Test Notes", 5, 10);
-        await _repository.AddAsync(recipe);
+        var tags = new List<Tag> { Tag.Create("Lunch", TagType.Cuisine), Tag.Create("Lunch", TagType.Cuisine) };
+        var recipe = new Recipe(new Guid(), "Hamburger", "https://downshiftology.com", true, "directions here", "Notes here", new LeftoverStorageLife(4, 90), tags );
+        await _repository.Add(recipe);
         await _iUnitOfWork.SaveChangesAsync();
 
     }
