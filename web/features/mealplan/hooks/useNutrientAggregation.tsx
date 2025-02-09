@@ -1,12 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
-import { CalcNutritionFunc } from '@/features/mealplan/hooks/useMealPlanNutrition';
-import { PlanServingsByDayResultData } from '@/features/mealplan/hooks/usePlanServings';
-import { MealPlanServingsFieldFragment } from '@/gql/graphql';
+import { CalcNutritionFunc } from "@/features/mealplan/hooks/useMealPlanNutrition";
+import { PlanServingsByDayResultData } from "@/features/mealplan/hooks/usePlanServings";
+import { MealPlanServingsFieldFragment } from "@/gql/graphql";
 
 interface NutrientAggregationProps {
   servingsByDay: PlanServingsByDayResultData["groupedByDay"];
-
   calculateNutrition: CalcNutritionFunc;
 }
 

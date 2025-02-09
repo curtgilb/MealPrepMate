@@ -70,7 +70,6 @@ export function useMealPlanNutrition(
   const [result] = useQuery({
     query: getMealPlanRecipeNutrition,
     variables: { mealPlanRecipeId: id },
-    requestPolicy: "cache-first",
   });
 
   const { data } = result;

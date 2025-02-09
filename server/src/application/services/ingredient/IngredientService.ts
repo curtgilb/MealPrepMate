@@ -23,6 +23,10 @@ async function getIngredient(id: string, query?: IngredientQuery) {
   });
 }
 
+async function getTotalCount() {
+  return await db.ingredient.count();
+}
+
 async function getIngredients(
   search: string | undefined,
   query?: IngredientQuery
@@ -54,7 +58,9 @@ async function createIngredient(
       name: ingredient.name,
       storageInstructions: ingredient.storageInstructions,
       alternateNames: ingredient.alternateNames ?? undefined,
-      category: { connect: { id: ingredient.categoryId } },
+      category: ingredient?.categoryId
+        ? { connect: { id: ingredient.categoryId } }
+        : undefined,
       expirationRule: ingredient.expirationRuleId
         ? { connect: { id: ingredient.expirationRuleId } }
         : undefined,
@@ -173,4 +179,8 @@ async function connectIngredientToExpirationRule(
   });
 }
 
-export { connectIngredientToExpirationRule, getIngredientMaxFreshness };
+export {
+  connectIngredientToExpirationRule,
+  getIngredientMaxFreshness,
+  getTotalCount,
+};

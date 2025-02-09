@@ -2,6 +2,7 @@
 import { cn } from "@/lib/utils";
 import {
   Apple,
+  House,
   Library,
   ReceiptText,
   Target,
@@ -18,6 +19,11 @@ import {
 } from "@/components/ui/tooltip";
 
 export const navigationLinks = [
+  {
+    title: "Home",
+    icon: <House className="h-5 w-5 shrink-0" />,
+    link: "/",
+  },
   {
     title: "Meal Plans",
     icon: <UtensilsCrossed className="h-5 w-5 shrink-0" />,
@@ -81,7 +87,8 @@ interface NavLink {
 
 function NavigationItem({ title, icon, link, collapsed }: NavLink) {
   const pathName = usePathname();
-  const activeLink = pathName.startsWith(link);
+  const activeLink =
+    pathName === link || (link !== "/" && pathName.startsWith(link));
   const toolTipProps = collapsed ? {} : { open: false };
   return (
     <TooltipProvider>

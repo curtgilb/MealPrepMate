@@ -1,8 +1,8 @@
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction } from "react";
 
-import { ProgramticModalDrawer } from '@/components/ModalDrawerProgramatic';
-import { ServingForm } from '@/features/mealplan/components/servings/ServingForm';
-import { MealPlanServingsFieldFragment } from '@/gql/graphql';
+import { ProgramticModalDrawer } from "@/components/ModalDrawerProgramatic";
+import { AddServingForm } from "@/features/mealplan/components/servings/AddServingForm";
+import { MealPlanServingsFieldFragment } from "@/gql/graphql";
 
 interface MealPlanServingDialog {
   serving: MealPlanServingsFieldFragment | null | undefined;
@@ -20,7 +20,7 @@ export function MealPlanServingDialog({
       title={serving ? "Edit serving" : "Add serving"}
       open={isOpen}
       setOpen={setOpen}
-      content={<ServingForm serving={serving} setOpen={setOpen} />}
+      content={<AddServingForm serving={serving} setOpen={setOpen} />}
     />
   );
 }

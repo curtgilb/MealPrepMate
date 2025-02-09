@@ -13,18 +13,25 @@ export function MealRecipeList({
   return (
     <div className="grid gap-y-4">
       {recipes?.map((recipe) => {
+        const primaryPhoto =
+          recipe.originalRecipe.photos?.find((photo) => photo.isPrimary) ??
+          recipe.originalRecipe.photos?.[0];
         return (
           <Card
-            vertical={false}
-            images={recipe.originalRecipe.photos.map((photo) => {
-              return {
-                id: photo.id,
-                url: `${process.env.NEXT_PUBLIC_STORAGE_URL}${photo.url}`,
-                altText: `Image of ${recipe.originalRecipe.name}`,
-              };
-            })}
+            key={recipe.id}
+            orientation="horizontal"
+            image={
+              primaryPhoto
+                ? {
+                    id: primaryPhoto.id,
+                    url: primaryPhoto.url,
+                    altText: recipe.originalRecipe.name,
+                  }
+                : undefined
+            }
             placeholderUrl="/placeholder_recipe.jpg"
-            imageGrid={false}
+            size="xs"
+            imageAspectRatio="sqaure"
             onClick={() => setRecipe(recipe)}
           >
             <div className="flex justify-between">

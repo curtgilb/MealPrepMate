@@ -63,6 +63,17 @@ async function tagIngredients<T extends boolean = false>(
     const bestUnitMatch = ingredient?.unit
       ? await db.measurementUnit.match(ingredient.unit)
       : undefined;
+    if (!bestIngredientMatch) {
+      console.log(
+        `No ingredient found for ${ingredient.name} in sentence: ${ingredient.sentence}`
+      );
+    }
+
+    if (!bestUnitMatch) {
+      console.log(
+        `No unit found for ${ingredient.unit} in sentence: ${ingredient.sentence}`
+      );
+    }
 
     if (onlyMatchingIds) {
       createInputIngredients.push({

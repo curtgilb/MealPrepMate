@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { TypedDocumentNode, useQuery } from "@urql/next";
 
 type BasicItemKeys<T> = {
-  [K in keyof T]: T[K] extends z.infer<typeof basicItemSchema> ? K : never;
+  [K in keyof T]: T[K] extends z.infer<typeof basicItemListSchema> ? K : never;
 }[keyof T] &
   string;
 
@@ -21,14 +21,14 @@ export interface CheckboxFilterProps<TQuery, TData> {
   name: BasicItemKeys<FilterValidationType>;
 }
 
-export const basicItemSchema = z
+export const basicItemListSchema = z
   .object({
     id: z.string(),
     label: z.string(),
   })
   .array();
 
-export type CheckboxFilterItem = z.infer<typeof basicItemSchema>;
+export type CheckboxFilterItem = z.infer<typeof basicItemListSchema>;
 
 export function CheckboxFilter<TQuery, TData>({
   query,

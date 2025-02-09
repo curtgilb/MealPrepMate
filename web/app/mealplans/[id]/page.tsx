@@ -22,6 +22,7 @@ export default function MealPlanPage() {
     query: mealPlanQuery,
     variables: { mealPlanId },
   });
+
   const [view, setView] = useState<ViewMode>("week");
   const { calculateNutrition } = useMealPlanNutrition(mealPlanId);
   const [focusedDay, setFocusedDay] = useState<number>(1);

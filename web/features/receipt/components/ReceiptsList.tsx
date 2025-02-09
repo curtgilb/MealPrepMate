@@ -79,7 +79,10 @@ export const columns: ColumnDef<
 ];
 
 export function ReceiptsList() {
-  const [result] = useQuery({ query: getReceiptsQuery });
+  const [result] = useQuery({
+    query: getReceiptsQuery,
+    requestPolicy: "network-only",
+  });
   const data = result?.data?.receipts.edges.map((node) => node.node) ?? [];
 
   return (

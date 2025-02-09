@@ -17,7 +17,7 @@ import { getCategoriesQuery } from "@/features/recipe/api/Category";
 import { getCoursesQuery } from "@/features/recipe/api/Course";
 import { getCuisinesQuery } from "@/features/recipe/api/Cuisine";
 import {
-  basicItemSchema,
+  basicItemListSchema,
   CheckboxFilter,
 } from "@/features/recipe/components/filters/CheckboxFilter";
 import {
@@ -45,9 +45,9 @@ interface RecipeFilterProps extends HTMLAttributes<HTMLDivElement> {
 
 const filterValidation = z.object({
   cookTime: numericalFilterSchema,
-  categoryIds: basicItemSchema,
-  courseIds: basicItemSchema,
-  cuisineIds: basicItemSchema,
+  categoryIds: basicItemListSchema,
+  courseIds: basicItemListSchema,
+  cuisineIds: basicItemListSchema,
   ingredientFilters: ingredientFilterValidation,
   ingredientFreshDays: numericalFilterSchema,
   isFavorite: z.boolean().nullish(),

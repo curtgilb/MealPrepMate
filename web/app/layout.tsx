@@ -44,7 +44,7 @@ export default function RootLayout({
 
     const client = createClient({
       url: process.env.NEXT_PUBLIC_CLIENT_API_URL ?? "",
-      // fetchOptions: { cache: "no-store" },
+      fetchOptions: { cache: "no-store" },
       exchanges: [
         devtoolsExchange,
         cacheExchange({
@@ -54,6 +54,8 @@ export default function RootLayout({
             PolygonCoordinate: (data) => null,
             BoundingBox: (data) => null,
             NutritionLabelNutrient: (data) => null,
+            NutrientGoal: (data) => null,
+            NutritionTargets: (data) => null,
           },
           // updates: {
           //   Mutation: {
@@ -155,7 +157,7 @@ export default function RootLayout({
           style={{
             ...sideBarSprings,
           }}
-          className="fixed z-30 top-[3.5rem] bottom-0 "
+          className="fixed z-30 top-[3.5rem] bottom-0"
         >
           <Navigation isCollapsed={isCollapsed} />
         </animated.aside>

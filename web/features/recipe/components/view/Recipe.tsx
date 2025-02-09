@@ -3,7 +3,7 @@ import { Pencil } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-import { SquareImage } from "@/components/images/SquareImage";
+import { FilledImage } from "@/components/images/FilledImage";
 import { RichTextContent } from "@/components/rich_text/RichTextContent";
 import { Button } from "@/components/ui/button";
 import { recipeIngredientFragment } from "@/features/recipe/api/RecipeIngredient";
@@ -49,10 +49,11 @@ export function Recipe({ recipe }: Recipe) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-[24rem_1fr] gap-x-24 gap-y-14">
-      <SquareImage
+      <FilledImage
         url={imageUrl}
         altText={`Image of ${recipe?.name}`}
-        targetSize={384}
+        rounded
+        targetSize="xl"
       />
 
       {/* Basic info */}

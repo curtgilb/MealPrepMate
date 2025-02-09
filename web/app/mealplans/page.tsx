@@ -41,7 +41,7 @@ export default function MealPlans() {
       </div>
       <InfiniteScroll
         query={getMealPlansQuery}
-        className="grid gap-4 grid-cols-autofit"
+        className="flex flex-flow gap-14 flex-wrap"
         variables={{}}
         renderItem={(
           mealPlan: GetMealPlansQuery["mealPlans"]["edges"][number]["node"]

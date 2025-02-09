@@ -6,19 +6,21 @@ interface MainRecipeSearchCardProps {
 }
 
 export function MainRecipeSearchCard({ recipe }: MainRecipeSearchCardProps) {
+  const primaryPhoto = recipe.photos.length > 0 ? recipe.photos[0] : undefined;
+
   return (
     <Card
       href={`/recipes/${recipe.id}`}
-      vertical={true}
-      images={recipe.photos.map((photo) => {
-        return {
-          id: photo.id,
-          url: `${process.env.NEXT_PUBLIC_STORAGE_URL}${photo.url}`,
-          altText: `Image of ${recipe.name}`,
-        };
-      })}
+      orientation="vertical"
+      image={
+        primaryPhoto && {
+          id: primaryPhoto.id,
+          url: primaryPhoto.url,
+          altText: recipe.name,
+        }
+      }
       placeholderUrl="/placeholder_recipe.jpg"
-      imageGrid={false}
+      size="md"
     >
       <div className="flex flex-col justify-between">
         <div>

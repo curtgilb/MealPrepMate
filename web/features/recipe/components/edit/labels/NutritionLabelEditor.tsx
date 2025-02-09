@@ -55,8 +55,6 @@ export const NutritionLabelEditor = forwardRef<
     groupId: selectedGroup === DEFAULT_GROUP_KEY ? undefined : selectedGroup,
   });
 
-  console.log("label", props.recipe?.nutritionLabels);
-
   useImperativeHandle(ref, () => ({
     async submit(postSubmit) {
       // Get the most current form data
@@ -74,7 +72,6 @@ export const NutritionLabelEditor = forwardRef<
             <Label htmlFor="ingredient_group">Ingredient Group</Label>
             <Select
               onValueChange={async (value) => {
-                console.log("Value changed");
                 await saveLabel().then((result) => {
                   if (result) {
                     setSelectedGroup(value);

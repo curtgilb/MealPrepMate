@@ -61,26 +61,47 @@ async function getIngredientPrices(
 }
 
 async function createPriceHistory(
-  price: CreatePriceHistoryInput,
+  price: CreatePriceHistoryInput | CreatePriceHistoryInput[],
   query?: IngredientPriceQuery
 ) {
-  return await db.ingredientPrice.create({
-    //@ts-ignore
-    data: {
-      ingredient: { connect: { id: price.ingredientId } },
-      date: price.date,
-      groceryStore: { connect: { id: price.groceryStoreId } },
-      price: price.price,
-      size: price.quantity,
-      unit: { connect: { id: price.unitId } },
-      pricePerUnit: price.pricePerUnit,
-      foodType: price.foodType,
-      receiptLine: price?.recieptLineId
-        ? { connect: { id: price.recieptLineId } }
-        : undefined,
-    },
-    ...query,
-  });
+  if (Array.isArray(price)) {
+    const data = price.map((p) => {
+      return {
+        ingredientId: p.ingredientId,
+        date: p.date,
+        groceryStoreId: p.groceryStoreId,
+        price: p.price,
+        size: p.quantity,
+        unitId: p.unitId,
+        pricePerUnit: p.pricePerUnit,
+        foodType: p.foodType,
+        receiptLineId: p.recieptLineId,
+      };
+    });
+
+    return await db.ingredientPrice.createMany({
+      data: data,
+      ...query,
+    });
+  } else {
+    return await db.ingredientPrice.create({
+      //@ts-ignore
+      data: {
+        ingredient: { connect: { id: price.ingredientId } },
+        date: price.date,
+        groceryStore: { connect: { id: price.groceryStoreId } },
+        price: price.price,
+        size: price.quantity,
+        unit: { connect: { id: price.unitId } },
+        pricePerUnit: price.pricePerUnit,
+        foodType: price.foodType,
+        receiptLine: price?.recieptLineId
+          ? { connect: { id: price.recieptLineId } }
+          : undefined,
+      },
+      ...query,
+    });
+  }
 }
 
 async function editPriceHistory(

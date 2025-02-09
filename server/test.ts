@@ -1,11 +1,11 @@
-import 'dotenv/config';
+import "dotenv/config";
 
-
-import {
-    RecipeKeeperTransformer
-} from '@/application/services/import/transformers/RecipeKeeperTransformer.js';
-import { createRecipe } from '@/application/services/recipe/RecipeService.js';
-import { createBuckets, nukeData, seedDb } from '@/seed/db_init.js';
+import { RecipeKeeperTransformer } from "@/application/services/import/transformers/RecipeKeeperTransformer.js";
+import { createRecipe } from "@/application/services/recipe/RecipeService.js";
+import { createBuckets, nukeData, seedDb } from "@/seed/db_init.js";
+import { db } from "@/infrastructure/repository/db.js";
+import { createPriceHistory } from "@/application/services/ingredient/IngredientPriceService.js";
+import { generateFakeIngredientPriceHistory } from "@/seed/seeders/IngredientPrice.js";
 
 await nukeData();
 await createBuckets();
@@ -18,8 +18,20 @@ const recipes = await recipeKeeper.transform({
 });
 
 for (const recipe of recipes) {
-  await createRecipe(recipe.getRecipe(true));
+  const final_recipe = recipe.getRecipe(true);
+
+  if (final_recipe.source?.startsWith("http") && final_recipe.nutrition) {
+    await createRecipe(final_recipe);
+  }
 }
+
+const ingredients = await db.ingredient.findMany();
+
+for (const ingredient of ingredients) {
+  const prices = generateFakeIngredientPriceHistory(ingredient.id);
+  await createPriceHistory(prices);
+}
+
 // /Users/curtgilbert/MealPrepMate/server/data/RecipeKeeper.zip
 // C:\\Users\\cgilb\\Desktop\\RecipeKeeper_20241010_135410.zip
 

@@ -1,19 +1,15 @@
 "use client";
-import { Search } from 'lucide-react';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Search } from "lucide-react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-import { InputWithIcon } from '@/components/ui/InputWithIcon';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-    MealPlanRecipeSearchCard
-} from '@/features/recipe/components/recipe_search/MealPlanRecipeSearchCard';
-import {
-    RecipeSearchResults
-} from '@/features/recipe/components/recipe_search/RecipeSearchResults';
-import { RecipeFilter } from '@/features/recipe/components/RecipeFilter';
-import { RecipeFilter as RecipeFilterInput } from '@/gql/graphql';
-import { useContainerHeight } from '@/hooks/useContainerHeight';
+import { InputWithIcon } from "@/components/ui/InputWithIcon";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MealPlanRecipeSearchCard } from "@/features/recipe/components/recipe_search/MealPlanRecipeSearchCard";
+import { RecipeSearchResults } from "@/features/recipe/components/recipe_search/RecipeSearchResults";
+import { RecipeFilter } from "@/features/recipe/components/RecipeFilter";
+import { RecipeFilter as RecipeFilterInput } from "@/gql/graphql";
+import { useContainerHeight } from "@/hooks/useContainerHeight";
 
 interface RecipeSearchProps {
   setRecipe: Dispatch<SetStateAction<string | null>>;
@@ -36,8 +32,8 @@ export function RecipeSearch({ setRecipe }: RecipeSearchProps) {
         </TabsTrigger>
       </TabsList>
       <TabsContent
-        className="grid grid-rows-[auto_1fr] h-[calc(100%-3rem)]"
         value="recipe"
+        className="grid grid-rows-[auto_1fr]  data-[state=active]:h-[calc(100%-2rem)]"
       >
         <InputWithIcon className="mt-8 mb-8" startIcon={Search} />
         <div className="overflow-hidden">
@@ -58,7 +54,11 @@ export function RecipeSearch({ setRecipe }: RecipeSearchProps) {
           </ScrollArea>
         </div>
       </TabsContent>
-      <TabsContent value="filter">
+
+      <TabsContent
+        value="filter"
+        className="grid grid-rows-[auto_1fr]  data-[state=active]:h-[calc(100%-2rem)]"
+      >
         <RecipeFilter filter={filter} setFilter={setFilter} />
       </TabsContent>
     </Tabs>

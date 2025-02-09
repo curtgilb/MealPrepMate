@@ -4,6 +4,7 @@ import {
   editIngredient,
   getIngredient,
   getIngredients,
+  getTotalCount,
   IngredientInput,
 } from "@/application/services/ingredient/IngredientService.js";
 import { builder } from "@/presentation/builder.js";
@@ -71,6 +72,12 @@ builder.queryFields((t) => ({
       return await getIngredient(args.ingredientId.id, query);
     },
   }),
+  allIngredients: t.prismaField({
+    type: ["Ingredient"],
+    resolve: async (query, root, args) => {
+      return await getIngredients(undefined, query);
+    },
+  }),
   ingredients: t.prismaConnection({
     type: "Ingredient",
     cursor: "id",
@@ -79,8 +86,10 @@ builder.queryFields((t) => ({
     args: {
       search: t.arg.string(),
     },
+    totalCount: async () => await getTotalCount(),
     resolve: async (query, root, args) => {
-      return await getIngredients(args.search ?? undefined, query);
+      const results = await getIngredients(args.search ?? undefined, query);
+      return results;
     },
   }),
   // groupedRecipeIngredients: t.field({

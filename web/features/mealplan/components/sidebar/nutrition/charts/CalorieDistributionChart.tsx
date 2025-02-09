@@ -95,7 +95,7 @@ export function WeekCalorieChart({ data, target }: WeekCalorieChartProps) {
           axisLine={false}
         />
 
-        <YAxis />
+        <YAxis tickLine={false} axisLine={false} tickMargin={10} />
 
         <Bar
           dataKey="carbs"

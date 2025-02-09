@@ -53,7 +53,7 @@ export function AddRecipe({ recipeId, setRecipe }: RecipeViewProps) {
   return (
     <div className="flex flex-col gap-2 h-[calc(100%-3rem)]">
       <div className="shrink-0">
-        <Button variant="link" onClick={() => setRecipe(null)}>
+        <Button className="p-0" variant="link" onClick={() => setRecipe(null)}>
           <ChevronLeft />
           Back to search results
         </Button>

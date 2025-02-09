@@ -75,9 +75,10 @@ async function getReceipt(id: string, query?: ReceiptQuery) {
 }
 
 async function getReceipts(query?: ReceiptQuery) {
-  return await db.receipt.findMany({
+  const result = await db.receipt.findMany({
     ...query,
   });
+  return result;
 }
 
 async function editReceipt(

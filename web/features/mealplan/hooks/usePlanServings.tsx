@@ -1,8 +1,11 @@
 "use client";
-import { getServingsQuery, mealServingsFragment } from '@/features/mealplan/api/MealPlanServings';
-import { getFragmentData } from '@/gql';
-import { Meal, MealPlanServingsFieldFragment } from '@/gql/graphql';
-import { useQuery } from '@urql/next';
+import {
+  getServingsQuery,
+  mealServingsFragment,
+} from "@/features/mealplan/api/MealPlanServings";
+import { getFragmentData } from "@/gql";
+import { Meal, MealPlanServingsFieldFragment } from "@/gql/graphql";
+import { useQuery } from "@urql/next";
 
 interface PlanServingsByDayProps {
   mealPlanId: string;
@@ -33,7 +36,6 @@ export function usePlanServings({
       mealPlanId,
       filter,
     },
-    requestPolicy: "cache-first",
   });
 
   const servings = getFragmentData(

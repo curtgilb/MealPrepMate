@@ -47,6 +47,7 @@ const getIngredientQuery = graphql(`
 const getIngredientsQuery = graphql(`
   query GetIngredients($search: String, $after: String, $first: Int) {
     ingredients(search: $search, after: $after, first: $first) {
+      totalCount
       pageInfo {
         endCursor
         hasNextPage
@@ -56,6 +57,27 @@ const getIngredientsQuery = graphql(`
           id
           name
         }
+      }
+    }
+  }
+`);
+
+const getAllIngredientsQuery = graphql(`
+  query GetAllIngredients {
+    allIngredients {
+      id
+      name
+      category {
+        id
+        name
+      }
+      expiration {
+        id
+        perishable
+        tableLife
+        fridgeLife
+        freezerLife
+        longestLife
       }
     }
   }
@@ -95,4 +117,5 @@ export {
   createIngredientMutation,
   deleteIngredientMutation,
   getIngredientsQuery,
+  getAllIngredientsQuery,
 };

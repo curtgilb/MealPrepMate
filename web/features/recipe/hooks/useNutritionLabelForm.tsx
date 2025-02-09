@@ -87,7 +87,6 @@ export function useNutritionLabelForm({
   function saveLabel() {
     return new Promise<boolean>((resolve) => {
       async function submit(values: NutritionFormValues) {
-        console.log("submit triggered");
         const filteredNutrients = values.nutrients
           .filter((nutrient) => nutrient.value > 0)
           .map((nutrient) => ({
@@ -105,7 +104,6 @@ export function useNutritionLabelForm({
           nutrients: filteredNutrients,
         };
 
-        console.log("input submitted", input);
         // create
         if (!label) {
           const result = await createLabel({ input });
@@ -119,9 +117,8 @@ export function useNutritionLabelForm({
         }
         resolve(false);
       }
-      console.log("errors: ", form.formState.errors);
+
       form.handleSubmit(submit, (e) => {
-        console.log(e);
         resolve(false);
       })();
     });

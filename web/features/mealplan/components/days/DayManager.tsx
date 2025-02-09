@@ -1,21 +1,19 @@
 "use client";
-import { useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
 
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { ViewMode } from '@/features/mealplan/components/controls/DayPicker';
-import {
-    MealPlanServingDialog
-} from '@/features/mealplan/components/servings/MealPlanServingDialog';
-import { ServingsContext } from '@/features/mealplan/contexts/ServingsContext';
-import { useMealPlanContext } from '@/features/mealplan/hooks/useMealPlanContext';
-import { useMealPlanRecipes } from '@/features/mealplan/hooks/useMealPlanRecipes';
-import { usePlanServings } from '@/features/mealplan/hooks/usePlanServings';
-import { MealPlanServingsFieldFragment } from '@/gql/graphql';
-import { useIdParam } from '@/hooks/use-id';
-import { useMediaQuery } from '@/hooks/use-media-query';
-import { cn } from '@/lib/utils';
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ViewMode } from "@/features/mealplan/components/controls/DayPicker";
+import { MealPlanServingDialog } from "@/features/mealplan/components/servings/MealPlanServingDialog";
+import { ServingsContext } from "@/features/mealplan/contexts/ServingsContext";
+import { useMealPlanContext } from "@/features/mealplan/hooks/useMealPlanContext";
+import { useMealPlanRecipes } from "@/features/mealplan/hooks/useMealPlanRecipes";
+import { usePlanServings } from "@/features/mealplan/hooks/usePlanServings";
+import { MealPlanServingsFieldFragment } from "@/gql/graphql";
+import { useIdParam } from "@/hooks/use-id";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { cn } from "@/lib/utils";
 
-import { MealPlanDay } from './MealPlanDay';
+import { MealPlanDay } from "./MealPlanDay";
 
 const courses = ["Breakfast", "Lunch", "Dinner", "Snacks"];
 
@@ -60,7 +58,7 @@ export function DayManager({ days, view }: DayManagerProps) {
 
   // Recipe and servings data
   // Lookup for serving provided the day range.
-  const { groupedByCourse } = usePlanServings({ mealPlanId, day });
+  const servings = usePlanServings({ mealPlanId, day });
 
   // Returns basic info about recipes on the plan.
   const recipes = useMealPlanRecipes(mealPlanId);
@@ -78,7 +76,7 @@ export function DayManager({ days, view }: DayManagerProps) {
             return (
               <MealPlanDay
                 isVerticalLayout={isVerticalLayout}
-                servings={groupedByCourse}
+                servings={servings}
                 key={dayNumber}
                 dayNumber={dayNumber}
                 recipeLookup={recipes}

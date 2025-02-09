@@ -1,28 +1,39 @@
 "use client";
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import { z } from 'zod';
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
-    Form, FormControl, FormField, FormItem, FormLabel, FormMessage
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
-    Select, SelectContent, SelectItem, SelectTrigger, SelectValue
-} from '@/components/ui/select';
-import { addServingMutation, editServingMutation } from '@/features/mealplan/api/MealPlanServings';
-import { useMealPlanContext } from '@/features/mealplan/hooks/useMealPlanContext';
-import { useServingsContext } from '@/features/mealplan/hooks/useServingsContext';
-import { Meal, MealPlanServingsFieldFragment } from '@/gql/graphql';
-import { useIdParam } from '@/hooks/use-id';
-import { toTitleCase } from '@/utils/utils';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@urql/next';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  addServingMutation,
+  editServingMutation,
+} from "@/features/mealplan/api/MealPlanServings";
+import { useMealPlanContext } from "@/features/mealplan/hooks/useMealPlanContext";
+import { useServingsContext } from "@/features/mealplan/hooks/useServingsContext";
+import { Meal, MealPlanServingsFieldFragment } from "@/gql/graphql";
+import { useIdParam } from "@/hooks/use-id";
+import { toTitleCase } from "@/utils/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@urql/next";
 
 interface AddServingDialogProps {
-  serving?: MealPlanServingsFieldFragment | null | undefined;
   setOpen: (value: boolean) => void;
 }
 
@@ -39,17 +50,13 @@ const MealPlanServingsSchema = z.object({
   servings: z.coerce.number().positive(),
 });
 
-export function ServingForm({ serving, setOpen }: AddServingDialogProps) {
+export function AddServingForm({ setOpen }: AddServingDialogProps) {
   const mealPlanId = useIdParam();
   const { calculateNutrition } = useMealPlanContext();
   const { selectedDay, allRecipes } = useServingsContext();
 
   // Mutations
-  const [{ fetching: addFetching }, addServing] =
-    useMutation(addServingMutation);
-  const [{ fetching: editFetching }, editServing] =
-    useMutation(editServingMutation);
-  const isFetching = addFetching || editFetching;
+  const [{ fetching }, addServing] = useMutation(addServingMutation);
 
   const form = useForm<z.infer<typeof MealPlanServingsSchema>>({
     resolver: zodResolver(MealPlanServingsSchema),
@@ -68,30 +75,18 @@ export function ServingForm({ serving, setOpen }: AddServingDialogProps) {
 
   function onSubmit(values: z.infer<typeof MealPlanServingsSchema>) {
     // Add new serving
-    if (!serving) {
-      addServing({
-        serving: {
-          mealPlanId: mealPlanId,
-          day: selectedDay,
-          meal: values.meal,
-          mealPlanRecipeId: values.mealPlanRecipeId,
-          servings: values.servings,
-        },
-      }).then(() => {
-        toast("Servings has been added to plan");
-        setOpen(false);
-      });
-    } else {
-      editServing({
-        id: serving.id,
-        serving: {
-          day: selectedDay,
-          servings: values.servings,
-          meal: values.meal,
-        },
-      });
-    }
-    // Edit existing serving
+    addServing({
+      serving: {
+        mealPlanId: mealPlanId,
+        day: selectedDay,
+        meal: values.meal,
+        mealPlanRecipeId: values.mealPlanRecipeId,
+        servings: values.servings,
+      },
+    }).then(() => {
+      toast("Servings has been added to plan");
+      setOpen(false);
+    });
   }
 
   return (
@@ -179,7 +174,7 @@ export function ServingForm({ serving, setOpen }: AddServingDialogProps) {
             </FormItem>
           )}
         />
-        <Button className="mt-4" type="submit" disabled={isFetching}>
+        <Button className="mt-4" type="submit" disabled={fetching}>
           Add serving
         </Button>
       </form>

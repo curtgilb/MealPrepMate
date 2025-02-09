@@ -14,18 +14,20 @@ export function MealPlanRecipeSearchCard({
   onClick,
   children,
 }: MealPlanRecipeSearchCardProps) {
+  const primaryPhoto =
+    recipe.photos?.find((photo) => photo.isPrimary) ?? recipe.photos?.[0];
+
   return (
     <Card
-      vertical={false}
-      images={recipe.photos.map((photo) => {
-        return {
-          id: photo.id,
-          url: `${process.env.NEXT_PUBLIC_STORAGE_URL}${photo.url}`,
-          altText: `Image of ${recipe.name}`,
-        };
-      })}
+      orientation="horizontal"
+      image={
+        primaryPhoto
+          ? { id: primaryPhoto.id, url: primaryPhoto.url, altText: recipe.name }
+          : undefined
+      }
       placeholderUrl="/placeholder_recipe.jpg"
-      imageGrid={false}
+      imageAspectRatio="sqaure"
+      size="sm"
       onClick={() => onClick(recipe.id)}
     >
       <div className="flex justify-between">

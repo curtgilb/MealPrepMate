@@ -1,12 +1,14 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
 import {
-    basicPlanRecipeFragment, getBasicPlanRecipeInfo
-} from '@/features/mealplan/api/MealPlanRecipe';
-import { getFragmentData } from '@/gql';
-import { BasicPlanRecipeFieldsFragment } from '@/gql/graphql';
-import { useQuery } from '@urql/next';
+  basicPlanRecipeFragment,
+  getBasicPlanRecipeInfo,
+} from "@/features/mealplan/api/MealPlanRecipe";
+import { getFragmentData } from "@/gql";
+import { BasicPlanRecipeFieldsFragment } from "@/gql/graphql";
+import { useQuery } from "@urql/next";
 
+// MealPlanRecipeID -> Fragment
 export type UseMealPlanRecipesResult = Record<
   string,
   BasicPlanRecipeFieldsFragment
