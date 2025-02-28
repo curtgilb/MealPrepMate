@@ -1,27 +1,26 @@
+"use client";
+import { useMemo, useState } from "react";
+
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { MealPlan } from "@/contexts/MealPlanContext";
+import { ViewMode } from "@/features/mealplan/components/controls/DayPicker";
+import { MealPlanServingDialog } from "@/features/mealplan/components/servings/MealPlanServingDialog";
+import { ServingsContext } from "@/features/mealplan/contexts/ServingsContext";
+import { useMealPlanContext } from "@/features/mealplan/hooks/useMealPlanContext";
+import { useMealPlanRecipes } from "@/features/mealplan/hooks/useMealPlanRecipes";
+import { usePlanServings } from "@/features/mealplan/hooks/usePlanServings";
 import { MealPlanServingsFieldFragment } from "@/gql/graphql";
-import { DisplayMode } from "@/app/mealplans/[id]/page";
-import { MealPlanServings } from "@/contexts/ServingsContext";
-import { useContext, useMemo } from "react";
-import { PlanMode } from "../controls/ModeDropdown";
-import { CookingDay } from "./CookingDay";
-import { PlanDayProps } from "./DayInterface";
-import { MealPlanDay } from "./MealPlanDay";
-import { NutritionDay } from "./NutritionDay";
-import { ShoppingDay } from "./ShoppingDay";
-import { useRecipeLabelLookup } from "@/hooks/use-recipe-label-lookup";
-import useMeasure from "react-use-measure";
+import { useIdParam } from "@/hooks/use-id";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/utils";
+
+import { MealPlanDay } from "./MealPlanDay";
 
 const courses = ["Breakfast", "Lunch", "Dinner", "Snacks"];
 
 // Aggregate days by day, then by course
 interface DayManagerProps {
   days: number;
-  display: DisplayMode;
-  planMode: PlanMode;
+  view: ViewMode;
 }
 
 export type ServingsLookup = Map<
@@ -29,67 +28,80 @@ export type ServingsLookup = Map<
   Map<string, MealPlanServingsFieldFragment[]> //Course, servings
 >;
 
-export function DayManager({ days, planMode }: DayManagerProps) {
-  const isVerticalLayout = useMediaQuery("(768px <= width <= 1440px)");
-  const [ref, bounds] = useMeasure();
-  const week = Math.ceil(days / 7);
-  const mealServings = useContext(MealPlanServings);
-  const servingsByMeal = useMemo(() => {
-    return mealServings?.reduce((acc, cur) => {
-      const day = acc.get(cur.day);
-      if (!day) {
-        acc.set(cur.day, new Map<string, MealPlanServingsFieldFragment[]>());
-      }
-      let servings = acc.get(cur.day)?.get(cur.meal);
+export function DayManager({ days, view }: DayManagerProps) {
+  const mealPlanId = useIdParam();
+  const { day, calculateNutrition } = useMealPlanContext();
 
-      if (!servings) {
-        acc.get(cur.day)?.set(cur.meal, []);
-      }
+  // Serving Dialog
+  const [selectedServing, setServing] = useState<{
+    day: number;
+    serving: MealPlanServingsFieldFragment | null;
+  } | null>(null);
 
-      servings = acc.get(cur.day)?.get(cur.meal);
-      if (servings) {
-        servings.push(cur);
-      }
-      return acc;
-    }, new Map<number, Map<string, MealPlanServingsFieldFragment[]>>());
-  }, [mealServings]);
+  const [openDialog, setDialogStatus] = useState<boolean>(false);
 
-  const dayTypes: Record<PlanMode, React.FC<PlanDayProps>> = {
-    meal_planning: MealPlanDay,
-    shopping: ShoppingDay,
-    nutrition: NutritionDay,
-    cooking: CookingDay,
-  };
-  const Day = dayTypes[planMode];
-  const size = isVerticalLayout
-    ? { height: bounds.height }
-    : { width: bounds.width };
+  // Day card configuration and orientation
+
+  const singleDay = typeof day === "number";
+  const isXlScreen = useMediaQuery("(min-width: 1440px)");
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
+  const isVerticalLayout = useMemo(
+    () => isMobile || (isXlScreen && !singleDay),
+    [isMobile, isXlScreen, singleDay]
+  );
+
+  const daysToRender = useMemo(() => {
+    if (typeof day === "number") return [day];
+    return Array.from({ length: 7 }, (_, i) => day.minDay + i);
+  }, [day]);
+
+  // Recipe and servings data
+  // Lookup for serving provided the day range.
+  const servings = usePlanServings({ mealPlanId, day });
+
+  // Returns basic info about recipes on the plan.
+  const recipes = useMealPlanRecipes(mealPlanId);
 
   return (
-    <div ref={ref} className="grow w-full h-full">
-      <ScrollArea style={size}>
+    <div className="grow w-full h-full">
+      <ScrollArea>
         <div
           className={cn(
             "flex w-full h-full gap-6 items-center justify-center",
-            isVerticalLayout ? "flex-col" : "flex-row"
+            isVerticalLayout ? "flex-row" : "flex-col"
           )}
         >
-          {[...Array(7)].map((item, index) => {
-            const displayNumber = index + 1;
-            const dayNumber = (week - 1) * 7 + displayNumber;
+          {daysToRender.map((dayNumber) => {
             return (
-              <Day
+              <MealPlanDay
                 isVerticalLayout={isVerticalLayout}
+                servings={servings}
                 key={dayNumber}
                 dayNumber={dayNumber}
-                displayNumber={displayNumber}
-                servingsByMeal={servingsByMeal}
+                recipeLookup={recipes}
+                openDialog={(day, serving) => {
+                  setServing({ day, serving });
+                  setDialogStatus(true);
+                }}
               />
             );
           })}
         </div>
-        <ScrollBar orientation={isVerticalLayout ? "vertical" : "horizontal"} />
+        <ScrollBar orientation={isVerticalLayout ? "horizontal" : "vertical"} />
       </ScrollArea>
+      <ServingsContext.Provider
+        value={{
+          selectedDay: selectedServing?.day ?? 0,
+          allRecipes: Object.values(recipes ?? {}),
+        }}
+      >
+        <MealPlanServingDialog
+          serving={selectedServing?.serving}
+          isOpen={openDialog}
+          setOpen={setDialogStatus}
+        />
+      </ServingsContext.Provider>
     </div>
   );
 }

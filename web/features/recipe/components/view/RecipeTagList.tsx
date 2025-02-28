@@ -1,20 +1,24 @@
 import { toTitleCase } from "@/utils/utils";
 
 interface RecipeTagListProps {
-  tags: { id: string; name: string }[];
+  tags: ({ id: string; name: string } | undefined)[];
 }
 
 export function RecipeTagList({ tags }: RecipeTagListProps) {
   return (
-    <ul className="flex gap-2 text-sm">
-      {tags.map((tag) => (
-        <li
-          className="bg-primary text-primary-foreground px-2 py-0.5 rounded-md"
-          key={tag.id}
-        >
-          {toTitleCase(tag.name)}
-        </li>
-      ))}
-    </ul>
+    tags && (
+      <ul className="flex gap-2 text-sm mt-2 flex-wrap">
+        {tags
+          ?.filter((tag) => tag)
+          .map((tag) => (
+            <li
+              className="bg-secondary text-secondary-foreground px-2 py-0.5 rounded-md"
+              key={tag?.id}
+            >
+              {toTitleCase(tag?.name)}
+            </li>
+          ))}
+      </ul>
+    )
   );
 }

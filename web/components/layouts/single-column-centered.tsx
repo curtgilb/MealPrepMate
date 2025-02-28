@@ -3,6 +3,7 @@ import React from "react";
 
 interface SingleColumnCenteredProps
   extends React.HTMLAttributes<HTMLDivElement> {
+  condensed?: boolean;
   locked?: boolean;
   children: React.ReactNode;
 }
@@ -10,15 +11,17 @@ interface SingleColumnCenteredProps
 export default function SingleColumnCentered({
   locked = false,
   children,
+  condensed,
   className,
   ...rest
 }: SingleColumnCenteredProps) {
   return (
     <div
       className={cn(
-        "max-w-screen-2xl w-full px-8 pt-6 mx-auto pb-8",
+        "max-w-screen-2xl w-full py-6 mx-auto mb-14 px-6 2xl:px-0",
         {
-          "h-main-full pb-0 overflow-hidden": locked,
+          "h-main-full overflow-hidden mb-0": locked,
+          "max-w-screen-xl": condensed,
         },
         className
       )}

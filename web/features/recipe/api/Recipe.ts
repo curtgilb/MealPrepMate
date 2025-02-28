@@ -1,100 +1,123 @@
 import { graphql } from "@/gql";
 
-const getRecipeQuery = graphql(`
-  query getRecipe($id: String!) {
-    recipe(recipeId: $id) {
+const recipeFragment = graphql(`
+  fragment RecipeFields on Recipe {
+    id
+    name
+    category {
       id
       name
-      category {
+    }
+    cuisine {
+      id
+      name
+    }
+    cookTime
+    course {
+      id
+      name
+    }
+    directions
+    leftoverFridgeLife
+    leftoverFreezerLife
+    marinadeTime
+    ingredientText
+    verified
+    notes
+    photos {
+      id
+      isPrimary
+      url
+    }
+    prepTime
+    source
+    ingredientGroups {
+      id
+      name
+    }
+    ingredients {
+      ...RecipeIngredientFields
+    }
+    nutritionLabels {
+      ...NutritionLabelFields
+    }
+    aggregateLabel {
+      id
+      alcohol
+      servings
+      totalCalories
+      carbs
+      fat
+      protein
+      servingSize
+      servingSizeUnit {
         id
         name
+        symbol
       }
-      cuisine {
+      nutrients {
         id
-        name
-      }
-      cookTime
-      course {
-        id
-        name
-      }
-      directions
-      leftoverFridgeLife
-      leftoverFreezerLife
-      marinadeTime
-      totalTime
-      verified
-      notes
-      photos {
-        id
-        isPrimary
-        url
-      }
-      prepTime
-      source
-      ingredients {
-        ...RecipeIngredientFragment
-      }
-      aggregateLabel {
-        id
-        alcohol
-        servings
-        totalCalories
-        carbs
-        fat
-        protein
-        servingSize
-        servingSizeUnit {
+        value
+        nutrient {
           id
-          name
-          symbol
-        }
-        nutrients {
-          id
-          value
-          perServing
-          nutrient {
-            id
-          }
         }
       }
     }
   }
 `);
 
-// const createRecipeMutation = graphql(`
-// mutation createRecipe()
-//   `);
+const createRecipeMutation = graphql(`
+  mutation createRecipe($input: RecipeInput!) {
+    createRecipe(recipe: $input) {
+      ...RecipeFields
+    }
+  }
+`);
+
+const getRecipeQuery = graphql(`
+  query getRecipe($id: ID!) {
+    recipe(recipeId: $id) {
+      ...RecipeFields
+    }
+  }
+`);
+
+const editRecipeMutation = graphql(`
+  mutation editRecipe($recipe: RecipeInput!, $id: ID!) {
+    editRecipe(recipeId: $id, recipe: $recipe) {
+      ...RecipeFields
+    }
+  }
+`);
 
 const getRecipeBaiscInfo = graphql(`
-  query getRecipeBaiscInfo($id: String!) {
+  query getRecipeBaiscInfo($id: ID!) {
     recipe(recipeId: $id) {
       id
       name
-      category {
-        id
-        name
-      }
-      cuisine {
-        id
-        name
-      }
       cookTime
-      course {
-        id
-        name
-      }
       directions
       leftoverFridgeLife
       leftoverFreezerLife
       marinadeTime
-      totalTime
       verified
+      ingredients {
+        ...RecipeIngredientFields
+      }
       notes
       photos {
         id
         isPrimary
         url
+      }
+      aggregateLabel {
+        id
+        servings
+        totalCalories
+        protein
+        fat
+        carbs
+        alcohol
       }
       prepTime
       source
@@ -103,7 +126,7 @@ const getRecipeBaiscInfo = graphql(`
 `);
 
 const getRecipeLabels = graphql(`
-  query getRecipeLabels($id: String!) {
+  query getRecipeLabels($id: ID!) {
     recipe(recipeId: $id) {
       id
       nutritionLabels {
@@ -163,22 +186,30 @@ const recipeSearchFragment = graphql(`
   }
 `);
 
-const searchRecipes = graphql(`
-  query searchRecipes($filters: RecipeFilter, $pagination: OffsetPagination!) {
-    recipes(filter: $filters, pagination: $pagination) {
-      itemsRemaining
-      nextOffset
-      recipes {
-        ...RecipeSearchFields
+const searchRecipesQuery = graphql(`
+  query searchRecipes($filters: RecipeFilter!, $after: String, $first: Int) {
+    recipes(filter: $filters, after: $after, first: $first) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          ...RecipeSearchFields
+        }
       }
     }
   }
 `);
 
 export {
+  createRecipeMutation,
   getRecipeQuery,
   getRecipeBaiscInfo,
   getRecipeLabels,
   recipeSearchFragment,
-  searchRecipes,
+  searchRecipesQuery,
+  recipeFragment,
+  editRecipeMutation,
 };

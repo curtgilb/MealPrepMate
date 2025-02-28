@@ -7,6 +7,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toTitleCase } from "@/utils/utils";
+import { cn } from "@/lib/utils";
 
 type EnumType = { [s: number]: string };
 
@@ -15,6 +16,7 @@ interface EnumSelectProps<T extends EnumType> {
   value: T[keyof T];
   onChange: (value: T[keyof T]) => void;
   placeholder?: string;
+  className?: string;
 }
 
 export function EnumSelect<T extends EnumType>({
@@ -22,6 +24,7 @@ export function EnumSelect<T extends EnumType>({
   value,
   onChange,
   placeholder = "Select an option",
+  className,
 }: EnumSelectProps<T>) {
   const enumValues = Object.values(enumObject);
 
@@ -30,7 +33,7 @@ export function EnumSelect<T extends EnumType>({
       value={value as string}
       onValueChange={(v) => onChange(v as T[keyof T])}
     >
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className={cn("min-w-max h-8 text-sm", className)}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

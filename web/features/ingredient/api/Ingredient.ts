@@ -1,38 +1,83 @@
 import { graphql } from "@/gql";
 
-const getIngredientQuery = graphql(`
-  query GetIngredient($id: String!) {
-    ingredient(ingredientId: $id) {
+const ingredientFieldsFragment = graphql(`
+  fragment IngredientFields on Ingredient {
+    id
+    name
+    alternateNames
+    storageInstructions
+    category {
       id
       name
-      alternateNames
-      storageInstructions
+    }
+    expiration {
+      ...ExpirationRuleFields
+    }
+    priceHistory {
+      id
+      date
+      foodType
+      groceryStore {
+        id
+        name
+      }
+      price
+      pricePerUnit
+      quantity
+      unit {
+        id
+        name
+        symbol
+        conversionName
+        measurementSystem
+        type
+      }
+    }
+  }
+`);
+
+const getIngredientQuery = graphql(`
+  query GetIngredient($id: ID!) {
+    ingredient(ingredientId: $id) {
+      ...IngredientFields
+    }
+  }
+`);
+
+const getIngredientsQuery = graphql(`
+  query GetIngredients($search: String, $after: String, $first: Int) {
+    ingredients(search: $search, after: $after, first: $first) {
+      totalCount
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+      edges {
+        node {
+          id
+          name
+        }
+      }
+    }
+  }
+`);
+
+const getAllIngredientsQuery = graphql(`
+  query GetAllIngredients {
+    allIngredients {
+      id
+      name
       category {
         id
         name
       }
       expiration {
-        ...ExpirationRuleFields
-      }
-      priceHistory {
         id
-        date
-        foodType
-        groceryStore {
-          id
-          name
-        }
-        price
-        pricePerUnit
-        quantity
-        unit {
-          id
-          name
-          symbol
-          conversionName
-          measurementSystem
-          type
-        }
+        perishable
+        tableLife
+        fridgeLife
+        freezerLife
+        longestLife
       }
     }
   }
@@ -40,24 +85,24 @@ const getIngredientQuery = graphql(`
 
 const editIngredientMutation = graphql(
   `
-    mutation EditIngredient($input: EditIngredientInput!) {
-      editIngredient(ingredient: $input) {
-        id
+    mutation EditIngredient($id: ID!, $input: IngredientInput!) {
+      editIngredient(id: $id, ingredient: $input) {
+        ...IngredientFields
       }
     }
   `
 );
 
 const createIngredientMutation = graphql(`
-  mutation CreateIngredient($input: CreateIngredientInput!) {
+  mutation CreateIngredient($input: IngredientInput!) {
     createIngredient(ingredient: $input) {
-      id
+      ...IngredientFields
     }
   }
 `);
 
 const deleteIngredientMutation = graphql(`
-  mutation deleteIngredient($id: String!) {
+  mutation deleteIngredient($id: ID!) {
     deleteIngredient(ingredientId: $id) {
       message
       success
@@ -66,8 +111,11 @@ const deleteIngredientMutation = graphql(`
 `);
 
 export {
+  ingredientFieldsFragment,
   getIngredientQuery,
   editIngredientMutation,
   createIngredientMutation,
   deleteIngredientMutation,
+  getIngredientsQuery,
+  getAllIngredientsQuery,
 };

@@ -1,0 +1,33 @@
+﻿ID,Name,Lookup Names,Symbol,Conversion Name,Type,system
+e962d622-d826-43da-bb0b-2bfcf67f8ca1,tablespoon,"tablespoons, tbsp.",Tbsp,tablespoon,volume,imperial
+b5193536-0b4d-48de-bb8f-92730d95080e,teaspoon,"teaspoon, teaspoons, tsp, tsp.",tsp,teaspoon,volume,imperial
+c076922f-231c-4dc9-bab9-da8e34151f34,cup,"cup, cups, c, c.",c,cup,volume,imperial
+4b341344-ef37-4dc5-bb90-da9f372189af,quart,"quart, quarts, qts, qt, qt.",qt,qt,volume,imperial
+f2450278-8f35-4e63-809e-dbd967d98d9d,fluid ounce,"fl oz, fl. Oz,",fl oz,fl oz,volume,imperial
+06b8591e-95c8-448a-b260-b8d26cfa1904,pint,"pt, pt.,",pt,pint,volume,imperial
+e2de942f-4eee-4322-bd6d-c9a029e4bad8,gallon,,gal,gallon,volume,imperial
+a79eb9d0-97ad-4c80-9f7f-763e09f0578f,liter,,L,l,volume,metric
+8cd647fe-c50b-4d9d-a822-5f82d6012c10,mililiter,,ml,ml,volume,metric
+c30a59ae-53e4-4013-a956-16badaf682db,ounce,,oz,oz,weight,imperial
+280c5f5c-39c9-4142-9523-ab8b91b24ef1,pound,,lb,lb,weight,imperial
+0cb9dd54-c101-4ae5-a124-fda86aa2a415,gram,,g,g,weight,metric
+dac383d1-955b-4328-971d-3ef6c5b0bced,kilogram,,kg,kg,weight,metric
+0ebfaf8c-e56a-444f-9392-d0e116080bcf,miligram,,mg,mg,weight,metric
+fda880a2-c717-468b-b300-1d652ab023e4,microgram,,μg,μg,weight,metric
+8a2a537d-6316-4b2e-9a4e-762a40863ee8,unit,,,,count,
+8429ccd0-9e9a-48d3-a41b-c8a2c0f70918,dozen,,,,count,
+5a1c87ed-31e6-4579-af1a-1743a79fe84e,dash,,,,count,
+c116c1c0-d500-4736-8cfe-1bafe4dd7681,pinch,,,,count,
+c3be87ac-3871-498a-bd54-8cc401053b9c,drop,,,,count,
+83b37cbd-9122-48cb-af91-4c21211c1689,sprig,,,,count,
+f8e27907-8306-4eac-9816-2ceda0640865,slice,,,,count,
+e2173f44-dc6d-4b51-beca-23147b86a935,clove,,,,count,
+a828ef2f-3b5d-4553-ae8f-fe020a43d7fe,can,,,,count,
+77c6c696-734a-4d60-b729-ee6d2bf414ee,stick,,,,count,
+f012c7b7-3ea1-4fca-ac27-ab0dac4d2672,calorie,,kcal,,Energy,
+6b3b79ab-9b5f-425d-bc40-3a7b50c1d0e6,crank,,,,count,
+2fb0d3f7-4dac-42e2-aec0-17ce457b994d,sprinkle,,,,count,
+cd1d2ef4-4006-4525-9d24-c67cae9d790b,inch,,in,in,length,imperial
+16b61323-6991-4493-954e-0572b31e7833,centimeter,,cm,cm,length,metric
+1232b470-a8fd-41f7-bace-85bf1c0bcd45,milimeter,,mm,mm,length,metric
+cb9c24f0-0e5d-4ba1-980b-c95c770182c3,foot,,ft,ft,length,imperial

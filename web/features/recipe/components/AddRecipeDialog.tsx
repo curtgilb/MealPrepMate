@@ -1,5 +1,5 @@
 "use client";
-import { FragmentType, useFragment } from "@/gql";
+import { FragmentType, getFragmentData } from "@/gql";
 import { recipeSearchFragment } from "@/graphql/recipe/queries";
 import { useState } from "react";
 import { Card } from "../generics/Card";
@@ -18,7 +18,7 @@ interface RecipeCardProps {
 type AggregateLabelFields = RecipeSearchFieldsFragment["aggregateLabel"];
 
 export function AddRecipeToMealPlan({ recipe: input }: RecipeCardProps) {
-  const recipe = useFragment(recipeSearchFragment, input);
+  const recipe = getFragmentData(recipeSearchFragment, input);
   const [open, setOpen] = useState<boolean>(false);
 
   const photoUrls = recipe.photos.map((photo) => {});

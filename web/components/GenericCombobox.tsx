@@ -11,51 +11,32 @@ import { AnyVariables, TypedDocumentNode, useQuery } from "@urql/next";
 import { ChevronsUpDownIcon, Plus } from "lucide-react";
 import { useState } from "react";
 
-type ConditionalVariables<
-  T extends AnyVariables,
-  U extends boolean
-> = U extends true ? T & { search: string } : T;
-
-export type GenericComboboxProps<
-  T extends { id: string },
-  TData,
-  TVariables extends AnyVariables,
-  MultiSelect extends boolean,
-  AutoFilter extends boolean
-> = {
-  queryDocument: TypedDocumentNode<
-    TData,
-    ConditionalVariables<TVariables, AutoFilter>
-  >;
+export type GenericComboboxProps<T extends { id: string }, MultiSelect> = {
+  options: T[];
   formatLabel: (item: T) => string;
-  createNewOption: (input: string) => void;
-  listKey: keyof TData;
-  autoFilter: AutoFilter;
+  createNewOption: () => void;
+  autoFilter: boolean;
   placeholder?: string;
   multiSelect: MultiSelect;
+  fetching: boolean;
+  setSearch: (value: string) => void;
 } & (MultiSelect extends true
   ? { onSelect: (value: T[]) => void; value: T[] }
   : { onSelect: (value: T | undefined) => void; value: T | undefined });
 
-export function GenericCombobox<
-  T extends { id: string },
-  TData,
-  TVariables extends AnyVariables,
-  MultiSelect extends boolean,
-  AutoFilter extends boolean
->({
-  queryDocument,
-  listKey,
+export function GenericCombobox<T extends { id: string }, MultiSelect>({
   formatLabel,
+  options,
   createNewOption,
   placeholder = "Select an item...",
   autoFilter,
   onSelect,
+  fetching,
   multiSelect,
   value,
-}: GenericComboboxProps<T, TData, TVariables, MultiSelect, AutoFilter>) {
+  setSearch,
+}: GenericComboboxProps<T, MultiSelect>) {
   const [open, setOpen] = useState(false);
-  const [inputValue, setInputValue] = useState("");
   const isMobile = useMediaQuery("(max-width: 640px)");
 
   const itemsSelected =
@@ -65,17 +46,6 @@ export function GenericCombobox<
       ? placeholder
       : formatLabel(value)
     : placeholder;
-
-  const queryVariables = (
-    autoFilter ? { search: inputValue } : {}
-  ) as ConditionalVariables<TVariables, AutoFilter>;
-
-  const [result] = useQuery({
-    query: queryDocument,
-    variables: queryVariables,
-  });
-
-  const { data, fetching, error } = result;
 
   function handleSelect(selectedItem: T, alreadySelected: boolean) {
     // If an arary
@@ -122,13 +92,14 @@ export function GenericCombobox<
           <DrawerContent>
             <div className="mt-4 border-t">
               <ComboboxContent
-                items={data ? (data[listKey] as T[]) : []}
+                items={options}
                 loading={fetching}
-                setSearch={setInputValue}
+                setSearch={setSearch}
                 formatLabel={formatLabel}
-                autoFilter={true}
+                autoFilter={autoFilter}
                 selectedItems={value}
                 handleSelect={handleSelect}
+                onCreate={createNewOption}
               />
             </div>
           </DrawerContent>
@@ -152,13 +123,14 @@ export function GenericCombobox<
           </PopoverTrigger>
           <PopoverContent className="w-full max-w-64 p-0">
             <ComboboxContent
-              items={data ? (data[listKey] as T[]) : []}
+              items={options}
               loading={fetching}
-              setSearch={setInputValue}
+              setSearch={setSearch}
               formatLabel={formatLabel}
-              autoFilter={true}
+              autoFilter={autoFilter}
               selectedItems={value}
               handleSelect={handleSelect}
+              onCreate={createNewOption}
             />
           </PopoverContent>
         </Popover>

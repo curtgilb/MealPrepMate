@@ -4,6 +4,7 @@ const nutritionFieldsFragment = graphql(`
   fragment NutrientFields on Nutrient {
     id
     alternateNames
+    advancedView
     target {
       id
       nutrientTarget
@@ -18,12 +19,6 @@ const nutritionFieldsFragment = graphql(`
     name
     important
     parentNutrientId
-    target {
-      id
-      nutrientTarget
-      preference
-      threshold
-    }
     type
     unit {
       id
@@ -35,14 +30,14 @@ const nutritionFieldsFragment = graphql(`
 `);
 
 const getNutrientsQuery = graphql(`
-  query getNutrients($advanced: Boolean!, $name: String) {
-    nutrients(search: $name, advanced: $advanced) {
+  query getNutrients($advanced: Boolean!, $name: String, $favorites: Boolean) {
+    nutrients(search: $name, advanced: $advanced, favorites: $favorites) {
       ...NutrientFields
     }
   }
 `);
 
-const getNutrientsForPicker = graphql(`
+const searchNutrients = graphql(`
   query searchNutrients($search: String) {
     nutrients(advanced: true, search: $search) {
       id
@@ -89,7 +84,7 @@ const setRankedNutrients = graphql(
 export {
   setRankedNutrients,
   getRankedNutrients,
-  getNutrientsForPicker,
+  searchNutrients as getNutrientsForPicker,
   getNutrientsQuery,
   nutritionFieldsFragment,
 };

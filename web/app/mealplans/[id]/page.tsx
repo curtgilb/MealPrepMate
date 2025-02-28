@@ -1,73 +1,74 @@
 "use client";
-import { MealPlanName } from "@/features/mealplan/components/PlanName";
-import { graphql, useFragment } from "@/gql";
-import { mealPlanQuery } from "@/graphql/mealplan/mealplan";
-import { mealRecipeFragment } from "@/graphql/mealplan/mealrecipes";
-import { mealServingsFragment } from "@/graphql/mealplan/mealservings";
-import { useRecipeLabelLookup } from "@/hooks/use-recipe-label-lookup";
-import { useQuery } from "@urql/next";
-import { MealPlan } from "@/contexts/MealPlanContext";
-import { useParams } from "next/navigation";
-import { Suspense, useState } from "react";
-import { MealPlanServings } from "@/contexts/ServingsContext";
+import { useMemo, useState } from "react";
+
+import { mealPlanQuery } from "@/features/mealplan/api/MealPlan";
 import {
-  ModeDropdown,
-  PlanMode,
-} from "@/features/mealplan/components/controls/ModeDropdown";
-import { DayScroller } from "@/features/mealplan/components/controls/DayPicker";
+  DayScroller,
+  ViewMode,
+} from "@/features/mealplan/components/controls/DayPicker";
 import { DayManager } from "@/features/mealplan/components/days/DayManager";
-import { MealPlanSideBar } from "@/features/mealplan/components/MealPlanSideBar";
+import { MealPlanSideBar } from "@/features/mealplan/components/sidebar/MealPlanSideBar";
+import { MealPlanContext } from "@/features/mealplan/contexts/MealPlanContext";
+import { useMealPlanNutrition } from "@/features/mealplan/hooks/useMealPlanNutrition";
+import { getMinMaxDay } from "@/features/mealplan/utils/getMinMaxDay";
+import { useIdParam } from "@/hooks/use-id";
+import { useQuery } from "@urql/next";
 
 export type DisplayMode = "week" | "day";
 
 export default function MealPlanPage() {
-  const params = useParams<{ id: string }>();
-  const [mealPlanResult, refetchMealPlan] = useQuery({
+  const mealPlanId = useIdParam();
+  const [mealPlanResult] = useQuery({
     query: mealPlanQuery,
-    variables: { mealPlanId: params.id },
+    variables: { mealPlanId },
   });
-  const [display, setDisplay] = useState<DisplayMode>("week");
-  const [days, setDays] = useState<number>(1);
-  const [mode, setMode] = useState<PlanMode>("meal_planning");
+
+  const [view, setView] = useState<ViewMode>("week");
+  const { calculateNutrition } = useMealPlanNutrition(mealPlanId);
+  const [focusedDay, setFocusedDay] = useState<number>(1);
+
+  const dayRange = useMemo(() => {
+    if (view === "day") {
+      return focusedDay;
+    }
+    const { startOfWeek, endOfWeek } = getMinMaxDay(focusedDay);
+
+    return { minDay: startOfWeek, maxDay: endOfWeek };
+  }, [focusedDay, view]);
 
   const { data, fetching, error } = mealPlanResult;
-  const labels = useRecipeLabelLookup(data?.mealPlan.planRecipes);
-  const recipes = useFragment(mealRecipeFragment, data?.mealPlan.planRecipes);
-  const servings = useFragment(
-    mealServingsFragment,
-    data?.mealPlan.mealPlanServings
-  );
 
   if (!data) return "loading or error";
 
   return (
-    <MealPlan.Provider
-      value={{
-        labels,
-        recipes,
-        id: params.id,
-      }}
-    >
-      <MealPlanServings.Provider value={servings}>
-        <div className="flex h-full min-w-0 overflow-hidden">
-          <div className="flex flex-col p-4 grow h-full min-w-0 overflow-hidden">
+    <MealPlanContext.Provider value={{ day: dayRange, calculateNutrition }}>
+      <div className="h-main-full overflow-hidden flex bg-muted">
+        {/* Main Content */}
+        <div className="p-4 px-12 grow h-full overflow-hidden">
+          <div className=" w-full max-w-sc mx-auto">
+            {/* Top Bar */}
             <div className="flex justify-between mb-6">
-              <MealPlanName
-                name={data.mealPlan.name ?? "Untitled meal plan"}
-                mealPlanId={params.id}
-              />
+              <h1 className="text-2xl font-bold font-serif">
+                {data.mealPlan.name}
+              </h1>
               <DayScroller
-                value={days}
-                onChange={setDays}
-                canScrollDays={true}
+                value={focusedDay}
+                onChange={setFocusedDay}
+                view={view}
+                setView={setView}
               />
-              <ModeDropdown mode={mode} setMode={setMode} />
             </div>
-            <DayManager days={days} display="week" planMode={mode} />
+
+            {/* Day Planner */}
+            <DayManager days={focusedDay} view={view} />
           </div>
+        </div>
+
+        {/* Sidebar */}
+        <div className="shrink-0">
           <MealPlanSideBar />
         </div>
-      </MealPlanServings.Provider>
-    </MealPlan.Provider>
+      </div>
+    </MealPlanContext.Provider>
   );
 }

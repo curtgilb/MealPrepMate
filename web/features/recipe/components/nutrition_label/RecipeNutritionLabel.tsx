@@ -1,33 +1,25 @@
 "use client";
-import { NutrientItemProps, NutritionList } from "@/components/NutritionList";
-import { GetRecipeQuery, NutrientFieldsFragment } from "@/gql/graphql";
-import { HTMLAttributes, useMemo, useState } from "react";
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
-import { toTitleCase } from "@/utils/utils";
 import { EnumSelect } from "@/components/EnumSelect";
-import { NutritionDisplayMode } from "@/hooks/use-nutrients";
+import {
+  NutritionLabelIndentation,
+  ServingSize,
+} from "@/components/nutrition_label_abstracts/NutritionLabelTable";
+import {
+  NutrientItemProps,
+  NutritionList,
+} from "@/components/nutrition_label_abstracts/NutritionList";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-type NutritionValues = GetRecipeQuery["recipe"]["aggregateLabel"];
-type NutrientValue = NonNullable<NutritionValues>["nutrients"];
-
-export enum ServingSize {
-  Serving = "One Serving",
-  Recipe = "Whole Recipe",
-}
-
-interface NutritionLabelProps extends HTMLAttributes<HTMLDivElement> {
-  label: NutritionValues;
-}
+import { NutrientFieldsFragment } from "@/gql/graphql";
+import { NutritionDisplayMode } from "@/hooks/use-nutrients";
+import { cn } from "@/lib/utils";
+import { toTitleCase } from "@/utils/utils";
+import { HTMLAttributes, useMemo, useState } from "react";
 
 function getValueLabel(
   nutrient: NutrientFieldsFragment,
@@ -43,20 +35,35 @@ function getValueLabel(
     : String(nutrientValue);
 
   return {
-    labelStr: `${valueString} ${nutrient.unit.symbol}`,
+    labelStr: `${valueString} ${nutrient?.unit?.symbol}`,
     percentage,
     target,
   };
 }
 
-const indentation: { [key: number]: string } = {
-  1: "pl-2",
-  2: "pl-6",
-  3: "pl-8",
-  4: "pl-12",
-};
+function Nutrient({ nutrient, depth, value }: NutrientItemProps) {
+  const { labelStr, percentage, target } = getValueLabel(nutrient, value);
 
-function Group({
+  return (
+    <TableRow key={nutrient.id} className="text-sm h-4 hover:bg-transparent">
+      <TableCell className="py-2">
+        <p className={NutritionLabelIndentation[depth]}>{nutrient.name}</p>
+      </TableCell>
+      <TableCell className="py-2">
+        {value
+          ? `${Math.round((value + Number.EPSILON) * 100) / 100} ${
+              nutrient.unit?.symbol
+            }`
+          : ""}
+      </TableCell>
+      <TableCell className="text-right py-2">
+        {target ? `${percentage}%` : ""}
+      </TableCell>
+    </TableRow>
+  );
+}
+
+function TableGroup({
   name,
   children,
 }: {
@@ -65,8 +72,8 @@ function Group({
 }) {
   return (
     <>
-      <TableRow>
-        <TableCell className="text-lg font-bold" colSpan={3}>
+      <TableRow className="bg-muted/50">
+        <TableCell className="font-serif font-bold py-2" colSpan={3}>
           {toTitleCase(name)}
         </TableCell>
       </TableRow>
@@ -75,26 +82,13 @@ function Group({
   );
 }
 
-function Nutrient({ nutrient, depth, value }: NutrientItemProps) {
-  const { labelStr, percentage, target } = getValueLabel(nutrient, value);
-  console.log(depth);
-  return (
-    <TableRow key={nutrient.id} className="text-sm">
-      <TableCell>
-        <p className={indentation[depth]}>{nutrient.name}</p>
-      </TableCell>
-      <TableCell>
-        {value
-          ? `${Math.round((value + Number.EPSILON) * 100) / 100} ${
-              nutrient.unit.symbol
-            }`
-          : ""}
-      </TableCell>
-      <TableCell className="text-right">
-        {target ? `${percentage}%` : ""}
-      </TableCell>
-    </TableRow>
-  );
+type NutritionLabelInput = {
+  servings?: number | undefined | null;
+  nutrients: { [key: string]: number };
+};
+
+interface NutritionLabelProps extends HTMLAttributes<HTMLDivElement> {
+  label: NutritionLabelInput | undefined | null;
 }
 
 export function RecipeNutritionlabel({
@@ -109,19 +103,27 @@ export function RecipeNutritionlabel({
     NutritionDisplayMode.Basic
   );
 
+  // Create map of nutrientID -> value
   const values = useMemo(() => {
-    return label?.nutrients.reduce((agg, nutrient) => {
-      agg[nutrient.nutrient.id] =
-        servingSize === ServingSize.Recipe
-          ? nutrient.value
-          : nutrient.perServing;
-      return agg;
-    }, {} as { [key: string]: number | undefined | null });
+    if (!label) return {};
+    return Object.entries(label.nutrients).reduce(
+      (agg, [nutrientId, value]) => {
+        agg[nutrientId] =
+          servingSize === ServingSize.Recipe
+            ? value
+            : value / (label.servings ?? 1);
+        return agg;
+      },
+      {} as { [key: string]: number | undefined | null }
+    );
   }, [label, servingSize]);
 
   return (
-    <div className={cn("max-w-lg", className)} {...rest}>
-      <div className="flex justify-end">
+    <div className={cn("w-full", className)} {...rest}>
+      <div className="flex justify-between mb-4 items-center">
+        <p className="font-serif">
+          <b>{label?.servings ?? 1}</b> servings
+        </p>
         <div className="flex gap-2">
           <EnumSelect
             enum={NutritionDisplayMode}
@@ -135,23 +137,31 @@ export function RecipeNutritionlabel({
           />
         </div>
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableCell>Nutrient</TableCell>
-            <TableCell>Value</TableCell>
-            <TableCell className="text-right">Goal %</TableCell>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <NutritionList
-            group={Group}
-            mode={mode}
-            nutrient={Nutrient}
-            values={values}
-          />
-        </TableBody>
-      </Table>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableCell className="font-semibold font-serif">
+                Nutrient
+              </TableCell>
+              <TableCell className="font-semibold font-serif min-w-32">
+                Value
+              </TableCell>
+              <TableCell className="text-right font-semibold font-serif">
+                Goal %
+              </TableCell>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <NutritionList
+              groupComponent={TableGroup}
+              mode={mode}
+              nutrientComponent={Nutrient}
+              nutrientIdToValue={values}
+            />
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

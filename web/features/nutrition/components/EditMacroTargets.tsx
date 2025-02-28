@@ -50,9 +50,7 @@ export function EditMacroTargets() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof MacroValidation>) {
-    console.log(values);
-  }
+  function onSubmit(values: z.infer<typeof MacroValidation>) {}
   return (
     <Form {...form}>
       <form

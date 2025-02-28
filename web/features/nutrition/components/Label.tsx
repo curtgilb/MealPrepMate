@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FragmentType, graphql, useFragment } from "@/gql";
+import { FragmentType, graphql, getFragmentData } from "@/gql";
 import { NutrientFieldsFragment } from "@/gql/graphql";
 
 import { isNumeric, toTitleCase } from "@/utils/utils";
@@ -24,7 +24,7 @@ interface NutritionLabelProps {
 }
 
 export function NutritionLabel({ nutrientValues }: NutritionLabelProps) {
-  const { categorized: categorized, childNutrients } = useNutrients(true);
+  const { parentNutrients: categorized, childNutrients } = useNutrients(true);
   const isDesktop = useMediaQuery("(min-width: 480px)");
   const LabelSection: React.FC<NutritionLabelLayoutProps> = isDesktop
     ? NutritionLabelTable

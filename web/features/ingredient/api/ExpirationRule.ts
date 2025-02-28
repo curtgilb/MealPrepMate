@@ -16,14 +16,22 @@ const expirationRuleFragment = graphql(`
 const getExpirationRulesQuery = graphql(`
   query GetExpirationRules {
     expirationRules {
-      ...ExpirationRuleFields
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        node {
+          ...ExpirationRuleFields
+        }
+      }
     }
   }
 `);
 
 const createExpirationRuleMutation = graphql(
   `
-    mutation CreateExpirationRule($input: CreateExpirationRuleInput!) {
+    mutation CreateExpirationRule($input: ExpirationRuleInput!) {
       createExpirationRule(rule: $input) {
         ...ExpirationRuleFields
       }
@@ -33,8 +41,8 @@ const createExpirationRuleMutation = graphql(
 
 const editExpirationRuleMutation = graphql(
   `
-    mutation EditExpirationRule($input: EditExpirationRuleInput!) {
-      editExpirationRule(expirationRule: $input) {
+    mutation EditExpirationRule($id: ID!, $input: ExpirationRuleInput!) {
+      editExpirationRule(ruleId: $id, expirationRule: $input) {
         ...ExpirationRuleFields
       }
     }
@@ -43,7 +51,7 @@ const editExpirationRuleMutation = graphql(
 
 const deleteExpirationRuleMutation = graphql(
   `
-    mutation DeleteRule($id: String!) {
+    mutation DeleteRule($id: ID!) {
       deleteExpirationRule(expirationRuleId: $id) {
         success
         message

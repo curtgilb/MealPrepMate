@@ -10,13 +10,15 @@ lerna-debug.log*
 *.DS_Store
 
 # Storage
-backend/storage/
+/storage/
+/storage/.minio.sys/
 
-cloudbeaver/
+/cloudbeaver/
 
-backend/pgadmin/
 
-backend/redis/
+/redis/
+
+*.env
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
@@ -157,7 +159,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -214,9 +215,7 @@ instance/
 # Sphinx documentation
 docs/_build/
 
-# PyBuilder
-.pybuilder/
-target/
+
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -305,3 +304,4 @@ cython_debug/
 .DS_Store
 .env
 web/package-lock.json
+

@@ -1,0 +1,59 @@
+﻿Id,Name,variant,Table Days,Fridge Days,Freezer Days,Human Readable,Defrost Time
+43d7a981-7e38-4e5c-8bc1-6903ac02839b,Hot Dogs,unopened,0,14,60,2 months,1
+d5e91ef8-504e-4497-a245-26b9530cfd95,Hot Dogs,opened,0,7,60,2 months,1
+a4546451-fc1d-4f23-abf3-bd9054532267,Luncheon Meat,,0,14,60,2 months,1
+d6de1443-a036-46b1-b91a-300941e391cb,Bacon,,0,7,30,1 month,1
+61b621f7-feea-4436-88d2-54914cefd8ce,Sausage,,0,2,60, 2 months,1
+5b55c9a6-ee98-4f14-b08b-1c043da01b02,Ground Meats,,0,2,122,4 Months,1
+1507a1ac-80bf-4dd6-be3a-21ad88e8f094,"Fresh beef, lamb, and pork",,0,5,122,4 Months,1
+0d299650-ba0c-4fff-bc55-f0e52e145e35,Ham,"uncured, uncooked",0,5,182,6 Months,1
+150266e2-207b-45c6-9093-9f45b17e2167,Ham,"uncured, cooked",0,4,122,4 Months,1
+758b62e6-fd8d-46f9-a56f-d3eb4e7c338b,Ham,"cooked, vacuum-sealed",0,14,60,2 Months,1
+b3487b90-508b-4e3f-bcd2-02d091205d65,"Prosciutto, Parma, Serrano",,0,4,30,1 month,1
+a7a0140f-73a7-4033-893f-67b46983bb52,Poultry,whole,0,2,365,1 year,1
+2ae81bf5-b280-44b5-ac45-93f9936bfe20,Poultry,pieces,0,2,274,9 months,1
+8f840b85-6445-4a34-8d65-905fb0628d79,Fish,"fatty (salmon, tuna, bluefish, mackerel, etc)",0,3,90,3 months,1
+9b783f96-1918-4cdc-a008-6cc7ebc05099,Fish,"(cod, flounder, haddock, halibut, sole, etc.)",0,3,243,8 months,1
+da6ec1f6-c067-4c9b-9b0f-4cabcb528d8e,Crab and Lobster,,0,4,120,4 months,1
+5d1d5150-97e7-43cb-bf63-6a94b623d35d,Shrimp,,0,5,365,1 year,1
+5b55ea23-1915-4f91-b6a8-bbb16a6df6a8,Eggs,shell,0,35,0,,1
+26696dc0-2240-4443-bbcf-3ef63c3d4a9b,Eggs,raw yolks/whites,0,4,365,1 year,1
+764ac350-ca57-4f1c-9cca-b6b5626959e7,Eggs,hard-cooked,0,7,0,,1
+549fc51c-66fe-463b-8116-2c3f6424f441,Eggs,Cooked,0,4,90,3 months,1
+464e20fa-676d-4bd1-9397-6f8c07f1cbd1,Garlic,separated from head,21,0,0,,1
+f89bdd03-1fb0-4feb-993a-267a986e04c2,Garlic,peeled,7,0,0,,1
+8576797e-b8c3-46ab-b442-d74174b4d346,Garlic,Head,180,0,0,,1
+2af5afab-3cdf-4228-859e-2aa507e8e7bb,Cilantro,,0,14,0,,1
+c75b365e-add9-4d30-9b05-a5720fdef7f4,Peppers,whole,0,14,0,,1
+a4bb2b2d-c468-48a3-81f6-aa65186dbb7a,Peppers,halved,0,7,0,,1
+c2842c68-ee85-4134-b1ff-0050eb80a06d,Peppers,sliced,0,2,0,,1
+e70d1ae6-23f6-4735-ab5c-7a3a60126086,Onions,,14,60,0,,1
+b29344dd-585d-47fb-bdd2-5b95382e11de,Bread,,4,14,90,3 months,1
+878760c2-fa57-4b2b-a943-2c6e4ede15bd,Cabbage,,0,14,0,,1
+ad836292-f978-49f0-bb1e-769c9c840871,Leafy Greens,,0,7,0,,1
+3da018c2-90f4-4c5e-a594-b64f46537282,Green Onions,,0,101,0,,1
+d8536c0b-4ea4-44a4-8ba4-70dfb2b948e5,Apples,,0,42,0,,1
+9f459690-6537-4716-a032-46edbaaad1b7,Raspberries/Strawberries/Blackberries,,0,3,0,,1
+dc1f46eb-31dd-4f93-9cce-cf6e26535e04,Blueberries,,0,14,0,,1
+ef4791a8-42aa-48f1-8ce5-12316e9cd19b,Broccoli/Cauliflower,,0,5,0,,1
+92ae55f1-d6c0-4c2c-b001-199eacbfd748,Carrots/Parsnips,,0,21,0,,1
+a784a19b-8538-4722-8c12-ee98fef5e889,Squash,,0,5,0,,1
+fa506a43-110a-4bd2-91a3-22e12520a330,Cherries,,0,3,0,,1
+43425df2-e217-4d2d-8659-b2e354316f10,Grapes,,0,7,0,,1
+38cdc69d-1120-48c0-ab67-b929a3638281,Mangos,,0,7,0,,1
+2ab115f6-be05-422a-a74f-6a802da063b3,Peaches,,0,5,0,,1
+c2fcde33-3a9b-416c-9c85-577163476d74,Pineapple,,0,5,0,,1
+dd1cd5cf-bcd6-4ce3-9f74-43c840ea7dad,Watermelon,,0,3,0,,1
+e00fd6a4-cf9b-4da3-b45d-862c58c47a35,Asparagus,,0,4,0,,1
+5dd480d2-8dff-486d-b79c-98a7230ac27f,Brussel Sprouts,,0,5,0,,1
+e8bd1bbf-ac2b-4d2e-a53e-ce424ea66a55,Cucumbers,,0,6,0,,1
+fdd1e0ec-11ee-41b7-bf4b-795ebc38d75b,Mushrooms,,0,7,0,,1
+d5710000-1c0b-4d4f-9e9d-db5fcfe5d541,Tomatoes,,7,0,0,,1
+af6ddfbe-c97f-4426-8eb4-32eae6c268ea,Whole Spices,,1460,0,0,,1
+f69118e8-7f24-4d55-bf9e-e27ee0a1cbee,Ground Spices,,730,0,0,,1
+346ce80a-0931-4bd8-9ced-b7a4ead9f174,Citrus Fruit,,2,31,0,,1
+11388d5b-f750-49a7-aa7d-20b9a2a57e82,Greek Yogurt,,0,21,0,,1
+3ae0fc9f-d897-40f5-8d0b-c619e6d378a2,Olive Oil,,540,0,0,,1
+9293f487-be94-4e61-b0d3-8beb2a9fd454,Fresh Herbs,,0,7,0,,1
+c70cdca7-05e4-454c-af29-690a7e9aec35,Vinegars,,1095,0,0,,1
+4827c7f4-1d70-424a-ab3e-cdb1232225c5,Sour Cream,,0,14,0,,1

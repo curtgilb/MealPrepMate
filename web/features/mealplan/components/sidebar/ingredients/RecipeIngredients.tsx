@@ -1,5 +1,6 @@
-import { MealPlan, MealPlanContext } from "@/contexts/MealPlanContext";
-import { useContext, useMemo } from "react";
+import { useContext, useMemo } from 'react';
+
+import { MealPlan, MealPlanContext } from '@/features/mealplan/contexts/ServingsContext';
 
 type RecipeIngredients = NonNullable<
   MealPlanContext["recipes"]

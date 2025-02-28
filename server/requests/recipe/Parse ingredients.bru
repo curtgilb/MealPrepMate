@@ -1,0 +1,35 @@
+meta {
+  name: Parse ingredients
+  type: graphql
+  seq: 5
+}
+
+post {
+  url: http://localhost:3025/graphql
+  body: graphql
+  auth: none
+}
+
+body:graphql {
+  query parseIngredients($lines: String!) {
+    tagIngredients(ingredientTxt: $lines) {
+      order
+      quantity
+      sentence
+      unit{
+        id
+        name
+      }
+      ingredient {
+        id
+        name
+      }
+    }
+  }
+}
+
+body:graphql:vars {
+  {
+    "lines": "2 tablespoons olive oil \r\n1 onion, diced"
+  }
+}

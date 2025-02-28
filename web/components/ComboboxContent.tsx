@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -8,17 +9,18 @@ import {
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { debounce } from "lodash";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 
 interface ComboboxContentProps<T extends { id: string }> {
   items: T[];
   loading: boolean;
-  setSearch: Dispatch<SetStateAction<string>>;
+  setSearch: (value: string) => void;
   formatLabel: (item: T) => string;
   autoFilter: boolean;
-  selectedItems: T | T[] | undefined;
+  selectedItems: T | T[] | null;
   handleSelect: (item: T, selected: boolean) => void;
+  onCreate: () => void;
 }
 
 export function ComboboxContent<T extends { id: string }>({
@@ -29,6 +31,7 @@ export function ComboboxContent<T extends { id: string }>({
   autoFilter,
   selectedItems,
   handleSelect,
+  onCreate,
 }: ComboboxContentProps<T>) {
   const debouncedUpdate = debounce((value) => {
     setSearch(value);
@@ -39,8 +42,16 @@ export function ComboboxContent<T extends { id: string }>({
       <CommandInput placeholder="Search..." onValueChange={debouncedUpdate} />
       <CommandEmpty>
         <p>No Results found</p>
+        {onCreate && (
+          <Button
+            onClick={() => {
+              onCreate();
+            }}
+          ></Button>
+        )}
       </CommandEmpty>
       <CommandList>
+        {loading && <Loader2 className="animate-spin" />}
         <CommandGroup className={items.length === 0 ? "hidden" : ""}>
           {items.map((item: T) => {
             let isSelected = false;
@@ -56,7 +67,7 @@ export function ComboboxContent<T extends { id: string }>({
             return (
               <CommandItem
                 key={item.id}
-                value={item.id}
+                value={formatLabel(item)}
                 onSelect={() => {
                   handleSelect(item, isSelected);
                 }}

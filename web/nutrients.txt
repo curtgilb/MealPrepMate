@@ -1,0 +1,458 @@
+[
+  {
+    "id": "TnV0cmllbnQ6NmUwZmNlZjMtZWM0NC00MjZjLTk5NDUtYTUzNzM3ZTk2Yzc5",
+    "alternateNames": [],
+    "target": null,
+    "dri": null,
+    "name": "Calories",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "GENERAL",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OmYwMTJjN2I3LTNlYTEtNGZjYS1hYzI3LWFiMGRhYzRkMjY3Mg==",
+      "name": "Calorie",
+      "symbol": "kcal",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6ZjE2ZWNmOTQtNTc2MC00ZmU3LWFjOTMtZGZlZTM5Zjc0ZTE5",
+    "alternateNames": [
+      "Vitamin B2"
+    ],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6ODAyZDEzOWEtMDVlYi00OTExLWFmNGMtZGY4NWI3YTk4Y2Rk",
+      "value": 1.3,
+      "upperLimit": 1.3
+    },
+    "name": "Riboflavin",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "VITAMIN",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OjBlYmZhZjhjLWU1NmEtNDQ0Zi05MzkyLWQwZTExNjA4MGJjZg==",
+      "name": "Miligram",
+      "symbol": "mg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6ODI2NzJjMTgtZjQzNi00MDQ4LTlkMDktZTNjNjk5N2NhZDhh",
+    "alternateNames": [
+      "Vitamin B3"
+    ],
+    "target": null,
+    "dri": null,
+    "name": "Niacin",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "VITAMIN",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OjBlYmZhZjhjLWU1NmEtNDQ0Zi05MzkyLWQwZTExNjA4MGJjZg==",
+      "name": "Miligram",
+      "symbol": "mg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6ZTVlMjZiYzEtODljMi00Yzg3LWJlMGEtZjRlOWQ2ZmFmOTli",
+    "alternateNames": [
+      "Vitamin B5"
+    ],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6ZmMyZjQxZmMtYTg3OC00ZGQ1LWFlY2EtNjQ3ZGQ5MGEzMmI2",
+      "value": 5,
+      "upperLimit": 5
+    },
+    "name": "Pantothenic Acid",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "VITAMIN",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OjBlYmZhZjhjLWU1NmEtNDQ0Zi05MzkyLWQwZTExNjA4MGJjZg==",
+      "name": "Miligram",
+      "symbol": "mg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6Yzk2YTFjNTItNmVkOS00YmNiLWFjMjQtYTUxMzA1ZWEzNDhi",
+    "alternateNames": [
+      "Vitamin B6"
+    ],
+    "target": null,
+    "dri": null,
+    "name": "Pyridoxine",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "VITAMIN",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OjBlYmZhZjhjLWU1NmEtNDQ0Zi05MzkyLWQwZTExNjA4MGJjZg==",
+      "name": "Miligram",
+      "symbol": "mg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6MDcwN2ZmN2ItZTk2MS00YWM0LWI4NTYtOGVjNzFiNjBhOTU3",
+    "alternateNames": [
+      "Vitamin B12"
+    ],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6YTc0ZmZlZTctYzU1ZC00YTc2LWE4N2YtZjU3M2ZiOWI1YTg2",
+      "value": 2.4,
+      "upperLimit": 2.4
+    },
+    "name": "Cobalamin",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "VITAMIN",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OmZkYTg4MGEyLWM3MTctNDY4Yi1iMzAwLTFkNjUyYWIwMjNlNA==",
+      "name": "Microgram",
+      "symbol": "μg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6ZThiMjFmYzMtNWU0YS00OTkzLTk1MDYtY2E0ZWUwMGMzODEy",
+    "alternateNames": [],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6ODA3NWRmYTUtMjdiZC00ODIyLTg1NmEtMGNlMTM3Zjk5OTc3",
+      "value": 30,
+      "upperLimit": 30
+    },
+    "name": "Biotin",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "VITAMIN",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OmZkYTg4MGEyLWM3MTctNDY4Yi1iMzAwLTFkNjUyYWIwMjNlNA==",
+      "name": "Microgram",
+      "symbol": "μg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6YzA5NDI0MGQtYjg3MC00M2IyLWIzMGItNThiOGFmZTk5N2Zk",
+    "alternateNames": [],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6MjNhMzdiZjAtMTExMy00N2ZkLTgyNjgtNTAxMTAwMjI2MjVl",
+      "value": 550,
+      "upperLimit": 550
+    },
+    "name": "Choline",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "VITAMIN",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OjBlYmZhZjhjLWU1NmEtNDQ0Zi05MzkyLWQwZTExNjA4MGJjZg==",
+      "name": "Miligram",
+      "symbol": "mg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6ZDEwMDNlZTgtNjAxMi00N2JkLWIzMDAtY2VlYmE3MGEyYTZj",
+    "alternateNames": [
+      "Vitamin B9"
+    ],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6N2JmODY3NjUtMWY1NS00ZDFlLWIxNjktYTQwMTBlYzYxMTEx",
+      "value": 400,
+      "upperLimit": 400
+    },
+    "name": "Folate",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "VITAMIN",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OmZkYTg4MGEyLWM3MTctNDY4Yi1iMzAwLTFkNjUyYWIwMjNlNA==",
+      "name": "Microgram",
+      "symbol": "μg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6ZGE0ZDRkZDYtZjgyNy00MmI0LWIxMmItZmUyYWUzNzJiN2Mw",
+    "alternateNames": [],
+    "target": null,
+    "dri": null,
+    "name": "Vitamin A",
+    "important": true,
+    "parentNutrientId": null,
+    "type": "VITAMIN",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OmZkYTg4MGEyLWM3MTctNDY4Yi1iMzAwLTFkNjUyYWIwMjNlNA==",
+      "name": "Microgram",
+      "symbol": "μg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6NTBiNTg3ZDQtZWUzMS00NTM2LTljYzctNTVkYjg2NjAwY2Ey",
+    "alternateNames": [],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6NGYxNWEwZTUtMTc1MC00MGNjLWJiZjEtZWJiZGZiYjA2M2Yy",
+      "value": 35,
+      "upperLimit": 35
+    },
+    "name": "Chromium",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "MINERAL",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OmZkYTg4MGEyLWM3MTctNDY4Yi1iMzAwLTFkNjUyYWIwMjNlNA==",
+      "name": "Microgram",
+      "symbol": "μg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6NjhhOTAyNWItYzgzYy00ZGQ2LWEyZTctODE0OGE4NzY0OGI1",
+    "alternateNames": [],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6YjBhZmEyOWYtMWNjZi00YzVmLTk3MDMtNTBjNDI3YTBlNTE2",
+      "value": 900,
+      "upperLimit": 900
+    },
+    "name": "Copper",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "MINERAL",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OmZkYTg4MGEyLWM3MTctNDY4Yi1iMzAwLTFkNjUyYWIwMjNlNA==",
+      "name": "Microgram",
+      "symbol": "μg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6MzEyZTBkNTktYjg0NC00YWY5LWI4YWMtNjA5YjQ2ZWIyZTUy",
+    "alternateNames": [],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6MmU5M2VkN2MtMWE0Yi00YjIxLThlN2QtMDU0ZDlhMWRjNWQw",
+      "value": 4,
+      "upperLimit": 4
+    },
+    "name": "Fluoride",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "MINERAL",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OjBlYmZhZjhjLWU1NmEtNDQ0Zi05MzkyLWQwZTExNjA4MGJjZg==",
+      "name": "Miligram",
+      "symbol": "mg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6YWQyMGY0ZjEtOTdjOS00MjNmLTliOWQtYjJmZDM1ODU1MjZl",
+    "alternateNames": [],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6NjJiOGUxNGYtNjlhNS00ZTYyLTk4NzAtZTA3OTQ2ODEwMWZk",
+      "value": 150,
+      "upperLimit": 150
+    },
+    "name": "Iodine",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "MINERAL",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OmZkYTg4MGEyLWM3MTctNDY4Yi1iMzAwLTFkNjUyYWIwMjNlNA==",
+      "name": "Microgram",
+      "symbol": "μg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6MDNkNjkxYzQtNzFjOS00ZWQ5LWFkYmUtMzBmNmE2NDJkZjA4",
+    "alternateNames": [],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6MDJjNzJiNjUtZWI4NS00NjNkLTllMzMtNzQ5Mzc5MmQ2MzMy",
+      "value": 8,
+      "upperLimit": 8
+    },
+    "name": "Iron",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "MINERAL",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OjBlYmZhZjhjLWU1NmEtNDQ0Zi05MzkyLWQwZTExNjA4MGJjZg==",
+      "name": "Miligram",
+      "symbol": "mg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6Mzg2MTVkMjQtY2Y1ZC00OGI2LWI3MWMtZGY2MGU5N2Y1YzE1",
+    "alternateNames": [],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6OTFmMWZmZDItMmNhZC00NTUyLTg0MWEtNjIwYzUzOTUyNTMz",
+      "value": 400,
+      "upperLimit": 400
+    },
+    "name": "Magnesium",
+    "important": true,
+    "parentNutrientId": null,
+    "type": "MINERAL",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OjBlYmZhZjhjLWU1NmEtNDQ0Zi05MzkyLWQwZTExNjA4MGJjZg==",
+      "name": "Miligram",
+      "symbol": "mg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6OGJjMGU0ZDktYzE1My00MTI3LTgyMTItMjkwYTI0OGNiYzBm",
+    "alternateNames": [],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6MmJiN2JkOTEtMWQ3Yy00ZmE2LWExZDgtNGQ5ODI2NmMyYTgw",
+      "value": 2.3,
+      "upperLimit": 2.3
+    },
+    "name": "Manganese",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "MINERAL",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OjBlYmZhZjhjLWU1NmEtNDQ0Zi05MzkyLWQwZTExNjA4MGJjZg==",
+      "name": "Miligram",
+      "symbol": "mg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6NWY5ODVmNjQtYmU1ZS00OTJhLTgzMjUtZTU5ODk2NmQyNmM5",
+    "alternateNames": [],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6ZjA3NTkxZGEtOGZkMS00YjFiLTkyZDItMDc1MDEyZmY4MzMx",
+      "value": 45,
+      "upperLimit": 45
+    },
+    "name": "Molybdenum",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "MINERAL",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OmZkYTg4MGEyLWM3MTctNDY4Yi1iMzAwLTFkNjUyYWIwMjNlNA==",
+      "name": "Microgram",
+      "symbol": "μg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6OWMzOWNiMTItMDNjMy00ODcwLWEzODUtN2RkZjJiY2NiMzE5",
+    "alternateNames": [],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6YWQyMjE2ZDktZjVkZS00ZmU3LTk2NDMtNDA3NWUxMTBiNWIy",
+      "value": 700,
+      "upperLimit": 700
+    },
+    "name": "Phosphorus",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "MINERAL",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OjBlYmZhZjhjLWU1NmEtNDQ0Zi05MzkyLWQwZTExNjA4MGJjZg==",
+      "name": "Miligram",
+      "symbol": "mg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6NGU5ZDRhM2UtYjhhOS00NjRmLTg1NmEtMzI2OGRkZDQ3YzI3",
+    "alternateNames": [],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6YThlZmUzMGItYWJmOC00MTg0LTgzZDMtOTY4NWJkYjFiNGI5",
+      "value": 3400,
+      "upperLimit": 3400
+    },
+    "name": "Potassium",
+    "important": true,
+    "parentNutrientId": null,
+    "type": "MINERAL",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OjBlYmZhZjhjLWU1NmEtNDQ0Zi05MzkyLWQwZTExNjA4MGJjZg==",
+      "name": "Miligram",
+      "symbol": "mg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6OGM2NTk0NzgtZjJkMS00MWRlLThjOTMtYTFlNWI0MzZjMTdh",
+    "alternateNames": [],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6MzBhNmE2NmMtMjVkZi00NmJiLThjNzktMWRjNjQ3NjZjYTc1",
+      "value": 55,
+      "upperLimit": 55
+    },
+    "name": "Selenium",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "MINERAL",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OmZkYTg4MGEyLWM3MTctNDY4Yi1iMzAwLTFkNjUyYWIwMjNlNA==",
+      "name": "Microgram",
+      "symbol": "μg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6NDg1YjUwMWEtMGY1Yy00YTJlLThhYmItYjlmM2RhZTc5YWRh",
+    "alternateNames": [],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6MTlhZWYxZDctMzBkOC00MDdhLTk1ZjktNWMzNmVlZWZhNTgy",
+      "value": 1500,
+      "upperLimit": 1500
+    },
+    "name": "Sodium",
+    "important": true,
+    "parentNutrientId": null,
+    "type": "MINERAL",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OjBlYmZhZjhjLWU1NmEtNDQ0Zi05MzkyLWQwZTExNjA4MGJjZg==",
+      "name": "Miligram",
+      "symbol": "mg",
+      "abbreviations": []
+    }
+  },
+  {
+    "id": "TnV0cmllbnQ6MmIyOTg0NGYtN2NjYS00MzE3LWI4OGUtNWVjMWI4ZTc4Mzgw",
+    "alternateNames": [],
+    "target": null,
+    "dri": {
+      "id": "RGFpbHlSZWZlcmVuY2VJbnRha2U6M2VmMTFhOTgtODFiNy00MzRkLWFkMTctZTRkYzY2N2I5OWE3",
+      "value": 11,
+      "upperLimit": 11
+    },
+    "name": "Zinc",
+    "important": false,
+    "parentNutrientId": null,
+    "type": "MINERAL",
+    "unit": {
+      "id": "TWVhc3VyZW1lbnRVbml0OjBlYmZhZjhjLWU1NmEtNDQ0Zi05MzkyLWQwZTExNjA4MGJjZg==",
+      "name": "Miligram",
+      "symbol": "mg",
+      "abbreviations": []
+    }
+  }
+]

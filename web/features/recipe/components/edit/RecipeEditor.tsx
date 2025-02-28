@@ -1,27 +1,24 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { EditRecipeInfo } from "@/features/recipe/components/edit/EditRecipeInfo";
-import { EditRecipeIngredients } from "@/features/recipe/components/edit/EditRecipeIngredients";
-import { EditRecipeNutritionLabels } from "@/features/recipe/components/edit/EditRecipeNutritionLabels";
-import { EditIngredientGroups } from "@/features/recipe/components/edit/ingredient_groups/EditIngredientGroups";
-import { GetRecipeQuery } from "@/gql/graphql";
-
 import { useRouter } from "next/navigation";
 import {
   ForwardRefExoticComponent,
   PropsWithoutRef,
   RefAttributes,
-  useCallback,
   useRef,
   useState,
 } from "react";
 
-interface RecipeEditorProps {
-  recipe: GetRecipeQuery["recipe"] | undefined;
-}
+import { Button } from "@/components/ui/button";
+import { BasicRecipeInfoFields } from "@/features/recipe/components/edit/info/BasicRecipeInfoFields";
+import { RecipeIngredientsEditor } from "@/features/recipe/components/edit/ingredients/RecipeIngredientsEditor";
+import { NutritionLabelEditor } from "@/features/recipe/components/edit/labels/NutritionLabelEditor";
+import { RecipeFieldsFragment } from "@/gql/graphql";
+import { useQuery } from "@urql/next";
+import { getRecipeQuery, recipeFragment } from "@/features/recipe/api/Recipe";
+import { getFragmentData } from "@/gql";
 
 export interface EditRecipeProps {
-  recipe: GetRecipeQuery["recipe"] | undefined;
+  recipe: RecipeFieldsFragment | undefined | null;
 }
 
 export interface EditRecipeSubmit {
@@ -36,22 +33,26 @@ const editComponents: {
     name: string;
   };
 } = {
-  1: { Component: EditRecipeInfo, name: "Basic info" },
-  2: { Component: EditIngredientGroups, name: "Ingredient groups" },
-  3: { Component: EditRecipeIngredients, name: "Match Ingredients" },
-  4: { Component: EditRecipeNutritionLabels, name: "Nutrition Labels" },
+  1: { Component: BasicRecipeInfoFields, name: "basic info" },
+  2: { Component: RecipeIngredientsEditor, name: "ingredients" },
+  3: { Component: NutritionLabelEditor, name: "nutrition label" },
 };
 
-export function RecipeEditor({ recipe }: RecipeEditorProps) {
+export function RecipeEditor({ recipe }: EditRecipeProps) {
   const router = useRouter();
   const [editStage, setEditStage] = useState<number>(1);
   const { Component, name } = editComponents[editStage];
   const child = useRef<EditRecipeSubmit>(null);
   const isLastStep = editStage === Object.keys(editComponents).length;
+  const [result] = useQuery({
+    query: getRecipeQuery,
+    // requestPolicy: "network-only",
+    variables: { id: recipe?.id ?? "" },
+  });
 
   function advanceStep() {
     if (child.current?.submit) {
-      child.current.submit(() => {
+      child.current.submit(async () => {
         if (editStage < Object.keys(editComponents).length) {
           setEditStage(editStage + 1);
         } else if (isLastStep) {
@@ -63,28 +64,41 @@ export function RecipeEditor({ recipe }: RecipeEditorProps) {
   }
 
   return (
-    <div>
-      <p className="text-2xl font-bold mb-8">{`${editStage}. ${name}`}</p>
+    <>
+      {/* Header */}
+      <div className="flex justify-between mb-14 align-middle">
+        <h1 className="text-3xl font-serif font-bold ">{`${editStage}. ${
+          recipe ? "Edit" : "Create"
+        } recipe ${name}`}</h1>
 
-      <Component ref={child} recipe={recipe}></Component>
-      <div className="flex justify-end gap-4">
-        <Button
-          variant="outline"
-          onClick={() => {
-            setEditStage(editStage - 1);
-          }}
-          disabled={editStage === 0}
-        >
-          Back
-        </Button>
-        <Button
-          onClick={() => {
-            advanceStep();
-          }}
-        >
-          {isLastStep ? "Finish" : "Save and continue"}
-        </Button>
+        <div className="flex justify-end gap-4 ">
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (editStage === 1) {
+                router.back();
+              } else {
+                setEditStage(editStage - 1);
+              }
+            }}
+          >
+            Back
+          </Button>
+          <Button
+            onClick={() => {
+              advanceStep();
+            }}
+          >
+            {isLastStep ? "Finish" : "Save and continue"}
+          </Button>
+        </div>
       </div>
-    </div>
+
+      {/* Dynamic Content */}
+      <Component
+        ref={child}
+        recipe={getFragmentData(recipeFragment, result.data?.recipe)}
+      ></Component>
+    </>
   );
 }

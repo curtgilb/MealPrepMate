@@ -1,11 +1,13 @@
 import { graphql } from "@/gql";
 
-const RecipeIngredientFragment = graphql(`
-  fragment RecipeIngredientFragment on RecipeIngredients {
+const recipeIngredientFragment = graphql(`
+  fragment RecipeIngredientFields on RecipeIngredient {
     id
     sentence
     order
     quantity
+    verified
+    mealPrepIngredient
     baseIngredient {
       id
       name
@@ -19,30 +21,78 @@ const RecipeIngredientFragment = graphql(`
       id
       name
     }
+    recipe {
+      id
+    }
   }
 `);
 
-const getRecipeIngredients = graphql(`
-  query getRecipeIngredients($id: String!) {
-    recipe(recipeId: $id) {
-      id
-      ingredients {
-        ...RecipeIngredientFragment
+const tagIngredientsQuery = graphql(`
+  query parseIngredients($lines: String!) {
+    tagIngredients(ingredientTxt: $lines) {
+      order
+      quantity
+      sentence
+      unit {
+        id
+        name
+      }
+      ingredient {
+        id
+        name
       }
     }
   }
 `);
 
+const getRecipeIngredients = graphql(`
+  query getRecipeIngredients($id: ID!) {
+    recipe(recipeId: $id) {
+      id
+      ingredients {
+        ...RecipeIngredientFields
+      }
+    }
+  }
+`);
+
+const createRecipeIngredientMutation = graphql(`
+  mutation createRecipeIngredient(
+    $recipeId: ID!
+    $ingredient: String!
+    $groupId: ID
+  ) {
+    addRecipeIngredientsFromTxt(
+      recipeId: $recipeId
+      text: $ingredient
+      groupId: $groupId
+    ) {
+      ...RecipeIngredientFields
+    }
+  }
+`);
+
+const editRecipeIngredientMutation = graphql(`
+  mutation editRecipeIngredient($input: [EditRecipeIngredientsInput!]!) {
+    editRecipeIngredients(ingredients: $input) {
+      ...RecipeIngredientFields
+    }
+  }
+`);
+
 const deleteRecipeIngredientMutation = graphql(`
-  mutation deleteRecipeIngredient($id: String!) {
-    deleteRecipeIngredientGroup(groupId: $id) {
+  mutation deleteRecipeIngredient($id: ID!) {
+    deleteRecipeIngredient(ingredientId: $id) {
       success
     }
   }
 `);
 
 export {
-  RecipeIngredientFragment,
+  recipeIngredientFragment,
   getRecipeIngredients,
   deleteRecipeIngredientMutation,
+  createRecipeIngredientMutation,
+  editRecipeIngredientMutation,
+  tagIngredientsQuery,
 };

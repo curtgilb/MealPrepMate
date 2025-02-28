@@ -40,7 +40,6 @@ export default function CreateRecipe() {
   function onSubmit(values: z.infer<typeof RecipeInputValidation>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-    console.log(values);
   }
   return (
     <div>

@@ -1,25 +1,16 @@
 "use client";
-import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 import {
   Apple,
-  CalendarDays,
-  FolderInput,
-  Home,
-  HomeIcon,
+  House,
   Library,
-  LucideIcon,
-  Package2,
-  Settings,
+  ReceiptText,
   Target,
   UtensilsCrossed,
 } from "lucide-react";
 import Link from "next/link";
-import { Button, buttonVariants } from "./ui/button";
-import { cn } from "@/lib/utils";
-import Icon from "./Icon";
-import dynamicIconImports from "lucide-react/dynamicIconImports";
+import { usePathname } from "next/navigation";
 
-import { motion } from "framer-motion";
 import {
   Tooltip,
   TooltipContent,
@@ -28,6 +19,11 @@ import {
 } from "@/components/ui/tooltip";
 
 export const navigationLinks = [
+  {
+    title: "Home",
+    icon: <House className="h-5 w-5 shrink-0" />,
+    link: "/",
+  },
   {
     title: "Meal Plans",
     icon: <UtensilsCrossed className="h-5 w-5 shrink-0" />,
@@ -38,11 +34,11 @@ export const navigationLinks = [
     icon: <Library className="h-5 w-5 shrink-0" />,
     link: "/recipes",
   },
-  {
-    title: "Calendar",
-    icon: <CalendarDays className="h-5 w-5 shrink-0" />,
-    link: "/calendar",
-  },
+  // {
+  //   title: "Calendar",
+  //   icon: <CalendarDays className="h-5 w-5 shrink-0" />,
+  //   link: "/calendar",
+  // },
   {
     title: "Ingredients",
     icon: <Apple className="h-5 w-5 shrink-0" />,
@@ -54,9 +50,9 @@ export const navigationLinks = [
     link: "/nutrition",
   },
   {
-    title: "Imports",
-    icon: <FolderInput className="h-5 w-5 shrink-0" />,
-    link: "/imports",
+    title: "Receipts",
+    icon: <ReceiptText className="h-5 w-5 shrink-0" />,
+    link: "/receipts",
   },
 ];
 
@@ -66,7 +62,7 @@ interface SideNavProps {
 
 function Navigation({ isCollapsed }: SideNavProps) {
   return (
-    <nav className="flex flex-col z-10 h-full border-r bg-card p-4 gap-y-2">
+    <nav className="flex flex-col z-10 h-full border-r border-sidebar-border bg-sidebar p-4 gap-y-2">
       {navigationLinks.map((link) => {
         return (
           <NavigationItem
@@ -91,7 +87,8 @@ interface NavLink {
 
 function NavigationItem({ title, icon, link, collapsed }: NavLink) {
   const pathName = usePathname();
-  const activeLink = pathName.startsWith(link);
+  const activeLink =
+    pathName === link || (link !== "/" && pathName.startsWith(link));
   const toolTipProps = collapsed ? {} : { open: false };
   return (
     <TooltipProvider>
@@ -99,8 +96,12 @@ function NavigationItem({ title, icon, link, collapsed }: NavLink) {
         <TooltipTrigger asChild>
           <Link
             className={cn(
-              " flex gap-2 w-full items-center whitespace-nowrap text-sm font-medium justify-items-start  px-2.5 py-2.5 rounded-lg hover:bg-accent text-accent-foreground transition-all hover:text-foreground overflow-hidden",
-              { "bg-primary text-primary-foreground": activeLink }
+              "flex gap-2 w-full items-center whitespace-nowrap text-sm font-medium justify-items-start  px-2.5 py-2.5 rounded-lg  text-accent-foreground transition-all  overflow-hidden",
+              {
+                "bg-sidebar-primary text-sidebar-primary-foreground":
+                  activeLink,
+              },
+              { "hover:bg-sidebar-accent hover:text-foreground": !activeLink }
             )}
             href={link}
           >

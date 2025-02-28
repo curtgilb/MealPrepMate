@@ -1,10 +1,10 @@
+import { StackedList } from "@/components/StackedList";
 import { HTMLAttributes } from "react";
 
 interface RecipeTimesProps extends HTMLAttributes<HTMLUListElement> {
   prep: number | null | undefined;
   marinade: number | null | undefined;
   cook: number | null | undefined;
-  total: number | null | undefined;
 }
 
 function equalizeTime(mins: number | undefined | null) {
@@ -17,30 +17,24 @@ function equalizeTime(mins: number | undefined | null) {
   return `${mins} ${mins > 1 ? "mins" : "min"}`;
 }
 
-export function RecipeTimes({ prep, marinade, cook, total }: RecipeTimesProps) {
-  return (
-    <ul className="flex gap-8">
-      <li>
-        <p className="text-lg font-medium text-center">{equalizeTime(prep)}</p>
-        <p className="text-sm text-center">Prep Time</p>
-      </li>
+export function RecipeTimes({ prep, marinade, cook }: RecipeTimesProps) {
+  const list = [
+    { id: "prep", top: equalizeTime(prep), bottom: "Prep Time" },
+    { id: "marinade", top: equalizeTime(marinade), bottom: "Marinade Time" },
+    { id: "cook", top: equalizeTime(cook), bottom: "Cook Time" },
+  ];
+  const totalTime = [prep, marinade, cook].reduce((acc, time) => {
+    if (typeof time === "number") {
+      return acc + time;
+    }
+    return acc;
+  }, 0 as number);
 
-      <li>
-        <p className="text-lg font-medium text-center">
-          {equalizeTime(marinade)}
-        </p>
-        <p className="text-sm text-center">Marinade Time</p>
-      </li>
+  list.push({
+    id: "total",
+    top: equalizeTime(totalTime),
+    bottom: "Total Time",
+  });
 
-      <li>
-        <p className="text-lg font-medium text-center">{equalizeTime(cook)}</p>
-        <p className="text-sm text-center">Cook Time</p>
-      </li>
-
-      <li>
-        <p className="text-lg font-medium text-center">{equalizeTime(total)}</p>
-        <p className="text-sm text-center">Total Time</p>
-      </li>
-    </ul>
-  );
+  return <StackedList items={list} />;
 }

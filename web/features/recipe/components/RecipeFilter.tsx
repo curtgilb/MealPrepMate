@@ -1,209 +1,237 @@
 "use client";
 
+import { Filter, FilterX } from "lucide-react";
+import { Dispatch, HTMLAttributes, SetStateAction } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { NumericalComparison, Recipe } from "@/gql/graphql";
-import { useState, Dispatch, SetStateAction, HTMLAttributes } from "react";
-import NumericalFilter from "./NumericalFilter";
-
-import { Filter, FilterX, X } from "lucide-react";
-import { NutritionFilter } from "./filters/NutrientFilter";
-
-import { IngredientFilter } from "./filters/IngredientFilter";
-import { RecipeSearchFilter } from "@/features/mealplan/components/RecipeSearch";
 import { Button } from "@/components/ui/button";
-import { CategoryFilter } from "@/features/recipe/components/filters/CategoryFilter";
-import { CourseFilter } from "@/features/recipe/components/filters/CourseFilter";
-import { CuisineFilter } from "@/features/recipe/components/filters/CuisineFIlter";
-import { TimeNumberInput } from "@/components/ui/time-number-input";
+import { Form } from "@/components/ui/form";
+import { getCategoriesQuery } from "@/features/recipe/api/Category";
+import { getCoursesQuery } from "@/features/recipe/api/Course";
+import { getCuisinesQuery } from "@/features/recipe/api/Cuisine";
+import {
+  basicItemListSchema,
+  CheckboxFilter,
+} from "@/features/recipe/components/filters/CheckboxFilter";
+import {
+  IngredientFilter,
+  ingredientFilterValidation,
+} from "@/features/recipe/components/filters/IngredientFilter";
+import {
+  nutrientFilterValidation,
+  NutritionFilter,
+} from "@/features/recipe/components/filters/NutrientFilter";
+import NumericalFilter, {
+  numericalFilterSchema,
+} from "@/features/recipe/components/NumericalFilter";
+import {
+  GetCategoriesQuery,
+  GetCoursesQuery,
+  GetCuisinesQuery,
+  RecipeFilter as RecipeFilterInput,
+} from "@/gql/graphql";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface RecipeFilterProps extends HTMLAttributes<HTMLDivElement> {
-  filter: RecipeSearchFilter;
-  setFilter: Dispatch<SetStateAction<RecipeSearchFilter>>;
+  setFilter: Dispatch<SetStateAction<RecipeFilterInput>>;
 }
 
-export interface FilterChildProp<K extends keyof RecipeSearchFilter> {
-  filter: RecipeSearchFilter[K];
-  updateFilter: (prop: K, value: RecipeSearchFilter[K]) => void;
-}
+const filterValidation = z.object({
+  cookTime: numericalFilterSchema,
+  categoryIds: basicItemListSchema,
+  courseIds: basicItemListSchema,
+  cuisineIds: basicItemListSchema,
+  ingredientFilters: ingredientFilterValidation,
+  ingredientFreshDays: numericalFilterSchema,
+  isFavorite: z.boolean().nullish(),
+  leftoverFreezerLife: numericalFilterSchema,
+  leftoverFridgeLife: numericalFilterSchema,
+  caloriePerServing: numericalFilterSchema,
+  carbPerServing: numericalFilterSchema,
+  fatPerServing: numericalFilterSchema,
+  alcoholPerServing: numericalFilterSchema,
+  proteinPerServing: numericalFilterSchema,
+  marinadeTime: numericalFilterSchema,
+  numOfServings: numericalFilterSchema,
+  nutrientFilters: nutrientFilterValidation,
+  prepTime: numericalFilterSchema,
+  searchTerm: z.string().nullish(),
+  totalPrepTime: numericalFilterSchema,
+});
 
-export function RecipeFilter({
-  filter,
-  setFilter,
-  ...divAttributes
-}: RecipeFilterProps) {
-  function handleFilterUpdate<K extends keyof RecipeSearchFilter>(
-    prop: K,
-    value: RecipeSearchFilter[K]
-  ) {
-    setFilter({ ...filter, [prop]: value });
+export type FilterValidationType = z.infer<typeof filterValidation>;
+
+export function RecipeFilter({ setFilter, ...rest }: RecipeFilterProps) {
+  const form = useForm<FilterValidationType>({
+    resolver: zodResolver(filterValidation),
+    defaultValues: {
+      categoryIds: [],
+      courseIds: [],
+      cuisineIds: [],
+      ingredientFilters: [],
+      ingredientFreshDays: { lte: undefined, gte: undefined },
+      isFavorite: null,
+      leftoverFreezerLife: { lte: undefined, gte: undefined },
+      leftoverFridgeLife: { lte: undefined, gte: undefined },
+      caloriePerServing: { lte: undefined, gte: undefined },
+      carbPerServing: { lte: undefined, gte: undefined },
+      fatPerServing: { lte: undefined, gte: undefined },
+      alcoholPerServing: { lte: undefined, gte: undefined },
+      proteinPerServing: { lte: undefined, gte: undefined },
+      numOfServings: { lte: undefined, gte: undefined },
+      nutrientFilters: [],
+      prepTime: { lte: undefined, gte: undefined },
+      cookTime: { lte: undefined, gte: undefined },
+      marinadeTime: { lte: undefined, gte: undefined },
+      totalPrepTime: { lte: undefined, gte: undefined },
+      searchTerm: null,
+    },
+  });
+
+  function onApply(values: FilterValidationType) {
+    // Do something with the form values.
+    // ✅ This will be type-safe and validated.
   }
 
   return (
-    <div {...divAttributes}>
-      <div className="grid grid-cols-2 gap-2 my-6">
-        <Button onClick={() => {}}>
-          <Filter className="mr-2 h-4 w-4" />
-          Apply
-        </Button>
-        <Button variant="outline" onClick={() => {}}>
-          <FilterX className="mr-2 h-4 w-4" />
-          Clear all
-        </Button>
-      </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onApply)}>
+        <div className="grid grid-cols-2 gap-2 my-6">
+          <Button type="submit">
+            <Filter className="mr-2 h-4 w-4" />
+            Apply
+          </Button>
+          <Button
+            type="reset"
+            variant="outline"
+            onClick={(e) => {
+              e.preventDefault();
+              form.reset();
+            }}
+          >
+            <FilterX className="mr-2 h-4 w-4" />
+            Clear all
+          </Button>
+        </div>
 
-      <Accordion type="single" collapsible>
-        <AccordionItem value="general">
-          <AccordionTrigger>General</AccordionTrigger>
-          <AccordionContent>
-            <div className="flex flex-col gap-4">
-              <NumericalFilter
-                id="servings"
-                name="Number of Servings"
-                min={filter.numOfServings?.gte}
-                max={filter.numOfServings?.lte}
-                onChange={(update) => {
-                  handleFilterUpdate("numOfServings", update);
-                }}
+        <Accordion type="single" collapsible>
+          <AccordionItem value="general">
+            <AccordionTrigger>General</AccordionTrigger>
+            <AccordionContent>
+              <div className="flex flex-col gap-8 px-2">
+                {/* Categories */}
+                <CheckboxFilter
+                  query={getCategoriesQuery}
+                  render={(item: GetCategoriesQuery["categories"][number]) => ({
+                    id: item.id,
+                    label: item.name,
+                  })}
+                  getList={(data) => data?.categories}
+                  title="Categories"
+                  name="categoryIds"
+                />
+
+                {/* Courses */}
+                <CheckboxFilter
+                  query={getCoursesQuery}
+                  render={(item: GetCoursesQuery["courses"][number]) => ({
+                    id: item.id,
+                    label: item.name,
+                  })}
+                  getList={(data) => data?.courses}
+                  title="Courses"
+                  name="courseIds"
+                />
+
+                {/* Cuisines */}
+                <CheckboxFilter
+                  query={getCuisinesQuery}
+                  render={(item: GetCuisinesQuery["cuisines"][number]) => ({
+                    id: item.id,
+                    label: item.name,
+                  })}
+                  getList={(data) => data?.cuisines}
+                  title="Cuisines"
+                  name="cuisineIds"
+                />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="macros">
+            <AccordionTrigger>Macros</AccordionTrigger>
+
+            <AccordionContent>
+              <NumericalFilter<FilterValidationType>
+                id="numOfServings"
+                label="Number of Servings"
               />
-              <CategoryFilter />
-              <CourseFilter />
-              <CuisineFilter />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="macros">
-          <AccordionTrigger>Macros</AccordionTrigger>
 
-          <AccordionContent>
-            <NumericalFilter
-              id="calorie"
-              name="Calories per serving (g)"
-              min={filter.macroFilter?.caloriePerServing?.gte}
-              max={filter.macroFilter?.caloriePerServing?.lte}
-              onChange={(update) => {
-                handleFilterUpdate("macroFilter", {
-                  ...filter.macroFilter,
-                  caloriePerServing: update,
-                });
-              }}
-            ></NumericalFilter>
-            <NumericalFilter
-              id="protein"
-              name="Protein per serving (g)"
-              min={filter.macroFilter?.caloriePerServing?.gte}
-              max={filter.macroFilter?.caloriePerServing?.lte}
-              onChange={(update) => {
-                handleFilterUpdate("macroFilter", {
-                  ...filter.macroFilter,
-                  protienPerServing: update,
-                });
-              }}
-            ></NumericalFilter>
-            <NumericalFilter
-              id="carbs"
-              name="Carbohydrates per serving (g)"
-              min={filter.macroFilter?.carbPerServing?.gte}
-              max={filter.macroFilter?.carbPerServing?.lte}
-              onChange={(update) => {
-                handleFilterUpdate("macroFilter", {
-                  ...filter.macroFilter,
-                  carbPerServing: update,
-                });
-              }}
-            ></NumericalFilter>
-            <NumericalFilter
-              id="fat"
-              name="Fat per serving (g)"
-              min={filter.macroFilter?.fatPerServing?.gte}
-              max={filter.macroFilter?.fatPerServing?.lte}
-              onChange={(update) => {
-                handleFilterUpdate("macroFilter", {
-                  ...filter.macroFilter,
-                  fatPerServing: update,
-                });
-              }}
-            ></NumericalFilter>
-            <NumericalFilter
-              id="alcohol"
-              name="Alcohol per serving (g)"
-              min={filter.macroFilter?.alcoholPerServing?.gte}
-              max={filter.macroFilter?.alcoholPerServing?.lte}
-              onChange={(update) => {
-                handleFilterUpdate("macroFilter", {
-                  ...filter.macroFilter,
-                  alcoholPerServing: update,
-                });
-              }}
-            ></NumericalFilter>
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="nutrients">
-          <AccordionTrigger>Nutrients</AccordionTrigger>
-
-          <AccordionContent>
-            <NutritionFilter
-              filter={filter.nutrientFilters}
-              updateFilter={handleFilterUpdate}
-            />
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem value="ingredients">
-          <AccordionTrigger>Ingredients</AccordionTrigger>
-
-          <AccordionContent>
-            <IngredientFilter
-              filter={filter.ingredientFilters}
-              updateFilter={handleFilterUpdate}
-            />
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem value="time">
-          <AccordionTrigger>Time</AccordionTrigger>
-          <AccordionContent>
-            <div className="grid gap-4">
-              <TimeNumberInput
-                id="prepTime"
-                label="Preparation time (max)"
-                value={filter.prepTime?.lte ?? 0}
-                onUpdate={(update) => {
-                  handleFilterUpdate("prepTime", { lte: update });
-                }}
+              <NumericalFilter<FilterValidationType>
+                id="caloriePerServing"
+                label="Calories per serving"
               />
-              <TimeNumberInput
-                id="marinadeTime"
-                label="Marinade time (max)"
-                value={filter.marinadeTime?.lte ?? 0}
-                onUpdate={(update) => {
-                  handleFilterUpdate("marinadeTime", { lte: update });
-                }}
+              <NumericalFilter<FilterValidationType>
+                id="carbPerServing"
+                label="Number of Servings"
               />
-              <TimeNumberInput
-                id="cookTime"
-                label="Cook time (max)"
-                value={filter.cookTime?.lte ?? 0}
-                onUpdate={(update) => {
-                  handleFilterUpdate("cookTime", { lte: update });
-                }}
+              <NumericalFilter<FilterValidationType>
+                id="fatPerServing"
+                label="Fat (g) per serving"
               />
-              <TimeNumberInput
-                id="totalTime"
-                label="Total Time (max)"
-                value={filter.totalPrepTime?.lte ?? 0}
-                onUpdate={(update) => {
-                  handleFilterUpdate("totalPrepTime", { lte: update });
-                }}
+              <NumericalFilter<FilterValidationType>
+                id="proteinPerServing"
+                label="Protein (g) per serving"
               />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </div>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="nutrients">
+            <AccordionTrigger>Nutrients</AccordionTrigger>
+
+            <AccordionContent>
+              <NutritionFilter<FilterValidationType> id="nutrientFilters" />
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="ingredients">
+            <AccordionTrigger>Ingredients</AccordionTrigger>
+
+            <AccordionContent>
+              <IngredientFilter />
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="time">
+            <AccordionTrigger>Time</AccordionTrigger>
+            <AccordionContent className="flex flex-col">
+              <div className="grid gap-4">
+                <NumericalFilter<FilterValidationType>
+                  id="prepTime"
+                  label="Prep time (mins)"
+                />
+                <NumericalFilter<FilterValidationType>
+                  id="marinadeTime"
+                  label="Marinade time (mins)"
+                />
+                <NumericalFilter<FilterValidationType>
+                  id="cookTime"
+                  label="Cook Time (mins)"
+                />
+                <NumericalFilter<FilterValidationType>
+                  id="totalPrepTime"
+                  label="Total Time (mins)"
+                />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </form>
+    </Form>
   );
 }

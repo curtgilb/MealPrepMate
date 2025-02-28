@@ -1,48 +1,44 @@
-"use client";
-import { Picker } from "@/components/picker";
-import { ItemPickerProps } from "@/components/pickers/Picker";
+import { GenericCombobox } from '@/components/combobox/GenericCombox1';
 import {
-  expirationRuleFragment,
-  getExpirationRulesQuery,
-} from "@/features/ingredient/api/ExpirationRule";
-import { useFragment } from "@/gql";
-import {
-  ExpirationRuleFieldsFragment,
-  GetExpirationRulesQuery,
-} from "@/gql/graphql";
-import { useQuery } from "@urql/next";
-import { useState } from "react";
+    expirationRuleFragment, getExpirationRulesQuery
+} from '@/features/ingredient/api/ExpirationRule';
+import { getFragmentData } from '@/gql/fragment-masking';
+import { ExpirationRuleFieldsFragment, GetExpirationRulesQuery } from '@/gql/graphql';
 
-export type ExpirationRule = GetExpirationRulesQuery["expirationRules"][number];
+interface ExpirationRulePickerProps {
+  selectedRule: ExpirationRuleFieldsFragment | null;
+  onChange: (rule: ExpirationRuleFieldsFragment | null) => void;
+}
 
 export function ExpirationRulePicker({
-  select,
-  deselect,
-  selectedIds,
-  placeholder,
-  multiselect,
-}: ItemPickerProps<ExpirationRuleFieldsFragment>) {
-  const [search, setSearch] = useState<string>();
-  const [result] = useQuery({
-    query: getExpirationRulesQuery,
-  });
-
-  const { data, fetching, error } = result;
-  const rules = useFragment(expirationRuleFragment, data?.expirationRules);
+  selectedRule,
+  onChange,
+}: ExpirationRulePickerProps) {
+  const rule = selectedRule
+    ? { ...selectedRule, label: selectedRule.name ?? "" }
+    : null;
 
   return (
-    <Picker<ExpirationRuleFieldsFragment>
-      options={rules ?? []}
-      id="id"
-      label="name"
-      autoFilter={true}
-      onSearchUpdate={setSearch}
-      placeholder={placeholder}
-      fetching={fetching}
-      multiselect={multiselect}
-      selectedIds={selectedIds}
-      select={select}
-      deselect={deselect}
+    <GenericCombobox
+      query={getExpirationRulesQuery}
+      variables={{}}
+      renderItem={(
+        item: GetExpirationRulesQuery["expirationRules"]["edges"][number]
+      ) => {
+        const rule = getFragmentData(expirationRuleFragment, item.node);
+        return {
+          ...rule,
+          label: rule.name,
+        };
+      }}
+      unwrapDataList={(list) => list?.expirationRules.edges ?? []}
+      placeholder="Select expiration rule"
+      autoFilter={false}
+      multiSelect={false}
+      selectedItems={rule ? [rule] : []}
+      onChange={(items) => {
+        onChange(items[0] ?? null);
+      }}
     />
   );
 }

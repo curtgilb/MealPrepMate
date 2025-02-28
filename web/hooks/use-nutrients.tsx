@@ -1,12 +1,12 @@
 "use client";
+import { useMemo } from "react";
 import {
   getNutrientsQuery,
   nutritionFieldsFragment,
 } from "@/features/nutrition/api/Nutrient";
-import { useFragment } from "@/gql";
+import { getFragmentData } from "@/gql";
 import { NutrientFieldsFragment } from "@/gql/graphql";
 import { useQuery } from "@urql/next";
-import { useMemo } from "react";
 
 export type NutrientMap = {
   [key: string]: NutrientFieldsFragment[];
@@ -18,56 +18,114 @@ export enum NutritionDisplayMode {
   All = "all",
 }
 
-export function useNutrients(type: NutritionDisplayMode) {
+export type NutrientWithChildren = NutrientFieldsFragment & {
+  children?: NutrientWithChildren[];
+  depth: number;
+};
+
+interface GroupedNutrients {
+  [key: string]: NutrientWithChildren[];
+}
+
+export interface UseNutrientResult {
+  grouped: GroupedNutrients;
+  flattened: NutrientWithChildren[];
+  nutrientMap: Record<string, NutrientWithChildren>;
+}
+
+export function useNutrients(type: NutritionDisplayMode): UseNutrientResult {
   const advanced = type !== NutritionDisplayMode.Basic;
   const [result, executeQuery] = useQuery({
     query: getNutrientsQuery,
     variables: {
       advanced: advanced,
+      favorites: type === NutritionDisplayMode.Favorites,
     },
   });
+
   const { data, fetching, error } = result;
-  const nutrients = useFragment(nutritionFieldsFragment, data?.nutrients);
+
+  const nutrients = getFragmentData(nutritionFieldsFragment, data?.nutrients);
 
   return useMemo(() => {
-    if (!nutrients) return {};
-    const filteredNutrients =
-      type === NutritionDisplayMode.Favorites
-        ? nutrients?.filter((nutrient) => nutrient.important)
-        : nutrients;
+    if (!nutrients) return { grouped: {}, flattened: [], nutrientMap: {} };
 
-    const childLookup = filteredNutrients.reduce((acc, nutrient) => {
-      if (nutrient.parentNutrientId) {
-        if (!(nutrient.parentNutrientId in acc)) {
-          acc[nutrient.parentNutrientId] = [];
-        }
-        acc[nutrient.parentNutrientId].push(nutrient);
+    const childrenIds = new Set<string>();
+    const nutrientMap: Record<string, NutrientWithChildren> = {};
+    const grouped: GroupedNutrients = {};
+    const flattened: NutrientWithChildren[] = [];
+    const processedForFlattened = new Set<string>();
+
+    // First pass: Create nutrient map and initialize grouped structure
+    nutrients.forEach((nutrient) => {
+      const nutrientWithDepth = {
+        ...nutrient,
+        depth: 0,
+      } as NutrientWithChildren;
+      nutrientMap[nutrient.id] = nutrientWithDepth;
+
+      if (!grouped[nutrient.type]) {
+        grouped[nutrient.type] = [];
       }
-      return acc;
-    }, {} as NutrientMap);
+      grouped[nutrient.type].push(nutrientWithDepth);
+    });
 
-    const categories = filteredNutrients
-      .filter((nutrient) => !nutrient.parentNutrientId)
-      .reduce((acc, nutrient) => {
-        if (!(nutrient.type in acc)) {
-          acc[nutrient.type] = [];
+    // Helper function to recursively add a nutrient and its children to flattened array
+    const addToFlattenedWithAncestors = (nutrientId: string) => {
+      if (processedForFlattened.has(nutrientId)) return;
+
+      const nutrient = nutrientMap[nutrientId];
+      const parentId = nutrient?.parentNutrientId;
+
+      // First process parent if it exists and hasn't been processed
+      if (parentId && !processedForFlattened.has(parentId)) {
+        addToFlattenedWithAncestors(parentId);
+      }
+
+      // Add this nutrient if it hasn't been processed
+      if (!processedForFlattened.has(nutrientId)) {
+        flattened.push(nutrient);
+        processedForFlattened.add(nutrientId);
+
+        // Process children
+        nutrient?.children?.forEach((child) => {
+          if (!processedForFlattened.has(child.id)) {
+            addToFlattenedWithAncestors(child.id);
+          }
+        });
+      }
+    };
+
+    // Second pass: Build relationships and update depths
+    nutrients.forEach((nutrient) => {
+      if (nutrient.parentNutrientId) {
+        const parent = nutrientMap[nutrient.parentNutrientId];
+        if (parent) {
+          childrenIds.add(nutrient.id);
+          if (!parent.children) parent.children = [];
+          const child = nutrientMap[nutrient.id];
+          child.depth = parent.depth + 1;
+          parent.children.push(child);
         }
-        acc[nutrient.type].push(nutrient);
-        return acc;
-      }, {} as NutrientMap);
+      }
+    });
 
-    const allNutrients = filteredNutrients.reduce((acc, cur) => {
-      acc.set(cur.id, cur);
-      return acc;
-    }, new Map<string, NutrientFieldsFragment>());
+    // Build flattened array by processing all nutrients
+    nutrients.forEach((nutrient) => {
+      addToFlattenedWithAncestors(nutrient.id);
+    });
+
+    // Filter grouped structure
+    Object.keys(grouped).forEach((type) => {
+      grouped[type] = grouped[type].filter(
+        (nutrient) => !childrenIds.has(nutrient.id)
+      );
+    });
 
     return {
-      // A map of nutrients with no parent id
-      categorized: categories,
-      // parentId -> list of nutrients with that id
-      childNutrients: childLookup,
-      // nutritionId -> nutrient
-      all: allNutrients,
+      grouped,
+      flattened,
+      nutrientMap,
     };
-  }, [nutrients, type]);
+  }, [nutrients]);
 }

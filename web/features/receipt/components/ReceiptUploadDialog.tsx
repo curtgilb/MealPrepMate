@@ -1,13 +1,14 @@
 "use client";
 
 import { Loader2, Plus } from "lucide-react";
-import { ModalDrawer } from "@/components/ModalDrawer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { graphql } from "@/gql";
 import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useState } from "react";
 import { useMutation } from "urql";
+
+import { ModalDrawerWithTrigger } from "@/components/ModalDrawerWithTrigger";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { graphql } from "@/gql";
 
 const uploadReceipt = graphql(`
   mutation uploadReceipt($file: File!) {
@@ -21,14 +22,14 @@ export function ReceiptUpload() {
   const [open, setOpen] = useState<boolean>(false);
   return (
     <>
-      <ModalDrawer
+      <ModalDrawerWithTrigger
         title="Upload receipt"
         description="Upload a photo of your grocery store receipt to add prices to ingredients"
         open={open}
         setOpen={setOpen}
         trigger={
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
+          <Button variant="secondary">
+            <Plus />
             Upload receipt
           </Button>
         }
@@ -51,7 +52,9 @@ function ReceiptUploadDialog({ open, setOpen }: ReceiptUploadDialogProps) {
   const handleFileUpload = () => {
     uploadFile({ file: selectedFile }).then((uploadResult) => {
       router.push(
-        `/ingredients/receipt/${uploadResult.data?.uploadReceipt.id}`
+        `/receipts/${decodeURIComponent(
+          uploadResult.data?.uploadReceipt.id ?? ""
+        )}`
       );
     });
   };

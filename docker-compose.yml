@@ -1,20 +1,109 @@
-version: "3.8"
-
 services:
-  app:
-    build:
-      context: .
+  nginx:
+    image: nginx:latest
     ports:
-      - 4000:4000
-      - 9229:9229
+      - "80:80"
     volumes:
-      - ./:/usr/src/app
-      - /usr/src/app/node_modules
-    command: npm run dev
-
+      - ./configuration/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      web:
+        condition: service_started
+      server:
+        condition: service_started
+      storage:
+        condition: service_started
+    networks:
+      - internal_network
   db:
     image: postgres
-    ports:
-      - 5432:5432
+    expose:
+      - 5432
+    env_file: "db.env"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    networks:
+      - internal_network
+  redis:
+    image: redis
+    expose:
+      - 6379
+    volumes:
+      - ./redis:/data
+    networks:
+      - internal_network
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    # volumes:
+    #   - ./:/app
+    expose:
+      - 3025
+    env_file:
+      - "server.env"
+      - "db.env"
+      - "storage.env"
     environment:
-      POSTGRES_PASSWORD: pass1
+      - STORAGE_URL="http://storage:9000"
+      - NLP_URL="http://recipe_nlp"
+      - REDIS_HOST=redis
+      - MINIO_HOST=storage
+      - MINIO_PORT=9000
+      - REDIS_PORT=6379
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - internal_network
+  web:
+    build:
+      context: ./web
+      target: dev
+    volumes:
+      - ./web:/usr/src/app/
+    expose:
+      - 3000
+    environment:
+      - SSR_API_ENDPOINT=http://server:3025/graphql
+      - NEXT_PUBLIC_CLIENT_API_URL=http://localhost/api/graphql
+    depends_on:
+      server:
+        condition: service_started
+    command: npm run dev
+    networks:
+      - internal_network
+
+  cloudbeaver:
+    image: dbeaver/cloudbeaver
+    expose:
+      - 8978
+    volumes:
+      - ./cloudbeaver/workspace:/opt/cloudbeaver/workspace
+    networks:
+      - internal_network
+  recipe_nlp:
+    build:
+      context: ./recipe_nlp
+    expose:
+      - 80
+    networks:
+      - internal_network
+  storage:
+    image: minio/minio
+    expose:
+      - 9000
+    volumes:
+      - ./storage:/mnt/data
+    env_file: "storage.env"
+    command: minio server --console-address ":9090" /mnt/data
+    networks:
+      - internal_network
+networks:
+  internal_network:
+    driver: bridge
