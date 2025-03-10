@@ -1,0 +1,95 @@
+{
+    "tests": [
+        {
+            "input": {
+                "ingredients": [
+                    "4 tablespoons butter (330 grams)"
+                ]
+            },
+            "output": {
+                "ingredients": [
+                    {
+                        "ingredient": {
+                            "text": "butter",
+                            "start": 14,
+                            "end": 19,
+                            "singular_ingredient": "butter"
+                        },
+                        "amounts": [
+                            {
+                                "quantity": {
+                                    "text": "4",
+                                    "start": 0,
+                                    "end": 0,
+                                    "value": 4
+                                },
+                                "max_quantity": null,
+                                "amount_text": {
+                                    "text": "4 tablespoons",
+                                    "start": 0,
+                                    "end": 12
+                                },
+                                "unit": {
+                                    "text": "tablespoons",
+                                    "start": 2,
+                                    "end": 12
+                                }
+                            },
+                            {
+                                "quantity": {
+                                    "text": "330",
+                                    "start": 22,
+                                    "end": 24,
+                                    "value": 330
+                                },
+                                "max_quantity": null,
+                                "amount_text": {
+                                    "text": "330 grams)",
+                                    "start": 22,
+                                    "end": 31
+                                },
+                                "unit": {
+                                    "text": "grams)",
+                                    "start": 26,
+                                    "end": 30
+                                }
+                            }
+                        ],
+                        "sentence": "4 tablespoons butter (330 grams)"
+                    }
+                ]
+            },
+            "description": "Alternate measurement in parenthesis"
+        },
+        {
+            "input": {},
+            "output": {},
+            "description": "Test different fractions"
+        },
+        {
+            "input": {},
+            "output": {},
+            "description": "Test different fractions"
+        },
+        {
+            "input": {},
+            "output": {},
+            "description": "Test different fractions"
+        },
+        {
+            "input": {},
+            "output": {},
+            "description": "Test different fractions"
+        },
+        {
+            "input": {},
+            "output": {},
+            "description": "Test different fractions"
+        },
+        {
+            "input": {},
+            "output": {},
+            "description": "Test different fractions"
+        },
+    ]
+}

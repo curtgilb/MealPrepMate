@@ -1,0 +1,215 @@
+{
+    "tests": [
+        {
+            "input": {
+                "ingredients": [
+                    "1 tbsp plus 1 tsp butter"
+                ]
+            },
+            "output": {
+                "ingredients": [
+                    {
+                        "ingredient": {
+                            "text": "butter",
+                            "start": 18,
+                            "end": 23,
+                            "singular_ingredient": "butter"
+                        },
+                        "amounts": [
+                            {
+                                "quantities": [
+                                    {
+                                        "quantity": {
+                                            "text": "1",
+                                            "start": 0,
+                                            "end": 0,
+                                            "value": 1
+                                        },
+                                        "max_quantity": null,
+                                        "amount_text": {
+                                            "text": "1 tbsp",
+                                            "start": 0,
+                                            "end": 5
+                                        },
+                                        "unit": {
+                                            "text": "tbsp",
+                                            "start": 2,
+                                            "end": 5
+                                        }
+                                    },
+                                    {
+                                        "quantity": {
+                                            "text": "1",
+                                            "start": 12,
+                                            "end": 12,
+                                            "value": 1
+                                        },
+                                        "max_quantity": null,
+                                        "amount_text": {
+                                            "text": "1 tsp",
+                                            "start": 12,
+                                            "end": 16
+                                        },
+                                        "unit": {
+                                            "text": "tsp",
+                                            "start": 14,
+                                            "end": 16
+                                        }
+                                    }
+                                ],
+                                "amount_text": {
+                                    "text": "1 tbsp plus 1 tsp",
+                                    "start": 0,
+                                    "end": 16
+                                }
+                            }
+                        ],
+                        "sentence": "1 tbsp plus 1 tsp butter"
+                    }
+                ]
+            },
+            "description": "Basic composite amount (plus)"
+        },
+        {
+            "input": {
+                "ingredients": [
+                    "2 cups + 3 tbsp sugar"
+                ]
+            },
+            "output": {
+                "ingredients": [
+                    {
+                        "ingredient": {
+                            "text": "sugar",
+                            "start": 16,
+                            "end": 20,
+                            "singular_ingredient": "sugar"
+                        },
+                        "amounts": [
+                            {
+                                "quantities": [
+                                    {
+                                        "quantity": {
+                                            "text": "2",
+                                            "start": 0,
+                                            "end": 0,
+                                            "value": 2
+                                        },
+                                        "max_quantity": null,
+                                        "amount_text": {
+                                            "text": "2 cups",
+                                            "start": 0,
+                                            "end": 5
+                                        },
+                                        "unit": {
+                                            "text": "cups",
+                                            "start": 2,
+                                            "end": 5
+                                        }
+                                    },
+                                    {
+                                        "quantity": {
+                                            "text": "3",
+                                            "start": 9,
+                                            "end": 9,
+                                            "value": 3
+                                        },
+                                        "max_quantity": null,
+                                        "amount_text": {
+                                            "text": "3 tbsp sugar",
+                                            "start": 9,
+                                            "end": 20
+                                        },
+                                        "unit": null
+                                    }
+                                ],
+                                "amount_text": {
+                                    "text": "2 cups + 3 tbsp sugar",
+                                    "start": 0,
+                                    "end": 20
+                                }
+                            }
+                        ],
+                        "sentence": "2 cups + 3 tbsp sugar"
+                    }
+                ]
+            },
+            "description": "Test different fractions"
+        },
+        {
+            "input": {
+                "ingredients": [
+                    "1/2 cup and 2 tbsp milk"
+                ]
+            },
+            "output": {
+                "ingredients": [
+                    {
+                        "ingredient": {
+                            "text": "sugar",
+                            "start": 16,
+                            "end": 20,
+                            "singular_ingredient": "sugar"
+                        },
+                        "amounts": [
+                            {
+                                "quantities": [
+                                    {
+                                        "quantity": {
+                                            "text": "2",
+                                            "start": 0,
+                                            "end": 0,
+                                            "value": 2
+                                        },
+                                        "max_quantity": null,
+                                        "amount_text": {
+                                            "text": "2 cups",
+                                            "start": 0,
+                                            "end": 5
+                                        },
+                                        "unit": {
+                                            "text": "cups",
+                                            "start": 2,
+                                            "end": 5
+                                        }
+                                    },
+                                    {
+                                        "quantity": {
+                                            "text": "3",
+                                            "start": 9,
+                                            "end": 9,
+                                            "value": 3
+                                        },
+                                        "max_quantity": null,
+                                        "amount_text": {
+                                            "text": "3 tbsp sugar",
+                                            "start": 9,
+                                            "end": 20
+                                        },
+                                        "unit": null
+                                    }
+                                ],
+                                "amount_text": {
+                                    "text": "2 cups + 3 tbsp sugar",
+                                    "start": 0,
+                                    "end": 20
+                                }
+                            }
+                        ],
+                        "sentence": "2 cups + 3 tbsp sugar"
+                    }
+                ]
+            },
+            "description": "Test different fractions"
+        },
+        {
+            "input": {
+                "ingredients": [
+                    "1/2 cup and 2 tbsp milk"
+                ]
+            },
+            "output": {},
+            "description": "Test different fractions"
+        }
+    ]
+}

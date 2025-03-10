@@ -1,0 +1,43 @@
+{
+    "tests": [
+        "1 1/2 tablespoons cumin",
+        "1\u00bd tablespoons cumin",
+        "1&frac12; tablespoons cumin",
+        "1.5 tablespoons cumin",
+        "1½ tablespoons cumin"
+    ],
+    "output": {
+        "ingredients": [
+            {
+                "ingredient": {
+                    "text": "cumin",
+                    "start": 16,
+                    "end": 20,
+                    "singular_ingredient": "cumin"
+                },
+                "amounts": [
+                    {
+                        "quantity": {
+                            "text": "1.5",
+                            "start": 0,
+                            "end": 2,
+                            "value": 1.5
+                        },
+                        "max_quantity": null,
+                        "amount_text": {
+                            "text": "1.5 tablespoons",
+                            "start": 0,
+                            "end": 14
+                        },
+                        "unit": {
+                            "text": "tablespoons",
+                            "start": 4,
+                            "end": 14
+                        }
+                    }
+                ],
+                "sentence": "1.5 tablespoons cumin"
+            }
+        ]
+    }
+}

@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=mealprepmate
+      - POSTGRES_USER=application
+  cloudbeaver:
+    image: dbeaver/cloudbeaver:latest
+    ports:
+      - 8080:8978
+    volumes:
+      - ./cloudbeaver/workspace:/opt/cloudbeaver/workspace
+  # recipe_nlp:
+  #   build:
+  #     context: ./recipe_nlp
+  #   ports:
+  #     - 8000:80
+  # storage:
+  #   image: minio/minio
+  #   ports:
+  #     - 9000:9000
+  #     - 9090:9090
+  #   volumes:
+  #     - ./storage:/mnt/data
+  #   command: minio server --console-address ":9090" /mnt/data
+  #   environment:
+  #     - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+  #     - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}

@@ -1,0 +1,365 @@
+
+   FastAPI   Starting development server 🚀
+ 
+             Searching for package file structure from directories with 
+             __init__.py files
+[nltk_data] Downloading package averaged_perceptron_tagger_eng to
+[nltk_data]     /root/nltk_data...
+[nltk_data]   Unzipping taggers/averaged_perceptron_tagger_eng.zip.
+Downloading required NLTK resource: averaged_perceptron_tagger_eng
+             Importing from /workspace/nlp
+ 
+    module   🐍 main.py
+ 
+      code   Importing the FastAPI app object from the module with the following
+             code:
+ 
+             from main import app
+ 
+       app   Using import string: main:app
+ 
+    server   Server started at http://127.0.0.1:7654
+    server   Documentation at http://127.0.0.1:7654/docs
+ 
+       tip   Running in development mode, for production use: fastapi run
+ 
+             Logs:
+ 
+      INFO   Will watch for changes in these directories: ['/workspace/nlp']
+2025-03-01 10:28:32,385 - uvicorn.error - INFO - Will watch for changes in these directories: ['/workspace/nlp']
+      INFO   Uvicorn running on http://127.0.0.1:7654 (Press CTRL+C to quit)
+2025-03-01 10:28:32,387 - uvicorn.error - INFO - Uvicorn running on http://127.0.0.1:7654 (Press CTRL+C to quit)
+      INFO   Started reloader process [817] using WatchFiles
+2025-03-01 10:28:32,388 - uvicorn.error - INFO - Started reloader process [817] using WatchFiles
+      INFO   Started server process [1005]
+2025-03-01 10:28:35,697 - uvicorn.error - INFO - Started server process [1005]
+      INFO   Waiting for application startup.
+2025-03-01 10:28:35,701 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:28:35,702 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'main.py'. Reloading...
+2025-03-01 10:31:42,734 - uvicorn.error - WARNING - WatchFiles detected changes in 'main.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 10:31:42,816 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 10:31:42,917 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 10:31:42,919 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [1005]
+2025-03-01 10:31:42,920 - uvicorn.error - INFO - Finished server process [1005]
+      INFO   Started server process [1713]
+2025-03-01 10:31:46,180 - uvicorn.error - INFO - Started server process [1713]
+      INFO   Waiting for application startup.
+2025-03-01 10:31:46,184 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:31:46,186 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'dto/IngredientResponse.py'. 
+             Reloading...
+2025-03-01 10:32:34,279 - uvicorn.error - WARNING - WatchFiles detected changes in 'dto/IngredientResponse.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 10:32:34,295 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 10:32:34,396 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 10:32:34,397 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [1713]
+2025-03-01 10:32:34,398 - uvicorn.error - INFO - Finished server process [1713]
+      INFO   Started server process [1957]
+2025-03-01 10:32:37,748 - uvicorn.error - INFO - Started server process [1957]
+      INFO   Waiting for application startup.
+2025-03-01 10:32:37,751 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:32:37,752 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'parser/IngredientParser.py'. 
+             Reloading...
+2025-03-01 10:33:12,832 - uvicorn.error - WARNING - WatchFiles detected changes in 'parser/IngredientParser.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 10:33:12,928 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 10:33:13,030 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 10:33:13,032 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [1957]
+2025-03-01 10:33:13,033 - uvicorn.error - INFO - Finished server process [1957]
+      INFO   Started server process [2128]
+2025-03-01 10:33:16,337 - uvicorn.error - INFO - Started server process [2128]
+      INFO   Waiting for application startup.
+2025-03-01 10:33:16,341 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:33:16,342 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'main.py'. Reloading...
+2025-03-01 10:33:33,732 - uvicorn.error - WARNING - WatchFiles detected changes in 'main.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 10:33:33,784 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 10:33:33,885 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 10:33:33,886 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [2128]
+2025-03-01 10:33:33,887 - uvicorn.error - INFO - Finished server process [2128]
+      INFO   Started server process [2248]
+2025-03-01 10:33:37,204 - uvicorn.error - INFO - Started server process [2248]
+      INFO   Waiting for application startup.
+2025-03-01 10:33:37,208 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:33:37,209 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'main.py'. Reloading...
+2025-03-01 10:33:43,314 - uvicorn.error - WARNING - WatchFiles detected changes in 'main.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 10:33:43,322 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 10:33:43,424 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 10:33:43,425 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [2248]
+2025-03-01 10:33:43,427 - uvicorn.error - INFO - Finished server process [2248]
+      INFO   Started server process [2335]
+2025-03-01 10:33:46,724 - uvicorn.error - INFO - Started server process [2335]
+      INFO   Waiting for application startup.
+2025-03-01 10:33:46,727 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:33:46,728 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'main.py'. Reloading...
+2025-03-01 10:34:17,051 - uvicorn.error - WARNING - WatchFiles detected changes in 'main.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 10:34:17,100 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 10:34:17,202 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 10:34:17,203 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [2335]
+2025-03-01 10:34:17,204 - uvicorn.error - INFO - Finished server process [2335]
+      INFO   Started server process [2531]
+2025-03-01 10:34:20,488 - uvicorn.error - INFO - Started server process [2531]
+      INFO   Waiting for application startup.
+2025-03-01 10:34:20,492 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:34:20,493 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'parser/IngredientParser.py'. 
+             Reloading...
+2025-03-01 10:35:47,387 - uvicorn.error - WARNING - WatchFiles detected changes in 'parser/IngredientParser.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 10:35:47,391 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 10:35:47,493 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 10:35:47,495 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [2531]
+2025-03-01 10:35:47,496 - uvicorn.error - INFO - Finished server process [2531]
+      INFO   Started server process [2926]
+2025-03-01 10:35:50,789 - uvicorn.error - INFO - Started server process [2926]
+      INFO   Waiting for application startup.
+2025-03-01 10:35:50,792 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:35:50,793 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'parser/IngredientParser.py'. 
+             Reloading...
+2025-03-01 10:35:52,714 - uvicorn.error - WARNING - WatchFiles detected changes in 'parser/IngredientParser.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 10:35:52,798 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 10:35:52,900 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 10:35:52,901 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [2926]
+2025-03-01 10:35:52,902 - uvicorn.error - INFO - Finished server process [2926]
+      INFO   Started server process [2977]
+2025-03-01 10:35:56,184 - uvicorn.error - INFO - Started server process [2977]
+      INFO   Waiting for application startup.
+2025-03-01 10:35:56,188 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:35:56,189 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'main.py'. Reloading...
+2025-03-01 10:40:09,692 - uvicorn.error - WARNING - WatchFiles detected changes in 'main.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 10:40:09,769 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 10:40:09,871 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 10:40:09,872 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [2977]
+2025-03-01 10:40:09,873 - uvicorn.error - INFO - Finished server process [2977]
+      INFO   Started server process [3955]
+2025-03-01 10:40:13,213 - uvicorn.error - INFO - Started server process [3955]
+      INFO   Waiting for application startup.
+2025-03-01 10:40:13,217 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:40:13,218 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'parser/IngredientParser.py'. 
+             Reloading...
+2025-03-01 10:41:44,914 - uvicorn.error - WARNING - WatchFiles detected changes in 'parser/IngredientParser.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 10:41:44,923 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 10:41:45,024 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 10:41:45,026 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [3955]
+2025-03-01 10:41:45,026 - uvicorn.error - INFO - Finished server process [3955]
+      INFO   Started server process [4304]
+2025-03-01 10:41:48,336 - uvicorn.error - INFO - Started server process [4304]
+      INFO   Waiting for application startup.
+2025-03-01 10:41:48,341 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:41:48,342 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'parser/IngredientParser.py'. 
+             Reloading...
+2025-03-01 10:46:49,919 - uvicorn.error - WARNING - WatchFiles detected changes in 'parser/IngredientParser.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 10:46:50,008 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 10:46:50,110 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 10:46:50,112 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [4304]
+2025-03-01 10:46:50,113 - uvicorn.error - INFO - Finished server process [4304]
+      INFO   Started server process [5352]
+2025-03-01 10:46:53,588 - uvicorn.error - INFO - Started server process [5352]
+      INFO   Waiting for application startup.
+2025-03-01 10:46:53,592 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:46:53,593 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'parser/IngredientParser.py'. 
+             Reloading...
+2025-03-01 10:48:02,563 - uvicorn.error - WARNING - WatchFiles detected changes in 'parser/IngredientParser.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 10:48:02,647 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 10:48:02,749 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 10:48:02,750 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [5352]
+2025-03-01 10:48:02,751 - uvicorn.error - INFO - Finished server process [5352]
+      INFO   Started server process [5639]
+2025-03-01 10:48:06,205 - uvicorn.error - INFO - Started server process [5639]
+      INFO   Waiting for application startup.
+2025-03-01 10:48:06,210 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:48:06,212 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'parser/IngredientParser.py'. 
+             Reloading...
+2025-03-01 10:48:20,042 - uvicorn.error - WARNING - WatchFiles detected changes in 'parser/IngredientParser.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 10:48:20,141 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 10:48:20,243 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 10:48:20,244 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [5639]
+2025-03-01 10:48:20,245 - uvicorn.error - INFO - Finished server process [5639]
+      INFO   Started server process [5749]
+2025-03-01 10:48:23,533 - uvicorn.error - INFO - Started server process [5749]
+      INFO   Waiting for application startup.
+2025-03-01 10:48:23,537 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:48:23,538 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'parser/IngredientParser.py'. 
+             Reloading...
+2025-03-01 10:48:28,520 - uvicorn.error - WARNING - WatchFiles detected changes in 'parser/IngredientParser.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 10:48:28,551 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 10:48:28,652 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 10:48:28,654 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [5749]
+2025-03-01 10:48:28,655 - uvicorn.error - INFO - Finished server process [5749]
+      INFO   Started server process [5830]
+2025-03-01 10:48:31,918 - uvicorn.error - INFO - Started server process [5830]
+      INFO   Waiting for application startup.
+2025-03-01 10:48:31,922 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:48:31,923 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'parser/IngredientParser.py'. 
+             Reloading...
+2025-03-01 10:48:37,680 - uvicorn.error - WARNING - WatchFiles detected changes in 'parser/IngredientParser.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 10:48:37,735 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 10:48:37,835 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 10:48:37,837 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [5830]
+2025-03-01 10:48:37,838 - uvicorn.error - INFO - Finished server process [5830]
+      INFO   Started server process [5919]
+2025-03-01 10:48:41,129 - uvicorn.error - INFO - Started server process [5919]
+      INFO   Waiting for application startup.
+2025-03-01 10:48:41,133 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:48:41,134 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'parser/IngredientParser.py'. 
+             Reloading...
+2025-03-01 10:50:36,629 - uvicorn.error - WARNING - WatchFiles detected changes in 'parser/IngredientParser.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 10:50:36,692 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 10:50:36,793 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 10:50:36,795 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [5919]
+2025-03-01 10:50:36,796 - uvicorn.error - INFO - Finished server process [5919]
+      INFO   Started server process [6352]
+2025-03-01 10:50:40,104 - uvicorn.error - INFO - Started server process [6352]
+      INFO   Waiting for application startup.
+2025-03-01 10:50:40,107 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:50:40,108 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'parser/IngredientParser.py'. 
+             Reloading...
+2025-03-01 10:51:23,697 - uvicorn.error - WARNING - WatchFiles detected changes in 'parser/IngredientParser.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 10:51:23,711 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 10:51:23,813 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 10:51:23,814 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [6352]
+2025-03-01 10:51:23,815 - uvicorn.error - INFO - Finished server process [6352]
+      INFO   Started server process [6564]
+2025-03-01 10:51:27,114 - uvicorn.error - INFO - Started server process [6564]
+      INFO   Waiting for application startup.
+2025-03-01 10:51:27,118 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:51:27,119 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'experiment.py'. Reloading...
+2025-03-01 10:56:59,102 - uvicorn.error - WARNING - WatchFiles detected changes in 'experiment.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 10:56:59,174 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 10:56:59,276 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 10:56:59,278 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [6564]
+2025-03-01 10:56:59,279 - uvicorn.error - INFO - Finished server process [6564]
+      INFO   Started server process [7702]
+2025-03-01 10:57:02,545 - uvicorn.error - INFO - Started server process [7702]
+      INFO   Waiting for application startup.
+2025-03-01 10:57:02,549 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 10:57:02,550 - uvicorn.error - INFO - Application startup complete.
+   WARNING   WatchFiles detected changes in 'parser/IngredientParser.py'. 
+             Reloading...
+2025-03-01 11:01:38,415 - uvicorn.error - WARNING - WatchFiles detected changes in 'parser/IngredientParser.py'. Reloading...
+      INFO   Shutting down
+2025-03-01 11:01:38,453 - uvicorn.error - INFO - Shutting down
+      INFO   Waiting for application shutdown.
+2025-03-01 11:01:38,554 - uvicorn.error - INFO - Waiting for application shutdown.
+      INFO   Application shutdown complete.
+2025-03-01 11:01:38,556 - uvicorn.error - INFO - Application shutdown complete.
+      INFO   Finished server process [7702]
+2025-03-01 11:01:38,557 - uvicorn.error - INFO - Finished server process [7702]
+   WARNING   WatchFiles detected changes in 'parser/IngredientParser.py'. 
+             Reloading...
+2025-03-01 11:01:40,219 - uvicorn.error - WARNING - WatchFiles detected changes in 'parser/IngredientParser.py'. Reloading...
+      INFO   Started server process [8703]
+2025-03-01 11:01:42,174 - uvicorn.error - INFO - Started server process [8703]
+      INFO   Waiting for application startup.
+2025-03-01 11:01:42,178 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 11:01:42,179 - uvicorn.error - INFO - Application startup complete.
+      INFO   Started server process [8757]
+2025-03-01 11:01:45,519 - uvicorn.error - INFO - Started server process [8757]
+      INFO   Waiting for application startup.
+2025-03-01 11:01:45,522 - uvicorn.error - INFO - Waiting for application startup.
+      INFO   Application startup complete.
+2025-03-01 11:01:45,523 - uvicorn.error - INFO - Application startup complete.
