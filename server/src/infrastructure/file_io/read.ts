@@ -14,9 +14,8 @@ function getFileContentsFromStream(
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     let fileData = "";
-    const fullPath = getPath(filePath);
 
-    const readStream = fs.createReadStream(fullPath, { encoding });
+    const readStream = fs.createReadStream(filePath, { encoding });
 
     readStream.on("data", (chunk) => {
       fileData += chunk;

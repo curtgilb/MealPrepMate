@@ -21,69 +21,70 @@ d91b5dd1-db1f-4b5e-a094-6d65f1c488e5,Sucrose,FALSE,FALSE,gram,TRUE,18,,,Carbohyd
 668cc76c-459b-4a0c-a3e8-136d4c6acb60,Sugar Alcohol,FALSE,FALSE,gram,TRUE,20,,,Carbohydrate,Total Carbohydrates
 cee7f055-ca23-4fc8-9d26-13c9f666f53c,Net Carbs,FALSE,FALSE,gram,TRUE,21,,,Carbohydrate,Total Carbohydrates
 1970c0ef-fc55-49ee-8ee3-228f5e061acb,Total Fat,FALSE,TRUE,gram,FALSE,22,,,Fat,
-1d3f287e-4e49-4646-b1f2-2f02cee4eb3d,Monounsaturated Fat,FALSE,FALSE,gram,FALSE,23,,,Fat,Total Fat
-408c1306-5eb8-4a85-aa0e-13c6c8573eb7,Polyunsaturated Fat,FALSE,FALSE,gram,FALSE,24,,,Fat,Total Fat
-80514162-dec7-4dcc-918b-07833c6417a8,Omega-3,FALSE,FALSE,gram,TRUE,25,,α-Linolenic Acid,Fat,Polyunsaturated Fat
-c2a43103-dd21-4d70-81dd-0d283ebfd432,Omega-6,FALSE,FALSE,gram,TRUE,26,,Linoleic Acid,Fat,Polyunsaturated Fat
-036b12f3-651f-443a-b716-af604998b9ae,Saturated Fat,TRUE,FALSE,gram,FALSE,27,,,Fat,Total Fat
-b212337c-2a42-4620-a4bb-cbb2a3cbea67,Trans Fat,TRUE,FALSE,gram,FALSE,28,,,Fat,Total Fat
-71bf849f-dae3-45b2-9d61-41c76d540024,Cholesterol,FALSE,FALSE,miligram,FALSE,29,,,Fat,
-90424ab4-ffa3-44bf-be67-9daae60231a7,Phytosterol,FALSE,FALSE,miligram,TRUE,30,,,Fat,
-bc012bd3-8792-40c1-a2eb-a890600f6677,Protein,FALSE,TRUE,gram,FALSE,31,"Based on g protein per kg of body weight for the reference body weight, e.g., for adults 0.8 g/kg body weight for the reference body weight.",,Protein,
-3f0ff690-abfe-4481-a5c7-a58503d745ce,Alanine,FALSE,FALSE,gram,TRUE,32,,,Protein,Protein
-0fe8e034-2ef9-4447-8177-8ee863da96f2,Arginine,FALSE,FALSE,gram,TRUE,33,,,Protein,Protein
-06418c9d-df31-41aa-9eb3-05a827587727,Aspartic acid,FALSE,FALSE,gram,TRUE,34,,,Protein,Protein
-f199476f-27d8-4937-a107-9b8a8bffcc71,Cystine,FALSE,FALSE,gram,TRUE,35,,,Protein,Protein
-8ab8a575-55d6-483d-807c-d66db963b80c,Glutamic acid,FALSE,FALSE,gram,TRUE,36,,,Protein,Protein
-d1090333-2a9c-4de8-a935-d494575ae223,Glycine,FALSE,FALSE,gram,TRUE,37,,,Protein,Protein
-cb676fa8-326d-429f-999e-58256bd58b2c,Histidine,FALSE,FALSE,gram,TRUE,38,,,Protein,Protein
-332dde4e-1c0b-4000-9021-7dfd306f33fc,Hydroxyproline,FALSE,FALSE,gram,TRUE,39,,,Protein,Protein
-d7069178-b266-4513-9467-4178216ea199,Isoleucine,FALSE,FALSE,gram,TRUE,40,,,Protein,Protein
-0ee0933d-ec6d-4e36-820c-bab1bddec34d,Leucine,FALSE,FALSE,gram,TRUE,41,,,Protein,Protein
-c84c2135-770e-4a3c-8b2f-da54bfcd42c9,Lysine,FALSE,FALSE,gram,TRUE,42,,,Protein,Protein
-0af0dfd7-b550-4c57-abee-a0337d39418b,Methionine,FALSE,FALSE,calorie,TRUE,43,,,Protein,Protein
-d8c5ea52-650d-42ef-9678-4cc4bd8f74ab,Phenylalanine,FALSE,FALSE,gram,TRUE,44,,,Protein,Protein
-615afde8-630f-4e80-a9b2-12dcd8263126,Proline,FALSE,FALSE,gram,TRUE,45,,,Protein,Protein
-234851fb-ae88-4308-89f7-6a480416e1bd,Serine,FALSE,FALSE,gram,TRUE,46,,,Protein,Protein
-b869b2ce-7e89-4457-bc4b-b1908a353ec8,Threonine,FALSE,FALSE,gram,TRUE,47,,,Protein,Protein
-6feb6775-1cbc-410b-8511-1e1e6d3f3018,Tryptophan,FALSE,FALSE,gram,TRUE,48,,,Protein,Protein
-cfa6cf19-9fbb-45ca-872b-654c34b30bfc,Tyrosine,FALSE,FALSE,gram,TRUE,49,,,Protein,Protein
-cfda615d-7a7b-4afc-8005-e516be80ac24,Valine,FALSE,FALSE,gram,TRUE,50,,,Protein,Protein
-c4598973-edb8-45b8-9d1c-568d11706286,Thiamin,FALSE,FALSE,miligram,TRUE,51,,Vitamin B1,Vitamin,
-f16ecf94-5760-4fe7-ac93-dfee39f74e19,Riboflavin,FALSE,FALSE,miligram,TRUE,52,,Vitamin B2,Vitamin,
-82672c18-f436-4048-9d09-e3c6997cad8a,Niacin,FALSE,FALSE,miligram,TRUE,53,,Vitamin B3,Vitamin,
-e5e26bc1-89c2-4c87-be0a-f4e9d6faf99b,Pantothenic Acid,FALSE,FALSE,miligram,TRUE,54,,Vitamin B5,Vitamin,
-c96a1c52-6ed9-4bcb-ac24-a51305ea348b,Pyridoxine,FALSE,FALSE,miligram,TRUE,55,,Vitamin B6,Vitamin,
-0707ff7b-e961-4ac4-b856-8ec71b60a957,Cobalamin,FALSE,FALSE,microgram,TRUE,56,,Vitamin B12,Vitamin,
-e8b21fc3-5e4a-4993-9506-ca4ee00c3812,Biotin,FALSE,FALSE,microgram,TRUE,57,,,Vitamin,
-c094240d-b870-43b2-b30b-58b8afe997fd,Choline,FALSE,FALSE,miligram,TRUE,58,,,Vitamin,
-d1003ee8-6012-47bd-b300-ceeba70a2a6c,Folate,FALSE,FALSE,microgram,TRUE,59,,Vitamin B9,Vitamin,
-da4d4dd6-f827-42b4-b12b-fe2ae372b7c0,Vitamin A,TRUE,FALSE,microgram,TRUE,60,,,Vitamin,
-2160c29d-f509-47b3-a39e-61e7b7ad1a4f,Alpha-carotene,FALSE,FALSE,microgram,TRUE,61,,,Vitamin,Vitamin A
-bcdf9e25-53b7-4b84-b4b7-64b9337e0f5f,Beta-carotene,FALSE,FALSE,microgram,TRUE,62,,,Vitamin,Vitamin A
-caaea020-90ec-49f2-8298-1ff78a32a8fe,Beta-cryptoxanthin,FALSE,FALSE,microgram,TRUE,63,,,Vitamin,Vitamin A
-278e14cd-17a2-4354-a5b0-dc1051dcd935,Lutein+Zeaxanthin,FALSE,FALSE,microgram,TRUE,64,,,Vitamin,Vitamin A
-71217b0c-d80d-472c-9ff8-9d6ecce1c726,Lycopene,FALSE,FALSE,microgram,TRUE,65,,,Vitamin,Vitamin A
-80b634b3-994a-4e5a-8766-3d8712c15595,Retinol,FALSE,FALSE,microgram,TRUE,66,,,Vitamin,
-55a450c0-53d4-4abe-8614-3f84bf992f20,Vitamin C,TRUE,FALSE,miligram,TRUE,67,,,Vitamin,
-e51e0555-bd31-43ec-87d6-b69ccf94fe8a,Vitamin D,TRUE,FALSE,microgram,FALSE,68,,,Vitamin,
-9c98797f-1893-49f9-b6cd-2b50a53ac142,Vitamin E,TRUE,FALSE,miligram,TRUE,69,,,Vitamin,
-d6e799a5-4c5c-40e3-8261-5879934cdb04,Beta Tocopherol,FALSE,FALSE,miligram,TRUE,70,,,Vitamin,Vitamin E
-9bfabedc-3896-4077-9ec7-dac8879f209b,Delta Tocopherol,FALSE,FALSE,miligram,TRUE,71,,,Vitamin,Vitamin E
-2dc26519-5dbb-479a-9aab-053ca3ed6d36,Gamma Tocopherol,FALSE,FALSE,miligram,TRUE,72,,,Vitamin,Vitamin E
-41048c3d-57b4-4be8-a1e4-5068f86cecab,Vitamin K,FALSE,FALSE,microgram,TRUE,73,,,Vitamin,
-1ebb60b1-0c43-42ee-a198-c89207fbea02,Calcium,FALSE,FALSE,miligram,FALSE,74,,,Mineral,
-d2a6f60f-f0d2-4294-86a6-9469987dbf6c,Chloride,FALSE,FALSE,gram,TRUE,75,,,Mineral,
-50b587d4-ee31-4536-9cc7-55db86600ca2,Chromium,FALSE,FALSE,microgram,TRUE,76,,,Mineral,
-68a9025b-c83c-4dd6-a2e7-8148a87648b5,Copper,FALSE,FALSE,microgram,TRUE,77,,,Mineral,
-312e0d59-b844-4af9-b8ac-609b46eb2e52,Fluoride,FALSE,FALSE,miligram,TRUE,78,,,Mineral,
-ad20f4f1-97c9-423f-9b9d-b2fd3585526e,Iodine,FALSE,FALSE,microgram,TRUE,79,,,Mineral,
-03d691c4-71c9-4ed9-adbe-30f6a642df08,Iron,FALSE,FALSE,miligram,FALSE,80,,,Mineral,
-38615d24-cf5d-48b6-b71c-df60e97f5c15,Magnesium,TRUE,FALSE,miligram,TRUE,81,,,Mineral,
-8bc0e4d9-c153-4127-8212-290a248cbc0f,Manganese,FALSE,FALSE,miligram,TRUE,82,,,Mineral,
-5f985f64-be5e-492a-8325-e598966d26c9,Molybdenum,FALSE,FALSE,microgram,TRUE,83,,,Mineral,
-9c39cb12-03c3-4870-a385-7ddf2bccb319,Phosphorus,FALSE,FALSE,miligram,TRUE,84,,,Mineral,
-4e9d4a3e-b8a9-464f-856a-3268ddd47c27,Potassium,TRUE,FALSE,miligram,FALSE,85,,,Mineral,
-8c659478-f2d1-41de-8c93-a1e5b436c17a,Selenium,FALSE,FALSE,microgram,TRUE,86,,,Mineral,
-485b501a-0f5c-4a2e-8abb-b9f3dae79ada,Sodium,TRUE,FALSE,miligram,FALSE,87,,,Mineral,
-2b29844f-7cca-4317-b88e-5ec1b8e78380,Zinc,FALSE,FALSE,miligram,TRUE,88,,,Mineral,
+2b2c5260-ad52-4aa0-99d7-5a72b0e20c1e,Unsaturated Fat,FALSE,FALSE,gram,FALSE,23,,,Fat,Total Fat
+1d3f287e-4e49-4646-b1f2-2f02cee4eb3d,Monounsaturated Fat,FALSE,FALSE,gram,FALSE,24,,,Fat,Unsaturated Fat
+408c1306-5eb8-4a85-aa0e-13c6c8573eb7,Polyunsaturated Fat,FALSE,FALSE,gram,FALSE,25,,,Fat,Unsaturated Fat
+80514162-dec7-4dcc-918b-07833c6417a8,Omega-3,FALSE,FALSE,gram,TRUE,26,,α-Linolenic Acid,Fat,Polyunsaturated Fat
+c2a43103-dd21-4d70-81dd-0d283ebfd432,Omega-6,FALSE,FALSE,gram,TRUE,27,,Linoleic Acid,Fat,Polyunsaturated Fat
+036b12f3-651f-443a-b716-af604998b9ae,Saturated Fat,TRUE,FALSE,gram,FALSE,28,,,Fat,Total Fat
+b212337c-2a42-4620-a4bb-cbb2a3cbea67,Trans Fat,TRUE,FALSE,gram,FALSE,29,,,Fat,Total Fat
+71bf849f-dae3-45b2-9d61-41c76d540024,Cholesterol,FALSE,FALSE,miligram,FALSE,30,,,Fat,
+90424ab4-ffa3-44bf-be67-9daae60231a7,Phytosterol,FALSE,FALSE,miligram,TRUE,31,,,Fat,
+bc012bd3-8792-40c1-a2eb-a890600f6677,Protein,FALSE,TRUE,gram,FALSE,32,"Based on g protein per kg of body weight for the reference body weight, e.g., for adults 0.8 g/kg body weight for the reference body weight.",,Protein,
+3f0ff690-abfe-4481-a5c7-a58503d745ce,Alanine,FALSE,FALSE,gram,TRUE,33,,,Protein,Protein
+0fe8e034-2ef9-4447-8177-8ee863da96f2,Arginine,FALSE,FALSE,gram,TRUE,34,,,Protein,Protein
+06418c9d-df31-41aa-9eb3-05a827587727,Aspartic acid,FALSE,FALSE,gram,TRUE,35,,,Protein,Protein
+f199476f-27d8-4937-a107-9b8a8bffcc71,Cystine,FALSE,FALSE,gram,TRUE,36,,,Protein,Protein
+8ab8a575-55d6-483d-807c-d66db963b80c,Glutamic acid,FALSE,FALSE,gram,TRUE,37,,,Protein,Protein
+d1090333-2a9c-4de8-a935-d494575ae223,Glycine,FALSE,FALSE,gram,TRUE,38,,,Protein,Protein
+cb676fa8-326d-429f-999e-58256bd58b2c,Histidine,FALSE,FALSE,gram,TRUE,39,,,Protein,Protein
+332dde4e-1c0b-4000-9021-7dfd306f33fc,Hydroxyproline,FALSE,FALSE,gram,TRUE,40,,,Protein,Protein
+d7069178-b266-4513-9467-4178216ea199,Isoleucine,FALSE,FALSE,gram,TRUE,41,,,Protein,Protein
+0ee0933d-ec6d-4e36-820c-bab1bddec34d,Leucine,FALSE,FALSE,gram,TRUE,42,,,Protein,Protein
+c84c2135-770e-4a3c-8b2f-da54bfcd42c9,Lysine,FALSE,FALSE,gram,TRUE,43,,,Protein,Protein
+0af0dfd7-b550-4c57-abee-a0337d39418b,Methionine,FALSE,FALSE,calorie,TRUE,44,,,Protein,Protein
+d8c5ea52-650d-42ef-9678-4cc4bd8f74ab,Phenylalanine,FALSE,FALSE,gram,TRUE,45,,,Protein,Protein
+615afde8-630f-4e80-a9b2-12dcd8263126,Proline,FALSE,FALSE,gram,TRUE,46,,,Protein,Protein
+234851fb-ae88-4308-89f7-6a480416e1bd,Serine,FALSE,FALSE,gram,TRUE,47,,,Protein,Protein
+b869b2ce-7e89-4457-bc4b-b1908a353ec8,Threonine,FALSE,FALSE,gram,TRUE,48,,,Protein,Protein
+6feb6775-1cbc-410b-8511-1e1e6d3f3018,Tryptophan,FALSE,FALSE,gram,TRUE,49,,,Protein,Protein
+cfa6cf19-9fbb-45ca-872b-654c34b30bfc,Tyrosine,FALSE,FALSE,gram,TRUE,50,,,Protein,Protein
+cfda615d-7a7b-4afc-8005-e516be80ac24,Valine,FALSE,FALSE,gram,TRUE,51,,,Protein,Protein
+c4598973-edb8-45b8-9d1c-568d11706286,Thiamin,FALSE,FALSE,miligram,TRUE,52,,Vitamin B1,Vitamin,
+f16ecf94-5760-4fe7-ac93-dfee39f74e19,Riboflavin,FALSE,FALSE,miligram,TRUE,53,,Vitamin B2,Vitamin,
+82672c18-f436-4048-9d09-e3c6997cad8a,Niacin,FALSE,FALSE,miligram,TRUE,54,,Vitamin B3,Vitamin,
+e5e26bc1-89c2-4c87-be0a-f4e9d6faf99b,Pantothenic Acid,FALSE,FALSE,miligram,TRUE,55,,Vitamin B5,Vitamin,
+c96a1c52-6ed9-4bcb-ac24-a51305ea348b,Pyridoxine,FALSE,FALSE,miligram,TRUE,56,,Vitamin B6,Vitamin,
+0707ff7b-e961-4ac4-b856-8ec71b60a957,Cobalamin,FALSE,FALSE,microgram,TRUE,57,,Vitamin B12,Vitamin,
+e8b21fc3-5e4a-4993-9506-ca4ee00c3812,Biotin,FALSE,FALSE,microgram,TRUE,58,,,Vitamin,
+c094240d-b870-43b2-b30b-58b8afe997fd,Choline,FALSE,FALSE,miligram,TRUE,59,,,Vitamin,
+d1003ee8-6012-47bd-b300-ceeba70a2a6c,Folate,FALSE,FALSE,microgram,TRUE,60,,Vitamin B9,Vitamin,
+da4d4dd6-f827-42b4-b12b-fe2ae372b7c0,Vitamin A,TRUE,FALSE,microgram,TRUE,61,,,Vitamin,
+2160c29d-f509-47b3-a39e-61e7b7ad1a4f,Alpha-carotene,FALSE,FALSE,microgram,TRUE,62,,,Vitamin,Vitamin A
+bcdf9e25-53b7-4b84-b4b7-64b9337e0f5f,Beta-carotene,FALSE,FALSE,microgram,TRUE,63,,,Vitamin,Vitamin A
+caaea020-90ec-49f2-8298-1ff78a32a8fe,Beta-cryptoxanthin,FALSE,FALSE,microgram,TRUE,64,,,Vitamin,Vitamin A
+278e14cd-17a2-4354-a5b0-dc1051dcd935,Lutein+Zeaxanthin,FALSE,FALSE,microgram,TRUE,65,,,Vitamin,Vitamin A
+71217b0c-d80d-472c-9ff8-9d6ecce1c726,Lycopene,FALSE,FALSE,microgram,TRUE,66,,,Vitamin,Vitamin A
+80b634b3-994a-4e5a-8766-3d8712c15595,Retinol,FALSE,FALSE,microgram,TRUE,67,,,Vitamin,
+55a450c0-53d4-4abe-8614-3f84bf992f20,Vitamin C,TRUE,FALSE,miligram,TRUE,68,,,Vitamin,
+e51e0555-bd31-43ec-87d6-b69ccf94fe8a,Vitamin D,TRUE,FALSE,microgram,FALSE,69,,,Vitamin,
+9c98797f-1893-49f9-b6cd-2b50a53ac142,Vitamin E,TRUE,FALSE,miligram,TRUE,70,,,Vitamin,
+d6e799a5-4c5c-40e3-8261-5879934cdb04,Beta Tocopherol,FALSE,FALSE,miligram,TRUE,71,,,Vitamin,Vitamin E
+9bfabedc-3896-4077-9ec7-dac8879f209b,Delta Tocopherol,FALSE,FALSE,miligram,TRUE,72,,,Vitamin,Vitamin E
+2dc26519-5dbb-479a-9aab-053ca3ed6d36,Gamma Tocopherol,FALSE,FALSE,miligram,TRUE,73,,,Vitamin,Vitamin E
+41048c3d-57b4-4be8-a1e4-5068f86cecab,Vitamin K,FALSE,FALSE,microgram,TRUE,74,,,Vitamin,
+1ebb60b1-0c43-42ee-a198-c89207fbea02,Calcium,FALSE,FALSE,miligram,FALSE,75,,,Mineral,
+d2a6f60f-f0d2-4294-86a6-9469987dbf6c,Chloride,FALSE,FALSE,gram,TRUE,76,,,Mineral,
+50b587d4-ee31-4536-9cc7-55db86600ca2,Chromium,FALSE,FALSE,microgram,TRUE,77,,,Mineral,
+68a9025b-c83c-4dd6-a2e7-8148a87648b5,Copper,FALSE,FALSE,microgram,TRUE,78,,,Mineral,
+312e0d59-b844-4af9-b8ac-609b46eb2e52,Fluoride,FALSE,FALSE,miligram,TRUE,79,,,Mineral,
+ad20f4f1-97c9-423f-9b9d-b2fd3585526e,Iodine,FALSE,FALSE,microgram,TRUE,80,,,Mineral,
+03d691c4-71c9-4ed9-adbe-30f6a642df08,Iron,FALSE,FALSE,miligram,FALSE,81,,,Mineral,
+38615d24-cf5d-48b6-b71c-df60e97f5c15,Magnesium,TRUE,FALSE,miligram,TRUE,82,,,Mineral,
+8bc0e4d9-c153-4127-8212-290a248cbc0f,Manganese,FALSE,FALSE,miligram,TRUE,83,,,Mineral,
+5f985f64-be5e-492a-8325-e598966d26c9,Molybdenum,FALSE,FALSE,microgram,TRUE,84,,,Mineral,
+9c39cb12-03c3-4870-a385-7ddf2bccb319,Phosphorus,FALSE,FALSE,miligram,TRUE,85,,,Mineral,
+4e9d4a3e-b8a9-464f-856a-3268ddd47c27,Potassium,TRUE,FALSE,miligram,FALSE,86,,,Mineral,
+8c659478-f2d1-41de-8c93-a1e5b436c17a,Selenium,FALSE,FALSE,microgram,TRUE,87,,,Mineral,
+485b501a-0f5c-4a2e-8abb-b9f3dae79ada,Sodium,TRUE,FALSE,miligram,FALSE,88,,,Mineral,
+2b29844f-7cca-4317-b88e-5ec1b8e78380,Zinc,FALSE,FALSE,miligram,TRUE,89,,,Mineral,

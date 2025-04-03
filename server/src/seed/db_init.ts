@@ -1,12 +1,12 @@
 import { storage } from "@/infrastructure/object_storage/storage.js";
 import { db } from "@/infrastructure/repository/db.js";
-import { loadDriRecommendations } from "@/seed/seeders/DriSeeder.js";
-import { loadExpirationRules } from "@/seed/seeders/ExpirationRuleSeeder.js";
-import { loadGroceryStores } from "@/seed/seeders/GroceryStoreSeeder.js";
-import { loadIngredients } from "@/seed/seeders/IngredientSeeder.js";
-import { loadNutrients } from "@/seed/seeders/NutrientSeeder.js";
-import { loadRecipeMetadata } from "@/seed/seeders/RecipeMetaSeeder.js";
-import { loadUnits } from "@/seed/seeders/UnitSeeder.js";
+import { loadDriRecommendations } from "scripts/seed/DriSeeder.js";
+import { loadExpirationRules } from "scripts/seed/ExpirationRuleSeeder.js";
+import { loadGroceryStores } from "scripts/seed/GroceryStoreSeeder.js";
+import { loadIngredients } from "scripts/seed/IngredientSeeder.js";
+import { loadNutrients } from "scripts/seed/NutrientSeeder.js";
+import { loadRecipeMetadata } from "scripts/seed/RecipeMetaSeeder.js";
+import { loadUnits } from "scripts/seed/UnitSeeder.js";
 
 const bucketPolicy = `{
     "Version": "2012-10-17",

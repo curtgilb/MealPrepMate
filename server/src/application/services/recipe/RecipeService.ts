@@ -1,16 +1,19 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-import { updateAggregateLabel } from '@/application/services/nutrition/AggregateLabelService.js';
+import { updateAggregateLabel } from "@/application/services/nutrition/AggregateLabelService.js";
 import {
-    NutritionLabelInput, nutritionLabelValidation
-} from '@/application/services/nutrition/NutritionLabelService.js';
+  NutritionLabelInput,
+  nutritionLabelValidation,
+} from "@/application/services/nutrition/NutritionLabelService.js";
 import {
-    RecipeIngredientInput, recipeIngredientValidation, tagIngredients
-} from '@/application/services/recipe/RecipeIngredientService.js';
-import { toTitleCase } from '@/application/util/utils.js';
-import { cleanString } from '@/application/validations/Formatters.js';
-import { db } from '@/infrastructure/repository/db.js';
-import { Prisma, RecipeIngredient } from '@prisma/client';
+  RecipeIngredientInput,
+  recipeIngredientValidation,
+  tagIngredients,
+} from "@/application/services/recipe/RecipeIngredientService.js";
+import { toTitleCase } from "@/application/util/utils.js";
+import { cleanString } from "@/application/validations/Formatters.js";
+import { db } from "@/infrastructure/repository/db.js";
+import { Prisma, RecipeIngredient } from "@prisma/client";
 
 type WebRecipeQuery = {
   include?: Prisma.WebScrapedRecipeInclude | undefined;
